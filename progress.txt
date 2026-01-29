@@ -1228,3 +1228,31 @@
   - Use destructive color for notification badges (red/destructive-foreground)
   - commonLinks array needed to be reordered: Overview, Messages, Settings (messages between overview and settings)
 ---
+
+## 2026-01-30 - COACH-042
+- What was implemented:
+  - Created ChatContextPanel component for coach view in chat conversations
+  - Panel displays client info: avatar, name with "Client" label
+  - Stats section showing past sessions count and total spent by client (formatted currency)
+  - Upcoming sessions list (next 3) with session type name and formatted date/time
+  - Each upcoming session links to session detail page
+  - Quick links section: "Book Session" links to coach's booking page, "View All Sessions" links to filtered sessions view
+  - Desktop: 320px fixed right-side panel always visible
+  - Mobile: hidden by default, shown via Info icon button in chat header (opens Sheet)
+  - Created getClientContext() server action fetching all context data in single call
+  - Updated ChatView component to accept clientContext prop and render panel conditionally
+  - Updated conversation page to fetch and pass client context for coaches
+- Files changed:
+  - src/app/(dashboard)/dashboard/messages/[id]/actions.ts - Added ClientContext interface, GetClientContextResult, and getClientContext() server action with full context data fetch
+  - src/app/(dashboard)/dashboard/messages/[id]/page.tsx - Fetch and pass clientContext to ChatView for coaches
+  - src/components/messages/chat-context-panel.tsx - New component displaying client info, stats, upcoming sessions, quick links
+  - src/components/messages/chat-view.tsx - Added clientContext prop, desktop side panel, mobile Sheet panel with toggle
+  - src/components/messages/index.ts - Exported ChatContextPanel
+- **Learnings for future iterations:**
+  - Use Sheet component for mobile slide-out panels (already used in navigation, works well for context panels)
+  - Check conversation.isCoach to conditionally render coach-only features
+  - Aggregate transaction data with sql template: sql<number>\`COALESCE(SUM(...), 0)\`
+  - Format currency amounts with a lookup table for symbols (USD: '$', EUR: '\u20AC', etc.)
+  - Use relative date formatting for upcoming sessions: "Today at", "Tomorrow at", day name, or full date
+  - Quick links pattern: /coaches/[slug]/book for booking, /dashboard/sessions?client=[id] for filtered view
+---

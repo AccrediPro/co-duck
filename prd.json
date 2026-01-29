@@ -523,7 +523,7 @@
       "title": "Chat Context Panel",
       "description": "Add context panel to chat view for coaches. Show client info: name, past sessions count, upcoming sessions, quick links. Collapsible on mobile.",
       "priority": 42,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "Side panel in chat view (coach only)",
         "Shows client profile info",
