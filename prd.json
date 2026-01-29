@@ -63,7 +63,7 @@
       "title": "Base Layout and Navigation",
       "description": "Create base application layout with responsive navigation. Include header with logo, nav links, and user menu. Create public layout (marketing) and authenticated layout (dashboard) variants.",
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "Root layout with proper metadata and fonts",
         "Public layout with marketing header/footer",

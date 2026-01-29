@@ -8,6 +8,10 @@
 - Clerk middleware in `src/middleware.ts` protects /dashboard/* routes; add new protected routes to `isProtectedRoute` matcher
 - Auth pages use catch-all routes: `/sign-in/[[...sign-in]]/page.tsx` and `/sign-up/[[...sign-up]]/page.tsx`
 - Webhook endpoints at `/api/webhooks/*` are public (not protected by auth middleware)
+- Use route groups `(public)` and `(dashboard)` for separate layouts; route groups don't affect URL paths
+- Navigation components live in `src/components/navigation/` and are exported via index.ts
+- Use `usePathname()` from next/navigation for active link highlighting in client components
+- Sheet component from shadcn is good for mobile slide-out menus
 
 ---
 
@@ -93,4 +97,36 @@
   - Always await `headers()` in Next.js 14+ API routes (returns a Promise)
   - Import `eq` from drizzle-orm for equality comparisons in update/delete queries
   - Clerk webhooks should subscribe to user.created, user.updated, user.deleted events
+---
+
+## 2026-01-29 - COACH-004
+- What was implemented:
+  - Created PublicHeader component with responsive navigation, hamburger menu, and Clerk UserButton
+  - Created PublicFooter component with product, company, and legal link sections
+  - Created DashboardSidebar component with icon-based navigation links
+  - Created DashboardMobileHeader for mobile dashboard navigation
+  - Created (public) route group layout for marketing pages (/, /coaches)
+  - Created (dashboard) route group layout for authenticated pages (/dashboard/*)
+  - Moved landing page to (public)/page.tsx with enhanced hero section
+  - Created placeholder coaches page at (public)/coaches/page.tsx
+  - Added shadcn/ui components: sheet, dropdown-menu, avatar, separator
+  - Navigation highlights current route using pathname matching
+- Files changed:
+  - src/components/navigation/public-header.tsx - Public header with mobile menu
+  - src/components/navigation/public-footer.tsx - Footer with link sections
+  - src/components/navigation/dashboard-sidebar.tsx - Dashboard sidebar and mobile header
+  - src/components/navigation/index.ts - Navigation exports
+  - src/app/(public)/layout.tsx - Public layout wrapper
+  - src/app/(public)/page.tsx - Landing page
+  - src/app/(public)/coaches/page.tsx - Coaches listing placeholder
+  - src/app/(dashboard)/layout.tsx - Dashboard layout with sidebar
+  - src/app/(dashboard)/dashboard/page.tsx - Dashboard home page
+  - src/components/ui/sheet.tsx, avatar.tsx, dropdown-menu.tsx, separator.tsx - New shadcn components
+  - package.json - Updated dependencies (@radix-ui/react-avatar, @radix-ui/react-dialog, @radix-ui/react-dropdown-menu, @radix-ui/react-separator)
+- **Learnings for future iterations:**
+  - Route groups in Next.js use parentheses syntax: (public), (dashboard) - they create separate layouts without affecting URLs
+  - Use SheetTitle with sr-only class for accessibility in mobile menus
+  - SignedIn/SignedOut components from @clerk/nextjs provide conditional rendering based on auth state
+  - Build errors for missing env vars (DATABASE_URL, Clerk keys) are pre-existing and require real env setup
+  - lucide-react provides icons that match shadcn/ui design well
 ---
