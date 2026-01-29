@@ -297,3 +297,32 @@ export const messages = pgTable(
 // Message type exports
 export type Message = typeof messages.$inferSelect;
 export type NewMessage = typeof messages.$inferInsert;
+
+// Session notes table (private coach notes for each session)
+export const sessionNotes = pgTable(
+  'session_notes',
+  {
+    id: serial('id').primaryKey(),
+    bookingId: integer('booking_id')
+      .notNull()
+      .unique() // One note per session
+      .references(() => bookings.id, { onDelete: 'cascade' }),
+    coachId: text('coach_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    content: text('content').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
+  },
+  (table) => [
+    index('session_notes_booking_id_idx').on(table.bookingId),
+    index('session_notes_coach_id_idx').on(table.coachId),
+  ]
+);
+
+// Session note type exports
+export type SessionNote = typeof sessionNotes.$inferSelect;
+export type NewSessionNote = typeof sessionNotes.$inferInsert;

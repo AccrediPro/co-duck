@@ -57,6 +57,13 @@
       "when": 1769723361807,
       "tag": "0007_sour_living_lightning",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1769725249156,
+      "tag": "0008_cloudy_hitman",
+      "breakpoints": true
     }
   ]
 }

@@ -533,6 +533,95 @@
         "Quick link to client's session history",
         "Collapsible/hidden on mobile"
       ]
+    },
+    {
+      "id": "COACH-043",
+      "title": "Session Notes Database Schema",
+      "description": "Create session_notes table: id, booking_id (FK unique), coach_id (FK), content (text), created_at, updated_at. One note per session, private to coach.",
+      "priority": 43,
+      "passes": true,
+      "acceptanceCriteria": [
+        "session_notes table created",
+        "Foreign key to bookings table (unique constraint)",
+        "content field for note storage",
+        "Index on booking_id and coach_id",
+        "Migration runs successfully"
+      ]
+    },
+    {
+      "id": "COACH-044",
+      "title": "Session Notes Editor",
+      "description": "Add notes section to session detail page for coaches. Textarea with save button. Auto-save on blur. Notes private to coach.",
+      "priority": 44,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Notes section on session detail page (coach view only)",
+        "Textarea for note content",
+        "Save button with loading state",
+        "Success toast on save",
+        "Notes persist across page reloads",
+        "Private to coach"
+      ]
+    },
+    {
+      "id": "COACH-045",
+      "title": "Action Items Database Schema",
+      "description": "Create action_items table: id, coach_id, client_id, booking_id (optional), title, description, due_date, is_completed, completed_at, created_at, updated_at.",
+      "priority": 45,
+      "passes": false,
+      "acceptanceCriteria": [
+        "action_items table created",
+        "Links to coach, client, optionally booking",
+        "title required, description and due_date optional",
+        "is_completed boolean with completed_at timestamp",
+        "Indexes on client_id, coach_id",
+        "Migration runs successfully"
+      ]
+    },
+    {
+      "id": "COACH-046",
+      "title": "Coach Action Items Management",
+      "description": "Allow coaches to create and manage action items for clients. Add from session detail. List in context panel. Mark complete, edit, delete.",
+      "priority": 46,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Add Action Item button in session detail",
+        "Modal with title, description, due date fields",
+        "Action items list in chat context panel",
+        "Status indicators (pending, overdue, completed)",
+        "Coach can mark complete or delete",
+        "Toast notifications for actions"
+      ]
+    },
+    {
+      "id": "COACH-047",
+      "title": "Client Action Items View",
+      "description": "Create page for clients to view and complete action items. Dashboard widget showing pending count.",
+      "priority": 47,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Page at /dashboard/action-items",
+        "List with filter: All, Pending, Completed",
+        "Client can mark items as complete",
+        "Due date highlighting (overdue in red)",
+        "Dashboard shows pending count widget",
+        "Empty state if no items"
+      ]
+    },
+    {
+      "id": "COACH-048",
+      "title": "Meeting Link for Sessions",
+      "description": "Allow coaches to add video meeting link to sessions. Display link to both parties. Placeholder for future native video integration.",
+      "priority": 48,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Coach can add meeting link (Zoom/Meet URL) to session",
+        "Link field in session detail edit mode",
+        "Client sees meeting link on session detail",
+        "Copy link button",
+        "Join Meeting button opens link in new tab",
+        "Placeholder message about native video coming soon"
+      ]
     }
   ]
 }

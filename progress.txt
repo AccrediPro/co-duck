@@ -1256,3 +1256,24 @@
   - Use relative date formatting for upcoming sessions: "Today at", "Tomorrow at", day name, or full date
   - Quick links pattern: /coaches/[slug]/book for booking, /dashboard/sessions?client=[id] for filtered view
 ---
+
+## 2026-01-30 - COACH-043
+- What was implemented:
+  - Created session_notes table for coaches to store private notes per session
+  - Table schema: id (serial PK), booking_id (FK to bookings, unique), coach_id (FK to users), content (text), created_at, updated_at
+  - Unique constraint on booking_id ensures one note per session
+  - Foreign keys with CASCADE delete for data integrity
+  - Indexes on booking_id and coach_id for efficient queries
+  - Exported SessionNote and NewSessionNote types using $inferSelect and $inferInsert
+  - Generated migration 0008_cloudy_hitman.sql
+- Files changed:
+  - src/db/schema.ts - Added sessionNotes table with type exports
+  - drizzle/0008_cloudy_hitman.sql - Migration file
+  - drizzle/meta/_journal.json - Updated migration journal
+  - drizzle/meta/0008_snapshot.json - Schema snapshot
+- **Learnings for future iterations:**
+  - Use unique() on foreign key column to enforce one-to-one relationship (one note per booking)
+  - sessionNotes is separate from bookings.coachNotes which is a simple text field for quick notes during booking
+  - This dedicated table allows for richer note features in the future (tags, formatting, attachments, etc.)
+  - Follow existing schema patterns: serial PK, CASCADE delete on FKs, timestamps with $onUpdate
+---
