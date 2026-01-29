@@ -509,7 +509,7 @@
       "title": "Messages Navigation and Unread Count",
       "description": "Add Messages link to dashboard navigation. Show unread count badge. Update badge when messages arrive.",
       "priority": 41,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "Messages link in dashboard sidebar with MessageSquare icon",
         "Unread count badge shows total unread messages",

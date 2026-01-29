@@ -1206,3 +1206,25 @@
   - canMessage pattern: `currentUserId && coachId && currentUserId !== coachId` prevents messaging yourself
   - System messages use message_type='system' - display centered with muted styling in chat view
 ---
+
+## 2026-01-30 - COACH-041
+- What was implemented:
+  - Added Messages link to dashboard sidebar with MessageSquare icon (visible to all roles)
+  - Added unread count badge next to Messages link displaying total unread messages
+  - Badge styling: small rounded red (destructive) badge showing count, "99+" for 100+
+  - Badge hidden when count is 0
+  - Dashboard layout fetches unread count using getUnreadMessageCountForUser helper
+  - Mobile header includes quick-access message icon with badge for easy access
+  - Created getUnreadMessageCountForUser internal function for server component usage (no auth check)
+  - Badge updates on page navigation since layout re-renders on each navigation
+- Files changed:
+  - src/components/navigation/dashboard-sidebar.tsx - Added MessageSquare icon, Messages link, showBadge prop, badge rendering logic, unreadMessageCount prop to both DashboardSidebar and DashboardMobileHeader
+  - src/app/(dashboard)/layout.tsx - Import getUnreadMessageCountForUser, fetch unread count, pass to sidebar components
+  - src/app/(dashboard)/dashboard/messages/actions.ts - Added getUnreadMessageCountForUser helper function that returns count without auth check (for server component use)
+- **Learnings for future iterations:**
+  - For server components that need to call actions, create internal helper functions without auth() calls (auth is already checked in layout)
+  - Badge positioning in nav links: use flex-1 on label span to push badge to right edge
+  - Mobile header quick-access icon pattern: place before hamburger menu for easy access
+  - Use destructive color for notification badges (red/destructive-foreground)
+  - commonLinks array needed to be reordered: Overview, Messages, Settings (messages between overview and settings)
+---
