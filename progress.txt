@@ -214,3 +214,38 @@
   - Redirect to previous step if profile doesn't exist (guards against direct URL access)
   - Character count warning: use conditional color class when approaching limit (e.g., text-amber-600)
 ---
+
+## 2026-01-29 - COACH-008
+- What was implemented:
+  - Created Step 3 of coach onboarding at /onboarding/coach/step-3 for pricing setup
+  - Hourly rate input with currency symbol prefix (optional field)
+  - Currency selector dropdown with 10 common currencies (USD default)
+  - Session types: can add multiple sessions with name, duration (15/30/45/60/90/120 min), and price
+  - At least one session type required (Zod validation)
+  - Dynamic form using react-hook-form useFieldArray for multiple session types
+  - Session types stored as JSONB in coach_profiles.session_types column
+  - Added SessionType interface to schema.ts for type-safe JSONB
+  - Generated migration (0002_dizzy_gorgon.sql) to add session_types column
+  - Back button returns to Step 2 with data preserved
+  - Server action saves hourly rate, currency, and session types
+  - Profile completion percentage updated (Step 1-3 = 75% max)
+  - Created placeholder Step 4 page for navigation flow
+- Files changed:
+  - src/db/schema.ts - Added SessionType interface and session_types JSONB column
+  - drizzle/0002_dizzy_gorgon.sql - Migration to add session_types column
+  - drizzle/meta/_journal.json - Updated migration journal
+  - drizzle/meta/0002_snapshot.json - Schema snapshot
+  - src/lib/validators/coach-onboarding.ts - Added SUPPORTED_CURRENCIES, SESSION_DURATIONS, sessionTypeSchema, coachPricingSchema
+  - src/components/onboarding/pricing-form.tsx - Client form component with dynamic session types
+  - src/components/onboarding/index.ts - Exported PricingForm
+  - src/app/(dashboard)/onboarding/coach/actions/save-pricing.ts - Server action for Step 3
+  - src/app/(dashboard)/onboarding/coach/step-3/page.tsx - Updated to use PricingForm with data loading
+  - src/app/(dashboard)/onboarding/coach/step-4/page.tsx - Placeholder for Step 4
+- **Learnings for future iterations:**
+  - Use useFieldArray from react-hook-form for dynamic form arrays (add/remove items)
+  - Store monetary values in cents; convert to/from dollars in form (price * 100 for storage, price / 100 for display)
+  - JSONB columns can use interface types with .$type<T>() for type safety
+  - Currency symbol can be looked up from constant array using find()
+  - Generate unique IDs for session types using Date.now() + random string
+  - Form field arrays need key prop from field.id (provided by useFieldArray)
+---

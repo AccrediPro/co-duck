@@ -124,7 +124,7 @@
       "title": "Coach Onboarding Flow - Step 3: Pricing",
       "description": "Step 3 collects: hourly rate, currency selection (USD default), session types they offer (discovery call, 1-hour session, etc.).",
       "priority": 8,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "Hourly rate input with currency selector",
         "Default currency is USD",
