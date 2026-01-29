@@ -1,9 +1,8 @@
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
-import Link from 'next/link';
-import { StepIndicator } from '@/components/onboarding';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { db, coachProfiles } from '@/db';
+import { eq } from 'drizzle-orm';
+import { StepIndicator, PricingForm } from '@/components/onboarding';
 
 export const metadata = {
   title: 'Coach Onboarding - Step 3 | Coaching Platform',
@@ -16,6 +15,25 @@ export default async function CoachOnboardingStep3Page() {
   if (!userId) {
     redirect('/sign-in');
   }
+
+  // Check if user has a coach profile (from Step 1)
+  const existingProfile = await db
+    .select()
+    .from(coachProfiles)
+    .where(eq(coachProfiles.userId, userId))
+    .limit(1);
+
+  // If no profile exists, redirect to step 1
+  if (existingProfile.length === 0) {
+    redirect('/onboarding/coach');
+  }
+
+  const profile = existingProfile[0];
+  const initialData = {
+    hourlyRate: profile.hourlyRate,
+    currency: profile.currency,
+    sessionTypes: profile.sessionTypes || [],
+  };
 
   return (
     <div className="mx-auto max-w-2xl space-y-8">
@@ -30,26 +48,8 @@ export default async function CoachOnboardingStep3Page() {
       {/* Step Indicator */}
       <StepIndicator currentStep={3} totalSteps={4} />
 
-      {/* Placeholder Content */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Pricing</CardTitle>
-          <CardDescription>Set your hourly rate and session types.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="rounded-md bg-muted p-8 text-center">
-            <p className="text-muted-foreground">
-              Step 3 form coming soon. Your bio and specialties have been saved!
-            </p>
-          </div>
-          <div className="mt-6 flex justify-between">
-            <Button variant="outline" asChild>
-              <Link href="/onboarding/coach/step-2">Back to Step 2</Link>
-            </Button>
-            <Button disabled>Continue to Step 4</Button>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Form */}
+      <PricingForm initialData={initialData} />
     </div>
   );
 }

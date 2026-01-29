@@ -30,6 +30,14 @@ export const users = pgTable('users', {
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
 
+// Session type stored in JSONB
+export interface SessionType {
+  id: string;
+  name: string;
+  duration: number; // in minutes
+  price: number; // in cents
+}
+
 // Coach profiles table
 export const coachProfiles = pgTable(
   'coach_profiles',
@@ -45,6 +53,7 @@ export const coachProfiles = pgTable(
     currency: text('currency').default('USD'),
     timezone: text('timezone'),
     videoIntroUrl: text('video_intro_url'),
+    sessionTypes: jsonb('session_types').$type<SessionType[]>().default([]),
     isPublished: boolean('is_published').notNull().default(false),
     profileCompletionPercentage: integer('profile_completion_percentage').notNull().default(0),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),

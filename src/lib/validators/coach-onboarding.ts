@@ -52,3 +52,52 @@ export function generateSlug(name: string): string {
     .replace(/-+/g, '-') // Replace multiple hyphens with single hyphen
     .substring(0, 50); // Limit length
 }
+
+// Supported currencies
+export const SUPPORTED_CURRENCIES = [
+  { code: 'USD', symbol: '$', name: 'US Dollar' },
+  { code: 'EUR', symbol: '€', name: 'Euro' },
+  { code: 'GBP', symbol: '£', name: 'British Pound' },
+  { code: 'CAD', symbol: 'C$', name: 'Canadian Dollar' },
+  { code: 'AUD', symbol: 'A$', name: 'Australian Dollar' },
+  { code: 'NZD', symbol: 'NZ$', name: 'New Zealand Dollar' },
+  { code: 'CHF', symbol: 'CHF', name: 'Swiss Franc' },
+  { code: 'INR', symbol: '₹', name: 'Indian Rupee' },
+  { code: 'JPY', symbol: '¥', name: 'Japanese Yen' },
+  { code: 'SGD', symbol: 'S$', name: 'Singapore Dollar' },
+] as const;
+
+export type CurrencyCode = (typeof SUPPORTED_CURRENCIES)[number]['code'];
+
+// Available session durations in minutes
+export const SESSION_DURATIONS = [15, 30, 45, 60, 90, 120] as const;
+
+export type SessionDuration = (typeof SESSION_DURATIONS)[number];
+
+// Session type schema
+export const sessionTypeSchema = z.object({
+  id: z.string().min(1),
+  name: z
+    .string()
+    .min(1, 'Session name is required')
+    .max(100, 'Name must be less than 100 characters'),
+  duration: z.number().refine((val) => SESSION_DURATIONS.includes(val as SessionDuration), {
+    message: 'Please select a valid duration',
+  }),
+  price: z.number().min(0, 'Price must be 0 or greater'),
+});
+
+export type SessionTypeFormData = z.infer<typeof sessionTypeSchema>;
+
+// Step 3: Pricing validation schema
+export const coachPricingSchema = z.object({
+  hourlyRate: z.number().min(0, 'Hourly rate must be 0 or greater').optional().nullable(),
+  currency: z
+    .string()
+    .refine((val) => SUPPORTED_CURRENCIES.some((c) => c.code === val), {
+      message: 'Please select a valid currency',
+    }),
+  sessionTypes: z.array(sessionTypeSchema).min(1, 'Please add at least one session type'),
+});
+
+export type CoachPricingFormData = z.infer<typeof coachPricingSchema>;

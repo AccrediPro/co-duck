@@ -1,0 +1,1 @@
+ALTER TABLE "coach_profiles" ADD COLUMN "session_types" jsonb DEFAULT '[]'::jsonb;
