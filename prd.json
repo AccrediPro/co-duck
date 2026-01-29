@@ -220,7 +220,7 @@
       "title": "Coach Profile Editor",
       "description": "Create /dashboard/profile page where coaches can edit their profile after initial onboarding. All fields editable. Auto-save or explicit save button. Profile completion indicator.",
       "priority": 14,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "Page at /dashboard/profile for editing",
         "All onboarding fields are editable",

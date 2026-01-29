@@ -396,3 +396,33 @@
   - Progress bar: use div with bg-secondary for track, nested div with bg-primary and dynamic width style
   - lucide-react icons: CheckCircle for published, Clock for draft, AlertCircle for coming soon
 ---
+
+## 2026-01-29 - COACH-014
+- What was implemented:
+  - Created /dashboard/profile page for coaches to edit their profile after onboarding
+  - All fields editable in a single form: display name, headline, profile photo URL, timezone, bio, specialties, currency, hourly rate, session types
+  - Save button updates both users and coach_profiles tables with proper validation
+  - Success/error toast notifications on save using shadcn toast
+  - Profile completion percentage updates live as user modifies fields
+  - Publish/Unpublish toggle using shadcn Switch component
+  - Preview button opens public profile in new tab (/coaches/[slug])
+  - Reused validation schemas from onboarding (coachBasicInfoSchema, coachBioSpecialtiesSchema, sessionTypeSchema)
+  - Added shadcn Switch component for publish toggle
+  - Server actions handle all database updates including slug regeneration on name change
+  - Role-based access: redirects non-coaches to onboarding prompt
+- Files changed:
+  - src/app/(dashboard)/dashboard/profile/page.tsx - Main profile editor page (server component)
+  - src/app/(dashboard)/dashboard/profile/actions.ts - Server actions: saveProfile, togglePublishProfile, getFullProfile
+  - src/components/profile/profile-editor-form.tsx - Client form component with all fields
+  - src/components/profile/index.ts - Component exports
+  - src/components/ui/switch.tsx - Added shadcn Switch component
+  - package.json - Added @radix-ui/react-switch dependency
+- **Learnings for future iterations:**
+  - Combine form fields from multiple onboarding steps into single editor using same Zod schemas
+  - Use form.watch() to extract individual field values, then use those in useEffect dependencies (avoid complex expressions)
+  - Profile completion can be calculated client-side for live updates using watched form values
+  - Switch component from shadcn is good for publish/unpublish toggle patterns
+  - When updating slug on name change, check for collisions excluding the current user's profile
+  - Monetary values stored in cents in DB; convert to/from dollars in form layer
+  - Server actions can update multiple tables (users + coachProfiles) in sequence
+---
