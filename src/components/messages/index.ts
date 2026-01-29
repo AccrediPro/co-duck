@@ -1,2 +1,5 @@
 export { ConversationRow } from './conversation-row';
 export { ConversationsList } from './conversations-list';
+export { MessageBubble } from './message-bubble';
+export { MessageInput } from './message-input';
+export { ChatView } from './chat-view';
