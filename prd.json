@@ -139,7 +139,7 @@
       "title": "Coach Onboarding Flow - Step 4: Review & Publish",
       "description": "Final step shows profile preview and publish button. Calculate profile completion percentage. Show what's missing for 100%. Allow publish or save as draft.",
       "priority": 9,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "Profile preview card shows all entered data",
         "Profile completion percentage displayed",

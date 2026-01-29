@@ -249,3 +249,33 @@
   - Generate unique IDs for session types using Date.now() + random string
   - Form field arrays need key prop from field.id (provided by useFieldArray)
 ---
+
+## 2026-01-29 - COACH-009
+- What was implemented:
+  - Created Step 4 (final step) of coach onboarding at /onboarding/coach/step-4
+  - Profile preview card showing all entered data (name, avatar, headline, timezone, bio, specialties, session types with prices)
+  - Profile completion percentage displayed prominently with checkmark/warning icon
+  - Missing items listed if profile is not 100% complete
+  - Publish button sets is_published=true in database and redirects to /dashboard
+  - Save as Draft button keeps is_published=false and redirects to /dashboard
+  - Success toast notifications using shadcn toast component
+  - Server action fetches combined data from coach_profiles and users tables for review
+  - Toaster added to root layout for toast notifications
+- Files changed:
+  - src/app/layout.tsx - Added Toaster component for toast notifications
+  - src/app/(dashboard)/onboarding/coach/step-4/page.tsx - Updated to load profile data and use ReviewPublishForm
+  - src/app/(dashboard)/onboarding/coach/actions/publish-profile.ts - Server actions for publishing/drafting and fetching profile data
+  - src/components/onboarding/review-publish-form.tsx - Client component with profile preview and action buttons
+  - src/components/onboarding/index.ts - Exported ReviewPublishForm
+  - src/components/ui/toast.tsx, toaster.tsx, sonner.tsx - shadcn toast components
+  - src/components/ui/badge.tsx - shadcn badge component for specialties display
+  - src/hooks/use-toast.ts - Toast hook from shadcn
+  - package.json - Added toast-related dependencies
+- **Learnings for future iterations:**
+  - Use shadcn toast for notifications: import { useToast } from '@/hooks/use-toast', call toast({ title, description })
+  - Toaster component must be added to root layout for toasts to appear
+  - For profile preview, join data from multiple tables (users + coach_profiles) in server action
+  - Profile completion calculation should account for fields split across tables
+  - Use catch blocks without error parameter (catch { ... }) to avoid unused variable lint errors
+  - shadcn auto-generated files may need eslint-disable comments for unused variable warnings
+---
