@@ -220,7 +220,7 @@
       "title": "Session Detail Page",
       "description": "Create session detail page showing full information. For coaches: client details, notes, session history with this client. For clients: coach details, session info. Join Session button placeholder for video integration later.",
       "priority": 23,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "Page at /dashboard/sessions/[id]",
         "Shows session: date, time, duration, type, status",

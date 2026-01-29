@@ -653,3 +653,29 @@
   - Reschedule flow placeholder links to dedicated route for future implementation
   - Client actions are kept in separate component for clean separation of concerns
 ---
+
+## 2026-01-30 - COACH-023
+- What was implemented:
+  - Enhanced /dashboard/sessions/[id] page with full feature set
+  - Join Session button (placeholder showing 'Video integration coming soon' via toast)
+  - Add to Calendar button for coach view (generates and downloads .ics file)
+  - Editable coach notes section using CoachNotesEditor component
+  - Auto-save notes on blur, manual save with Save button
+  - Past sessions count with this client shown in coach view sidebar
+  - Cancel/Reschedule buttons for upcoming sessions in coach view
+  - CoachSessionActions component for coach-specific actions (join, calendar, cancel)
+  - Quick Actions sidebar card for coach view (mirrors client view pattern)
+  - Server actions: saveCoachNotes, generateCoachIcsFile, getPastSessionsCountWithClient
+- Files changed:
+  - src/app/(dashboard)/dashboard/sessions/[id]/page.tsx - Updated to include coach features
+  - src/app/(dashboard)/dashboard/sessions/actions.ts - Added new server actions
+  - src/app/(dashboard)/dashboard/sessions/[id]/coach-notes-editor.tsx - New editable notes component
+  - src/app/(dashboard)/dashboard/sessions/[id]/coach-session-actions.tsx - New coach actions component
+- **Learnings for future iterations:**
+  - Reuse patterns for coach and client actions (both use sidebar and default variants)
+  - Use useCallback with handleBlur to prevent stale closure issues
+  - Past sessions count query: filter by coachId, clientId, past dates, and valid statuses
+  - ICS file generation for coaches similar to clients but shows client name instead of coach
+  - Keep action components co-located with page for easier maintenance
+  - Toast provides good UX for placeholder features ("coming soon")
+---
