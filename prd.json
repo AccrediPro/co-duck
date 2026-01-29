@@ -203,7 +203,7 @@
       "title": "Client Session Management",
       "description": "Create /dashboard/my-sessions page for clients. Show their booked sessions with coach info. Upcoming and past tabs. Actions: view details, reschedule, cancel.",
       "priority": 22,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "Page at /dashboard/my-sessions",
         "Tabs: Upcoming, Past",

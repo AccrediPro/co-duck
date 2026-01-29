@@ -618,3 +618,38 @@
   - Session status badge colors: green for confirmed/completed, amber for pending, red for cancelled, gray for no_show
   - Local state updates after mutations improve UX (optimistic UI pattern)
 ---
+
+## 2026-01-30 - COACH-022
+- What was implemented:
+  - Created /dashboard/my-sessions page for clients to view and manage their booked sessions
+  - Tabs: Upcoming (future confirmed/pending), Past (past sessions + cancelled)
+  - ClientSessionCard component showing: coach name/avatar, date, time, session type, status badge
+  - View button links to /dashboard/sessions/[id] detail page
+  - Add to Calendar button downloads .ics file for upcoming sessions
+  - Reschedule button links to placeholder reschedule page
+  - Cancel button with AlertDialog confirmation modal
+  - Empty states for each tab with helpful messages and "Find a Coach" CTA
+  - Pagination (10 per page) with smart page number display
+  - Updated session detail page to support both coach and client views
+  - Client view shows coach info, profile link, and action buttons
+  - Created SessionDetailActions client component for client actions on detail page
+  - Created placeholder reschedule page at /dashboard/sessions/[id]/reschedule
+  - Server actions: getClientSessions, cancelClientSession, generateClientIcsFile
+- Files changed:
+  - src/app/(dashboard)/dashboard/my-sessions/page.tsx - Main client sessions page
+  - src/app/(dashboard)/dashboard/my-sessions/actions.ts - Server actions for client sessions
+  - src/app/(dashboard)/dashboard/sessions/[id]/page.tsx - Updated to support coach/client views
+  - src/app/(dashboard)/dashboard/sessions/[id]/session-detail-actions.tsx - Client actions component
+  - src/app/(dashboard)/dashboard/sessions/[id]/reschedule/page.tsx - Placeholder reschedule page
+  - src/components/sessions/client-session-card.tsx - Client session card component
+  - src/components/sessions/client-sessions-list.tsx - Client sessions list with tabs
+  - src/components/sessions/index.ts - Exported new components
+- **Learnings for future iterations:**
+  - Reuse patterns from coach session components but adapt for client view (show coach instead of client)
+  - Session detail page can check userId against both coachId and clientId to allow both parties access
+  - Use `or(eq(bookings.coachId, userId), eq(bookings.clientId, userId))` for shared access queries
+  - ICS file generation can be reused with slight modifications (verify clientId ownership)
+  - Blob download pattern for .ics files: create Blob, createObjectURL, click link, cleanup
+  - Reschedule flow placeholder links to dedicated route for future implementation
+  - Client actions are kept in separate component for clean separation of concerns
+---
