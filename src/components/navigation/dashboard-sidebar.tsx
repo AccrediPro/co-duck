@@ -2,7 +2,16 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, User, CalendarDays, Clock, Settings, Menu, CreditCard } from 'lucide-react';
+import {
+  Home,
+  User,
+  CalendarDays,
+  Clock,
+  Settings,
+  Menu,
+  CreditCard,
+  MessageSquare,
+} from 'lucide-react';
 import { UserButton } from '@clerk/nextjs';
 import { useState } from 'react';
 
@@ -19,11 +28,13 @@ interface NavLink {
   label: string;
   icon: LucideIcon;
   roles?: UserRole[]; // If undefined, visible to all roles
+  showBadge?: boolean; // Whether to show unread badge for this link
 }
 
 // Common links visible to all roles
 const commonLinks: NavLink[] = [
   { href: '/dashboard', label: 'Overview', icon: Home },
+  { href: '/dashboard/messages', label: 'Messages', icon: MessageSquare, showBadge: true },
   { href: '/dashboard/settings', label: 'Settings', icon: Settings },
 ];
 
@@ -53,7 +64,10 @@ function getNavLinksForRole(role: UserRole): NavLink[] {
     links.push(...coachLinks, ...clientLinks);
   }
 
-  links.push(commonLinks[1]); // Settings last
+  // Messages link (visible to all)
+  links.push(commonLinks[1]);
+  // Settings last
+  links.push(commonLinks[2]);
   return links;
 }
 
@@ -61,12 +75,14 @@ interface DashboardSidebarProps {
   userName?: string | null;
   userEmail?: string | null;
   userRole?: UserRole;
+  unreadMessageCount?: number;
 }
 
 export function DashboardSidebar({
   userName,
   userEmail,
   userRole = 'client',
+  unreadMessageCount = 0,
 }: DashboardSidebarProps) {
   const pathname = usePathname();
   const navLinks = getNavLinksForRole(userRole);
@@ -93,6 +109,7 @@ export function DashboardSidebar({
       <nav className="flex-1 space-y-1 px-3 py-4">
         {navLinks.map((link) => {
           const Icon = link.icon;
+          const showBadge = link.showBadge && unreadMessageCount > 0;
           return (
             <Link
               key={link.href}
@@ -105,7 +122,12 @@ export function DashboardSidebar({
               )}
             >
               <Icon className="h-4 w-4" />
-              {link.label}
+              <span className="flex-1">{link.label}</span>
+              {showBadge && (
+                <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-xs font-medium text-destructive-foreground">
+                  {unreadMessageCount > 99 ? '99+' : unreadMessageCount}
+                </span>
+              )}
             </Link>
           );
         })}
@@ -140,6 +162,7 @@ export function DashboardMobileHeader({
   userName,
   userEmail,
   userRole = 'client',
+  unreadMessageCount = 0,
 }: DashboardSidebarProps) {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -158,63 +181,84 @@ export function DashboardMobileHeader({
         CoachHub
       </Link>
 
-      <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-        <SheetTrigger asChild>
-          <Button variant="ghost" size="icon">
-            <Menu className="h-6 w-6" />
-            <span className="sr-only">Toggle menu</span>
-          </Button>
-        </SheetTrigger>
-        <SheetContent side="left" className="w-64 p-0">
-          <SheetTitle className="sr-only">Dashboard Navigation</SheetTitle>
-          <div className="flex h-full flex-col">
-            {/* Logo */}
-            <div className="flex h-16 items-center px-6">
-              <Link href="/" className="text-xl font-bold" onClick={() => setMobileMenuOpen(false)}>
-                CoachHub
-              </Link>
-            </div>
+      <div className="flex items-center gap-2">
+        {/* Unread badge indicator on mobile header */}
+        {unreadMessageCount > 0 && (
+          <Link href="/dashboard/messages" className="relative">
+            <MessageSquare className="h-5 w-5 text-muted-foreground" />
+            <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-medium text-destructive-foreground">
+              {unreadMessageCount > 99 ? '99+' : unreadMessageCount}
+            </span>
+          </Link>
+        )}
+        <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+          <SheetTrigger asChild>
+            <Button variant="ghost" size="icon">
+              <Menu className="h-6 w-6" />
+              <span className="sr-only">Toggle menu</span>
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="w-64 p-0">
+            <SheetTitle className="sr-only">Dashboard Navigation</SheetTitle>
+            <div className="flex h-full flex-col">
+              {/* Logo */}
+              <div className="flex h-16 items-center px-6">
+                <Link
+                  href="/"
+                  className="text-xl font-bold"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  CoachHub
+                </Link>
+              </div>
 
-            <Separator />
+              <Separator />
 
-            {/* Navigation Links */}
-            <nav className="flex-1 space-y-1 px-3 py-4">
-              {navLinks.map((link) => {
-                const Icon = link.icon;
-                return (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={cn(
-                      'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-                      isActiveLink(link.href)
-                        ? 'bg-primary text-primary-foreground'
-                        : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-                    )}
-                  >
-                    <Icon className="h-4 w-4" />
-                    {link.label}
-                  </Link>
-                );
-              })}
-            </nav>
+              {/* Navigation Links */}
+              <nav className="flex-1 space-y-1 px-3 py-4">
+                {navLinks.map((link) => {
+                  const Icon = link.icon;
+                  const showBadge = link.showBadge && unreadMessageCount > 0;
+                  return (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={cn(
+                        'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+                        isActiveLink(link.href)
+                          ? 'bg-primary text-primary-foreground'
+                          : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                      )}
+                    >
+                      <Icon className="h-4 w-4" />
+                      <span className="flex-1">{link.label}</span>
+                      {showBadge && (
+                        <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-xs font-medium text-destructive-foreground">
+                          {unreadMessageCount > 99 ? '99+' : unreadMessageCount}
+                        </span>
+                      )}
+                    </Link>
+                  );
+                })}
+              </nav>
 
-            <Separator />
+              <Separator />
 
-            {/* User Info */}
-            <div className="p-4">
-              <div className="flex items-center gap-3">
-                <UserButton afterSignOutUrl="/" />
-                <div className="flex-1 overflow-hidden">
-                  <p className="truncate text-sm font-medium">{userName || 'User'}</p>
-                  <p className="truncate text-xs text-muted-foreground">{userEmail}</p>
+              {/* User Info */}
+              <div className="p-4">
+                <div className="flex items-center gap-3">
+                  <UserButton afterSignOutUrl="/" />
+                  <div className="flex-1 overflow-hidden">
+                    <p className="truncate text-sm font-medium">{userName || 'User'}</p>
+                    <p className="truncate text-xs text-muted-foreground">{userEmail}</p>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </SheetContent>
-      </Sheet>
+          </SheetContent>
+        </Sheet>
+      </div>
     </header>
   );
 }

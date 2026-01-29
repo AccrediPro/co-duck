@@ -4,6 +4,7 @@ import { eq } from 'drizzle-orm';
 
 import { DashboardSidebar, DashboardMobileHeader } from '@/components/navigation';
 import { db, users } from '@/db';
+import { getUnreadMessageCountForUser } from './dashboard/messages/actions';
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { userId } = await auth();
@@ -27,11 +28,29 @@ export default async function DashboardLayout({ children }: { children: React.Re
     // Default to client if DB query fails
   }
 
+  // Fetch unread message count
+  let unreadMessageCount = 0;
+  try {
+    unreadMessageCount = await getUnreadMessageCountForUser(userId);
+  } catch {
+    // Default to 0 if fetching fails
+  }
+
   return (
     <div className="flex min-h-screen">
-      <DashboardSidebar userName={userName} userEmail={userEmail} userRole={userRole} />
+      <DashboardSidebar
+        userName={userName}
+        userEmail={userEmail}
+        userRole={userRole}
+        unreadMessageCount={unreadMessageCount}
+      />
       <div className="flex flex-1 flex-col">
-        <DashboardMobileHeader userName={userName} userEmail={userEmail} userRole={userRole} />
+        <DashboardMobileHeader
+          userName={userName}
+          userEmail={userEmail}
+          userRole={userRole}
+          unreadMessageCount={unreadMessageCount}
+        />
         <main className="flex-1 overflow-auto bg-muted/30 p-4 md:p-8">{children}</main>
       </div>
     </div>

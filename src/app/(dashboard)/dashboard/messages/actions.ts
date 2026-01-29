@@ -144,35 +144,42 @@ export async function getUnreadMessageCount(): Promise<{
   }
 
   try {
-    // Get all conversations where user is either coach or client
-    const conversationIds = await db
-      .select({ id: conversations.id })
-      .from(conversations)
-      .where(or(eq(conversations.coachId, userId), eq(conversations.clientId, userId)));
-
-    if (conversationIds.length === 0) {
-      return { success: true, count: 0 };
-    }
-
-    // Count unread messages from other users in all conversations
-    let totalUnread = 0;
-    for (const conv of conversationIds) {
-      const unreadResult = await db
-        .select({ count: sql<number>`count(*)` })
-        .from(messages)
-        .where(
-          and(
-            eq(messages.conversationId, conv.id),
-            ne(messages.senderId, userId),
-            eq(messages.isRead, false)
-          )
-        );
-      totalUnread += unreadResult[0]?.count || 0;
-    }
-
-    return { success: true, count: totalUnread };
+    const count = await getUnreadMessageCountForUser(userId);
+    return { success: true, count };
   } catch (error) {
     console.error('Error fetching unread count:', error);
     return { success: false, error: 'Failed to fetch unread count' };
   }
+}
+
+// Internal function for getting unread count without auth check
+// Used by the dashboard layout which already has userId
+export async function getUnreadMessageCountForUser(userId: string): Promise<number> {
+  // Get all conversations where user is either coach or client
+  const conversationIds = await db
+    .select({ id: conversations.id })
+    .from(conversations)
+    .where(or(eq(conversations.coachId, userId), eq(conversations.clientId, userId)));
+
+  if (conversationIds.length === 0) {
+    return 0;
+  }
+
+  // Count unread messages from other users in all conversations
+  let totalUnread = 0;
+  for (const conv of conversationIds) {
+    const unreadResult = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(messages)
+      .where(
+        and(
+          eq(messages.conversationId, conv.id),
+          ne(messages.senderId, userId),
+          eq(messages.isRead, false)
+        )
+      );
+    totalUnread += unreadResult[0]?.count || 0;
+  }
+
+  return totalUnread;
 }
