@@ -478,7 +478,7 @@
       "title": "Send and Receive Messages",
       "description": "Implement message sending and receiving. Server action to send message. Mark messages as read when conversation opened. Poll for new messages every few seconds (real-time upgrade later).",
       "priority": 39,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "Server action sendMessage creates message record",
         "Message appears immediately in sender's view (optimistic)",

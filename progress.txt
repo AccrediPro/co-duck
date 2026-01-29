@@ -1121,3 +1121,41 @@
   - MessageWithSender interface includes isOwn boolean to simplify rendering logic
   - Mark messages as read in useEffect on conversation.id change
 ---
+
+## 2026-01-30 - COACH-039
+- What was implemented:
+  - Created sendMessage(conversationId, content) server action
+    - Validates user is a participant in conversation
+    - Validates content is not empty/whitespace-only
+    - Creates message record in database
+    - Updates conversation.last_message_at
+    - Returns the new message with sender info (MessageWithSender type)
+  - Created getNewMessages(conversationId, afterId) server action for polling
+    - Fetches messages with ID greater than afterId
+    - Returns messages in chronological order (oldest to newest)
+    - Includes sender info for each message
+  - Implemented optimistic UI update in ChatView component
+    - Message appears immediately in sender's view with temporary ID
+    - On success: replace optimistic message with real message from server
+    - On error: remove optimistic message and show error banner
+  - Added polling for new messages (every 3 seconds)
+    - Uses useEffect with setInterval
+    - Fetches messages newer than last message ID
+    - Filters out duplicates (including optimistic messages)
+    - Appends new messages to state
+    - Marks new messages from others as read
+    - Auto-scrolls if user is near the bottom of the chat
+  - Empty message validation prevents sending empty/whitespace-only messages
+  - markMessagesAsRead already existed from COACH-038 and is called on poll
+- Files changed:
+  - src/app/(dashboard)/dashboard/messages/[id]/actions.ts - Added sendMessage, getNewMessages server actions, SendMessageResult and GetNewMessagesResult interfaces, imported gt and asc from drizzle-orm
+  - src/components/messages/chat-view.tsx - Updated handleSend for real implementation with optimistic UI, added polling useEffect, imported sendMessage and getNewMessages
+- **Learnings for future iterations:**
+  - For optimistic UI: create temp message with Date.now() as ID, replace on success, remove on error
+  - Polling pattern: useEffect with setInterval, cleanup with clearInterval on unmount
+  - To avoid infinite loops in polling useEffect, use the last message ID rather than timestamp for comparison
+  - Check senderId === 'current-user' to identify optimistic messages during polling
+  - Auto-scroll only when user is near bottom: scrollHeight - scrollTop - clientHeight < 100
+  - Use gt() and asc() from drizzle-orm for "greater than" and ascending order queries
+  - Filter duplicates with Set before appending polled messages to state
+---
