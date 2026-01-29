@@ -8,6 +8,7 @@ import { CalendarPlus, Video, Loader2 } from 'lucide-react';
 import { CancellationDialog } from '@/components/sessions/cancellation-dialog';
 import type { RefundEligibilityInfo } from '@/components/sessions/cancellation-dialog';
 import { MessageButton } from '@/components/messages';
+import { AddActionItemDialog } from '@/components/action-items';
 import { generateCoachIcsFile, cancelSession, getRefundEligibility } from '../actions';
 
 interface CoachSessionActionsProps {
@@ -150,6 +151,15 @@ export function CoachSessionActions({
           )}
           Add to Calendar
         </Button>
+        <AddActionItemDialog
+          clientId={clientId}
+          bookingId={sessionId}
+          clientName={clientName}
+          variant="outline"
+          size="sm"
+          className="w-full justify-start"
+          onActionItemAdded={() => router.refresh()}
+        />
         {canCancel && (
           <CancellationDialog
             onCancel={handleCancel}
@@ -184,6 +194,13 @@ export function CoachSessionActions({
         )}
         Add to Calendar
       </Button>
+      <AddActionItemDialog
+        clientId={clientId}
+        bookingId={sessionId}
+        clientName={clientName}
+        variant="outline"
+        onActionItemAdded={() => router.refresh()}
+      />
       {canCancel && (
         <CancellationDialog
           onCancel={handleCancel}

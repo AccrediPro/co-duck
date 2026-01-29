@@ -2,7 +2,16 @@
 
 import { auth } from '@clerk/nextjs/server';
 import { eq, and, or, desc, lt, ne, gt, asc, gte, sql } from 'drizzle-orm';
-import { db, conversations, messages, users, bookings, transactions, coachProfiles } from '@/db';
+import {
+  db,
+  conversations,
+  messages,
+  users,
+  bookings,
+  transactions,
+  coachProfiles,
+  actionItems,
+} from '@/db';
 
 // Message with sender info
 export interface MessageWithSender {
@@ -360,6 +369,19 @@ export interface GetNewMessagesResult {
  * Get messages newer than the provided message ID (for polling)
  * Returns messages in chronological order (oldest to newest)
  */
+// Action item with computed status
+export interface ActionItemForContext {
+  id: number;
+  title: string;
+  description: string | null;
+  dueDate: string | null;
+  isCompleted: boolean;
+  completedAt: Date | null;
+  createdAt: Date;
+  status: 'pending' | 'overdue' | 'completed';
+  bookingId: number | null;
+}
+
 // Client context for chat panel (coach view only)
 export interface ClientContext {
   clientId: string;
@@ -374,6 +396,7 @@ export interface ClientContext {
     startTime: Date;
   }[];
   coachSlug: string;
+  actionItems: ActionItemForContext[];
 }
 
 export interface GetClientContextResult {
@@ -493,6 +516,44 @@ export async function getClientContext(conversationId: number): Promise<GetClien
       startTime: session.startTime,
     }));
 
+    // Get action items for this client (pending/overdue first, then completed)
+    const actionItemsRecords = await db
+      .select()
+      .from(actionItems)
+      .where(and(eq(actionItems.coachId, userId), eq(actionItems.clientId, clientId)))
+      .orderBy(asc(actionItems.isCompleted), desc(actionItems.createdAt))
+      .limit(10); // Show last 10 items
+
+    // Helper to compute action item status
+    const computeStatus = (item: {
+      isCompleted: boolean;
+      dueDate: string | null;
+    }): 'pending' | 'overdue' | 'completed' => {
+      if (item.isCompleted) {
+        return 'completed';
+      }
+      if (item.dueDate) {
+        const due = new Date(item.dueDate);
+        due.setHours(23, 59, 59, 999);
+        if (due < new Date()) {
+          return 'overdue';
+        }
+      }
+      return 'pending';
+    };
+
+    const clientActionItems: ActionItemForContext[] = actionItemsRecords.map((item) => ({
+      id: item.id,
+      title: item.title,
+      description: item.description,
+      dueDate: item.dueDate,
+      isCompleted: item.isCompleted,
+      completedAt: item.completedAt,
+      createdAt: item.createdAt,
+      status: computeStatus(item),
+      bookingId: item.bookingId,
+    }));
+
     return {
       success: true,
       context: {
@@ -504,6 +565,7 @@ export async function getClientContext(conversationId: number): Promise<GetClien
         currency,
         upcomingSessions,
         coachSlug,
+        actionItems: clientActionItems,
       },
     };
   } catch (error) {

@@ -1,13 +1,23 @@
 'use client';
 
+import { useState, useCallback } from 'react';
 import Link from 'next/link';
 import { format } from 'date-fns';
+import { useRouter } from 'next/navigation';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { Calendar, DollarSign, History, CalendarPlus, ExternalLink } from 'lucide-react';
+import {
+  Calendar,
+  DollarSign,
+  History,
+  CalendarPlus,
+  ExternalLink,
+  CheckSquare,
+} from 'lucide-react';
 import type { ClientContext } from '@/app/(dashboard)/dashboard/messages/[id]/actions';
+import { ActionItemsList, AddActionItemDialog } from '@/components/action-items';
 
 interface ChatContextPanelProps {
   context: ClientContext;
@@ -64,6 +74,23 @@ function formatSessionTime(date: Date): string {
 }
 
 export function ChatContextPanel({ context }: ChatContextPanelProps) {
+  const router = useRouter();
+  const [, setRefreshKey] = useState(0);
+
+  const handleActionItemUpdate = useCallback(() => {
+    // Force a refresh to reload the action items
+    setRefreshKey((prev) => prev + 1);
+    router.refresh();
+  }, [router]);
+
+  // Prepare action items for the list component
+  const actionItemsForList = (context.actionItems || []).map((item) => ({
+    ...item,
+    // Ensure dates are properly typed
+    completedAt: item.completedAt ? new Date(item.completedAt) : null,
+    createdAt: new Date(item.createdAt),
+  }));
+
   return (
     <div className="flex h-full flex-col overflow-y-auto border-l bg-muted/30">
       {/* Client Info Header */}
@@ -143,6 +170,40 @@ export function ChatContextPanel({ context }: ChatContextPanelProps) {
               </Card>
             ))}
           </div>
+        )}
+      </div>
+
+      <Separator />
+
+      {/* Action Items */}
+      <div className="p-4">
+        <div className="mb-3 flex items-center justify-between">
+          <h3 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            Action Items
+          </h3>
+          <AddActionItemDialog
+            clientId={context.clientId}
+            clientName={context.clientName || undefined}
+            onActionItemAdded={handleActionItemUpdate}
+            variant="ghost"
+            size="sm"
+            className="h-6 px-2 text-xs"
+          />
+        </div>
+        {actionItemsForList.length === 0 ? (
+          <Card className="bg-background">
+            <CardContent className="flex flex-col items-center py-6 text-center">
+              <CheckSquare className="mb-2 h-8 w-8 text-muted-foreground" />
+              <p className="text-sm text-muted-foreground">No action items</p>
+            </CardContent>
+          </Card>
+        ) : (
+          <ActionItemsList
+            items={actionItemsForList}
+            onUpdate={handleActionItemUpdate}
+            showDelete={true}
+            compact={true}
+          />
         )}
       </div>
 
