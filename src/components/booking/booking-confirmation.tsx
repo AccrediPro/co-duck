@@ -16,6 +16,7 @@ import type { SessionType } from '@/db/schema';
 import type { CoachBookingData } from '@/app/(public)/coaches/[slug]/book/actions';
 import {
   createBooking,
+  createCheckoutSession,
   generateIcsFile,
   type BookingResult,
 } from '@/app/(public)/coaches/[slug]/book/confirm/actions';
@@ -25,6 +26,7 @@ import {
   CalendarPlus,
   Check,
   Clock,
+  CreditCard,
   DollarSign,
   Globe,
   Loader2,
@@ -120,6 +122,9 @@ export function BookingConfirmation({
     }
   };
 
+  // Check if this is a paid session
+  const isPaidSession = sessionType.price > 0;
+
   // Handle booking confirmation
   const handleConfirmBooking = async () => {
     if (!isAuthenticated) {
@@ -130,33 +135,64 @@ export function BookingConfirmation({
 
     setIsSubmitting(true);
 
-    const result = await createBooking({
-      coachId: coach.userId,
-      sessionType: {
-        name: sessionType.name,
-        duration: sessionType.duration,
-        price: sessionType.price,
-      },
-      startTime,
-      endTime,
-      clientNotes: clientNotes.trim() || undefined,
-    });
-
-    setIsSubmitting(false);
-
-    if (result.success) {
-      setBookingResult(result.data);
-      setBookingComplete(true);
-      toast({
-        title: 'Booking Confirmed!',
-        description: 'Your coaching session has been booked successfully.',
+    if (isPaidSession) {
+      // For paid sessions, create a Stripe Checkout session
+      const result = await createCheckoutSession({
+        coachId: coach.userId,
+        coachSlug: slug,
+        sessionType: {
+          name: sessionType.name,
+          duration: sessionType.duration,
+          price: sessionType.price,
+        },
+        startTime,
+        endTime,
+        clientNotes: clientNotes.trim() || undefined,
+        clientTimezone,
       });
+
+      setIsSubmitting(false);
+
+      if (result.success) {
+        // Redirect to Stripe Checkout
+        window.location.href = result.checkoutUrl;
+      } else {
+        toast({
+          title: 'Payment Setup Failed',
+          description: result.error,
+          variant: 'destructive',
+        });
+      }
     } else {
-      toast({
-        title: 'Booking Failed',
-        description: result.error,
-        variant: 'destructive',
+      // For free sessions, create booking directly with confirmed status
+      const result = await createBooking({
+        coachId: coach.userId,
+        sessionType: {
+          name: sessionType.name,
+          duration: sessionType.duration,
+          price: sessionType.price,
+        },
+        startTime,
+        endTime,
+        clientNotes: clientNotes.trim() || undefined,
       });
+
+      setIsSubmitting(false);
+
+      if (result.success) {
+        setBookingResult(result.data);
+        setBookingComplete(true);
+        toast({
+          title: 'Booking Confirmed!',
+          description: 'Your coaching session has been booked successfully.',
+        });
+      } else {
+        toast({
+          title: 'Booking Failed',
+          description: result.error,
+          variant: 'destructive',
+        });
+      }
     }
   };
 
@@ -434,15 +470,22 @@ export function BookingConfirmation({
               {isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Confirming...
+                  {isPaidSession ? 'Redirecting to Payment...' : 'Confirming...'}
                 </>
               ) : isAuthenticated ? (
-                <>
-                  <Check className="mr-2 h-4 w-4" />
-                  Confirm Booking
-                </>
+                isPaidSession ? (
+                  <>
+                    <CreditCard className="mr-2 h-4 w-4" />
+                    Pay Now
+                  </>
+                ) : (
+                  <>
+                    <Check className="mr-2 h-4 w-4" />
+                    Confirm Booking
+                  </>
+                )
               ) : (
-                'Sign in to Confirm Booking'
+                `Sign in to ${isPaidSession ? 'Pay & Book' : 'Confirm Booking'}`
               )}
             </Button>
             <Button variant="ghost" asChild>
