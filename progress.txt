@@ -1295,3 +1295,23 @@
   - Legacy aliases (export const saveCoachNotes = saveSessionNote) maintain backward compatibility with existing components
   - CoachNotesEditor component was already well-implemented with all acceptance criteria (save button, loading state, auto-save, toast)
 ---
+
+## 2026-01-30 - COACH-045
+- What was implemented:
+  - Created action_items table for coaches to assign tasks/action items to clients
+  - Table schema: id (serial PK), coach_id (FK to users), client_id (FK to users), booking_id (FK to bookings, nullable for linking to specific session), title (text, required), description (text, nullable), due_date (date, nullable), is_completed (boolean, default false), completed_at (timestamp, nullable), created_at, updated_at
+  - Foreign keys with CASCADE delete on coach_id/client_id, SET NULL on booking_id (action items persist even if booking is deleted)
+  - Indexes on coach_id, client_id, and is_completed for efficient queries
+  - Exported ActionItem and NewActionItem types using $inferSelect and $inferInsert
+  - Generated migration 0009_wealthy_mercury.sql
+- Files changed:
+  - src/db/schema.ts - Added actionItems table with type exports
+  - drizzle/0009_wealthy_mercury.sql - Migration file
+  - drizzle/meta/_journal.json - Updated migration journal
+  - drizzle/meta/0009_snapshot.json - Schema snapshot
+- **Learnings for future iterations:**
+  - Use SET NULL on booking_id FK so action items survive booking deletion (different from session_notes which uses CASCADE)
+  - Action items are standalone tasks that may or may not be associated with a specific session
+  - Following same patterns: serial PK, nullable FK for optional relationships, date type for due_date (not timestamp)
+  - Three indexes added: coach_id, client_id, is_completed - supports filtering by owner and completion status
+---

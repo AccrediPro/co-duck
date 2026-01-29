@@ -568,7 +568,7 @@
       "title": "Action Items Database Schema",
       "description": "Create action_items table: id, coach_id, client_id, booking_id (optional), title, description, due_date, is_completed, completed_at, created_at, updated_at.",
       "priority": 45,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "action_items table created",
         "Links to coach, client, optionally booking",
