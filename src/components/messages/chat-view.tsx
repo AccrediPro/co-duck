@@ -11,7 +11,12 @@ import type {
   ConversationDetails,
   MessageWithSender,
 } from '@/app/(dashboard)/dashboard/messages/[id]/actions';
-import { getMessages, markMessagesAsRead } from '@/app/(dashboard)/dashboard/messages/[id]/actions';
+import {
+  getMessages,
+  markMessagesAsRead,
+  sendMessage,
+  getNewMessages,
+} from '@/app/(dashboard)/dashboard/messages/[id]/actions';
 
 interface ChatViewProps {
   conversation: ConversationDetails;
@@ -96,16 +101,19 @@ export function ChatView({ conversation, initialMessages, initialHasMore }: Chat
     }
   }, [hasMore, isLoadingMore, loadMoreMessages]);
 
-  // Temporary send handler (will be replaced in COACH-039 with real implementation)
+  // Handle sending a message with optimistic UI update
   const handleSend = async (content: string) => {
     setSendError(null);
 
+    // Generate a temporary ID for optimistic update
+    const tempId = Date.now();
+
     // Create optimistic message
     const optimisticMessage: MessageWithSender = {
-      id: Date.now(), // Temporary ID
+      id: tempId,
       content,
       messageType: 'text',
-      senderId: 'current-user', // Will be replaced
+      senderId: 'current-user',
       senderName: 'You',
       senderAvatar: null,
       isOwn: true,
@@ -119,11 +127,74 @@ export function ChatView({ conversation, initialMessages, initialHasMore }: Chat
     // Scroll to show new message
     setTimeout(() => scrollToBottom('smooth'), 50);
 
-    // Note: Actual sending will be implemented in COACH-039
-    // For now, just show the message locally
-    // When COACH-039 is implemented, replace this with actual sendMessage call
-    // and handle errors/replace optimistic message with real one
+    // Send the message to the server
+    const result = await sendMessage(conversation.id, content);
+
+    if (result.success && result.message) {
+      // Replace optimistic message with real message from server
+      setMessages((prev) => prev.map((msg) => (msg.id === tempId ? result.message! : msg)));
+    } else {
+      // Remove optimistic message on error
+      setMessages((prev) => prev.filter((msg) => msg.id !== tempId));
+      setSendError(result.error || 'Failed to send message');
+    }
   };
+
+  // Poll for new messages every 3 seconds
+  useEffect(() => {
+    // Only poll if we have messages (to get the last message ID)
+    // and the component is mounted
+    let pollInterval: ReturnType<typeof setInterval> | null = null;
+
+    const pollForNewMessages = async () => {
+      // Get the highest message ID from current messages
+      const lastMessage = messages[messages.length - 1];
+      if (!lastMessage) return;
+
+      // Skip if it's an optimistic message (non-numeric or very large temporary ID)
+      if (lastMessage.senderId === 'current-user') return;
+
+      try {
+        const result = await getNewMessages(conversation.id, lastMessage.id);
+
+        if (result.success && result.messages && result.messages.length > 0) {
+          // Filter out any messages we already have (including optimistic ones)
+          const existingIds = new Set(messages.map((m) => m.id));
+          const newMessages = result.messages.filter((m) => !existingIds.has(m.id));
+
+          if (newMessages.length > 0) {
+            setMessages((prev) => [...prev, ...newMessages]);
+
+            // Mark new messages from others as read
+            markMessagesAsRead(conversation.id);
+
+            // Scroll to bottom if user is near the bottom
+            const container = messagesContainerRef.current;
+            if (container) {
+              const isNearBottom =
+                container.scrollHeight - container.scrollTop - container.clientHeight < 100;
+              if (isNearBottom) {
+                setTimeout(() => scrollToBottom('smooth'), 50);
+              }
+            }
+          }
+        }
+      } catch (error) {
+        // Silently handle polling errors - don't disrupt the UI
+        console.error('Error polling for new messages:', error);
+      }
+    };
+
+    // Start polling
+    pollInterval = setInterval(pollForNewMessages, 3000);
+
+    // Cleanup on unmount or when conversation changes
+    return () => {
+      if (pollInterval) {
+        clearInterval(pollInterval);
+      }
+    };
+  }, [conversation.id, messages, scrollToBottom]);
 
   return (
     <div className="flex h-[calc(100vh-8rem)] flex-col overflow-hidden rounded-lg border bg-background">
