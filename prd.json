@@ -598,7 +598,7 @@
       "title": "Client Action Items View",
       "description": "Create page for clients to view and complete action items. Dashboard widget showing pending count.",
       "priority": 47,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "Page at /dashboard/action-items",
         "List with filter: All, Pending, Completed",

@@ -1361,3 +1361,33 @@
   - Compact prop on list components helps fit in sidebars/panels with limited space
   - TooltipProvider wraps individual tooltips - required by shadcn/radix tooltip pattern
 ---
+
+## 2026-01-30 - COACH-047
+- What was implemented:
+  - Created /dashboard/action-items page for clients to view their action items
+  - Added getMyActionItems server action that fetches items where client_id = current user, joined with users table to get coach info
+  - Added getPendingActionItemsCount server action for dashboard widget
+  - Client action items list with tabs: All, Pending, Completed - uses URL search params for filter state
+  - Each item displays: title, description preview (2 line clamp), due date, coach avatar/name, status badge
+  - Client can mark items complete using existing markActionItemComplete (already allows coach or client)
+  - Overdue items highlighted in red with distinct badge styling
+  - Added "Action Items" link to client navigation in dashboard sidebar (CheckSquare icon)
+  - Added Action Items widget to client dashboard showing pending count with "View All" link
+  - Added "View Action Items" button to client Quick Actions section
+  - Empty state with icon when no action items assigned
+- Files changed:
+  - src/app/(dashboard)/dashboard/action-items/actions.ts - Added getMyActionItems (with coach join), getPendingActionItemsCount, ActionItemWithCoach type
+  - src/app/(dashboard)/dashboard/action-items/page.tsx - New page with empty state handling
+  - src/app/(dashboard)/dashboard/action-items/client-action-items-list.tsx - New client component with tabs, filtering, status display
+  - src/app/(dashboard)/dashboard/page.tsx - Added Action Items widget to ClientDashboard, imported CheckSquare and ArrowRight icons
+  - src/components/navigation/dashboard-sidebar.tsx - Added Action Items link to clientLinks array
+  - src/components/action-items/action-items-list.tsx - Formatting fixes from Prettier
+  - src/components/ui/tooltip.tsx - Formatting fixes from Prettier
+- **Learnings for future iterations:**
+  - Server actions can join tables to include related data - use leftJoin with select to pick specific fields
+  - ActionItemWithCoach extends ActionItemWithStatus to include coach info (coachId, coachName, coachAvatar)
+  - URL search params work well for filter state - allows bookmarking/sharing filtered views
+  - Dashboard widgets can call server actions directly since ClientDashboard is async server component
+  - Client-specific navigation links go in clientLinks array in dashboard-sidebar.tsx
+  - Status badges use tailwind utilities like bg-green-100, bg-red-100 with dark mode variants
+---
