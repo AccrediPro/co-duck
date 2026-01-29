@@ -22,9 +22,16 @@ interface CoachesGridProps {
   totalCount: number;
   currentPage: number;
   perPage: number;
+  showResultsCount?: boolean;
 }
 
-export function CoachesGrid({ coaches, totalCount, currentPage, perPage }: CoachesGridProps) {
+export function CoachesGrid({
+  coaches,
+  totalCount,
+  currentPage,
+  perPage,
+  showResultsCount = true,
+}: CoachesGridProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -59,10 +66,12 @@ export function CoachesGrid({ coaches, totalCount, currentPage, perPage }: Coach
   return (
     <div>
       {/* Results count */}
-      <p className="mb-4 text-sm text-muted-foreground">
-        Showing {(currentPage - 1) * perPage + 1}-{Math.min(currentPage * perPage, totalCount)} of{' '}
-        {totalCount} coach{totalCount !== 1 ? 'es' : ''}
-      </p>
+      {showResultsCount && (
+        <p className="mb-4 text-sm text-muted-foreground">
+          Showing {(currentPage - 1) * perPage + 1}-{Math.min(currentPage * perPage, totalCount)} of{' '}
+          {totalCount} coach{totalCount !== 1 ? 'es' : ''}
+        </p>
+      )}
 
       {/* Grid */}
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
