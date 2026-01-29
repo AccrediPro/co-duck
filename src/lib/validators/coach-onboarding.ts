@@ -92,11 +92,9 @@ export type SessionTypeFormData = z.infer<typeof sessionTypeSchema>;
 // Step 3: Pricing validation schema
 export const coachPricingSchema = z.object({
   hourlyRate: z.number().min(0, 'Hourly rate must be 0 or greater').optional().nullable(),
-  currency: z
-    .string()
-    .refine((val) => SUPPORTED_CURRENCIES.some((c) => c.code === val), {
-      message: 'Please select a valid currency',
-    }),
+  currency: z.string().refine((val) => SUPPORTED_CURRENCIES.some((c) => c.code === val), {
+    message: 'Please select a valid currency',
+  }),
   sessionTypes: z.array(sessionTypeSchema).min(1, 'Please add at least one session type'),
 });
 

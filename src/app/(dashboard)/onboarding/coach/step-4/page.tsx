@@ -1,9 +1,7 @@
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
-import Link from 'next/link';
-import { StepIndicator } from '@/components/onboarding';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { StepIndicator, ReviewPublishForm } from '@/components/onboarding';
+import { getCoachProfileForReview } from '../actions/publish-profile';
 
 export const metadata = {
   title: 'Coach Onboarding - Step 4 | Coaching Platform',
@@ -15,6 +13,14 @@ export default async function CoachOnboardingStep4Page() {
 
   if (!userId) {
     redirect('/sign-in');
+  }
+
+  // Get profile data for review
+  const result = await getCoachProfileForReview();
+
+  if (!result.success) {
+    // If no profile exists, redirect to step 1
+    redirect('/onboarding/coach');
   }
 
   return (
@@ -30,26 +36,12 @@ export default async function CoachOnboardingStep4Page() {
       {/* Step Indicator */}
       <StepIndicator currentStep={4} totalSteps={4} />
 
-      {/* Placeholder Content */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Review & Publish</CardTitle>
-          <CardDescription>Review your profile and publish when ready.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="rounded-md bg-muted p-8 text-center">
-            <p className="text-muted-foreground">
-              Step 4 form coming soon. Your pricing has been saved!
-            </p>
-          </div>
-          <div className="mt-6 flex justify-between">
-            <Button variant="outline" asChild>
-              <Link href="/onboarding/coach/step-3">Back to Step 3</Link>
-            </Button>
-            <Button disabled>Publish Profile</Button>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Review Form */}
+      <ReviewPublishForm
+        profile={result.profile}
+        missingItems={result.missingItems}
+        completionPercentage={result.completionPercentage}
+      />
     </div>
   );
 }
