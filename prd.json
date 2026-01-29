@@ -32,7 +32,7 @@
       "title": "Database Setup with Drizzle ORM",
       "description": "Set up Drizzle ORM with PostgreSQL connection. Create initial schema with users table including fields for id, email, name, avatar_url, role (admin/coach/client), created_at, updated_at. Configure migrations.",
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "Drizzle ORM is installed and configured",
         "Database connection uses environment variable DATABASE_URL",

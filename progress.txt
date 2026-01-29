@@ -3,6 +3,8 @@
 - Format with `npm run format` before committing
 - Run `npm run typecheck` and `npm run lint` for quality checks
 - Project uses single quotes, semi-colons, and 100 char line width (Prettier config)
+- Database schema lives in `src/db/schema.ts`, export types using `$inferSelect` and `$inferInsert`
+- Use `DATABASE_URL=... npm run db:generate` to test migrations without real DB
 
 ---
 
@@ -34,4 +36,30 @@
   - next-env.d.ts is auto-generated and git-ignored
   - shadcn init with `--defaults` avoids interactive prompts
   - Node v18 shows engine warnings but packages still work
+---
+
+## 2026-01-29 - COACH-002
+- What was implemented:
+  - Installed drizzle-orm, @neondatabase/serverless, drizzle-kit, dotenv
+  - Created users table schema with: id (text PK), email (unique), name, avatar_url, role (enum), created_at, updated_at
+  - Created userRoleEnum with 'admin', 'coach', 'client' values
+  - Set up drizzle.config.ts for PostgreSQL dialect with Neon
+  - Created database connection in src/db/index.ts using Pool from @neondatabase/serverless
+  - Added npm scripts: db:generate, db:migrate, db:push, db:studio
+  - Generated initial migration (0000_famous_champions.sql)
+  - Added .env.example documenting required environment variables
+- Files changed:
+  - package.json - Added dependencies and db scripts
+  - drizzle.config.ts - Drizzle kit configuration
+  - src/db/schema.ts - Users table and role enum
+  - src/db/index.ts - Database connection and exports
+  - drizzle/0000_famous_champions.sql - Initial migration
+  - drizzle/meta/* - Migration metadata files
+  - .env.example - Environment variable template
+- **Learnings for future iterations:**
+  - Use `pgEnum` for PostgreSQL enum types in Drizzle
+  - Use `$onUpdate(() => new Date())` for auto-updating timestamp fields
+  - drizzle-kit generate can run with mock DATABASE_URL for testing script works
+  - Node v18 shows engine warnings for @neondatabase/serverless but still functions
+  - Export `User` and `NewUser` types from schema for type-safe queries
 ---
