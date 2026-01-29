@@ -11,6 +11,7 @@ import {
   Menu,
   CreditCard,
   MessageSquare,
+  CheckSquare,
 } from 'lucide-react';
 import { UserButton } from '@clerk/nextjs';
 import { useState } from 'react';
@@ -49,6 +50,7 @@ const coachLinks: NavLink[] = [
 // Client-specific links
 const clientLinks: NavLink[] = [
   { href: '/dashboard/my-sessions', label: 'My Sessions', icon: CalendarDays, roles: ['client'] },
+  { href: '/dashboard/action-items', label: 'Action Items', icon: CheckSquare, roles: ['client'] },
 ];
 
 // Get navigation links based on user role

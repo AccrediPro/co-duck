@@ -5,12 +5,7 @@ import { format } from 'date-fns';
 import { CheckCircle2, Circle, Clock, Loader2, Trash2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useToast } from '@/hooks/use-toast';
 import {
   markActionItemComplete,
@@ -149,10 +144,7 @@ export function ActionItemsList({
         return (
           <Card
             key={item.id}
-            className={cn(
-              'bg-background transition-opacity',
-              item.isCompleted && 'opacity-60'
-            )}
+            className={cn('bg-background transition-opacity', item.isCompleted && 'opacity-60')}
           >
             <CardContent className={cn('p-3', compact && 'p-2')}>
               <div className="flex items-start gap-2">
@@ -193,7 +185,7 @@ export function ActionItemsList({
                   </p>
 
                   {!compact && item.description && (
-                    <p className="mt-1 text-xs text-muted-foreground line-clamp-2">
+                    <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
                       {item.description}
                     </p>
                   )}
@@ -203,7 +195,7 @@ export function ActionItemsList({
                       <span
                         className={cn(
                           'flex items-center gap-1',
-                          item.status === 'overdue' && 'text-red-500 font-medium'
+                          item.status === 'overdue' && 'font-medium text-red-500'
                         )}
                       >
                         <Clock className="h-3 w-3" />

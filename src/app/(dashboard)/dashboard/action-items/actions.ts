@@ -2,7 +2,7 @@
 
 import { auth } from '@clerk/nextjs/server';
 import { eq, and, desc, asc } from 'drizzle-orm';
-import { db, actionItems, bookings } from '@/db';
+import { db, actionItems, bookings, users } from '@/db';
 import type { ActionItem } from '@/db/schema';
 import { revalidatePath } from 'next/cache';
 
@@ -316,5 +316,121 @@ export async function getSessionActionItems(
   } catch (error) {
     console.error('Error fetching session action items:', error);
     return { success: false, error: 'Failed to fetch action items' };
+  }
+}
+
+// Extended type for client view with coach info
+export interface ActionItemWithCoach extends ActionItemWithStatus {
+  coachId: string;
+  coachName: string | null;
+  coachAvatar: string | null;
+}
+
+// Result for client's action items
+export interface GetMyActionItemsResult {
+  success: boolean;
+  actionItems?: ActionItemWithCoach[];
+  error?: string;
+}
+
+// Get all action items for the current user as a client
+export async function getMyActionItems(
+  filter: 'all' | 'pending' | 'completed' = 'all'
+): Promise<GetMyActionItemsResult> {
+  const { userId } = await auth();
+
+  if (!userId) {
+    return { success: false, error: 'Not authenticated' };
+  }
+
+  try {
+    // Build query conditions
+    const conditions = [eq(actionItems.clientId, userId)];
+
+    if (filter === 'pending') {
+      conditions.push(eq(actionItems.isCompleted, false));
+    } else if (filter === 'completed') {
+      conditions.push(eq(actionItems.isCompleted, true));
+    }
+
+    const items = await db
+      .select({
+        id: actionItems.id,
+        coachId: actionItems.coachId,
+        title: actionItems.title,
+        description: actionItems.description,
+        dueDate: actionItems.dueDate,
+        isCompleted: actionItems.isCompleted,
+        completedAt: actionItems.completedAt,
+        createdAt: actionItems.createdAt,
+        bookingId: actionItems.bookingId,
+        coachName: users.name,
+        coachAvatar: users.avatarUrl,
+      })
+      .from(actionItems)
+      .leftJoin(users, eq(actionItems.coachId, users.id))
+      .where(and(...conditions))
+      .orderBy(
+        asc(actionItems.isCompleted), // Pending first
+        desc(actionItems.createdAt) // Newest first
+      );
+
+    const itemsWithCoach: ActionItemWithCoach[] = items.map((item) => ({
+      id: item.id,
+      coachId: item.coachId,
+      title: item.title,
+      description: item.description,
+      dueDate: item.dueDate,
+      isCompleted: item.isCompleted,
+      completedAt: item.completedAt,
+      createdAt: item.createdAt,
+      status: computeStatus({
+        ...item,
+        clientId: userId,
+        updatedAt: item.createdAt,
+      }),
+      bookingId: item.bookingId,
+      coachName: item.coachName,
+      coachAvatar: item.coachAvatar,
+    }));
+
+    return {
+      success: true,
+      actionItems: itemsWithCoach,
+    };
+  } catch (error) {
+    console.error('Error fetching my action items:', error);
+    return { success: false, error: 'Failed to fetch action items' };
+  }
+}
+
+// Result for pending count
+export interface GetPendingActionItemsCountResult {
+  success: boolean;
+  count?: number;
+  error?: string;
+}
+
+// Get count of pending action items for the current user as a client
+export async function getPendingActionItemsCount(): Promise<GetPendingActionItemsCountResult> {
+  const { userId } = await auth();
+
+  if (!userId) {
+    return { success: false, error: 'Not authenticated' };
+  }
+
+  try {
+    const items = await db
+      .select({ id: actionItems.id })
+      .from(actionItems)
+      .where(and(eq(actionItems.clientId, userId), eq(actionItems.isCompleted, false)));
+
+    return {
+      success: true,
+      count: items.length,
+    };
+  } catch (error) {
+    console.error('Error fetching pending action items count:', error);
+    return { success: false, error: 'Failed to fetch count' };
   }
 }

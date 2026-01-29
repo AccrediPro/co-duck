@@ -15,7 +15,10 @@ import {
   CheckCircle,
   Clock,
   AlertCircle,
+  CheckSquare,
+  ArrowRight,
 } from 'lucide-react';
+import { getPendingActionItemsCount } from '@/app/(dashboard)/dashboard/action-items/actions';
 
 async function getUserWithProfile(userId: string) {
   // Get user from database
@@ -231,7 +234,11 @@ function CoachOnboardingPrompt() {
 }
 
 // Client Dashboard Component
-function ClientDashboard() {
+async function ClientDashboard() {
+  // Fetch pending action items count
+  const actionItemsResult = await getPendingActionItemsCount();
+  const pendingActionItems = actionItemsResult.success ? actionItemsResult.count || 0 : 0;
+
   return (
     <>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -248,6 +255,26 @@ function ClientDashboard() {
               <AlertCircle className="h-3 w-3" />
               <span>Booking coming soon</span>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Action Items Widget */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Action Items</CardTitle>
+            <CheckSquare className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{pendingActionItems}</div>
+            <p className="text-xs text-muted-foreground">
+              {pendingActionItems === 1 ? 'pending item' : 'pending items'}
+            </p>
+            <Button variant="outline" className="mt-3" size="sm" asChild>
+              <Link href="/dashboard/action-items" className="flex items-center gap-1">
+                View All
+                <ArrowRight className="h-3 w-3" />
+              </Link>
+            </Button>
           </CardContent>
         </Card>
 
@@ -279,6 +306,12 @@ function ClientDashboard() {
             <Link href="/coaches">
               <User className="mr-2 h-4 w-4" />
               Find a Coach
+            </Link>
+          </Button>
+          <Button variant="outline" asChild>
+            <Link href="/dashboard/action-items">
+              <CheckSquare className="mr-2 h-4 w-4" />
+              View Action Items
             </Link>
           </Button>
         </CardContent>
