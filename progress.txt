@@ -5,6 +5,9 @@
 - Project uses single quotes, semi-colons, and 100 char line width (Prettier config)
 - Database schema lives in `src/db/schema.ts`, export types using `$inferSelect` and `$inferInsert`
 - Use `DATABASE_URL=... npm run db:generate` to test migrations without real DB
+- Clerk middleware in `src/middleware.ts` protects /dashboard/* routes; add new protected routes to `isProtectedRoute` matcher
+- Auth pages use catch-all routes: `/sign-in/[[...sign-in]]/page.tsx` and `/sign-up/[[...sign-up]]/page.tsx`
+- Webhook endpoints at `/api/webhooks/*` are public (not protected by auth middleware)
 
 ---
 
@@ -62,4 +65,32 @@
   - drizzle-kit generate can run with mock DATABASE_URL for testing script works
   - Node v18 shows engine warnings for @neondatabase/serverless but still functions
   - Export `User` and `NewUser` types from schema for type-safe queries
+---
+
+## 2026-01-29 - COACH-003
+- What was implemented:
+  - Installed @clerk/nextjs and svix for webhook signature verification
+  - Wrapped app with ClerkProvider in src/app/layout.tsx
+  - Created sign-in page at /sign-in using Clerk's SignIn component with catch-all route
+  - Created sign-up page at /sign-up using Clerk's SignUp component with catch-all route
+  - Created middleware.ts to protect /dashboard/* routes using clerkMiddleware
+  - Created webhook endpoint at /api/webhooks/clerk for user sync (handles user.created, user.updated, user.deleted events)
+  - Created dashboard page at /dashboard with auth check and UserButton component
+  - Updated .env.example with all Clerk environment variables including optional URL configs
+- Files changed:
+  - package.json - Added @clerk/nextjs and svix dependencies
+  - src/app/layout.tsx - Wrapped with ClerkProvider
+  - src/app/sign-in/[[...sign-in]]/page.tsx - Sign-in page
+  - src/app/sign-up/[[...sign-up]]/page.tsx - Sign-up page
+  - src/middleware.ts - Route protection middleware
+  - src/app/api/webhooks/clerk/route.ts - Webhook endpoint for user sync
+  - src/app/dashboard/page.tsx - Protected dashboard page
+  - .env.example - Clerk environment variable documentation
+- **Learnings for future iterations:**
+  - Clerk uses catch-all routes [[...slug]] for sign-in/sign-up to handle multi-step flows
+  - Use `clerkMiddleware` with `createRouteMatcher` for protecting routes in Next.js 14+
+  - Webhook verification requires svix package; use Webhook class from svix to verify signatures
+  - Always await `headers()` in Next.js 14+ API routes (returns a Promise)
+  - Import `eq` from drizzle-orm for equality comparisons in update/delete queries
+  - Clerk webhooks should subscribe to user.created, user.updated, user.deleted events
 ---

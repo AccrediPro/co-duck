@@ -47,7 +47,7 @@
       "title": "Clerk Authentication Integration",
       "description": "Integrate Clerk for authentication. Set up sign-in, sign-up, and user profile routes. Create middleware for protected routes. Sync Clerk users to database on sign-up via webhook.",
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "Clerk is installed and configured",
         "Environment variables for Clerk keys are documented",
