@@ -11,6 +11,15 @@ import { useToast } from '@/hooks/use-toast';
 import { SUPPORTED_CURRENCIES } from '@/lib/validators/coach-onboarding';
 import type { SessionType } from '@/db/schema';
 import { Calendar, Check, Clock, Copy, Globe, User } from 'lucide-react';
+import { AvailabilitySection } from './availability-section';
+
+interface AvailabilityDisplayData {
+  timezone: string | null;
+  nextAvailable: string | null;
+  nextAvailableDisplay: string | null;
+  weeklyAvailabilitySummary: string | null;
+  hasAvailability: boolean;
+}
 
 interface CoachProfileDisplayProps {
   name: string;
@@ -23,6 +32,7 @@ interface CoachProfileDisplayProps {
   currency: string | null;
   sessionTypes: SessionType[] | null;
   slug: string;
+  availability?: AvailabilityDisplayData;
 }
 
 export function CoachProfileDisplay({
@@ -36,6 +46,7 @@ export function CoachProfileDisplay({
   currency,
   sessionTypes,
   slug,
+  availability,
 }: CoachProfileDisplayProps) {
   const { toast } = useToast();
   const [copied, setCopied] = useState(false);
@@ -193,8 +204,21 @@ export function CoachProfileDisplay({
           )}
         </div>
 
-        {/* Sidebar - Session Types & Pricing */}
+        {/* Sidebar - Availability & Pricing */}
         <div className="space-y-6">
+          {/* Availability Section */}
+          {availability && (
+            <AvailabilitySection
+              timezone={availability.timezone}
+              nextAvailable={availability.nextAvailable}
+              nextAvailableDisplay={availability.nextAvailableDisplay}
+              weeklyAvailabilitySummary={availability.weeklyAvailabilitySummary}
+              hasAvailability={availability.hasAvailability}
+              slug={slug}
+            />
+          )}
+
+          {/* Sessions & Pricing */}
           <Card>
             <CardHeader>
               <CardTitle>Sessions & Pricing</CardTitle>

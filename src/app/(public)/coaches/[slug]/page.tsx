@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { eq, and } from 'drizzle-orm';
 import { db, users, coachProfiles } from '@/db';
 import { CoachProfileDisplay } from '@/components/coaches/coach-profile-display';
+import { getCoachAvailabilityForProfile } from './availability-actions';
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -75,6 +76,9 @@ export default async function CoachProfilePage({ params }: PageProps) {
     notFound();
   }
 
+  // Fetch availability data for display
+  const availability = await getCoachAvailabilityForProfile(coach.userId);
+
   return (
     <div className="container mx-auto px-4 py-8">
       <CoachProfileDisplay
@@ -88,6 +92,7 @@ export default async function CoachProfilePage({ params }: PageProps) {
         currency={coach.currency}
         sessionTypes={coach.sessionTypes}
         slug={coach.slug}
+        availability={availability}
       />
     </div>
   );
