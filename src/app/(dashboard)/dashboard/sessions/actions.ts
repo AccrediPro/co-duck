@@ -2,7 +2,7 @@
 
 import { auth } from '@clerk/nextjs/server';
 import { eq, and, or, gte, lt, desc, asc, sql } from 'drizzle-orm';
-import { db, bookings, users, transactions, coachProfiles } from '@/db';
+import { db, bookings, users, transactions, coachProfiles, sessionNotes } from '@/db';
 import type { BookingSessionType } from '@/db/schema';
 import { stripe } from '@/lib/stripe';
 import { formatRefundAmount } from '@/lib/refunds';
@@ -358,16 +358,16 @@ export async function getPastSessionsCountWithClient(
   }
 }
 
-// Save coach notes for a session
-export interface SaveCoachNotesResult {
+// Save session note for a booking (uses session_notes table)
+export interface SaveSessionNoteResult {
   success: boolean;
   error?: string;
 }
 
-export async function saveCoachNotes(
-  sessionId: number,
-  notes: string
-): Promise<SaveCoachNotesResult> {
+export async function saveSessionNote(
+  bookingId: number,
+  content: string
+): Promise<SaveSessionNoteResult> {
   const { userId } = await auth();
 
   if (!userId) {
@@ -375,28 +375,90 @@ export async function saveCoachNotes(
   }
 
   try {
-    // Verify the session belongs to this coach
+    // Verify the booking belongs to this coach
     const existingBooking = await db
       .select()
       .from(bookings)
-      .where(and(eq(bookings.id, sessionId), eq(bookings.coachId, userId)))
+      .where(and(eq(bookings.id, bookingId), eq(bookings.coachId, userId)))
       .limit(1);
 
     if (existingBooking.length === 0) {
       return { success: false, error: 'Session not found' };
     }
 
-    // Update the coach notes
-    await db
-      .update(bookings)
-      .set({ coachNotes: notes || null })
-      .where(eq(bookings.id, sessionId));
+    // Check if a note already exists for this booking
+    const existingNote = await db
+      .select()
+      .from(sessionNotes)
+      .where(eq(sessionNotes.bookingId, bookingId))
+      .limit(1);
+
+    if (existingNote.length > 0) {
+      // Update existing note
+      await db
+        .update(sessionNotes)
+        .set({ content: content || '' })
+        .where(eq(sessionNotes.bookingId, bookingId));
+    } else {
+      // Create new note
+      await db.insert(sessionNotes).values({
+        bookingId,
+        coachId: userId,
+        content: content || '',
+      });
+    }
 
     return { success: true };
   } catch {
     return { success: false, error: 'Failed to save notes' };
   }
 }
+
+// Get session note for a booking
+export interface GetSessionNoteResult {
+  success: boolean;
+  content?: string | null;
+  error?: string;
+}
+
+export async function getSessionNote(bookingId: number): Promise<GetSessionNoteResult> {
+  const { userId } = await auth();
+
+  if (!userId) {
+    return { success: false, error: 'Not authenticated' };
+  }
+
+  try {
+    // Verify the booking belongs to this coach
+    const existingBooking = await db
+      .select()
+      .from(bookings)
+      .where(and(eq(bookings.id, bookingId), eq(bookings.coachId, userId)))
+      .limit(1);
+
+    if (existingBooking.length === 0) {
+      return { success: false, error: 'Session not found' };
+    }
+
+    // Get the note
+    const note = await db
+      .select({ content: sessionNotes.content })
+      .from(sessionNotes)
+      .where(eq(sessionNotes.bookingId, bookingId))
+      .limit(1);
+
+    return {
+      success: true,
+      content: note.length > 0 ? note[0].content : null,
+    };
+  } catch {
+    return { success: false, error: 'Failed to get notes' };
+  }
+}
+
+// Legacy alias for backward compatibility
+export type SaveCoachNotesResult = SaveSessionNoteResult;
+export const saveCoachNotes = saveSessionNote;
 
 // Generate ICS file content for coach's calendar download
 export async function generateCoachIcsFile(

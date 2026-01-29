@@ -3,7 +3,7 @@ import { redirect, notFound } from 'next/navigation';
 import { eq, and, or, lt, sql } from 'drizzle-orm';
 import { format } from 'date-fns';
 import Link from 'next/link';
-import { db, bookings, users, coachProfiles, transactions } from '@/db';
+import { db, bookings, users, coachProfiles, transactions, sessionNotes } from '@/db';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -169,6 +169,18 @@ export default async function SessionDetailPage({ params }: PageProps) {
     .limit(1);
 
   const transaction = transactionData.length > 0 ? transactionData[0] : null;
+
+  // Fetch session note for coach view (from session_notes table)
+  let sessionNoteContent: string | null = null;
+  if (isCoachView) {
+    const noteData = await db
+      .select({ content: sessionNotes.content })
+      .from(sessionNotes)
+      .where(eq(sessionNotes.bookingId, sessionId))
+      .limit(1);
+
+    sessionNoteContent = noteData.length > 0 ? noteData[0].content : null;
+  }
 
   // Determine payment status
   type PaymentStatus = 'free' | 'paid' | 'payment_required' | 'payment_failed';
@@ -346,7 +358,7 @@ export default async function SessionDetailPage({ params }: PageProps) {
 
           {/* Editable Coach Notes - Only visible to coach */}
           {isCoachView && (
-            <CoachNotesEditor sessionId={session.id} initialNotes={session.coachNotes} />
+            <CoachNotesEditor sessionId={session.id} initialNotes={sessionNoteContent} />
           )}
 
           {/* Cancellation Info */}
