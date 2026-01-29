@@ -1,0 +1,10 @@
+## Codebase Patterns
+(Patterns will be added as development progresses)
+
+---
+
+## Project Kickoff - 2026-01-29
+- PRD created with 15 user stories for Phase 0 (Foundation) + Phase 1 (Coach Profiles MVP)
+- Tech stack: Next.js 14, Tailwind, shadcn/ui, Drizzle ORM, PostgreSQL, Clerk
+- Stories ordered by priority for incremental development
+---

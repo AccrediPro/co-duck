@@ -1,0 +1,252 @@
+{
+  "projectName": "Coaching Platform",
+  "description": "A platform connecting coaches with clients for 1:1 and group coaching sessions",
+  "branchName": "main",
+  "techStack": {
+    "frontend": "Next.js 14+ (App Router), Tailwind CSS, shadcn/ui",
+    "backend": "Next.js API Routes, Drizzle ORM",
+    "database": "PostgreSQL (Neon)",
+    "auth": "Clerk",
+    "payments": "Stripe Connect",
+    "validation": "Zod"
+  },
+  "stories": [
+    {
+      "id": "COACH-001",
+      "title": "Project Initialization",
+      "description": "Initialize Next.js 14 project with App Router, TypeScript, Tailwind CSS, and shadcn/ui. Set up project structure with src/app, src/components, src/lib, src/db directories. Configure ESLint and Prettier.",
+      "priority": 1,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Next.js 14+ with App Router is initialized",
+        "TypeScript is configured",
+        "Tailwind CSS is installed and configured",
+        "shadcn/ui is initialized with default components (button, input, card)",
+        "Project structure follows Next.js 14 conventions",
+        "ESLint and Prettier are configured",
+        "Dev server runs without errors"
+      ]
+    },
+    {
+      "id": "COACH-002",
+      "title": "Database Setup with Drizzle ORM",
+      "description": "Set up Drizzle ORM with PostgreSQL connection. Create initial schema with users table including fields for id, email, name, avatar_url, role (admin/coach/client), created_at, updated_at. Configure migrations.",
+      "priority": 2,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Drizzle ORM is installed and configured",
+        "Database connection uses environment variable DATABASE_URL",
+        "Users table schema is defined with proper types",
+        "Role enum includes: admin, coach, client",
+        "Migration scripts are set up (drizzle-kit)",
+        "db:generate and db:migrate scripts work"
+      ]
+    },
+    {
+      "id": "COACH-003",
+      "title": "Clerk Authentication Integration",
+      "description": "Integrate Clerk for authentication. Set up sign-in, sign-up, and user profile routes. Create middleware for protected routes. Sync Clerk users to database on sign-up via webhook.",
+      "priority": 3,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Clerk is installed and configured",
+        "Environment variables for Clerk keys are documented",
+        "Sign-in page at /sign-in works",
+        "Sign-up page at /sign-up works",
+        "Middleware protects /dashboard/* routes",
+        "ClerkProvider wraps the app",
+        "Webhook endpoint /api/webhooks/clerk syncs users to DB"
+      ]
+    },
+    {
+      "id": "COACH-004",
+      "title": "Base Layout and Navigation",
+      "description": "Create base application layout with responsive navigation. Include header with logo, nav links, and user menu. Create public layout (marketing) and authenticated layout (dashboard) variants.",
+      "priority": 4,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Root layout with proper metadata and fonts",
+        "Public layout with marketing header/footer",
+        "Dashboard layout with sidebar navigation",
+        "Responsive mobile menu (hamburger)",
+        "User menu shows avatar and sign-out option",
+        "Navigation highlights current route"
+      ]
+    },
+    {
+      "id": "COACH-005",
+      "title": "Coach Profile Database Schema",
+      "description": "Create coach_profiles table with fields: user_id (FK), slug, headline, bio, specialties (jsonb), hourly_rate, currency, timezone, video_intro_url, is_published, profile_completion_percentage. Add indexes for search.",
+      "priority": 5,
+      "passes": false,
+      "acceptanceCriteria": [
+        "coach_profiles table is created with all fields",
+        "Foreign key relationship to users table",
+        "Unique constraint on slug",
+        "JSONB field for specialties array",
+        "Proper indexes for slug and is_published",
+        "Migration runs successfully"
+      ]
+    },
+    {
+      "id": "COACH-006",
+      "title": "Coach Onboarding Flow - Step 1: Basic Info",
+      "description": "Create multi-step coach onboarding wizard. Step 1 collects: display name, headline (tagline), profile photo upload, timezone selection. Save progress and allow resuming later.",
+      "priority": 6,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Onboarding page at /onboarding/coach",
+        "Step indicator shows progress (1 of 4)",
+        "Form fields: name, headline, photo, timezone",
+        "Photo upload with preview (store URL for now)",
+        "Timezone dropdown with auto-detect default",
+        "Data saves to coach_profiles table",
+        "Can navigate to step 2"
+      ]
+    },
+    {
+      "id": "COACH-007",
+      "title": "Coach Onboarding Flow - Step 2: Bio & Specialties",
+      "description": "Step 2 of onboarding collects: detailed bio (rich text or textarea), specialties selection from predefined list with ability to add custom ones.",
+      "priority": 7,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Bio textarea with character count (max 2000)",
+        "Predefined specialties list as multi-select chips",
+        "Can add custom specialty",
+        "Minimum 1 specialty required",
+        "Back button returns to step 1 with data preserved",
+        "Data saves to coach_profiles table"
+      ]
+    },
+    {
+      "id": "COACH-008",
+      "title": "Coach Onboarding Flow - Step 3: Pricing",
+      "description": "Step 3 collects: hourly rate, currency selection (USD default), session types they offer (discovery call, 1-hour session, etc.).",
+      "priority": 8,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Hourly rate input with currency selector",
+        "Default currency is USD",
+        "Session types: can add multiple with name, duration, price",
+        "At least one session type required",
+        "Data saves to coach_profiles table",
+        "Session types stored in separate table or JSONB"
+      ]
+    },
+    {
+      "id": "COACH-009",
+      "title": "Coach Onboarding Flow - Step 4: Review & Publish",
+      "description": "Final step shows profile preview and publish button. Calculate profile completion percentage. Show what's missing for 100%. Allow publish or save as draft.",
+      "priority": 9,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Profile preview card shows all entered data",
+        "Profile completion percentage displayed",
+        "Missing items listed if not 100%",
+        "Publish button sets is_published=true",
+        "Save as Draft keeps is_published=false",
+        "Redirect to /dashboard after completion",
+        "Success toast notification"
+      ]
+    },
+    {
+      "id": "COACH-010",
+      "title": "Public Coach Profile Page",
+      "description": "Create public coach profile page at /coaches/[slug]. SSR for SEO. Display all profile info: photo, name, headline, bio, specialties as tags, pricing, and CTA button.",
+      "priority": 10,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Page at /coaches/[slug] renders coach profile",
+        "Server-side rendered for SEO",
+        "Proper meta tags (title, description, og:image)",
+        "Shows 404 if coach not found or not published",
+        "Displays: photo, name, headline, bio, specialties, pricing",
+        "Book Session CTA button (links to booking page)",
+        "Share profile button copies URL",
+        "Responsive layout"
+      ]
+    },
+    {
+      "id": "COACH-011",
+      "title": "Browse Coaches Page",
+      "description": "Create /coaches page listing all published coaches in a grid. Each coach shows card with photo, name, headline, specialties preview, starting price. Include basic pagination.",
+      "priority": 11,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Page at /coaches lists published coaches",
+        "Grid layout (3 cols desktop, 2 tablet, 1 mobile)",
+        "Coach card: photo, name, headline, specialties (3 max), price",
+        "Click card goes to coach profile",
+        "Pagination (12 per page)",
+        "Loading skeleton while fetching",
+        "Empty state if no coaches"
+      ]
+    },
+    {
+      "id": "COACH-012",
+      "title": "Coach Search and Filters",
+      "description": "Add search bar and filters to /coaches page. Search by name, headline, bio. Filter by specialty, price range. Sort by: newest, price low-high, price high-low.",
+      "priority": 12,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Search input filters coaches by name/headline/bio",
+        "Specialty filter as multi-select dropdown",
+        "Price range filter (min-max inputs or slider)",
+        "Sort dropdown with options",
+        "Filters update URL params (shareable)",
+        "Debounced search (300ms)",
+        "Clear filters button",
+        "Results count displayed"
+      ]
+    },
+    {
+      "id": "COACH-013",
+      "title": "Coach Dashboard Home",
+      "description": "Create /dashboard page for coaches showing overview: profile status, profile views (placeholder), upcoming sessions (placeholder), quick actions (edit profile, view public profile).",
+      "priority": 13,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Dashboard at /dashboard requires authentication",
+        "Shows different content based on user role",
+        "Coach sees: profile status card, stats placeholders",
+        "Quick action: Edit Profile links to profile editor",
+        "Quick action: View Public Profile opens in new tab",
+        "Responsive layout with cards"
+      ]
+    },
+    {
+      "id": "COACH-014",
+      "title": "Coach Profile Editor",
+      "description": "Create /dashboard/profile page where coaches can edit their profile after initial onboarding. All fields editable. Auto-save or explicit save button. Profile completion indicator.",
+      "priority": 14,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Page at /dashboard/profile for editing",
+        "All onboarding fields are editable",
+        "Save button updates database",
+        "Success/error toast notifications",
+        "Profile completion percentage updates live",
+        "Publish/Unpublish toggle",
+        "Preview button opens public profile"
+      ]
+    },
+    {
+      "id": "COACH-015",
+      "title": "Landing Page",
+      "description": "Create marketing landing page at / with hero section, value props, how it works, featured coaches (placeholder), and CTA to sign up as coach or find a coach.",
+      "priority": 15,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Landing page at / with marketing content",
+        "Hero section with headline and CTAs",
+        "Value proposition section (3 benefits)",
+        "How it works section (3 steps)",
+        "Featured coaches section (placeholder or first 3)",
+        "CTA section for coaches to join",
+        "Footer with links",
+        "Fully responsive"
+      ]
+    }
+  ]
+}
