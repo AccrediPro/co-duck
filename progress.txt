@@ -373,3 +373,26 @@
   - Price filtering uses minimum session price (Math.min across sessionTypes array)
   - SQL sorting with JSONB: use raw sql template for complex JSONB aggregations
 ---
+
+## 2026-01-29 - COACH-013
+- What was implemented:
+  - Updated /dashboard page with role-based content rendering
+  - Coach Dashboard shows: profile status card (published/draft badge, completion % with progress bar)
+  - Stats placeholders: profile views (0, "Analytics coming soon"), upcoming sessions (0, "Booking coming soon")
+  - Quick actions: Edit Profile links to /dashboard/profile, View Public Profile opens /coaches/[slug] in new tab
+  - Coach without profile sees onboarding prompt with link to /onboarding/coach
+  - Client Dashboard shows: upcoming sessions placeholder, find a coach card, quick action to browse coaches
+  - Admin Dashboard shows: placeholder stats cards and "coming soon" notice
+  - User role badge displayed next to welcome message (Coach/Client/Admin)
+  - Responsive grid layout: 3 cols on lg, 2 cols on md, 1 col on mobile
+  - Fetches user role and coach profile from database using getUserWithProfile helper
+- Files changed:
+  - src/app/(dashboard)/dashboard/page.tsx - Complete rewrite with role-based dashboard views
+- **Learnings for future iterations:**
+  - Import coachProfiles.$inferSelect type for typing component props with profile data
+  - Use Button asChild with Link/a for styled navigation (shadcn pattern)
+  - a tag with target="_blank" needs rel="noopener noreferrer" for security
+  - Conditional rendering with {condition && <Component />} pattern for role-based UI
+  - Progress bar: use div with bg-secondary for track, nested div with bg-primary and dynamic width style
+  - lucide-react icons: CheckCircle for published, Clock for draft, AlertCircle for coming soon
+---

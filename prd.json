@@ -205,7 +205,7 @@
       "title": "Coach Dashboard Home",
       "description": "Create /dashboard page for coaches showing overview: profile status, profile views (placeholder), upcoming sessions (placeholder), quick actions (edit profile, view public profile).",
       "priority": 13,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "Dashboard at /dashboard requires authentication",
         "Shows different content based on user role",
