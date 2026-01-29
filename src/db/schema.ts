@@ -326,3 +326,37 @@ export const sessionNotes = pgTable(
 // Session note type exports
 export type SessionNote = typeof sessionNotes.$inferSelect;
 export type NewSessionNote = typeof sessionNotes.$inferInsert;
+
+// Action items table (tasks assigned by coach to client)
+export const actionItems = pgTable(
+  'action_items',
+  {
+    id: serial('id').primaryKey(),
+    coachId: text('coach_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    clientId: text('client_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    bookingId: integer('booking_id').references(() => bookings.id, { onDelete: 'set null' }), // Optional link to specific session
+    title: text('title').notNull(),
+    description: text('description'),
+    dueDate: date('due_date'),
+    isCompleted: boolean('is_completed').notNull().default(false),
+    completedAt: timestamp('completed_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
+  },
+  (table) => [
+    index('action_items_coach_id_idx').on(table.coachId),
+    index('action_items_client_id_idx').on(table.clientId),
+    index('action_items_is_completed_idx').on(table.isCompleted),
+  ]
+);
+
+// Action item type exports
+export type ActionItem = typeof actionItems.$inferSelect;
+export type NewActionItem = typeof actionItems.$inferInsert;

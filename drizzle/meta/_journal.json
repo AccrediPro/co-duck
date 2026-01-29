@@ -64,6 +64,13 @@
       "when": 1769725249156,
       "tag": "0008_cloudy_hitman",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1769725618244,
+      "tag": "0009_wealthy_mercury",
+      "breakpoints": true
     }
   ]
 }
