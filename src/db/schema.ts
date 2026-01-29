@@ -15,6 +15,15 @@ import {
 // Role enum for users
 export const userRoleEnum = pgEnum('user_role', ['admin', 'coach', 'client']);
 
+// Booking status enum
+export const bookingStatusEnum = pgEnum('booking_status', [
+  'pending',
+  'confirmed',
+  'completed',
+  'cancelled',
+  'no_show',
+]);
+
 // Users table
 export const users = pgTable('users', {
   id: text('id').primaryKey(), // Will use Clerk user ID
@@ -136,3 +145,48 @@ export const availabilityOverrides = pgTable(
 // Availability override type exports
 export type AvailabilityOverride = typeof availabilityOverrides.$inferSelect;
 export type NewAvailabilityOverride = typeof availabilityOverrides.$inferInsert;
+
+// Session type snapshot stored in booking JSONB (captures pricing at time of booking)
+export interface BookingSessionType {
+  name: string;
+  duration: number; // in minutes
+  price: number; // in cents
+}
+
+// Bookings table
+export const bookings = pgTable(
+  'bookings',
+  {
+    id: serial('id').primaryKey(),
+    coachId: text('coach_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    clientId: text('client_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    sessionType: jsonb('session_type').$type<BookingSessionType>().notNull(),
+    startTime: timestamp('start_time', { withTimezone: true }).notNull(),
+    endTime: timestamp('end_time', { withTimezone: true }).notNull(),
+    status: bookingStatusEnum('status').notNull().default('pending'),
+    clientNotes: text('client_notes'), // Notes from client when booking
+    coachNotes: text('coach_notes'), // Private notes from coach
+    cancelledBy: text('cancelled_by').references(() => users.id), // Who cancelled (if cancelled)
+    cancelledAt: timestamp('cancelled_at', { withTimezone: true }),
+    cancellationReason: text('cancellation_reason'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
+  },
+  (table) => [
+    index('bookings_coach_id_idx').on(table.coachId),
+    index('bookings_client_id_idx').on(table.clientId),
+    index('bookings_start_time_idx').on(table.startTime),
+    index('bookings_status_idx').on(table.status),
+  ]
+);
+
+// Booking type exports
+export type Booking = typeof bookings.$inferSelect;
+export type NewBooking = typeof bookings.$inferInsert;
