@@ -109,7 +109,7 @@
       "title": "Coach Onboarding Flow - Step 2: Bio & Specialties",
       "description": "Step 2 of onboarding collects: detailed bio (rich text or textarea), specialties selection from predefined list with ability to add custom ones.",
       "priority": 7,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "Bio textarea with character count (max 2000)",
         "Predefined specialties list as multi-select chips",

@@ -188,3 +188,29 @@
   - Profile photo uses URL input for now; file upload would need separate infrastructure
   - Calculate profile completion percentage based on filled fields (25% per step)
 ---
+
+## 2026-01-29 - COACH-007
+- What was implemented:
+  - Created Step 2 of coach onboarding at /onboarding/coach/step-2
+  - Bio textarea with character count display (max 2000 characters)
+  - Predefined specialties list (12 options) displayed as toggleable chip buttons
+  - Custom specialty input with Add button (supports Enter key)
+  - Minimum 1 specialty required validation
+  - Back button returns to Step 1 with data preserved (server loads existing profile)
+  - Server action saves bio and specialties to coach_profiles table
+  - Profile completion percentage updated (Step 1 + Step 2 = 50% max)
+  - Created placeholder Step 3 page for navigation flow
+- Files changed:
+  - src/lib/validators/coach-onboarding.ts - Added COACH_SPECIALTIES array and coachBioSpecialtiesSchema
+  - src/app/(dashboard)/onboarding/coach/actions/save-bio-specialties.ts - Server action for Step 2
+  - src/components/onboarding/bio-specialties-form.tsx - Client form component with chips UI
+  - src/components/onboarding/index.ts - Exported BioSpecialtiesForm
+  - src/app/(dashboard)/onboarding/coach/step-2/page.tsx - Updated page to use form with data loading
+  - src/app/(dashboard)/onboarding/coach/step-3/page.tsx - Placeholder for Step 3
+- **Learnings for future iterations:**
+  - Toggle chip pattern: use button with dynamic classes for selected/unselected states
+  - For multi-select with form.watch(), remember to call form.setValue() with { shouldValidate: true }
+  - Custom specialties stored alongside predefined ones in same array; filter using COACH_SPECIALTIES.includes()
+  - Redirect to previous step if profile doesn't exist (guards against direct URL access)
+  - Character count warning: use conditional color class when approaching limit (e.g., text-amber-600)
+---
