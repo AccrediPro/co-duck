@@ -556,3 +556,30 @@
   - Pass booking selection via URL params for stateless navigation to confirmation page
   - Public pages in (public) route group automatically get PublicHeader/PublicFooter layout
 ---
+
+## 2026-01-30 - COACH-020
+- What was implemented:
+  - Updated /coaches/[slug]/book/confirm page to receive booking data via URL search params
+  - Booking confirmation form shows: coach info, session type, date/time, duration, price
+  - Optional notes textarea for client (max 1000 characters)
+  - Auth check redirects unauthenticated users to sign-in with return URL
+  - Confirm Booking button creates booking record with 'confirmed' status via server action
+  - Success page after booking shows all booking details with reference number
+  - Add to Calendar button generates and downloads .ics file
+  - Link back to coach profile from success page
+  - Server action validates user exists, coach exists, prevents self-booking, validates times
+  - ICS file generation with proper VCALENDAR format including session details and notes
+- Files changed:
+  - src/app/(public)/coaches/[slug]/book/confirm/page.tsx - Updated confirmation page with auth check
+  - src/app/(public)/coaches/[slug]/book/confirm/actions.ts - Server actions: createBooking, generateIcsFile
+  - src/components/booking/booking-confirmation.tsx - Client component for confirmation/success flow
+  - src/components/booking/index.ts - Exported BookingConfirmation component
+- **Learnings for future iterations:**
+  - Pass booking params via URL searchParams for stateless confirmation page
+  - Use `await auth()` from @clerk/nextjs/server to check authentication on server
+  - Build return URL for redirect_url param so users return to same page after sign-in
+  - ICS file format: use CRLF (\r\n), DTSTAMP/DTSTART/DTEND in YYYYMMDDTHHMMSSZ format
+  - Blob download pattern: create Blob, create URL, create link, click, cleanup
+  - BookingSessionType differs from SessionType - no id field, just name/duration/price snapshot
+  - Prevent self-booking by comparing userId === coachId before creating booking
+---

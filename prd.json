@@ -170,7 +170,7 @@
       "title": "Booking Flow - Confirmation",
       "description": "Complete booking flow with confirmation step. Show summary of selected session, date, time, price. Add optional notes field. For now, create booking with 'confirmed' status (payment integration later). Send confirmation details.",
       "priority": 20,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "Confirmation step shows: coach name, session type, date, time, duration, price",
         "Optional notes textarea for client",
