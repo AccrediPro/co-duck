@@ -312,3 +312,31 @@
   - Clipboard API: `navigator.clipboard.writeText()` may fail in some browsers; always handle the error
   - Use `whitespace-pre-wrap` class to preserve bio formatting (newlines, paragraphs)
 ---
+
+## 2026-01-29 - COACH-011
+- What was implemented:
+  - Updated /coaches page to list all published coaches in a responsive grid
+  - Grid layout: 3 cols on desktop (lg), 2 cols on tablet (sm), 1 col on mobile
+  - CoachCard component showing: avatar photo, name, headline, specialties (max 3 with +N badge), starting price
+  - Click on card navigates to the coach profile page (/coaches/[slug])
+  - Pagination with 12 coaches per page, Previous/Next buttons and page number buttons
+  - Smart pagination with ellipsis for large page counts
+  - Loading skeleton using Suspense and CoachGridSkeleton component
+  - Empty state with icon and message when no coaches are found
+  - Results count displayed above the grid (e.g., "Showing 1-12 of 36 coaches")
+  - Pagination updates URL params (?page=2) for shareable/bookmarkable URLs
+- Files changed:
+  - src/app/(public)/coaches/page.tsx - Updated to fetch coaches with pagination using Suspense
+  - src/components/coaches/coach-card.tsx - New coach card component
+  - src/components/coaches/coach-card-skeleton.tsx - Loading skeleton components
+  - src/components/coaches/coaches-grid.tsx - Grid with pagination and empty state
+  - src/components/coaches/index.ts - Exported new components
+  - src/components/ui/skeleton.tsx - Added shadcn skeleton component
+- **Learnings for future iterations:**
+  - Use Suspense boundary with fallback for loading states in server components
+  - searchParams in Next.js 14+ page props is a Promise; must await it
+  - Use `sql<number>\`count(*)\`` from drizzle-orm for count queries
+  - Pagination URL params can be managed with URLSearchParams and router.push()
+  - Use line-clamp-2 Tailwind class to truncate text to 2 lines
+  - Export interface types alongside components for reusability
+---

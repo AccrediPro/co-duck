@@ -172,7 +172,7 @@
       "title": "Browse Coaches Page",
       "description": "Create /coaches page listing all published coaches in a grid. Each coach shows card with photo, name, headline, specialties preview, starting price. Include basic pagination.",
       "priority": 11,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "Page at /coaches lists published coaches",
         "Grid layout (3 cols desktop, 2 tablet, 1 mobile)",
