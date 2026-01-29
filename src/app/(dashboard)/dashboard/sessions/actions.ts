@@ -211,3 +211,155 @@ export async function cancelSession(
     return { success: false, error: 'Failed to cancel session' };
   }
 }
+
+// Get the count of past sessions between a coach and a specific client
+export async function getPastSessionsCountWithClient(
+  clientId: string
+): Promise<{ success: true; count: number } | { success: false; error: string }> {
+  const { userId } = await auth();
+
+  if (!userId) {
+    return { success: false, error: 'Not authenticated' };
+  }
+
+  try {
+    const countResult = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(bookings)
+      .where(
+        and(
+          eq(bookings.coachId, userId),
+          eq(bookings.clientId, clientId),
+          lt(bookings.startTime, new Date()),
+          or(
+            eq(bookings.status, 'completed'),
+            eq(bookings.status, 'confirmed'),
+            eq(bookings.status, 'pending')
+          )
+        )
+      );
+
+    return { success: true, count: countResult[0]?.count || 0 };
+  } catch {
+    return { success: false, error: 'Failed to get session count' };
+  }
+}
+
+// Save coach notes for a session
+export interface SaveCoachNotesResult {
+  success: boolean;
+  error?: string;
+}
+
+export async function saveCoachNotes(
+  sessionId: number,
+  notes: string
+): Promise<SaveCoachNotesResult> {
+  const { userId } = await auth();
+
+  if (!userId) {
+    return { success: false, error: 'Not authenticated' };
+  }
+
+  try {
+    // Verify the session belongs to this coach
+    const existingBooking = await db
+      .select()
+      .from(bookings)
+      .where(and(eq(bookings.id, sessionId), eq(bookings.coachId, userId)))
+      .limit(1);
+
+    if (existingBooking.length === 0) {
+      return { success: false, error: 'Session not found' };
+    }
+
+    // Update the coach notes
+    await db
+      .update(bookings)
+      .set({ coachNotes: notes || null })
+      .where(eq(bookings.id, sessionId));
+
+    return { success: true };
+  } catch {
+    return { success: false, error: 'Failed to save notes' };
+  }
+}
+
+// Generate ICS file content for coach's calendar download
+export async function generateCoachIcsFile(
+  bookingId: number
+): Promise<{ success: true; data: string } | { success: false; error: string }> {
+  const { userId } = await auth();
+
+  if (!userId) {
+    return { success: false, error: 'Not authenticated' };
+  }
+
+  try {
+    // Get the booking details (must belong to this coach)
+    const booking = await db
+      .select({
+        id: bookings.id,
+        coachId: bookings.coachId,
+        clientId: bookings.clientId,
+        sessionType: bookings.sessionType,
+        startTime: bookings.startTime,
+        endTime: bookings.endTime,
+        clientNotes: bookings.clientNotes,
+      })
+      .from(bookings)
+      .where(and(eq(bookings.id, bookingId), eq(bookings.coachId, userId)))
+      .limit(1);
+
+    if (booking.length === 0) {
+      return { success: false, error: 'Booking not found' };
+    }
+
+    const bookingData = booking[0];
+
+    // Get client info
+    const client = await db
+      .select({
+        name: users.name,
+        email: users.email,
+      })
+      .from(users)
+      .where(eq(users.id, bookingData.clientId))
+      .limit(1);
+
+    const clientName = client.length > 0 ? client[0].name || 'Client' : 'Client';
+
+    // Format dates for ICS (YYYYMMDDTHHMMSSZ)
+    const formatIcsDate = (date: Date) => {
+      return date
+        .toISOString()
+        .replace(/[-:]/g, '')
+        .replace(/\.\d{3}/, '');
+    };
+
+    const sessionType = bookingData.sessionType as BookingSessionType;
+
+    // Generate ICS content
+    const icsContent = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//Coaching Platform//Booking//EN',
+      'CALSCALE:GREGORIAN',
+      'METHOD:PUBLISH',
+      'BEGIN:VEVENT',
+      `UID:booking-${bookingData.id}@coachingplatform.com`,
+      `DTSTAMP:${formatIcsDate(new Date())}`,
+      `DTSTART:${formatIcsDate(bookingData.startTime)}`,
+      `DTEND:${formatIcsDate(bookingData.endTime)}`,
+      `SUMMARY:Coaching Session with ${clientName}`,
+      `DESCRIPTION:${sessionType.name} (${sessionType.duration} minutes)${bookingData.clientNotes ? '\\n\\nClient Notes: ' + bookingData.clientNotes.replace(/\n/g, '\\n') : ''}`,
+      'STATUS:CONFIRMED',
+      'END:VEVENT',
+      'END:VCALENDAR',
+    ].join('\r\n');
+
+    return { success: true, data: icsContent };
+  } catch {
+    return { success: false, error: 'Failed to generate calendar file' };
+  }
+}

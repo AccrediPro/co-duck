@@ -1,6 +1,6 @@
 import { auth } from '@clerk/nextjs/server';
 import { redirect, notFound } from 'next/navigation';
-import { eq, and, or } from 'drizzle-orm';
+import { eq, and, or, lt, sql } from 'drizzle-orm';
 import { format } from 'date-fns';
 import Link from 'next/link';
 import { db, bookings, users, coachProfiles } from '@/db';
@@ -17,8 +17,11 @@ import {
   DollarSign,
   FileText,
   ExternalLink,
+  History,
 } from 'lucide-react';
 import { SessionDetailActions } from './session-detail-actions';
+import { CoachNotesEditor } from './coach-notes-editor';
+import { CoachSessionActions } from './coach-session-actions';
 
 export const metadata = {
   title: 'Session Details | Coaching Platform',
@@ -84,6 +87,9 @@ export default async function SessionDetailPage({ params }: PageProps) {
     slug?: string;
   } | null = null;
 
+  // For coach view: count of past sessions with this client
+  let pastSessionsCount = 0;
+
   if (isCoachView) {
     // Coach viewing - get client info
     const clientData = await db
@@ -103,6 +109,24 @@ export default async function SessionDetailPage({ params }: PageProps) {
         email: clientData[0].email,
       };
     }
+
+    // Get count of past sessions with this client
+    const countResult = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(bookings)
+      .where(
+        and(
+          eq(bookings.coachId, userId),
+          eq(bookings.clientId, session.clientId),
+          lt(bookings.startTime, new Date()),
+          or(
+            eq(bookings.status, 'completed'),
+            eq(bookings.status, 'confirmed'),
+            eq(bookings.status, 'pending')
+          )
+        )
+      );
+    pastSessionsCount = countResult[0]?.count || 0;
   } else {
     // Client viewing - get coach info
     const coachData = await db
@@ -276,17 +300,9 @@ export default async function SessionDetailPage({ params }: PageProps) {
             </Card>
           )}
 
-          {/* Coach Notes Card - Only visible to coach */}
-          {isCoachView && session.coachNotes && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Your Notes</CardTitle>
-                <CardDescription>Private notes about this session</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="whitespace-pre-wrap text-muted-foreground">{session.coachNotes}</p>
-              </CardContent>
-            </Card>
+          {/* Editable Coach Notes - Only visible to coach */}
+          {isCoachView && (
+            <CoachNotesEditor sessionId={session.id} initialNotes={session.coachNotes} />
           )}
 
           {/* Cancellation Info */}
@@ -325,6 +341,19 @@ export default async function SessionDetailPage({ params }: PageProps) {
               </CardContent>
             </Card>
           )}
+
+          {/* Actions Card for Coach - Upcoming sessions only */}
+          {isCoachView && isUpcoming && session.status !== 'cancelled' && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Actions</CardTitle>
+                <CardDescription>Manage this session</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <CoachSessionActions sessionId={session.id} canCancel={canTakeAction} />
+              </CardContent>
+            </Card>
+          )}
         </div>
 
         {/* Sidebar - Other party info */}
@@ -353,6 +382,16 @@ export default async function SessionDetailPage({ params }: PageProps) {
                   </div>
                 )}
 
+                {/* Past sessions count for coach view */}
+                {isCoachView && (
+                  <div className="mt-3 flex items-center gap-1 text-sm text-muted-foreground">
+                    <History className="h-4 w-4" />
+                    {pastSessionsCount === 0
+                      ? 'First session with this client'
+                      : `${pastSessionsCount} past session${pastSessionsCount === 1 ? '' : 's'} together`}
+                  </div>
+                )}
+
                 {/* Link to coach profile for clients */}
                 {isClientView && otherParty?.slug && (
                   <Button variant="outline" size="sm" className="mt-4" asChild>
@@ -374,6 +413,22 @@ export default async function SessionDetailPage({ params }: PageProps) {
               </CardHeader>
               <CardContent className="space-y-2">
                 <SessionDetailActions sessionId={session.id} variant="sidebar" />
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Quick Actions Card for Coach */}
+          {isCoachView && isUpcoming && session.status !== 'cancelled' && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Quick Actions</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <CoachSessionActions
+                  sessionId={session.id}
+                  canCancel={canTakeAction}
+                  variant="sidebar"
+                />
               </CardContent>
             </Card>
           )}
