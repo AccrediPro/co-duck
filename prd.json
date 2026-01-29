@@ -186,7 +186,7 @@
       "title": "Coach Session Management",
       "description": "Create /dashboard/sessions page for coaches. Show upcoming sessions list with client info, date, time, session type. Show past sessions separately. Quick actions: view details, mark complete, cancel.",
       "priority": 21,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "Page at /dashboard/sessions",
         "Tabs: Upcoming, Past, Cancelled",

@@ -583,3 +583,38 @@
   - BookingSessionType differs from SessionType - no id field, just name/duration/price snapshot
   - Prevent self-booking by comparing userId === coachId before creating booking
 ---
+
+## 2026-01-30 - COACH-021
+- What was implemented:
+  - Created /dashboard/sessions page for coaches to manage their sessions
+  - Tabs component using shadcn/ui Tabs: Upcoming, Past, Cancelled
+  - SessionCard component showing: client name/avatar, date, time, session type, status badge
+  - View button links to /dashboard/sessions/[id] detail page
+  - Mark as Complete action for past sessions (confirmed/pending status)
+  - Cancel action with AlertDialog confirmation modal
+  - Empty states for each tab with helpful messages
+  - Pagination (10 per page) with smart page number display
+  - Session detail page showing full booking information, client info, notes
+  - Server actions: getCoachSessions, markSessionComplete, cancelSession
+  - Role-based access control: only coaches can view this page
+  - Toast notifications for success/error on actions
+- Files changed:
+  - src/app/(dashboard)/dashboard/sessions/page.tsx - Main sessions list page with auth checks
+  - src/app/(dashboard)/dashboard/sessions/actions.ts - Server actions for fetching/updating sessions
+  - src/app/(dashboard)/dashboard/sessions/[id]/page.tsx - Session detail page
+  - src/components/sessions/session-card.tsx - Reusable session card component
+  - src/components/sessions/sessions-list.tsx - Client component with tabs, pagination, actions
+  - src/components/sessions/index.ts - Component exports
+  - src/components/ui/tabs.tsx - shadcn Tabs component (added via npx shadcn@latest add tabs)
+  - src/components/ui/alert-dialog.tsx - shadcn AlertDialog component for confirmation modals
+  - package.json - Added @radix-ui/react-tabs, @radix-ui/react-alert-dialog dependencies
+- **Learnings for future iterations:**
+  - Use shadcn Tabs for tabbed interfaces: Tabs, TabsList, TabsTrigger, TabsContent pattern
+  - AlertDialog from shadcn is good for confirmation modals before destructive actions
+  - Session filtering by status: upcoming = future + (confirmed|pending), past = past + (completed|no_show|confirmed|pending), cancelled = cancelled
+  - Use `asc` for upcoming sessions (nearest first), `desc` for past/cancelled (most recent first)
+  - useTransition provides isPending state for disabling UI during async navigation
+  - Pass tab/page via URL searchParams for bookmarkable/shareable filtered views
+  - Session status badge colors: green for confirmed/completed, amber for pending, red for cancelled, gray for no_show
+  - Local state updates after mutations improve UX (optimistic UI pattern)
+---
