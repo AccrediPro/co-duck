@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { CalendarPlus, RefreshCw, Loader2 } from 'lucide-react';
 import { CancellationDialog } from '@/components/sessions/cancellation-dialog';
 import type { RefundEligibilityInfo } from '@/components/sessions/cancellation-dialog';
+import { MessageButton } from '@/components/messages';
 import {
   cancelClientSession,
   generateClientIcsFile,
@@ -16,6 +17,8 @@ import {
 
 interface SessionDetailActionsProps {
   sessionId: number;
+  coachId: string;
+  clientId: string;
   coachName?: string;
   sessionTime?: Date;
   variant?: 'default' | 'sidebar';
@@ -24,6 +27,8 @@ interface SessionDetailActionsProps {
 
 export function SessionDetailActions({
   sessionId,
+  coachId,
+  clientId,
   coachName = 'the coach',
   sessionTime,
   variant = 'default',
@@ -112,6 +117,14 @@ export function SessionDetailActions({
   if (variant === 'sidebar') {
     return (
       <>
+        <MessageButton
+          coachId={coachId}
+          clientId={clientId}
+          variant="outline"
+          size="sm"
+          className="w-full justify-start"
+          label="Message Coach"
+        />
         <Button
           variant="outline"
           size="sm"
@@ -151,6 +164,12 @@ export function SessionDetailActions({
 
   return (
     <div className="flex flex-wrap gap-3">
+      <MessageButton
+        coachId={coachId}
+        clientId={clientId}
+        variant="outline"
+        label="Message Coach"
+      />
       <Button variant="outline" onClick={handleAddToCalendar} disabled={isAddingToCalendar}>
         {isAddingToCalendar ? (
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />

@@ -12,6 +12,7 @@ import { SUPPORTED_CURRENCIES } from '@/lib/validators/coach-onboarding';
 import type { SessionType } from '@/db/schema';
 import { Calendar, Check, Clock, Copy, Globe, User } from 'lucide-react';
 import { AvailabilitySection } from './availability-section';
+import { MessageButton } from '@/components/messages';
 
 interface AvailabilityDisplayData {
   timezone: string | null;
@@ -33,6 +34,9 @@ interface CoachProfileDisplayProps {
   sessionTypes: SessionType[] | null;
   slug: string;
   availability?: AvailabilityDisplayData;
+  // For messaging - only show if user is logged in and not viewing their own profile
+  coachId?: string;
+  currentUserId?: string | null;
 }
 
 export function CoachProfileDisplay({
@@ -47,7 +51,11 @@ export function CoachProfileDisplay({
   sessionTypes,
   slug,
   availability,
+  coachId,
+  currentUserId,
 }: CoachProfileDisplayProps) {
+  // Show message button only if user is logged in and not viewing their own profile
+  const canMessage = currentUserId && coachId && currentUserId !== coachId;
   const { toast } = useToast();
   const [copied, setCopied] = useState(false);
 
@@ -128,6 +136,16 @@ export function CoachProfileDisplay({
                     Book Session
                   </Link>
                 </Button>
+                {canMessage && (
+                  <MessageButton
+                    coachId={coachId}
+                    clientId={currentUserId}
+                    variant="outline"
+                    size="lg"
+                    fullWidth
+                    label="Message"
+                  />
+                )}
                 <Button variant="outline" size="lg" onClick={handleShareProfile} className="w-full">
                   {copied ? (
                     <>
@@ -152,6 +170,15 @@ export function CoachProfileDisplay({
                   Book Session
                 </Link>
               </Button>
+              {canMessage && (
+                <MessageButton
+                  coachId={coachId}
+                  clientId={currentUserId}
+                  variant="outline"
+                  size="lg"
+                  label="Message"
+                />
+              )}
               <Button variant="outline" size="lg" onClick={handleShareProfile}>
                 {copied ? (
                   <>

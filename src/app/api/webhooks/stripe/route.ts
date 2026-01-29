@@ -3,6 +3,8 @@ import { stripe } from '@/lib/stripe';
 import { db, bookings, transactions } from '@/db';
 import { eq, and } from 'drizzle-orm';
 import type Stripe from 'stripe';
+import { createBookingSystemMessage } from '@/lib/conversations';
+import type { BookingSessionType } from '@/db/schema';
 
 // Helper to get STRIPE_WEBHOOK_SECRET
 function getWebhookSecret(): string {
@@ -180,6 +182,14 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
   });
 
   console.log(`Stripe webhook: Transaction created for booking ${bookingIdNum}`);
+
+  // Create system message in conversation for the booking
+  // Get session type from booking for the message
+  const sessionType = booking.sessionType as BookingSessionType;
+  createBookingSystemMessage(coachId, clientId, sessionType, booking.startTime).catch((error) => {
+    console.error('Stripe webhook: Error creating booking system message:', error);
+    // Don't fail the webhook if message creation fails
+  });
 }
 
 // Handle checkout.session.expired event

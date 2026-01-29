@@ -7,10 +7,13 @@ import { useToast } from '@/hooks/use-toast';
 import { CalendarPlus, Video, Loader2 } from 'lucide-react';
 import { CancellationDialog } from '@/components/sessions/cancellation-dialog';
 import type { RefundEligibilityInfo } from '@/components/sessions/cancellation-dialog';
+import { MessageButton } from '@/components/messages';
 import { generateCoachIcsFile, cancelSession, getRefundEligibility } from '../actions';
 
 interface CoachSessionActionsProps {
   sessionId: number;
+  coachId: string;
+  clientId: string;
   canCancel: boolean;
   clientName?: string;
   sessionTime?: Date;
@@ -20,6 +23,8 @@ interface CoachSessionActionsProps {
 
 export function CoachSessionActions({
   sessionId,
+  coachId,
+  clientId,
   canCancel,
   clientName = 'the client',
   sessionTime,
@@ -123,6 +128,14 @@ export function CoachSessionActions({
           <Video className="mr-2 h-4 w-4" />
           Join Session
         </Button>
+        <MessageButton
+          coachId={coachId}
+          clientId={clientId}
+          variant="outline"
+          size="sm"
+          className="w-full justify-start"
+          label="Message Client"
+        />
         <Button
           variant="outline"
           size="sm"
@@ -157,6 +170,12 @@ export function CoachSessionActions({
         <Video className="mr-2 h-4 w-4" />
         Join Session
       </Button>
+      <MessageButton
+        coachId={coachId}
+        clientId={clientId}
+        variant="outline"
+        label="Message Client"
+      />
       <Button variant="outline" onClick={handleAddToCalendar} disabled={isAddingToCalendar}>
         {isAddingToCalendar ? (
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />

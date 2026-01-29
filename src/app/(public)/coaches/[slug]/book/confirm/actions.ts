@@ -6,6 +6,7 @@ import { eq } from 'drizzle-orm';
 import { headers } from 'next/headers';
 import { stripe } from '@/lib/stripe';
 import type { BookingSessionType } from '@/db/schema';
+import { createBookingSystemMessage } from '@/lib/conversations';
 
 // Input for creating a booking
 export interface CreateBookingInput {
@@ -107,6 +108,15 @@ export async function createBooking(
     if (newBooking.length === 0) {
       return { success: false, error: 'Failed to create booking' };
     }
+
+    // Create system message in conversation for the booking
+    // This runs asynchronously and doesn't block the booking flow
+    createBookingSystemMessage(input.coachId, userId, input.sessionType, startTime).catch(
+      (error) => {
+        console.error('Error creating booking system message:', error);
+        // Don't fail the booking if message creation fails
+      }
+    );
 
     return {
       success: true,

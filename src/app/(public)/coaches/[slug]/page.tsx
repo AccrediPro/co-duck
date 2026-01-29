@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { eq, and } from 'drizzle-orm';
+import { auth } from '@clerk/nextjs/server';
 import { db, users, coachProfiles } from '@/db';
 import { CoachProfileDisplay } from '@/components/coaches/coach-profile-display';
 import { getCoachAvailabilityForProfile } from './availability-actions';
@@ -76,6 +77,9 @@ export default async function CoachProfilePage({ params }: PageProps) {
     notFound();
   }
 
+  // Get current user ID for messaging (optional - only if logged in)
+  const { userId } = await auth();
+
   // Fetch availability data for display
   const availability = await getCoachAvailabilityForProfile(coach.userId);
 
@@ -93,6 +97,8 @@ export default async function CoachProfilePage({ params }: PageProps) {
         sessionTypes={coach.sessionTypes}
         slug={coach.slug}
         availability={availability}
+        coachId={coach.userId}
+        currentUserId={userId}
       />
     </div>
   );

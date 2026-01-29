@@ -383,6 +383,8 @@ export default async function SessionDetailPage({ params }: PageProps) {
               <CardContent>
                 <SessionDetailActions
                   sessionId={session.id}
+                  coachId={session.coachId}
+                  clientId={session.clientId}
                   coachName={otherParty?.name || 'the coach'}
                   sessionTime={session.startTime}
                   hasPaidTransaction={paymentStatus === 'paid'}
@@ -401,6 +403,8 @@ export default async function SessionDetailPage({ params }: PageProps) {
               <CardContent>
                 <CoachSessionActions
                   sessionId={session.id}
+                  coachId={session.coachId}
+                  clientId={session.clientId}
                   canCancel={canTakeAction}
                   clientName={otherParty?.name || 'the client'}
                   sessionTime={session.startTime}
@@ -469,6 +473,8 @@ export default async function SessionDetailPage({ params }: PageProps) {
               <CardContent className="space-y-2">
                 <SessionDetailActions
                   sessionId={session.id}
+                  coachId={session.coachId}
+                  clientId={session.clientId}
                   coachName={otherParty?.name || 'the coach'}
                   sessionTime={session.startTime}
                   variant="sidebar"
@@ -487,6 +493,8 @@ export default async function SessionDetailPage({ params }: PageProps) {
               <CardContent className="space-y-2">
                 <CoachSessionActions
                   sessionId={session.id}
+                  coachId={session.coachId}
+                  clientId={session.clientId}
                   canCancel={canTakeAction}
                   clientName={otherParty?.name || 'the client'}
                   sessionTime={session.startTime}

@@ -4,6 +4,7 @@ import { db, bookings, users, coachProfiles, transactions } from '@/db';
 import { eq } from 'drizzle-orm';
 import { stripe } from '@/lib/stripe';
 import type { BookingSessionType } from '@/db/schema';
+import { createBookingSystemMessage } from '@/lib/conversations';
 
 // Booking data for success page
 export interface BookingSuccessData {
@@ -113,6 +114,18 @@ export async function getBookingFromCheckoutSession(
           stripePaymentIntentId: paymentIntentId,
           stripeCheckoutSessionId: sessionId,
           status: 'succeeded',
+        });
+
+        // Create system message in conversation for the booking
+        // This runs asynchronously and doesn't block the booking flow
+        createBookingSystemMessage(
+          booking.coachId,
+          booking.clientId,
+          sessionType,
+          booking.startTime
+        ).catch((error) => {
+          console.error('Error creating booking system message:', error);
+          // Don't fail the booking if message creation fails
         });
       }
 
