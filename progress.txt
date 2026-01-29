@@ -1315,3 +1315,49 @@
   - Following same patterns: serial PK, nullable FK for optional relationships, date type for due_date (not timestamp)
   - Three indexes added: coach_id, client_id, is_completed - supports filtering by owner and completion status
 ---
+
+## 2026-01-30 - COACH-046
+- What was implemented:
+  - Created server actions for action items management in src/app/(dashboard)/dashboard/action-items/actions.ts:
+    - createActionItem(data) - creates new action item with title, description (optional), due date (optional), links to client and optionally to a booking/session
+    - getClientActionItems(clientId) - fetches all action items for a specific client (coach view)
+    - markActionItemComplete(actionItemId, completed) - toggles completion status, can be called by coach or client
+    - deleteActionItem(actionItemId) - removes action item (coach only)
+    - getSessionActionItems(bookingId) - fetches action items linked to a specific session
+  - Added ActionItemWithStatus interface that computes status (pending/overdue/completed) based on isCompleted and dueDate
+  - Created AddActionItemDialog component (src/components/action-items/add-action-item-dialog.tsx):
+    - Modal with form using react-hook-form + zod validation
+    - Title (required), description (optional), due date (optional) fields
+    - Pre-fills client_id and booking_id from context
+    - Toast notifications on success/error
+  - Created ActionItemsList component (src/components/action-items/action-items-list.tsx):
+    - Displays action items with status indicators: blue (pending), red (overdue), green (completed)
+    - Toggle complete/incomplete with checkbox button
+    - Delete button with confirmation via toast
+    - Compact mode for sidebar usage
+    - Loading states during actions
+  - Added "Add Action Item" button to session detail page (coach view) via CoachSessionActions component
+  - Updated ChatContextPanel to show action items list:
+    - Added ActionItemForContext interface to messages actions
+    - Updated getClientContext to fetch action items for the client (limit 10, ordered by completion status and date)
+    - Added Action Items section with add button and list display
+  - Added shadcn tooltip component for action button tooltips
+- Files changed:
+  - src/app/(dashboard)/dashboard/action-items/actions.ts - New file with 5 server actions
+  - src/components/action-items/add-action-item-dialog.tsx - Dialog component for adding items
+  - src/components/action-items/action-items-list.tsx - List component with status indicators
+  - src/components/action-items/index.ts - Component exports
+  - src/app/(dashboard)/dashboard/sessions/[id]/coach-session-actions.tsx - Added AddActionItemDialog button
+  - src/app/(dashboard)/dashboard/messages/[id]/actions.ts - Added actionItems to ClientContext interface and query
+  - src/components/messages/chat-context-panel.tsx - Added Action Items section with list and add button
+  - src/components/ui/tooltip.tsx - New shadcn tooltip component
+  - package.json - Added @radix-ui/react-tooltip dependency
+- **Learnings for future iterations:**
+  - Action items server actions follow same pattern as other features: auth check, ownership verification, try/catch with error returns
+  - Use revalidatePath after mutations to refresh affected pages (sessions, messages, action-items)
+  - Status computation helper is useful for UI display - separate from DB storage (only store isCompleted boolean)
+  - Overdue status calculated at render time by comparing dueDate to current date (set to end of day for comparison)
+  - ClientContext in messages can be extended with additional data - just add to interface and query in getClientContext
+  - Compact prop on list components helps fit in sidebars/panels with limited space
+  - TooltipProvider wraps individual tooltips - required by shadcn/radix tooltip pattern
+---

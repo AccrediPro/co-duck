@@ -583,7 +583,7 @@
       "title": "Coach Action Items Management",
       "description": "Allow coaches to create and manage action items for clients. Add from session detail. List in context panel. Mark complete, edit, delete.",
       "priority": 46,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "Add Action Item button in session detail",
         "Modal with title, description, due date fields",
