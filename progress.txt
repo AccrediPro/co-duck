@@ -426,3 +426,29 @@
   - Monetary values stored in cents in DB; convert to/from dollars in form layer
   - Server actions can update multiple tables (users + coachProfiles) in sequence
 ---
+
+## 2026-01-29 - COACH-015
+- What was implemented:
+  - Created comprehensive marketing landing page at / with modern design
+  - Hero section with gradient background, badge, headline ("Find Your Perfect Coach") with gradient text, and two CTAs (Find a Coach, Become a Coach)
+  - Value proposition section with 3 benefits displayed as cards with icons (Expert Coaches, Flexible Scheduling, Secure & Private)
+  - How it works section with 3 numbered steps (Browse Coaches, Book a Session, Achieve Your Goals) with connector lines on desktop
+  - Featured coaches section that fetches first 3 published coaches from DB, or shows placeholder cards if none exist
+  - Coach cards show avatar, name, headline, specialties (max 2), and starting price
+  - CTA section for coaches with gradient background, benefits checklist, and two action buttons
+  - Final CTA section with "Ready to Transform Your Life?" headline
+  - Fully responsive design with mobile-first approach
+  - Uses existing components (Card, Badge, Avatar, Button) for consistency
+  - Server-side data fetching for featured coaches with try/catch for error handling
+- Files changed:
+  - src/app/(public)/page.tsx - Complete rewrite with comprehensive marketing sections
+- **Learnings for future iterations:**
+  - Use gradient backgrounds with bg-gradient-to-br for visual appeal (from-primary/5 via-background to-primary/10)
+  - Use bg-clip-text text-transparent with gradients for gradient text effects
+  - Decorative elements with blur-3xl create nice background effects
+  - For featured coaches, use try/catch to gracefully handle DB errors and show placeholders
+  - Reuse helper functions (formatPrice, getInitials) from existing components rather than duplicating
+  - lucide-react icons work well for value prop sections (Users, Calendar, Shield, etc.)
+  - Numbered step indicators with connecting lines enhance visual flow
+  - Coach benefits checklist with CheckCircle icons creates compelling conversion section
+---

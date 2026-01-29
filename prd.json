@@ -236,7 +236,7 @@
       "title": "Landing Page",
       "description": "Create marketing landing page at / with hero section, value props, how it works, featured coaches (placeholder), and CTA to sign up as coach or find a coach.",
       "priority": 15,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "Landing page at / with marketing content",
         "Hero section with headline and CTAs",
