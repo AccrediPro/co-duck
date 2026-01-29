@@ -423,6 +423,116 @@
         "Refund amount shown in cancellation confirmation",
         "Coach payout adjusted accordingly"
       ]
+    },
+    {
+      "id": "COACH-036",
+      "title": "Messages Database Schema",
+      "description": "Create database schema for messaging. conversations table: id, coach_id, client_id, last_message_at, created_at. messages table: id, conversation_id, sender_id, content, message_type (text/system), is_read, created_at. Add indexes.",
+      "priority": 36,
+      "passes": true,
+      "acceptanceCriteria": [
+        "conversations table with coach_id, client_id, last_message_at",
+        "Unique constraint on coach_id + client_id pair",
+        "messages table with conversation_id, sender_id, content",
+        "message_type enum: text, system (for automated messages)",
+        "is_read boolean for read receipts",
+        "Indexes on conversation_id, sender_id, created_at",
+        "Migration runs successfully"
+      ]
+    },
+    {
+      "id": "COACH-037",
+      "title": "Conversations List Page",
+      "description": "Create /dashboard/messages page showing list of conversations. For coaches: show client conversations. For clients: show coach conversations. Display last message preview, timestamp, unread indicator.",
+      "priority": 37,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Page at /dashboard/messages",
+        "List of conversations sorted by last_message_at desc",
+        "Each row: other person's avatar/name, last message preview (truncated), timestamp",
+        "Unread indicator (dot or badge) for conversations with unread messages",
+        "Click conversation opens chat view",
+        "Empty state if no conversations",
+        "Search conversations by name"
+      ]
+    },
+    {
+      "id": "COACH-038",
+      "title": "Chat View Component",
+      "description": "Create chat UI at /dashboard/messages/[conversationId]. Show message history with sender bubbles (left/right alignment). Message input at bottom. Auto-scroll to latest. Load older messages on scroll up.",
+      "priority": 38,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Page at /dashboard/messages/[conversationId]",
+        "Header shows other person's name/avatar",
+        "Messages displayed with sender alignment (own right, other left)",
+        "Message bubbles with timestamp",
+        "Text input with send button",
+        "Send on Enter (Shift+Enter for newline)",
+        "Auto-scroll to bottom on new message",
+        "Load older messages pagination (infinite scroll up)"
+      ]
+    },
+    {
+      "id": "COACH-039",
+      "title": "Send and Receive Messages",
+      "description": "Implement message sending and receiving. Server action to send message. Mark messages as read when conversation opened. Poll for new messages every few seconds (real-time upgrade later).",
+      "priority": 39,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Server action sendMessage creates message record",
+        "Message appears immediately in sender's view (optimistic)",
+        "Poll for new messages every 3-5 seconds",
+        "New messages appear without page refresh",
+        "Opening conversation marks unread messages as read",
+        "Conversation last_message_at updates on new message",
+        "Handle empty message validation"
+      ]
+    },
+    {
+      "id": "COACH-040",
+      "title": "Start Conversation from Booking",
+      "description": "Add 'Message' button on session detail and coach profile. Create conversation if doesn't exist. Redirect to chat. System message on booking confirmation.",
+      "priority": 40,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Message button on session detail page",
+        "Message button on coach profile page",
+        "Creates conversation if none exists between users",
+        "Redirects to /dashboard/messages/[id]",
+        "Booking confirmation creates system message in conversation",
+        "Handles case where conversation already exists"
+      ]
+    },
+    {
+      "id": "COACH-041",
+      "title": "Messages Navigation and Unread Count",
+      "description": "Add Messages link to dashboard navigation. Show unread count badge. Update badge when messages arrive.",
+      "priority": 41,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Messages link in dashboard sidebar with MessageSquare icon",
+        "Unread count badge shows total unread messages",
+        "Badge updates on page navigation",
+        "Badge hidden when count is 0",
+        "Works for both coach and client roles"
+      ]
+    },
+    {
+      "id": "COACH-042",
+      "title": "Chat Context Panel",
+      "description": "Add context panel to chat view for coaches. Show client info: name, past sessions count, upcoming sessions, quick links. Collapsible on mobile.",
+      "priority": 42,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Side panel in chat view (coach only)",
+        "Shows client profile info",
+        "Past sessions count with this client",
+        "Upcoming sessions list (next 3)",
+        "Quick link to book session for client",
+        "Quick link to client's session history",
+        "Collapsible/hidden on mobile"
+      ]
     }
   ]
 }

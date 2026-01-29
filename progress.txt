@@ -1034,3 +1034,26 @@
   - Cache refund info per session ID to avoid repeated API calls
   - Pass refund result in cancel action response for toast message display
 ---
+
+## 2026-01-30 - COACH-036
+- What was implemented:
+  - Created message_type enum with 'text' and 'system' values
+  - Created conversations table with: id (serial PK), coach_id (FK to users), client_id (FK to users), last_message_at (timestamp, nullable), created_at
+  - Added unique constraint on (coach_id, client_id) pair to ensure one conversation per coach-client relationship
+  - Created messages table with: id (serial PK), conversation_id (FK to conversations), sender_id (FK to users), content (text), message_type (enum), is_read (boolean, default false), created_at
+  - Foreign key relationships with CASCADE delete for data integrity
+  - Added indexes: conversations (coach_id, client_id, last_message_at), messages (conversation_id, sender_id, created_at)
+  - Generated migration 0007_sour_living_lightning.sql
+  - Exported Conversation, NewConversation, Message, NewMessage TypeScript types
+- Files changed:
+  - src/db/schema.ts - Added messageTypeEnum, conversations table, messages table, and type exports
+  - drizzle/0007_sour_living_lightning.sql - Migration file
+  - drizzle/meta/_journal.json - Updated migration journal
+  - drizzle/meta/0007_snapshot.json - Schema snapshot
+- **Learnings for future iterations:**
+  - Use `unique()` import from drizzle-orm/pg-core for composite unique constraints
+  - Composite unique constraint syntax: `unique('constraint_name').on(table.col1, table.col2)`
+  - Keep conversations table lightweight (no updatedAt) - use last_message_at for sorting
+  - Messages table uses CASCADE delete on conversation_id so deleting a conversation removes all messages
+  - message_type enum with 'text' and 'system' supports both user messages and automated system messages (e.g., booking confirmations)
+---
