@@ -778,3 +778,25 @@
   - hasAvailability flag distinguishes between "no slots available right now" vs "coach never set up availability"
   - formatTimeShort() helper for compact time display (9am, 10:30am) in weekly summary
 ---
+
+## 2026-01-30 - COACH-028
+- What was implemented:
+  - Installed stripe package (v20.3.0)
+  - Created src/lib/stripe.ts with Stripe client configuration
+  - Server-side Stripe client exported as `stripe`
+  - `getStripePublishableKey()` function for client-side key access
+  - Error handling that throws descriptive errors when STRIPE_SECRET_KEY or NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY are missing
+  - Links to Stripe Dashboard in error messages for easy key retrieval
+  - Updated .env.example with Stripe environment variables: STRIPE_SECRET_KEY, NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY, STRIPE_WEBHOOK_SECRET
+- Files changed:
+  - package.json - Added stripe dependency
+  - package-lock.json - Updated lockfile
+  - src/lib/stripe.ts - New Stripe client module
+  - .env.example - Added Stripe environment variable documentation
+- **Learnings for future iterations:**
+  - Stripe SDK apiVersion must match installed package version; check node_modules/stripe/types/apiVersion.d.ts for correct version
+  - Current Stripe API version is '2026-01-28.clover'
+  - Use typescript: true option in Stripe config for better type inference
+  - NEXT_PUBLIC_ prefix makes environment variables available in client-side code
+  - getStripePublishableKey() helper validates the key exists before returning, avoiding runtime errors in client components
+---

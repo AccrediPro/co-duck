@@ -295,6 +295,134 @@
         "Book Session button prominent",
         "Handles coach with no availability set"
       ]
+    },
+    {
+      "id": "COACH-028",
+      "title": "Stripe Integration Setup",
+      "description": "Install and configure Stripe SDK. Create lib/stripe.ts with Stripe client initialization. Add STRIPE_SECRET_KEY and STRIPE_PUBLISHABLE_KEY to env. Create basic API route structure for Stripe operations.",
+      "priority": 28,
+      "passes": true,
+      "acceptanceCriteria": [
+        "stripe package installed",
+        "lib/stripe.ts exports configured Stripe client",
+        "Environment variables documented in .env.example",
+        "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY available for client",
+        "Basic error handling for missing keys"
+      ]
+    },
+    {
+      "id": "COACH-029",
+      "title": "Coach Stripe Connect Onboarding",
+      "description": "Create Stripe Connect Express account flow for coaches. Add stripe_account_id to coach_profiles. Create /dashboard/payments page showing onboarding status. Generate Connect onboarding link and handle return/refresh URLs.",
+      "priority": 29,
+      "passes": false,
+      "acceptanceCriteria": [
+        "stripe_account_id column added to coach_profiles",
+        "stripe_onboarding_complete boolean added",
+        "/dashboard/payments page for coaches",
+        "Start Onboarding button creates Stripe Connect Express account",
+        "Redirects to Stripe onboarding flow",
+        "Return URL handles successful onboarding",
+        "Refresh URL regenerates onboarding link",
+        "Shows onboarding status (pending, complete)"
+      ]
+    },
+    {
+      "id": "COACH-030",
+      "title": "Transactions Database Schema",
+      "description": "Create transactions table: id, booking_id (FK), coach_id, client_id, amount_cents, currency, platform_fee_cents, coach_payout_cents, stripe_payment_intent_id, stripe_transfer_id, status (pending/succeeded/failed/refunded), created_at.",
+      "priority": 30,
+      "passes": false,
+      "acceptanceCriteria": [
+        "transactions table created",
+        "Foreign key to bookings table",
+        "Amount stored in cents (integer)",
+        "Platform fee calculated (e.g., 10%)",
+        "Coach payout = amount - platform_fee",
+        "Stripe IDs stored for reference",
+        "Status enum for transaction states",
+        "Migration runs successfully"
+      ]
+    },
+    {
+      "id": "COACH-031",
+      "title": "Checkout Flow with Stripe",
+      "description": "Integrate Stripe Checkout into booking confirmation. Create Checkout Session with coach's Connect account as destination. Handle booking creation after successful payment. Update booking flow to require payment for paid sessions.",
+      "priority": 31,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Booking confirmation shows Pay Now button for paid sessions",
+        "Creates Stripe Checkout Session with session details",
+        "Uses coach's Stripe Connect account for destination",
+        "Platform fee applied via application_fee_amount",
+        "Success URL returns to booking success page",
+        "Cancel URL returns to booking page",
+        "Booking created with status 'pending' until payment",
+        "Free sessions skip payment (existing flow)"
+      ]
+    },
+    {
+      "id": "COACH-032",
+      "title": "Stripe Webhook Handler",
+      "description": "Create /api/webhooks/stripe endpoint. Handle checkout.session.completed to confirm booking and create transaction. Handle payment_intent.failed. Verify webhook signatures.",
+      "priority": 32,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Webhook endpoint at /api/webhooks/stripe",
+        "Verifies Stripe webhook signature",
+        "Handles checkout.session.completed event",
+        "Updates booking status to confirmed on success",
+        "Creates transaction record",
+        "Handles payment failures gracefully",
+        "Returns 200 for processed events",
+        "Logs errors for debugging"
+      ]
+    },
+    {
+      "id": "COACH-033",
+      "title": "Coach Earnings Dashboard",
+      "description": "Create earnings section on /dashboard/payments. Show total earnings, pending payouts, completed payouts. List recent transactions with details. Link to Stripe Express dashboard for full details.",
+      "priority": 33,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Earnings overview cards: total, pending, paid out",
+        "Recent transactions list with date, client, amount, status",
+        "Filter by date range",
+        "Link to Stripe Express Dashboard",
+        "Shows message if Stripe not connected",
+        "Handles coaches with no transactions"
+      ]
+    },
+    {
+      "id": "COACH-034",
+      "title": "Payment Status in Booking Flow",
+      "description": "Update booking UI to show payment status. Display payment required badge on unpaid bookings. Show payment confirmation on completed payments. Handle payment failures with retry option.",
+      "priority": 34,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Booking cards show payment status badge",
+        "Unpaid bookings show 'Payment Required' with Pay Now button",
+        "Paid bookings show 'Paid' badge",
+        "Session detail shows transaction info",
+        "Failed payments show retry option",
+        "Receipt link for completed payments"
+      ]
+    },
+    {
+      "id": "COACH-035",
+      "title": "Refund Flow",
+      "description": "Implement refund functionality for cancelled sessions. Calculate refund based on cancellation policy. Process refund via Stripe. Update transaction status. Show refund status to both parties.",
+      "priority": 35,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Cancellation triggers refund evaluation",
+        "Full refund if cancelled > 24 hours before",
+        "Partial/no refund within 24 hours (configurable)",
+        "Refund processed via Stripe Refunds API",
+        "Transaction status updated to 'refunded'",
+        "Refund amount shown in cancellation confirmation",
+        "Coach payout adjusted accordingly"
+      ]
     }
   ]
 }
