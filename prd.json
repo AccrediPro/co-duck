@@ -461,7 +461,7 @@
       "title": "Chat View Component",
       "description": "Create chat UI at /dashboard/messages/[conversationId]. Show message history with sender bubbles (left/right alignment). Message input at bottom. Auto-scroll to latest. Load older messages on scroll up.",
       "priority": 38,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "Page at /dashboard/messages/[conversationId]",
         "Header shows other person's name/avatar",

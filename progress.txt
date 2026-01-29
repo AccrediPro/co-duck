@@ -1088,3 +1088,36 @@
   - For role-based queries, check if userId === coachId to determine isCoach boolean
   - Blue dot indicator positioned with absolute -right-0.5 -top-0.5 on avatar container
 ---
+
+## 2026-01-30 - COACH-038
+- What was implemented:
+  - Updated /dashboard/messages/[id] page from placeholder to full chat view
+  - Server actions: getConversationDetails, getMessages (paginated, newest first), markMessagesAsRead
+  - ChatView component with header (back button, avatar, name), messages area, and input
+  - MessageBubble component with alignment (own right blue, other left gray)
+  - System messages centered with different styling (muted background)
+  - Timestamps under each message (relative formatting: "Just now", "Xm ago", etc.)
+  - MessageInput component with auto-growing textarea (max 150px height)
+  - Send on Enter, Shift+Enter for new line
+  - Auto-scroll to bottom on initial load using ref and useEffect
+  - Initial load: last 50 messages
+  - Load more pagination via "Load older messages" button and scroll detection
+  - Mark messages as read when conversation is opened
+  - Temporary optimistic message sending (actual sending in COACH-039)
+- Files changed:
+  - src/app/(dashboard)/dashboard/messages/[id]/page.tsx - Updated to use ChatView component
+  - src/app/(dashboard)/dashboard/messages/[id]/actions.ts - New server actions for chat
+  - src/components/messages/chat-view.tsx - Main chat view component
+  - src/components/messages/message-bubble.tsx - Message bubble with styling
+  - src/components/messages/message-input.tsx - Growing textarea input
+  - src/components/messages/index.ts - Exported new components
+- **Learnings for future iterations:**
+  - Use Array.from(new Set(...)) instead of [...new Set(...)] to avoid TypeScript downlevelIteration errors
+  - For pagination with "load more at top", store previousScrollHeight and restore scroll position after prepending messages
+  - useCallback with all dependencies to avoid React hooks lint warnings; make loadMoreMessages a useCallback
+  - Message bubble alignment: use justify-end for own messages, justify-start for others, max-w-[70%] for bubbles
+  - Auto-growing textarea pattern: use ref, reset height to 'auto', then set to Math.min(scrollHeight, maxHeight)
+  - For system messages (messageType === 'system'), use centered styling with muted background
+  - MessageWithSender interface includes isOwn boolean to simplify rendering logic
+  - Mark messages as read in useEffect on conversation.id change
+---
