@@ -340,3 +340,36 @@
   - Use line-clamp-2 Tailwind class to truncate text to 2 lines
   - Export interface types alongside components for reusability
 ---
+
+## 2026-01-29 - COACH-012
+- What was implemented:
+  - Search input with 300ms debounce (useEffect with setTimeout cleanup)
+  - Search queries name, headline, and bio using ilike with wildcard pattern
+  - Multi-select specialty filter using Popover + Checkbox components
+  - Price range filter with min/max inputs (filters by minimum session price)
+  - Sort dropdown with 3 options: newest, price low-high, price high-low
+  - All filters sync to URL searchParams for shareable/bookmarkable URLs
+  - Clear filters button resets all filters and navigates to base /coaches URL
+  - Results count displayed in filter component header
+  - useTransition for pending state during filter updates
+  - Server-side filtering for search; client-side filtering for specialties and price (JSONB complexity)
+- Files changed:
+  - src/components/coaches/coach-search-filters.tsx - New client component for search/filter UI
+  - src/app/(public)/coaches/page.tsx - Updated to handle filter params and pass to getCoaches
+  - src/components/coaches/coaches-grid.tsx - Added optional showResultsCount prop
+  - src/components/coaches/index.ts - Exported CoachSearchFilters and SortOption
+  - src/components/ui/popover.tsx - Added shadcn popover component
+  - src/components/ui/checkbox.tsx - Added shadcn checkbox component
+  - src/components/ui/command.tsx - Added shadcn command component
+  - src/components/ui/dialog.tsx - Added shadcn dialog component
+  - package.json - Added @radix-ui/react-checkbox and cmdk dependencies
+- **Learnings for future iterations:**
+  - Drizzle JSONB filtering is complex; consider application-layer filtering for JSONB arrays
+  - Use `ilike` from drizzle-orm for case-insensitive pattern matching
+  - useTransition provides isPending state for async URL navigation without blocking UI
+  - debounce pattern: useEffect with setTimeout and cleanup return
+  - URL params for filters make pages shareable; use URLSearchParams.toString() + router.push()
+  - Specialty filter stored as comma-separated string in URL: `?specialties=Career,Life`
+  - Price filtering uses minimum session price (Math.min across sessionTypes array)
+  - SQL sorting with JSONB: use raw sql template for complex JSONB aggregations
+---

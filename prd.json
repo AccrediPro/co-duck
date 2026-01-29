@@ -188,7 +188,7 @@
       "title": "Coach Search and Filters",
       "description": "Add search bar and filters to /coaches page. Search by name, headline, bio. Filter by specialty, price range. Sort by: newest, price low-high, price high-low.",
       "priority": 12,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "Search input filters coaches by name/headline/bio",
         "Specialty filter as multi-select dropdown",
