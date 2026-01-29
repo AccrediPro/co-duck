@@ -78,7 +78,7 @@
       "title": "Coach Profile Database Schema",
       "description": "Create coach_profiles table with fields: user_id (FK), slug, headline, bio, specialties (jsonb), hourly_rate, currency, timezone, video_intro_url, is_published, profile_completion_percentage. Add indexes for search.",
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "coach_profiles table is created with all fields",
         "Foreign key relationship to users table",

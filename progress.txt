@@ -130,3 +130,23 @@
   - Build errors for missing env vars (DATABASE_URL, Clerk keys) are pre-existing and require real env setup
   - lucide-react provides icons that match shadcn/ui design well
 ---
+
+## 2026-01-29 - COACH-005
+- What was implemented:
+  - Created coach_profiles table with all required fields: user_id (FK to users), slug (unique), headline, bio, specialties (jsonb), hourly_rate (integer stored in cents), currency, timezone, video_intro_url, is_published, profile_completion_percentage
+  - Added foreign key relationship to users table with CASCADE delete
+  - Created indexes for slug and is_published columns for efficient querying
+  - Generated migration file (0001_groovy_cargill.sql)
+  - Exported CoachProfile and NewCoachProfile types using $inferSelect and $inferInsert
+- Files changed:
+  - src/db/schema.ts - Added coachProfiles table definition and type exports
+  - drizzle/0001_groovy_cargill.sql - Migration to create coach_profiles table
+  - drizzle/meta/_journal.json - Updated migration journal
+  - drizzle/meta/0001_snapshot.json - Schema snapshot for migration
+- **Learnings for future iterations:**
+  - Store monetary values (hourly_rate) as integers in cents to avoid floating point issues
+  - Use `.$type<string[]>()` with jsonb for type-safe JSONB array columns in Drizzle
+  - Foreign key references use callback syntax: `.references(() => users.id, { onDelete: 'cascade' })`
+  - Drizzle v2 uses array syntax for table indexes: `(table) => [index(...), index(...)]`
+  - Unique constraint on slug is automatic via `.unique()`, index is separate for query optimization
+---
