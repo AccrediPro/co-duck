@@ -332,7 +332,7 @@
       "title": "Transactions Database Schema",
       "description": "Create transactions table: id, booking_id (FK), coach_id, client_id, amount_cents, currency, platform_fee_cents, coach_payout_cents, stripe_payment_intent_id, stripe_transfer_id, status (pending/succeeded/failed/refunded), created_at.",
       "priority": 30,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "transactions table created",
         "Foreign key to bookings table",
@@ -349,7 +349,7 @@
       "title": "Checkout Flow with Stripe",
       "description": "Integrate Stripe Checkout into booking confirmation. Create Checkout Session with coach's Connect account as destination. Handle booking creation after successful payment. Update booking flow to require payment for paid sessions.",
       "priority": 31,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "Booking confirmation shows Pay Now button for paid sessions",
         "Creates Stripe Checkout Session with session details",
@@ -366,7 +366,7 @@
       "title": "Stripe Webhook Handler",
       "description": "Create /api/webhooks/stripe endpoint. Handle checkout.session.completed to confirm booking and create transaction. Handle payment_intent.failed. Verify webhook signatures.",
       "priority": 32,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "Webhook endpoint at /api/webhooks/stripe",
         "Verifies Stripe webhook signature",

@@ -836,3 +836,93 @@
   - router.refresh() triggers Next.js to re-fetch server data after returning from Stripe
   - router.replace() clears URL params without adding to history stack
 ---
+
+## 2026-01-30 - COACH-030
+- What was implemented:
+  - Created transaction_status enum: pending, succeeded, failed, refunded
+  - Created transactions table with: id (serial PK), booking_id (FK to bookings, nullable), coach_id (FK to users), client_id (FK to users), amount_cents, currency, platform_fee_cents, coach_payout_cents, stripe_payment_intent_id, stripe_checkout_session_id, stripe_transfer_id, status, refund_amount_cents (nullable), created_at, updated_at
+  - booking_id is nullable to support future non-booking transactions
+  - booking_id FK uses onDelete: 'set null' to preserve transaction history if booking is deleted
+  - coach_id and client_id FKs use onDelete: 'cascade' for user data cleanup
+  - Added indexes on booking_id, coach_id, client_id, status for efficient querying
+  - Exported Transaction and NewTransaction types using $inferSelect and $inferInsert
+  - Generated migration 0006_yummy_butterfly.sql
+- Files changed:
+  - src/db/schema.ts - Added transactionStatusEnum, transactions table, and type exports
+  - drizzle/0006_yummy_butterfly.sql - Migration file
+  - drizzle/meta/_journal.json - Updated migration journal
+  - drizzle/meta/0006_snapshot.json - Schema snapshot
+- **Learnings for future iterations:**
+  - Use onDelete: 'set null' for FKs when you want to preserve records even if related data is deleted (e.g., transaction history)
+  - Store all monetary values in cents as integers to avoid floating point precision issues
+  - Add stripe_checkout_session_id alongside stripe_payment_intent_id - they serve different purposes in the Checkout flow
+  - refund_amount_cents is nullable to distinguish between "not refunded" (null) and "fully refunded" (equals amount_cents)
+---
+
+## 2026-01-30 - COACH-031
+- What was implemented:
+  - Updated booking confirmation page to show "Pay Now" button for paid sessions (price > 0)
+  - Created createCheckoutSession() server action in confirm/actions.ts to generate Stripe Checkout Session:
+    - Uses stripe.checkout.sessions.create() with destination charges
+    - Sets payment_intent_data.transfer_data.destination to coach's stripe_account_id
+    - Sets application_fee_amount for platform fee (10% of session price)
+    - Includes comprehensive metadata (bookingId, coachId, clientId, session details)
+    - success_url: /coaches/[slug]/book/success?session_id={CHECKOUT_SESSION_ID}
+    - cancel_url: /coaches/[slug]/book/confirm?...params
+  - Creates booking with status 'pending' before redirecting to Stripe for paid sessions
+  - Created /coaches/[slug]/book/success page and actions:
+    - Retrieves booking from Stripe checkout session via metadata
+    - Verifies payment status and updates booking to 'confirmed' on success
+    - Creates transaction record with payment details
+    - Shows payment confirmation with booking details and Add to Calendar button
+    - Graceful error handling if session can't be verified
+  - Free sessions (price = 0) continue with existing flow (immediate confirm)
+  - Updated BookingConfirmation component to conditionally show "Pay Now" vs "Confirm Booking" button
+- Files changed:
+  - src/app/(public)/coaches/[slug]/book/confirm/actions.ts - Added createCheckoutSession server action
+  - src/app/(public)/coaches/[slug]/book/success/page.tsx - New payment success page
+  - src/app/(public)/coaches/[slug]/book/success/actions.ts - Server actions for success page
+  - src/components/booking/booking-confirmation.tsx - Updated for paid/free session handling
+  - src/components/booking/payment-success-content.tsx - New component for success display
+  - src/components/booking/index.ts - Exported PaymentSuccessContent
+- **Learnings for future iterations:**
+  - Stripe Checkout destination charges: use payment_intent_data.transfer_data.destination for Connect accounts
+  - application_fee_amount is platform fee in cents, deducted from the total before transfer
+  - Store metadata on both checkout session and payment_intent for redundancy
+  - Create booking with 'pending' status before payment; webhook or success page confirms it
+  - Success page should verify payment status via Stripe API before confirming booking
+  - Use window.location.href for external redirects (Stripe Checkout) instead of router.push
+  - Coach must have completed Stripe onboarding (stripeOnboardingComplete: true) to accept payments
+---
+
+## 2026-01-30 - COACH-032
+- What was implemented:
+  - Created /api/webhooks/stripe/route.ts endpoint for Stripe webhook events
+  - Webhook signature verification using STRIPE_WEBHOOK_SECRET via stripe.webhooks.constructEvent()
+  - Handler for checkout.session.completed event:
+    - Extracts booking info from session metadata (bookingId, coachId, clientId, sessionPrice)
+    - Updates booking status from 'pending' to 'confirmed' on successful payment
+    - Creates transaction record with payment details (amount, fees, Stripe IDs)
+    - Idempotent: checks for existing transaction to avoid duplicates from success page + webhook
+  - Handler for checkout.session.expired event:
+    - Updates booking status to 'cancelled' if still pending
+    - Sets cancellation reason to 'Payment session expired'
+    - Only cancels if booking hasn't been confirmed via another method
+  - Handler for payment_intent.payment_failed event:
+    - Logs payment failures with error message and code for debugging
+    - Updates existing pending transaction to 'failed' status if found
+    - Does not auto-cancel booking (allows retry via new checkout session)
+  - Returns 200 for all processed events (including errors) to prevent Stripe retries on non-recoverable errors
+  - Returns 400 for signature verification failures
+- Files changed:
+  - src/app/api/webhooks/stripe/route.ts - New Stripe webhook handler
+- **Learnings for future iterations:**
+  - Use req.text() instead of req.json() to get raw body for Stripe signature verification
+  - stripe.webhooks.constructEvent() verifies signature and parses event in one step
+  - Always check for idempotency (existing records) in webhook handlers - webhooks can be delivered multiple times
+  - Success page and webhook may both try to confirm booking/create transaction - handle race condition by checking existing records
+  - Return 200 for handled errors to prevent Stripe from retrying (log for debugging instead)
+  - Return 400 only for signature failures which indicate a misconfigured webhook or attack
+  - Webhook routes at /api/webhooks/* are automatically excluded from Clerk auth middleware per codebase patterns
+  - Parse metadata strings to numbers when needed (parseInt for bookingId, sessionPrice)
+---
