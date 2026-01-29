@@ -16,7 +16,7 @@
       "title": "Project Initialization",
       "description": "Initialize Next.js 14 project with App Router, TypeScript, Tailwind CSS, and shadcn/ui. Set up project structure with src/app, src/components, src/lib, src/db directories. Configure ESLint and Prettier.",
       "priority": 1,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "Next.js 14+ with App Router is initialized",
         "TypeScript is configured",

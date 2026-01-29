@@ -1,5 +1,8 @@
 ## Codebase Patterns
-(Patterns will be added as development progresses)
+- Use `npx shadcn@latest add <component>` to add new UI components
+- Format with `npm run format` before committing
+- Run `npm run typecheck` and `npm run lint` for quality checks
+- Project uses single quotes, semi-colons, and 100 char line width (Prettier config)
 
 ---
 
@@ -7,4 +10,28 @@
 - PRD created with 15 user stories for Phase 0 (Foundation) + Phase 1 (Coach Profiles MVP)
 - Tech stack: Next.js 14, Tailwind, shadcn/ui, Drizzle ORM, PostgreSQL, Clerk
 - Stories ordered by priority for incremental development
+---
+
+## 2026-01-29 - COACH-001
+- What was implemented:
+  - Initialized Next.js 14.2.35 with App Router, TypeScript, Tailwind CSS
+  - Set up shadcn/ui with button, input, card components
+  - Configured ESLint with Prettier integration
+  - Created project directory structure (src/app, src/components/ui, src/lib, src/db)
+  - Added npm scripts: typecheck, format, format:check
+  - Created simple landing page demonstrating shadcn components
+- Files changed:
+  - All project initialization files created
+  - src/app/page.tsx - Simple landing with Card and Button components
+  - src/app/layout.tsx - Updated metadata for Coaching Platform
+  - src/components/ui/button.tsx, card.tsx, input.tsx - shadcn components
+  - src/lib/utils.ts - shadcn utility for cn() function
+  - .prettierrc, .prettierignore - Prettier configuration
+  - .eslintrc.json - ESLint with Prettier integration
+- **Learnings for future iterations:**
+  - Use `npx create-next-app@14` to create Next.js 14 project (version-specific)
+  - Existing files in directory block create-next-app; need to move them temporarily
+  - next-env.d.ts is auto-generated and git-ignored
+  - shadcn init with `--defaults` avoids interactive prompts
+  - Node v18 shows engine warnings but packages still work
 ---
