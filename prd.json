@@ -153,7 +153,7 @@
       "title": "Booking Flow - Time Selection",
       "description": "Create /coaches/[slug]/book page. Show coach's session types to select. Display available time slots based on coach availability, existing bookings, buffer time, and advance notice. Calendar view for date selection, time slots for selected date.",
       "priority": 19,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "Page at /coaches/[slug]/book",
         "Step 1: Select session type from coach's offerings",

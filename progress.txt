@@ -522,3 +522,37 @@
   - cancelled_by FK has no onDelete cascade - we want to preserve cancellation history even if user is deleted
   - Use separate client_notes and coach_notes fields (not single notes field) for clear ownership
 ---
+
+## 2026-01-30 - COACH-019
+- What was implemented:
+  - Created /coaches/[slug]/book page as public route for booking flow
+  - 3-step booking wizard: Session Type -> Date -> Time selection
+  - Step 1: Shows coach's session types with name, duration, and price
+  - Step 2: Calendar view with disabled dates (past, beyond max_advance_days, no availability)
+  - Step 3: Time slots calculated from availability minus bookings minus buffer time
+  - Client timezone auto-detection with manual override using timezone dropdown
+  - Booking summary sidebar showing selected session, date, time
+  - Progress indicator showing current step
+  - Continue button navigates to /coaches/[slug]/book/confirm with URL params
+  - Server actions for fetching coach data, weekly availability, bookable dates, and time slots
+  - Custom not-found page for invalid coach slugs
+  - Placeholder confirmation page for next story
+- Files changed:
+  - src/app/(public)/coaches/[slug]/book/page.tsx - Main booking page
+  - src/app/(public)/coaches/[slug]/book/actions.ts - Server actions for slot calculation
+  - src/app/(public)/coaches/[slug]/book/not-found.tsx - Custom 404 page
+  - src/app/(public)/coaches/[slug]/book/confirm/page.tsx - Placeholder for confirmation
+  - src/components/booking/booking-flow.tsx - Client component for 3-step wizard
+  - src/components/booking/index.ts - Component exports
+  - src/components/ui/calendar.tsx - shadcn calendar component (react-day-picker)
+  - package.json - Added date-fns, react-day-picker dependencies
+- **Learnings for future iterations:**
+  - shadcn calendar uses react-day-picker v9; use `mode="single"` for single date selection
+  - Calendar disabled prop takes a function: `disabled={(date) => !isBookable(date)}`
+  - Time slot calculation: iterate from day start to end, check advance notice and booking conflicts
+  - Buffer time applies both before and after bookings (slotStart - buffer, slotEnd + buffer)
+  - Use Set for bookable dates lookup (O(1) vs O(n) for array.includes)
+  - Timezone formatting: Intl.DateTimeFormat().resolvedOptions().timeZone for detection
+  - Pass booking selection via URL params for stateless navigation to confirmation page
+  - Public pages in (public) route group automatically get PublicHeader/PublicFooter layout
+---
