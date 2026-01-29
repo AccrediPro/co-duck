@@ -23,6 +23,7 @@ import { SessionDetailActions } from './session-detail-actions';
 import { CoachNotesEditor } from './coach-notes-editor';
 import { CoachSessionActions } from './coach-session-actions';
 import { PaymentSection } from './payment-section';
+import { MeetingLinkSection } from './meeting-link-section';
 
 export const metadata = {
   title: 'Session Details | Coaching Platform',
@@ -61,6 +62,7 @@ export default async function SessionDetailPage({ params }: PageProps) {
       coachNotes: bookings.coachNotes,
       cancelledAt: bookings.cancelledAt,
       cancellationReason: bookings.cancellationReason,
+      meetingLink: bookings.meetingLink,
       createdAt: bookings.createdAt,
     })
     .from(bookings)
@@ -328,6 +330,15 @@ export default async function SessionDetailPage({ params }: PageProps) {
               </div>
             </CardContent>
           </Card>
+
+          {/* Meeting Link Section */}
+          <MeetingLinkSection
+            sessionId={session.id}
+            initialMeetingLink={session.meetingLink}
+            isCoachView={isCoachView}
+            isUpcoming={isUpcoming}
+            isConfirmed={session.status === 'confirmed'}
+          />
 
           {/* Payment Information Card */}
           <PaymentSection

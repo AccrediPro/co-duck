@@ -460,6 +460,61 @@ export async function getSessionNote(bookingId: number): Promise<GetSessionNoteR
 export type SaveCoachNotesResult = SaveSessionNoteResult;
 export const saveCoachNotes = saveSessionNote;
 
+// Update meeting link for a booking
+export interface UpdateMeetingLinkResult {
+  success: boolean;
+  error?: string;
+}
+
+export async function updateMeetingLink(
+  bookingId: number,
+  meetingLink: string
+): Promise<UpdateMeetingLinkResult> {
+  const { userId } = await auth();
+
+  if (!userId) {
+    return { success: false, error: 'Not authenticated' };
+  }
+
+  try {
+    // Verify the booking belongs to this coach
+    const existingBooking = await db
+      .select()
+      .from(bookings)
+      .where(and(eq(bookings.id, bookingId), eq(bookings.coachId, userId)))
+      .limit(1);
+
+    if (existingBooking.length === 0) {
+      return { success: false, error: 'Session not found' };
+    }
+
+    // Validate URL format if not empty
+    const trimmedLink = meetingLink.trim();
+    if (trimmedLink) {
+      // Must start with https://
+      if (!trimmedLink.startsWith('https://')) {
+        return { success: false, error: 'Meeting link must start with https://' };
+      }
+      // Basic URL validation
+      try {
+        new URL(trimmedLink);
+      } catch {
+        return { success: false, error: 'Invalid URL format' };
+      }
+    }
+
+    // Update the meeting link
+    await db
+      .update(bookings)
+      .set({ meetingLink: trimmedLink || null })
+      .where(eq(bookings.id, bookingId));
+
+    return { success: true };
+  } catch {
+    return { success: false, error: 'Failed to update meeting link' };
+  }
+}
+
 // Generate ICS file content for coach's calendar download
 export async function generateCoachIcsFile(
   bookingId: number

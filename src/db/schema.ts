@@ -185,6 +185,7 @@ export const bookings = pgTable(
     cancelledBy: text('cancelled_by').references(() => users.id), // Who cancelled (if cancelled)
     cancelledAt: timestamp('cancelled_at', { withTimezone: true }),
     cancellationReason: text('cancellation_reason'),
+    meetingLink: text('meeting_link'), // Video meeting link (Zoom, Meet, etc.)
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true })
       .notNull()
