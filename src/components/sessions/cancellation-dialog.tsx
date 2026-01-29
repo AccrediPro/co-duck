@@ -20,7 +20,7 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { AlertTriangle, Loader2, XCircle } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Loader2, XCircle } from 'lucide-react';
 
 export const CANCELLATION_REASONS = [
   { value: 'schedule_conflict', label: 'Schedule conflict' },
@@ -31,26 +31,34 @@ export const CANCELLATION_REASONS = [
 
 export type CancellationReason = (typeof CANCELLATION_REASONS)[number]['value'];
 
+export interface RefundEligibilityInfo {
+  hasPaidTransaction: boolean;
+  isEligibleForRefund: boolean;
+  refundAmountFormatted: string;
+  refundReason: string;
+}
+
 interface CancellationDialogProps {
   onCancel: (reason: string, details: string) => Promise<void>;
   otherPartyName: string;
   sessionTime?: Date;
-  /** Reserved for future use when coach/client have different policies */
+  /** Whether the coach is the one cancelling */
   isCoach?: boolean;
   triggerButton?: React.ReactNode;
   variant?: 'default' | 'sidebar';
+  /** Refund eligibility info for paid sessions */
+  refundInfo?: RefundEligibilityInfo;
 }
 
 export function CancellationDialog({
   onCancel,
   otherPartyName,
   sessionTime,
-  isCoach: _isCoach = false,
+  isCoach = false,
   triggerButton,
   variant = 'default',
+  refundInfo,
 }: CancellationDialogProps) {
-  // _isCoach is reserved for future use (different policies for coach/client)
-  void _isCoach;
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState<CancellationReason | ''>('');
   const [details, setDetails] = useState('');
@@ -93,6 +101,55 @@ export function CancellationDialog({
       </Button>
     );
 
+  // Determine what refund message to show
+  const getRefundDisplay = () => {
+    if (!refundInfo || !refundInfo.hasPaidTransaction) {
+      return null;
+    }
+
+    if (isCoach) {
+      // Coach cancellations always result in full refund
+      return (
+        <div className="flex items-start gap-3 rounded-md border border-green-200 bg-green-50 p-3">
+          <CheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-green-600" />
+          <div className="text-sm">
+            <p className="font-medium text-green-800">Refund Information</p>
+            <p className="mt-1 text-green-700">
+              The client will receive a full refund of {refundInfo.refundAmountFormatted}.
+            </p>
+          </div>
+        </div>
+      );
+    }
+
+    // Client cancellation - depends on timing
+    if (refundInfo.isEligibleForRefund) {
+      return (
+        <div className="flex items-start gap-3 rounded-md border border-green-200 bg-green-50 p-3">
+          <CheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-green-600" />
+          <div className="text-sm">
+            <p className="font-medium text-green-800">Full Refund Available</p>
+            <p className="mt-1 text-green-700">
+              You will receive a full refund of {refundInfo.refundAmountFormatted}.
+            </p>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="flex items-start gap-3 rounded-md border border-red-200 bg-red-50 p-3">
+        <XCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" />
+        <div className="text-sm">
+          <p className="font-medium text-red-800">No Refund Available</p>
+          <p className="mt-1 text-red-700">
+            Cancelled within 24 hours of the scheduled session time.
+          </p>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>{triggerButton || defaultTrigger}</DialogTrigger>
@@ -106,26 +163,31 @@ export function CancellationDialog({
         </DialogHeader>
 
         <div className="grid gap-4 py-4">
-          {/* Cancellation Policy Warning */}
-          <div className="flex items-start gap-3 rounded-md border border-amber-200 bg-amber-50 p-3">
-            <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
-            <div className="text-sm">
-              <p className="font-medium text-amber-800">Cancellation Policy</p>
-              <p className="mt-1 text-amber-700">
-                {isWithin24Hours ? (
-                  <>
-                    This session is within 24 hours. Cancellations made less than 24 hours before
-                    the scheduled time may be subject to cancellation fees.
-                  </>
-                ) : (
-                  <>
-                    Sessions cancelled with at least 24 hours notice can be rescheduled at no
-                    additional cost. Late cancellations may be subject to fees.
-                  </>
-                )}
-              </p>
+          {/* Refund Information (for paid sessions) */}
+          {getRefundDisplay()}
+
+          {/* Cancellation Policy Warning (only show if no refund info) */}
+          {(!refundInfo || !refundInfo.hasPaidTransaction) && (
+            <div className="flex items-start gap-3 rounded-md border border-amber-200 bg-amber-50 p-3">
+              <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
+              <div className="text-sm">
+                <p className="font-medium text-amber-800">Cancellation Policy</p>
+                <p className="mt-1 text-amber-700">
+                  {isWithin24Hours ? (
+                    <>
+                      This session is within 24 hours. Cancellations made less than 24 hours before
+                      the scheduled time may be subject to cancellation fees.
+                    </>
+                  ) : (
+                    <>
+                      Sessions cancelled with at least 24 hours notice can be rescheduled at no
+                      additional cost. Late cancellations may be subject to fees.
+                    </>
+                  )}
+                </p>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Reason Dropdown */}
           <div className="grid gap-2">

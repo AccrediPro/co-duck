@@ -2,8 +2,10 @@
 
 import { auth } from '@clerk/nextjs/server';
 import { eq, and, or, gte, lt, desc, asc, sql } from 'drizzle-orm';
-import { db, bookings, users, transactions } from '@/db';
+import { db, bookings, users, transactions, coachProfiles } from '@/db';
 import type { BookingSessionType } from '@/db/schema';
+import { stripe } from '@/lib/stripe';
+import { formatRefundAmount } from '@/lib/refunds';
 
 export type SessionStatus = 'upcoming' | 'past' | 'cancelled';
 
@@ -197,9 +199,17 @@ export async function markSessionComplete(sessionId: number): Promise<MarkComple
   }
 }
 
+export interface RefundInfo {
+  wasRefunded: boolean;
+  refundAmountCents: number;
+  refundAmountFormatted: string;
+  reason: string;
+}
+
 export interface CancelSessionResult {
   success: boolean;
   error?: string;
+  refund?: RefundInfo;
 }
 
 export async function cancelSession(
@@ -231,6 +241,73 @@ export async function cancelSession(
       return { success: false, error: 'Session cannot be cancelled in its current state' };
     }
 
+    // Check if there's a paid transaction for this booking
+    const transactionResult = await db
+      .select()
+      .from(transactions)
+      .where(and(eq(transactions.bookingId, sessionId), eq(transactions.status, 'succeeded')))
+      .limit(1);
+
+    let refundInfo: RefundInfo | undefined;
+
+    // If there's a paid transaction, process refund
+    // Coach cancellations always get full refund for the client
+    if (transactionResult.length > 0) {
+      const transaction = transactionResult[0];
+
+      // Get coach currency for formatting
+      const coachResult = await db
+        .select({ currency: coachProfiles.currency })
+        .from(coachProfiles)
+        .where(eq(coachProfiles.userId, userId))
+        .limit(1);
+      const currency = coachResult[0]?.currency || 'USD';
+
+      // Coach cancellations always result in full refund
+      const refundAmountCents = transaction.amountCents;
+
+      if (transaction.stripePaymentIntentId) {
+        try {
+          // Create refund via Stripe
+          await stripe.refunds.create({
+            payment_intent: transaction.stripePaymentIntentId,
+            amount: refundAmountCents,
+            reason: 'requested_by_customer',
+            metadata: {
+              bookingId: sessionId.toString(),
+              cancelledBy: 'coach',
+              cancelledByUserId: userId,
+            },
+          });
+
+          // Update transaction status
+          await db
+            .update(transactions)
+            .set({
+              status: 'refunded',
+              refundAmountCents: refundAmountCents,
+            })
+            .where(eq(transactions.id, transaction.id));
+
+          refundInfo = {
+            wasRefunded: true,
+            refundAmountCents,
+            refundAmountFormatted: formatRefundAmount(refundAmountCents, currency),
+            reason: 'Coach cancelled - full refund issued',
+          };
+        } catch (stripeError) {
+          console.error('Stripe refund failed:', stripeError);
+          // Continue with cancellation but note refund failure
+          refundInfo = {
+            wasRefunded: false,
+            refundAmountCents: 0,
+            refundAmountFormatted: '$0.00',
+            reason: 'Refund processing failed - please contact support',
+          };
+        }
+      }
+    }
+
     // Update the session status
     await db
       .update(bookings)
@@ -242,7 +319,7 @@ export async function cancelSession(
       })
       .where(eq(bookings.id, sessionId));
 
-    return { success: true };
+    return { success: true, refund: refundInfo };
   } catch {
     return { success: false, error: 'Failed to cancel session' };
   }
@@ -397,5 +474,93 @@ export async function generateCoachIcsFile(
     return { success: true, data: icsContent };
   } catch {
     return { success: false, error: 'Failed to generate calendar file' };
+  }
+}
+
+// Get refund eligibility info for a booking (used by cancellation dialog)
+export interface RefundEligibilityResult {
+  success: boolean;
+  error?: string;
+  data?: {
+    hasPaidTransaction: boolean;
+    paidAmountCents: number;
+    currency: string;
+    isEligibleForRefund: boolean;
+    refundAmountCents: number;
+    refundAmountFormatted: string;
+    refundReason: string;
+    isCoachCancelling: boolean;
+  };
+}
+
+export async function getRefundEligibility(sessionId: number): Promise<RefundEligibilityResult> {
+  const { userId } = await auth();
+
+  if (!userId) {
+    return { success: false, error: 'Not authenticated' };
+  }
+
+  try {
+    // Get the booking (must belong to this coach)
+    const existingBooking = await db
+      .select()
+      .from(bookings)
+      .where(and(eq(bookings.id, sessionId), eq(bookings.coachId, userId)))
+      .limit(1);
+
+    if (existingBooking.length === 0) {
+      return { success: false, error: 'Session not found' };
+    }
+
+    // Get coach currency
+    const coachResult = await db
+      .select({ currency: coachProfiles.currency })
+      .from(coachProfiles)
+      .where(eq(coachProfiles.userId, userId))
+      .limit(1);
+    const currency = coachResult[0]?.currency || 'USD';
+
+    // Check for paid transaction
+    const transactionResult = await db
+      .select()
+      .from(transactions)
+      .where(and(eq(transactions.bookingId, sessionId), eq(transactions.status, 'succeeded')))
+      .limit(1);
+
+    if (transactionResult.length === 0) {
+      // No paid transaction
+      return {
+        success: true,
+        data: {
+          hasPaidTransaction: false,
+          paidAmountCents: 0,
+          currency,
+          isEligibleForRefund: false,
+          refundAmountCents: 0,
+          refundAmountFormatted: formatRefundAmount(0, currency),
+          refundReason: 'No payment on file',
+          isCoachCancelling: true,
+        },
+      };
+    }
+
+    const transaction = transactionResult[0];
+
+    // Coach cancellations always result in full refund
+    return {
+      success: true,
+      data: {
+        hasPaidTransaction: true,
+        paidAmountCents: transaction.amountCents,
+        currency,
+        isEligibleForRefund: true,
+        refundAmountCents: transaction.amountCents,
+        refundAmountFormatted: formatRefundAmount(transaction.amountCents, currency),
+        refundReason: 'Coach cancelled - full refund will be issued',
+        isCoachCancelling: true,
+      },
+    };
+  } catch {
+    return { success: false, error: 'Failed to get refund eligibility' };
   }
 }

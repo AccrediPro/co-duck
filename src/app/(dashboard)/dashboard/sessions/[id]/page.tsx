@@ -385,6 +385,7 @@ export default async function SessionDetailPage({ params }: PageProps) {
                   sessionId={session.id}
                   coachName={otherParty?.name || 'the coach'}
                   sessionTime={session.startTime}
+                  hasPaidTransaction={paymentStatus === 'paid'}
                 />
               </CardContent>
             </Card>
@@ -403,6 +404,7 @@ export default async function SessionDetailPage({ params }: PageProps) {
                   canCancel={canTakeAction}
                   clientName={otherParty?.name || 'the client'}
                   sessionTime={session.startTime}
+                  hasPaidTransaction={paymentStatus === 'paid'}
                 />
               </CardContent>
             </Card>
@@ -470,6 +472,7 @@ export default async function SessionDetailPage({ params }: PageProps) {
                   coachName={otherParty?.name || 'the coach'}
                   sessionTime={session.startTime}
                   variant="sidebar"
+                  hasPaidTransaction={paymentStatus === 'paid'}
                 />
               </CardContent>
             </Card>
@@ -488,6 +491,7 @@ export default async function SessionDetailPage({ params }: PageProps) {
                   clientName={otherParty?.name || 'the client'}
                   sessionTime={session.startTime}
                   variant="sidebar"
+                  hasPaidTransaction={paymentStatus === 'paid'}
                 />
               </CardContent>
             </Card>

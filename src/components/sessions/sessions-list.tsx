@@ -11,7 +11,12 @@ import type {
   SessionWithClient,
   SessionStatus,
 } from '@/app/(dashboard)/dashboard/sessions/actions';
-import { markSessionComplete, cancelSession } from '@/app/(dashboard)/dashboard/sessions/actions';
+import {
+  markSessionComplete,
+  cancelSession,
+  getRefundEligibility,
+} from '@/app/(dashboard)/dashboard/sessions/actions';
+import type { RefundEligibilityInfo } from './cancellation-dialog';
 
 interface SessionsListProps {
   initialTab: SessionStatus;
@@ -35,6 +40,7 @@ export function SessionsList({
   const [sessions, setSessions] = useState(initialSessions);
   const [totalCount, setTotalCount] = useState(initialTotalCount);
   const [activeTab, setActiveTab] = useState<SessionStatus>(initialTab);
+  const [refundInfoCache, setRefundInfoCache] = useState<Record<number, RefundEligibilityInfo>>({});
 
   const totalPages = Math.ceil(totalCount / perPage);
 
@@ -90,9 +96,15 @@ export function SessionsList({
     const result = await cancelSession(sessionId, fullReason);
 
     if (result.success) {
+      // Build description based on refund result
+      let description = 'The session has been cancelled successfully.';
+      if (result.refund?.wasRefunded) {
+        description = `Session cancelled. A refund of ${result.refund.refundAmountFormatted} has been issued to the client.`;
+      }
+
       toast({
         title: 'Session cancelled',
-        description: 'The session has been cancelled successfully.',
+        description,
       });
       // Remove from current list (it will appear in cancelled tab)
       setSessions((prev) => prev.filter((s) => s.id !== sessionId));
@@ -105,6 +117,36 @@ export function SessionsList({
       });
     }
   };
+
+  // Load refund info for a session (for cancellation dialog)
+  const loadRefundInfo = async (sessionId: number): Promise<RefundEligibilityInfo | undefined> => {
+    // Check cache first
+    if (refundInfoCache[sessionId]) {
+      return refundInfoCache[sessionId];
+    }
+
+    const result = await getRefundEligibility(sessionId);
+    if (result.success && result.data) {
+      const info: RefundEligibilityInfo = {
+        hasPaidTransaction: result.data.hasPaidTransaction,
+        isEligibleForRefund: result.data.isEligibleForRefund,
+        refundAmountFormatted: result.data.refundAmountFormatted,
+        refundReason: result.data.refundReason,
+      };
+      setRefundInfoCache((prev) => ({ ...prev, [sessionId]: info }));
+      return info;
+    }
+    return undefined;
+  };
+
+  // Preload refund info for paid sessions when component mounts
+  useState(() => {
+    sessions.forEach((session) => {
+      if (session.paymentStatus === 'paid') {
+        loadRefundInfo(session.id);
+      }
+    });
+  });
 
   const EmptyState = ({ type }: { type: SessionStatus }) => {
     const config = {
@@ -247,6 +289,7 @@ export function SessionsList({
               onCancel={handleCancel}
               isPast={tab === 'past'}
               isCancelled={tab === 'cancelled'}
+              refundInfo={refundInfoCache[session.id]}
             />
           ))}
         </div>

@@ -6,6 +6,7 @@ import { db, bookings, users, coachProfiles, transactions } from '@/db';
 import { headers } from 'next/headers';
 import { stripe } from '@/lib/stripe';
 import type { BookingSessionType } from '@/db/schema';
+import { calculateRefundEligibility, formatRefundAmount } from '@/lib/refunds';
 
 export type ClientSessionStatus = 'upcoming' | 'past';
 
@@ -156,9 +157,17 @@ export async function getClientSessions(
   }
 }
 
+export interface RefundInfo {
+  wasRefunded: boolean;
+  refundAmountCents: number;
+  refundAmountFormatted: string;
+  reason: string;
+}
+
 export interface CancelSessionResult {
   success: boolean;
   error?: string;
+  refund?: RefundInfo;
 }
 
 export async function cancelClientSession(
@@ -190,6 +199,81 @@ export async function cancelClientSession(
       return { success: false, error: 'Session cannot be cancelled in its current state' };
     }
 
+    // Check if there's a paid transaction for this booking
+    const transactionResult = await db
+      .select()
+      .from(transactions)
+      .where(and(eq(transactions.bookingId, sessionId), eq(transactions.status, 'succeeded')))
+      .limit(1);
+
+    let refundInfo: RefundInfo | undefined;
+
+    // If there's a paid transaction, evaluate refund eligibility
+    if (transactionResult.length > 0) {
+      const transaction = transactionResult[0];
+
+      // Get coach currency for formatting
+      const coachResult = await db
+        .select({ currency: coachProfiles.currency })
+        .from(coachProfiles)
+        .where(eq(coachProfiles.userId, booking.coachId))
+        .limit(1);
+      const currency = coachResult[0]?.currency || 'USD';
+
+      // Calculate refund eligibility based on cancellation timing
+      const eligibility = calculateRefundEligibility(booking.startTime, transaction.amountCents);
+
+      if (eligibility.isEligible && transaction.stripePaymentIntentId) {
+        try {
+          // Create refund via Stripe
+          await stripe.refunds.create({
+            payment_intent: transaction.stripePaymentIntentId,
+            amount: eligibility.refundAmountCents,
+            reason: 'requested_by_customer',
+            metadata: {
+              bookingId: sessionId.toString(),
+              cancelledBy: 'client',
+              cancelledByUserId: userId,
+              refundPercentage: eligibility.refundPercentage.toString(),
+            },
+          });
+
+          // Update transaction status
+          await db
+            .update(transactions)
+            .set({
+              status: 'refunded',
+              refundAmountCents: eligibility.refundAmountCents,
+            })
+            .where(eq(transactions.id, transaction.id));
+
+          refundInfo = {
+            wasRefunded: true,
+            refundAmountCents: eligibility.refundAmountCents,
+            refundAmountFormatted: formatRefundAmount(eligibility.refundAmountCents, currency),
+            reason: eligibility.reason,
+          };
+        } catch (stripeError) {
+          console.error('Stripe refund failed:', stripeError);
+          // Continue with cancellation but note refund failure
+          refundInfo = {
+            wasRefunded: false,
+            refundAmountCents: 0,
+            refundAmountFormatted: '$0.00',
+            reason: 'Refund processing failed - please contact support',
+          };
+        }
+      } else if (!eligibility.isEligible) {
+        // No refund due to timing policy
+        refundInfo = {
+          wasRefunded: false,
+          refundAmountCents: 0,
+          refundAmountFormatted: formatRefundAmount(0, currency),
+          reason: eligibility.reason,
+        };
+      }
+    }
+
     // Update the session status
     await db
       .update(bookings)
@@ -201,7 +285,7 @@ export async function cancelClientSession(
       })
       .where(eq(bookings.id, sessionId));
 
-    return { success: true };
+    return { success: true, refund: refundInfo };
   } catch {
     return { success: false, error: 'Failed to cancel session' };
   }
@@ -469,5 +553,101 @@ export async function createRetryCheckoutSession(
   } catch (error) {
     console.error('Error creating retry checkout session:', error);
     return { success: false, error: 'Failed to create checkout session. Please try again.' };
+  }
+}
+
+// Get refund eligibility info for a booking (used by client cancellation dialog)
+export interface ClientRefundEligibilityResult {
+  success: boolean;
+  error?: string;
+  data?: {
+    hasPaidTransaction: boolean;
+    paidAmountCents: number;
+    currency: string;
+    isEligibleForRefund: boolean;
+    refundAmountCents: number;
+    refundAmountFormatted: string;
+    refundReason: string;
+    hoursUntilSession: number;
+  };
+}
+
+export async function getClientRefundEligibility(
+  sessionId: number
+): Promise<ClientRefundEligibilityResult> {
+  const { userId } = await auth();
+
+  if (!userId) {
+    return { success: false, error: 'Not authenticated' };
+  }
+
+  try {
+    // Get the booking (must belong to this client)
+    const existingBooking = await db
+      .select()
+      .from(bookings)
+      .where(and(eq(bookings.id, sessionId), eq(bookings.clientId, userId)))
+      .limit(1);
+
+    if (existingBooking.length === 0) {
+      return { success: false, error: 'Session not found' };
+    }
+
+    const booking = existingBooking[0];
+
+    // Get coach currency
+    const coachResult = await db
+      .select({ currency: coachProfiles.currency })
+      .from(coachProfiles)
+      .where(eq(coachProfiles.userId, booking.coachId))
+      .limit(1);
+    const currency = coachResult[0]?.currency || 'USD';
+
+    // Check for paid transaction
+    const transactionResult = await db
+      .select()
+      .from(transactions)
+      .where(and(eq(transactions.bookingId, sessionId), eq(transactions.status, 'succeeded')))
+      .limit(1);
+
+    if (transactionResult.length === 0) {
+      // No paid transaction
+      const msUntilSession = booking.startTime.getTime() - Date.now();
+      const hoursUntilSession = msUntilSession / (1000 * 60 * 60);
+      return {
+        success: true,
+        data: {
+          hasPaidTransaction: false,
+          paidAmountCents: 0,
+          currency,
+          isEligibleForRefund: false,
+          refundAmountCents: 0,
+          refundAmountFormatted: formatRefundAmount(0, currency),
+          refundReason: 'No payment on file',
+          hoursUntilSession,
+        },
+      };
+    }
+
+    const transaction = transactionResult[0];
+
+    // Calculate refund eligibility based on timing
+    const eligibility = calculateRefundEligibility(booking.startTime, transaction.amountCents);
+
+    return {
+      success: true,
+      data: {
+        hasPaidTransaction: true,
+        paidAmountCents: transaction.amountCents,
+        currency,
+        isEligibleForRefund: eligibility.isEligible,
+        refundAmountCents: eligibility.refundAmountCents,
+        refundAmountFormatted: formatRefundAmount(eligibility.refundAmountCents, currency),
+        refundReason: eligibility.reason,
+        hoursUntilSession: eligibility.hoursUntilSession,
+      },
+    };
+  } catch {
+    return { success: false, error: 'Failed to get refund eligibility' };
   }
 }

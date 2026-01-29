@@ -17,6 +17,7 @@ import {
   CreditCard,
 } from 'lucide-react';
 import { CancellationDialog } from './cancellation-dialog';
+import type { RefundEligibilityInfo } from './cancellation-dialog';
 import type {
   SessionWithCoach,
   PaymentStatus,
@@ -28,6 +29,7 @@ interface ClientSessionCardProps {
   onAddToCalendar?: (sessionId: number) => Promise<void>;
   onPayNow?: (sessionId: number) => void;
   isUpcoming?: boolean;
+  refundInfo?: RefundEligibilityInfo;
 }
 
 export function ClientSessionCard({
@@ -36,6 +38,7 @@ export function ClientSessionCard({
   onAddToCalendar,
   onPayNow,
   isUpcoming = false,
+  refundInfo,
 }: ClientSessionCardProps) {
   const getInitials = (name: string | null) => {
     if (!name) return 'C';
@@ -214,6 +217,7 @@ export function ClientSessionCard({
                 otherPartyName={session.coachName || 'the coach'}
                 sessionTime={session.startTime}
                 isCoach={false}
+                refundInfo={refundInfo}
                 triggerButton={
                   <Button
                     variant="outline"

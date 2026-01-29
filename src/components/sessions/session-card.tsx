@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Calendar, Clock, User, CheckCircle, XCircle, Eye, CreditCard } from 'lucide-react';
 import { CancellationDialog } from './cancellation-dialog';
+import type { RefundEligibilityInfo } from './cancellation-dialog';
 import type {
   SessionWithClient,
   PaymentStatus,
@@ -19,6 +20,7 @@ interface SessionCardProps {
   onCancel?: (sessionId: number, reason: string, details: string) => Promise<void>;
   isPast?: boolean;
   isCancelled?: boolean;
+  refundInfo?: RefundEligibilityInfo;
 }
 
 export function SessionCard({
@@ -27,6 +29,7 @@ export function SessionCard({
   onCancel,
   isPast = false,
   isCancelled = false,
+  refundInfo,
 }: SessionCardProps) {
   const getInitials = (name: string | null) => {
     if (!name) return 'U';
@@ -188,6 +191,7 @@ export function SessionCard({
                   otherPartyName={session.clientName || 'the client'}
                   sessionTime={session.startTime}
                   isCoach={true}
+                  refundInfo={refundInfo}
                   triggerButton={
                     <Button
                       variant="outline"

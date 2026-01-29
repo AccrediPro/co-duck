@@ -15,7 +15,9 @@ import {
   cancelClientSession,
   generateClientIcsFile,
   createRetryCheckoutSession,
+  getClientRefundEligibility,
 } from '@/app/(dashboard)/dashboard/my-sessions/actions';
+import type { RefundEligibilityInfo } from './cancellation-dialog';
 
 interface ClientSessionsListProps {
   initialTab: ClientSessionStatus;
@@ -39,6 +41,7 @@ export function ClientSessionsList({
   const [sessions, setSessions] = useState(initialSessions);
   const [totalCount, setTotalCount] = useState(initialTotalCount);
   const [activeTab, setActiveTab] = useState<ClientSessionStatus>(initialTab);
+  const [refundInfoCache, setRefundInfoCache] = useState<Record<number, RefundEligibilityInfo>>({});
 
   const totalPages = Math.ceil(totalCount / perPage);
 
@@ -73,9 +76,17 @@ export function ClientSessionsList({
     const result = await cancelClientSession(sessionId, fullReason);
 
     if (result.success) {
+      // Build description based on refund result
+      let description = 'Your session has been cancelled successfully.';
+      if (result.refund?.wasRefunded) {
+        description = `Session cancelled. You will receive a refund of ${result.refund.refundAmountFormatted}.`;
+      } else if (result.refund && !result.refund.wasRefunded && result.refund.reason) {
+        description = `Session cancelled. ${result.refund.reason}`;
+      }
+
       toast({
         title: 'Session cancelled',
-        description: 'Your session has been cancelled successfully.',
+        description,
       });
       // Remove from current list if on upcoming tab, or update status if on past tab
       if (activeTab === 'upcoming') {
@@ -94,6 +105,36 @@ export function ClientSessionsList({
       });
     }
   };
+
+  // Load refund info for a session (for cancellation dialog)
+  const loadRefundInfo = async (sessionId: number): Promise<RefundEligibilityInfo | undefined> => {
+    // Check cache first
+    if (refundInfoCache[sessionId]) {
+      return refundInfoCache[sessionId];
+    }
+
+    const result = await getClientRefundEligibility(sessionId);
+    if (result.success && result.data) {
+      const info: RefundEligibilityInfo = {
+        hasPaidTransaction: result.data.hasPaidTransaction,
+        isEligibleForRefund: result.data.isEligibleForRefund,
+        refundAmountFormatted: result.data.refundAmountFormatted,
+        refundReason: result.data.refundReason,
+      };
+      setRefundInfoCache((prev) => ({ ...prev, [sessionId]: info }));
+      return info;
+    }
+    return undefined;
+  };
+
+  // Preload refund info for paid sessions when component mounts
+  useState(() => {
+    sessions.forEach((session) => {
+      if (session.paymentStatus === 'paid') {
+        loadRefundInfo(session.id);
+      }
+    });
+  });
 
   const handleAddToCalendar = async (sessionId: number) => {
     const result = await generateClientIcsFile(sessionId);
@@ -281,6 +322,7 @@ export function ClientSessionsList({
               onAddToCalendar={handleAddToCalendar}
               onPayNow={handlePayNow}
               isUpcoming={tab === 'upcoming'}
+              refundInfo={refundInfoCache[session.id]}
             />
           ))}
         </div>

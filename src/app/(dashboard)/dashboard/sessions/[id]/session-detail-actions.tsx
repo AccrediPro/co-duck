@@ -1,15 +1,17 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { CalendarPlus, RefreshCw, Loader2 } from 'lucide-react';
 import { CancellationDialog } from '@/components/sessions/cancellation-dialog';
+import type { RefundEligibilityInfo } from '@/components/sessions/cancellation-dialog';
 import {
   cancelClientSession,
   generateClientIcsFile,
+  getClientRefundEligibility,
 } from '@/app/(dashboard)/dashboard/my-sessions/actions';
 
 interface SessionDetailActionsProps {
@@ -17,6 +19,7 @@ interface SessionDetailActionsProps {
   coachName?: string;
   sessionTime?: Date;
   variant?: 'default' | 'sidebar';
+  hasPaidTransaction?: boolean;
 }
 
 export function SessionDetailActions({
@@ -24,10 +27,28 @@ export function SessionDetailActions({
   coachName = 'the coach',
   sessionTime,
   variant = 'default',
+  hasPaidTransaction = false,
 }: SessionDetailActionsProps) {
   const router = useRouter();
   const { toast } = useToast();
   const [isAddingToCalendar, setIsAddingToCalendar] = useState(false);
+  const [refundInfo, setRefundInfo] = useState<RefundEligibilityInfo | undefined>();
+
+  // Load refund info if there's a paid transaction
+  useEffect(() => {
+    if (hasPaidTransaction) {
+      getClientRefundEligibility(sessionId).then((result) => {
+        if (result.success && result.data) {
+          setRefundInfo({
+            hasPaidTransaction: result.data.hasPaidTransaction,
+            isEligibleForRefund: result.data.isEligibleForRefund,
+            refundAmountFormatted: result.data.refundAmountFormatted,
+            refundReason: result.data.refundReason,
+          });
+        }
+      });
+    }
+  }, [hasPaidTransaction, sessionId]);
 
   const handleAddToCalendar = async () => {
     setIsAddingToCalendar(true);
@@ -67,9 +88,16 @@ export function SessionDetailActions({
     const result = await cancelClientSession(sessionId, fullReason);
 
     if (result.success) {
+      let description = 'Your session has been cancelled successfully.';
+      if (result.refund?.wasRefunded) {
+        description = `Session cancelled. You will receive a refund of ${result.refund.refundAmountFormatted}.`;
+      } else if (result.refund && !result.refund.wasRefunded && result.refund.reason) {
+        description = `Session cancelled. ${result.refund.reason}`;
+      }
+
       toast({
         title: 'Session cancelled',
-        description: 'Your session has been cancelled successfully.',
+        description,
       });
       router.refresh();
     } else {
@@ -115,6 +143,7 @@ export function SessionDetailActions({
           sessionTime={sessionTime}
           isCoach={false}
           variant="sidebar"
+          refundInfo={refundInfo}
         />
       </>
     );
@@ -145,6 +174,7 @@ export function SessionDetailActions({
         otherPartyName={coachName}
         sessionTime={sessionTime}
         isCoach={false}
+        refundInfo={refundInfo}
       />
     </div>
   );
