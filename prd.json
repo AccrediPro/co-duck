@@ -138,7 +138,7 @@
       "title": "Bookings Database Schema",
       "description": "Create bookings table: id, coach_id (FK), client_id (FK), session_type_id or session_type (JSONB snapshot), start_time, end_time, status (pending/confirmed/completed/cancelled/no_show), notes, created_at, updated_at. Add indexes for queries.",
       "priority": 18,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "bookings table created with all fields",
         "Status enum: pending, confirmed, completed, cancelled, no_show",

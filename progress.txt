@@ -502,3 +502,23 @@
   - Generate time options programmatically with AM/PM display but store as 24-hour format
   - Delete all existing availability records before inserting new ones (simpler than upsert logic)
 ---
+
+## 2026-01-30 - COACH-018
+- What was implemented:
+  - Created booking_status enum: pending, confirmed, completed, cancelled, no_show
+  - Created bookings table with: id (serial PK), coach_id (FK to users), client_id (FK to users), session_type (JSONB snapshot with name, duration, price), start_time, end_time, status, client_notes, coach_notes, cancelled_by (FK to users), cancelled_at, cancellation_reason, created_at, updated_at
+  - Added indexes on coach_id, client_id, start_time, status for efficient queries
+  - Created BookingSessionType interface for type-safe JSONB snapshot
+  - Exported Booking and NewBooking types using $inferSelect and $inferInsert
+  - Generated migration 0004_special_hardball.sql
+- Files changed:
+  - src/db/schema.ts - Added bookingStatusEnum, BookingSessionType interface, bookings table, and type exports
+  - drizzle/0004_special_hardball.sql - Migration file
+  - drizzle/meta/_journal.json - Updated migration journal
+  - drizzle/meta/0004_snapshot.json - Schema snapshot
+- **Learnings for future iterations:**
+  - Foreign keys should reference users.id directly (not coachProfiles.userId) to allow both coaches and clients to be in bookings
+  - Store session type as JSONB snapshot (BookingSessionType) to capture pricing at time of booking; different from SessionType which includes id
+  - cancelled_by FK has no onDelete cascade - we want to preserve cancellation history even if user is deleted
+  - Use separate client_notes and coach_notes fields (not single notes field) for clear ownership
+---
