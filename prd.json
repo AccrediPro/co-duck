@@ -613,7 +613,7 @@
       "title": "Meeting Link for Sessions",
       "description": "Allow coaches to add video meeting link to sessions. Display link to both parties. Placeholder for future native video integration.",
       "priority": 48,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "Coach can add meeting link (Zoom/Meet URL) to session",
         "Link field in session detail edit mode",

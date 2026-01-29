@@ -1391,3 +1391,30 @@
   - Client-specific navigation links go in clientLinks array in dashboard-sidebar.tsx
   - Status badges use tailwind utilities like bg-green-100, bg-red-100 with dark mode variants
 ---
+
+## 2026-01-30 - COACH-048
+- What was implemented:
+  - Added meeting_link column to bookings table (text, nullable) for video meeting URLs
+  - Generated migration 0010_nervous_infant_terrible.sql
+  - Created MeetingLinkSection client component for session detail page
+  - Coach view: editable input field with auto-save on blur, "Test Link" and "Copy Link" buttons
+  - Client view: read-only display with "Join Meeting" and "Copy Link" buttons
+  - Server action updateMeetingLink validates URL format (https:// required)
+  - Only displays for upcoming confirmed sessions
+  - Placeholder text: "Native video integration coming soon"
+  - Copy to clipboard with toast notification feedback
+- Files changed:
+  - src/db/schema.ts - Added meetingLink field to bookings table
+  - drizzle/0010_nervous_infant_terrible.sql - Migration for meeting_link column
+  - drizzle/meta/0010_snapshot.json - Schema snapshot
+  - drizzle/meta/_journal.json - Updated migration journal
+  - src/app/(dashboard)/dashboard/sessions/actions.ts - Added updateMeetingLink server action
+  - src/app/(dashboard)/dashboard/sessions/[id]/meeting-link-section.tsx - New MeetingLinkSection component
+  - src/app/(dashboard)/dashboard/sessions/[id]/page.tsx - Integrated MeetingLinkSection, fetch meetingLink field
+- **Learnings for future iterations:**
+  - URL validation: new URL(string) throws if invalid, but also check startsWith('https://') for security
+  - navigator.clipboard.writeText returns a Promise - handle errors gracefully with toast
+  - Components conditionally rendered based on isUpcoming && isConfirmed pattern
+  - For editable fields with auto-save: track hasChanges state, save on blur if hasChanges is true
+  - window.open with '_blank' needs 'noopener,noreferrer' for security
+---
