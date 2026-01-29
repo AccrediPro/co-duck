@@ -10,6 +10,7 @@ import {
   time,
   date,
   serial,
+  unique,
 } from 'drizzle-orm/pg-core';
 
 // Role enum for users
@@ -240,3 +241,59 @@ export const transactions = pgTable(
 // Transaction type exports
 export type Transaction = typeof transactions.$inferSelect;
 export type NewTransaction = typeof transactions.$inferInsert;
+
+// Message type enum
+export const messageTypeEnum = pgEnum('message_type', ['text', 'system']);
+
+// Conversations table (for messaging between coach and client)
+export const conversations = pgTable(
+  'conversations',
+  {
+    id: serial('id').primaryKey(),
+    coachId: text('coach_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    clientId: text('client_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    lastMessageAt: timestamp('last_message_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('conversations_coach_id_idx').on(table.coachId),
+    index('conversations_client_id_idx').on(table.clientId),
+    index('conversations_last_message_at_idx').on(table.lastMessageAt),
+    unique('conversations_coach_client_unique').on(table.coachId, table.clientId),
+  ]
+);
+
+// Conversation type exports
+export type Conversation = typeof conversations.$inferSelect;
+export type NewConversation = typeof conversations.$inferInsert;
+
+// Messages table
+export const messages = pgTable(
+  'messages',
+  {
+    id: serial('id').primaryKey(),
+    conversationId: integer('conversation_id')
+      .notNull()
+      .references(() => conversations.id, { onDelete: 'cascade' }),
+    senderId: text('sender_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    content: text('content').notNull(),
+    messageType: messageTypeEnum('message_type').notNull().default('text'),
+    isRead: boolean('is_read').notNull().default(false),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('messages_conversation_id_idx').on(table.conversationId),
+    index('messages_sender_id_idx').on(table.senderId),
+    index('messages_created_at_idx').on(table.createdAt),
+  ]
+);
+
+// Message type exports
+export type Message = typeof messages.$inferSelect;
+export type NewMessage = typeof messages.$inferInsert;
