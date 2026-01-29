@@ -254,7 +254,7 @@
       "title": "Cancellation Flow",
       "description": "Allow both coaches and clients to cancel sessions. Confirm cancellation with reason (optional). Update booking status. Free up the time slot. Handle cancellation policies (placeholder for payment refunds later).",
       "priority": 25,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "Cancel button opens confirmation modal",
         "Optional reason dropdown (schedule conflict, emergency, other)",

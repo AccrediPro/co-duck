@@ -705,3 +705,31 @@
   - Policy text in sidebar helps users understand reschedule constraints (advance notice hours)
   - format() from date-fns is useful for consistent date formatting in confirmation screens
 ---
+
+## 2026-01-30 - COACH-025
+- What was implemented:
+  - Enhanced cancellation flow with CancellationDialog component
+  - Cancellation reason dropdown with 4 options: schedule conflict, emergency, no longer needed, other
+  - Optional text field for additional cancellation details (max 500 chars)
+  - Cancellation policy warning that changes based on session timing (within 24 hours vs. advance notice)
+  - Updated all cancel locations: SessionCard, ClientSessionCard, session detail page, coach session actions
+  - Server actions already stored cancellation reason, cancelled_by, cancelled_at - just enhanced the UI
+  - Success toast notification after successful cancellation
+- Files changed:
+  - src/components/sessions/cancellation-dialog.tsx - New reusable cancellation dialog component
+  - src/components/sessions/index.ts - Exported new component and types
+  - src/components/sessions/session-card.tsx - Use CancellationDialog instead of AlertDialog
+  - src/components/sessions/client-session-card.tsx - Use CancellationDialog instead of AlertDialog
+  - src/components/sessions/sessions-list.tsx - Updated handleCancel signature (reason, details)
+  - src/components/sessions/client-sessions-list.tsx - Updated handleCancel signature (reason, details)
+  - src/app/(dashboard)/dashboard/sessions/[id]/session-detail-actions.tsx - Use CancellationDialog, added coachName/sessionTime props
+  - src/app/(dashboard)/dashboard/sessions/[id]/coach-session-actions.tsx - Use CancellationDialog, added clientName/sessionTime props
+  - src/app/(dashboard)/dashboard/sessions/[id]/page.tsx - Pass new props to action components
+- **Learnings for future iterations:**
+  - Create reusable dialog components for repeated patterns (CancellationDialog used in 4+ places)
+  - Dialog component from shadcn is better than AlertDialog for forms with inputs
+  - Use underscore prefix with void statement for unused parameters: `_param` + `void _param;`
+  - Combine reason and details in handler: `const fullReason = details ? \`\${reason}: \${details}\` : reason`
+  - Policy text should be dynamic based on session timing (check isWithin24Hours)
+  - Keep isCoach prop for future extensibility even if not currently used (different policies)
+---
