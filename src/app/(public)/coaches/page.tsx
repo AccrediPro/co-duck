@@ -1,6 +1,70 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Suspense } from 'react';
+import { Metadata } from 'next';
+import { eq, sql } from 'drizzle-orm';
+import { db, users, coachProfiles } from '@/db';
+import { CoachesGrid, CoachGridSkeleton, type CoachListItem } from '@/components/coaches';
 
-export default function CoachesPage() {
+export const metadata: Metadata = {
+  title: 'Find a Coach | Coaching Platform',
+  description:
+    'Browse our community of expert coaches. Find the perfect coach for career, life, wellness, leadership, and more.',
+};
+
+const COACHES_PER_PAGE = 12;
+
+interface PageProps {
+  searchParams: Promise<{ page?: string }>;
+}
+
+async function getCoaches(page: number): Promise<{ coaches: CoachListItem[]; totalCount: number }> {
+  const offset = (page - 1) * COACHES_PER_PAGE;
+
+  // Get total count of published coaches
+  const countResult = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(coachProfiles)
+    .where(eq(coachProfiles.isPublished, true));
+
+  const totalCount = Number(countResult[0]?.count || 0);
+
+  // Get coaches for current page
+  const coaches = await db
+    .select({
+      userId: coachProfiles.userId,
+      slug: coachProfiles.slug,
+      headline: coachProfiles.headline,
+      specialties: coachProfiles.specialties,
+      currency: coachProfiles.currency,
+      sessionTypes: coachProfiles.sessionTypes,
+      name: users.name,
+      avatarUrl: users.avatarUrl,
+    })
+    .from(coachProfiles)
+    .innerJoin(users, eq(coachProfiles.userId, users.id))
+    .where(eq(coachProfiles.isPublished, true))
+    .orderBy(coachProfiles.createdAt)
+    .limit(COACHES_PER_PAGE)
+    .offset(offset);
+
+  return { coaches, totalCount };
+}
+
+async function CoachesContent({ searchParams }: PageProps) {
+  const params = await searchParams;
+  const page = Math.max(1, parseInt(params.page || '1', 10));
+  const { coaches, totalCount } = await getCoaches(page);
+
+  return (
+    <CoachesGrid
+      coaches={coaches}
+      totalCount={totalCount}
+      currentPage={page}
+      perPage={COACHES_PER_PAGE}
+    />
+  );
+}
+
+export default async function CoachesPage({ searchParams }: PageProps) {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
@@ -10,18 +74,9 @@ export default function CoachesPage() {
         </p>
       </div>
 
-      {/* Placeholder content - will be replaced in COACH-011 */}
-      <Card className="mx-auto max-w-md text-center">
-        <CardHeader>
-          <CardTitle>Coming Soon</CardTitle>
-          <CardDescription>The coach directory is currently being built.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">
-            Check back soon to browse our growing list of expert coaches.
-          </p>
-        </CardContent>
-      </Card>
+      <Suspense fallback={<CoachGridSkeleton count={COACHES_PER_PAGE} />}>
+        <CoachesContent searchParams={searchParams} />
+      </Suspense>
     </div>
   );
 }
