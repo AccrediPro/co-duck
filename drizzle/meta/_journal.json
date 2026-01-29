@@ -43,6 +43,13 @@
       "when": 1769720888943,
       "tag": "0005_hesitant_red_ghost",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1769721128457,
+      "tag": "0006_yummy_butterfly",
+      "breakpoints": true
     }
   ]
 }
