@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, User, CalendarDays, Clock, Settings, Menu } from 'lucide-react';
+import { Home, User, CalendarDays, Clock, Settings, Menu, CreditCard } from 'lucide-react';
 import { UserButton } from '@clerk/nextjs';
 import { useState } from 'react';
 
@@ -32,6 +32,7 @@ const coachLinks: NavLink[] = [
   { href: '/dashboard/profile', label: 'Profile', icon: User, roles: ['coach'] },
   { href: '/dashboard/sessions', label: 'Sessions', icon: CalendarDays, roles: ['coach'] },
   { href: '/dashboard/availability', label: 'Availability', icon: Clock, roles: ['coach'] },
+  { href: '/dashboard/payments', label: 'Payments', icon: CreditCard, roles: ['coach'] },
 ];
 
 // Client-specific links

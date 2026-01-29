@@ -72,6 +72,9 @@ export const coachProfiles = pgTable(
     bufferMinutes: integer('buffer_minutes').notNull().default(15),
     advanceNoticeHours: integer('advance_notice_hours').notNull().default(24),
     maxAdvanceDays: integer('max_advance_days').notNull().default(60),
+    // Stripe Connect fields
+    stripeAccountId: text('stripe_account_id'),
+    stripeOnboardingComplete: boolean('stripe_onboarding_complete').notNull().default(false),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true })
       .notNull()
