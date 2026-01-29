@@ -1,14 +1,24 @@
 import { auth } from '@clerk/nextjs/server';
 import { redirect, notFound } from 'next/navigation';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, or } from 'drizzle-orm';
 import { format } from 'date-fns';
 import Link from 'next/link';
-import { db, bookings, users } from '@/db';
+import { db, bookings, users, coachProfiles } from '@/db';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { ArrowLeft, Calendar, Clock, User, Mail, DollarSign, FileText } from 'lucide-react';
+import {
+  ArrowLeft,
+  Calendar,
+  Clock,
+  User,
+  Mail,
+  DollarSign,
+  FileText,
+  ExternalLink,
+} from 'lucide-react';
+import { SessionDetailActions } from './session-detail-actions';
 
 export const metadata = {
   title: 'Session Details | Coaching Platform',
@@ -33,15 +43,12 @@ export default async function SessionDetailPage({ params }: PageProps) {
     notFound();
   }
 
-  // Fetch the booking with client info
+  // Fetch the booking - allow access if user is either coach OR client
   const bookingData = await db
     .select({
       id: bookings.id,
       coachId: bookings.coachId,
       clientId: bookings.clientId,
-      clientName: users.name,
-      clientAvatar: users.avatarUrl,
-      clientEmail: users.email,
       sessionType: bookings.sessionType,
       startTime: bookings.startTime,
       endTime: bookings.endTime,
@@ -53,8 +60,12 @@ export default async function SessionDetailPage({ params }: PageProps) {
       createdAt: bookings.createdAt,
     })
     .from(bookings)
-    .innerJoin(users, eq(bookings.clientId, users.id))
-    .where(and(eq(bookings.id, sessionId), eq(bookings.coachId, userId)))
+    .where(
+      and(
+        eq(bookings.id, sessionId),
+        or(eq(bookings.coachId, userId), eq(bookings.clientId, userId))
+      )
+    )
     .limit(1);
 
   if (bookingData.length === 0) {
@@ -62,6 +73,59 @@ export default async function SessionDetailPage({ params }: PageProps) {
   }
 
   const session = bookingData[0];
+  const isCoachView = session.coachId === userId;
+  const isClientView = session.clientId === userId;
+
+  // Fetch the other party's info
+  let otherParty: {
+    name: string | null;
+    avatar: string | null;
+    email: string;
+    slug?: string;
+  } | null = null;
+
+  if (isCoachView) {
+    // Coach viewing - get client info
+    const clientData = await db
+      .select({
+        name: users.name,
+        avatar: users.avatarUrl,
+        email: users.email,
+      })
+      .from(users)
+      .where(eq(users.id, session.clientId))
+      .limit(1);
+
+    if (clientData.length > 0) {
+      otherParty = {
+        name: clientData[0].name,
+        avatar: clientData[0].avatar,
+        email: clientData[0].email,
+      };
+    }
+  } else {
+    // Client viewing - get coach info
+    const coachData = await db
+      .select({
+        name: users.name,
+        avatar: users.avatarUrl,
+        email: users.email,
+        slug: coachProfiles.slug,
+      })
+      .from(users)
+      .innerJoin(coachProfiles, eq(users.id, coachProfiles.userId))
+      .where(eq(users.id, session.coachId))
+      .limit(1);
+
+    if (coachData.length > 0) {
+      otherParty = {
+        name: coachData[0].name,
+        avatar: coachData[0].avatar,
+        email: coachData[0].email,
+        slug: coachData[0].slug,
+      };
+    }
+  }
 
   const getInitials = (name: string | null) => {
     if (!name) return 'U';
@@ -114,14 +178,19 @@ export default async function SessionDetailPage({ params }: PageProps) {
     return `$${(cents / 100).toFixed(2)}`;
   };
 
+  const backLink = isCoachView ? '/dashboard/sessions' : '/dashboard/my-sessions';
+  const isUpcoming = new Date(session.startTime) > new Date();
+  const canTakeAction =
+    isUpcoming && session.status !== 'cancelled' && session.status !== 'completed';
+
   return (
     <div className="space-y-6">
       {/* Back button and header */}
       <div>
         <Button variant="ghost" size="sm" asChild className="mb-4">
-          <Link href="/dashboard/sessions">
+          <Link href={backLink}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Sessions
+            Back to {isCoachView ? 'Sessions' : 'My Sessions'}
           </Link>
         </Button>
         <div className="flex flex-wrap items-center gap-3">
@@ -194,8 +263,12 @@ export default async function SessionDetailPage({ params }: PageProps) {
           {session.clientNotes && (
             <Card>
               <CardHeader>
-                <CardTitle>Client Notes</CardTitle>
-                <CardDescription>Notes provided by the client when booking</CardDescription>
+                <CardTitle>{isCoachView ? 'Client Notes' : 'Your Notes'}</CardTitle>
+                <CardDescription>
+                  {isCoachView
+                    ? 'Notes provided by the client when booking'
+                    : 'Notes you provided when booking'}
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <p className="whitespace-pre-wrap text-muted-foreground">{session.clientNotes}</p>
@@ -203,8 +276,8 @@ export default async function SessionDetailPage({ params }: PageProps) {
             </Card>
           )}
 
-          {/* Coach Notes Card */}
-          {session.coachNotes && (
+          {/* Coach Notes Card - Only visible to coach */}
+          {isCoachView && session.coachNotes && (
             <Card>
               <CardHeader>
                 <CardTitle>Your Notes</CardTitle>
@@ -239,41 +312,71 @@ export default async function SessionDetailPage({ params }: PageProps) {
               </CardContent>
             </Card>
           )}
+
+          {/* Actions Card for Client - Upcoming sessions only */}
+          {isClientView && canTakeAction && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Actions</CardTitle>
+                <CardDescription>Manage your session</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <SessionDetailActions sessionId={session.id} />
+              </CardContent>
+            </Card>
+          )}
         </div>
 
-        {/* Sidebar - Client Info */}
-        <div>
+        {/* Sidebar - Other party info */}
+        <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Client</CardTitle>
+              <CardTitle>{isCoachView ? 'Client' : 'Coach'}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="flex flex-col items-center text-center">
                 <Avatar className="h-20 w-20">
-                  <AvatarImage
-                    src={session.clientAvatar || undefined}
-                    alt={session.clientName || ''}
-                  />
+                  <AvatarImage src={otherParty?.avatar || undefined} alt={otherParty?.name || ''} />
                   <AvatarFallback className="text-lg">
-                    {session.clientName ? (
-                      getInitials(session.clientName)
-                    ) : (
-                      <User className="h-8 w-8" />
-                    )}
+                    {otherParty?.name ? getInitials(otherParty.name) : <User className="h-8 w-8" />}
                   </AvatarFallback>
                 </Avatar>
 
                 <h3 className="mt-4 text-lg font-semibold">
-                  {session.clientName || 'Unknown Client'}
+                  {otherParty?.name || (isCoachView ? 'Unknown Client' : 'Coach')}
                 </h3>
 
-                <div className="mt-2 flex items-center gap-1 text-sm text-muted-foreground">
-                  <Mail className="h-4 w-4" />
-                  {session.clientEmail}
-                </div>
+                {otherParty?.email && (
+                  <div className="mt-2 flex items-center gap-1 text-sm text-muted-foreground">
+                    <Mail className="h-4 w-4" />
+                    {otherParty.email}
+                  </div>
+                )}
+
+                {/* Link to coach profile for clients */}
+                {isClientView && otherParty?.slug && (
+                  <Button variant="outline" size="sm" className="mt-4" asChild>
+                    <Link href={`/coaches/${otherParty.slug}`} target="_blank">
+                      <ExternalLink className="mr-2 h-4 w-4" />
+                      View Profile
+                    </Link>
+                  </Button>
+                )}
               </div>
             </CardContent>
           </Card>
+
+          {/* Quick Actions Card for Client */}
+          {isClientView && isUpcoming && session.status !== 'cancelled' && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Quick Actions</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <SessionDetailActions sessionId={session.id} variant="sidebar" />
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     </div>
