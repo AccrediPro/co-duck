@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, User, Calendar, Settings, Menu } from 'lucide-react';
+import { Home, User, CalendarDays, Clock, Settings, Menu } from 'lucide-react';
 import { UserButton } from '@clerk/nextjs';
 import { useState } from 'react';
 
@@ -10,21 +10,65 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/sheet';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
+import { LucideIcon } from 'lucide-react';
 
-const dashboardNavLinks = [
+type UserRole = 'admin' | 'coach' | 'client';
+
+interface NavLink {
+  href: string;
+  label: string;
+  icon: LucideIcon;
+  roles?: UserRole[]; // If undefined, visible to all roles
+}
+
+// Common links visible to all roles
+const commonLinks: NavLink[] = [
   { href: '/dashboard', label: 'Overview', icon: Home },
-  { href: '/dashboard/profile', label: 'Profile', icon: User },
-  { href: '/dashboard/sessions', label: 'Sessions', icon: Calendar },
   { href: '/dashboard/settings', label: 'Settings', icon: Settings },
 ];
+
+// Coach-specific links
+const coachLinks: NavLink[] = [
+  { href: '/dashboard/profile', label: 'Profile', icon: User, roles: ['coach'] },
+  { href: '/dashboard/sessions', label: 'Sessions', icon: CalendarDays, roles: ['coach'] },
+  { href: '/dashboard/availability', label: 'Availability', icon: Clock, roles: ['coach'] },
+];
+
+// Client-specific links
+const clientLinks: NavLink[] = [
+  { href: '/dashboard/my-sessions', label: 'My Sessions', icon: CalendarDays, roles: ['client'] },
+];
+
+// Get navigation links based on user role
+function getNavLinksForRole(role: UserRole): NavLink[] {
+  const links: NavLink[] = [commonLinks[0]]; // Overview first
+
+  if (role === 'coach') {
+    links.push(...coachLinks);
+  } else if (role === 'client') {
+    links.push(...clientLinks);
+  } else if (role === 'admin') {
+    // Admins see both coach and client links
+    links.push(...coachLinks, ...clientLinks);
+  }
+
+  links.push(commonLinks[1]); // Settings last
+  return links;
+}
 
 interface DashboardSidebarProps {
   userName?: string | null;
   userEmail?: string | null;
+  userRole?: UserRole;
 }
 
-export function DashboardSidebar({ userName, userEmail }: DashboardSidebarProps) {
+export function DashboardSidebar({
+  userName,
+  userEmail,
+  userRole = 'client',
+}: DashboardSidebarProps) {
   const pathname = usePathname();
+  const navLinks = getNavLinksForRole(userRole);
 
   const isActiveLink = (href: string) => {
     if (href === '/dashboard') {
@@ -46,7 +90,7 @@ export function DashboardSidebar({ userName, userEmail }: DashboardSidebarProps)
 
       {/* Navigation Links */}
       <nav className="flex-1 space-y-1 px-3 py-4">
-        {dashboardNavLinks.map((link) => {
+        {navLinks.map((link) => {
           const Icon = link.icon;
           return (
             <Link
@@ -91,9 +135,14 @@ export function DashboardSidebar({ userName, userEmail }: DashboardSidebarProps)
   );
 }
 
-export function DashboardMobileHeader({ userName, userEmail }: DashboardSidebarProps) {
+export function DashboardMobileHeader({
+  userName,
+  userEmail,
+  userRole = 'client',
+}: DashboardSidebarProps) {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const navLinks = getNavLinksForRole(userRole);
 
   const isActiveLink = (href: string) => {
     if (href === '/dashboard') {
@@ -129,7 +178,7 @@ export function DashboardMobileHeader({ userName, userEmail }: DashboardSidebarP
 
             {/* Navigation Links */}
             <nav className="flex-1 space-y-1 px-3 py-4">
-              {dashboardNavLinks.map((link) => {
+              {navLinks.map((link) => {
                 const Icon = link.icon;
                 return (
                   <Link
