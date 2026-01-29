@@ -413,7 +413,7 @@
       "title": "Refund Flow",
       "description": "Implement refund functionality for cancelled sessions. Calculate refund based on cancellation policy. Process refund via Stripe. Update transaction status. Show refund status to both parties.",
       "priority": 35,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "Cancellation triggers refund evaluation",
         "Full refund if cancelled > 24 hours before",

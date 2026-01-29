@@ -984,3 +984,53 @@
   - createRetryCheckoutSession reuses existing booking data to create new Stripe Checkout session
   - window.location.href for external redirects (Stripe Checkout) instead of router.push
 ---
+
+## 2026-01-30 - COACH-035
+- What was implemented:
+  - Created refund calculation utility (src/lib/refunds.ts) with eligibility rules:
+    - Full refund if cancelled > 24 hours before session
+    - No refund if cancelled within 24 hours (configurable threshold)
+    - Coach cancellations always result in full refund to client
+  - Updated cancelSession (coach) and cancelClientSession actions to:
+    - Check for existing paid transaction on the booking
+    - Calculate refund eligibility based on cancellation timing
+    - Process refunds via stripe.refunds.create() with payment_intent
+    - Update transaction status to 'refunded' and set refund_amount_cents
+    - Return refund info in the CancelSessionResult response
+  - Added getRefundEligibility (coach) and getClientRefundEligibility (client) server actions
+  - Updated CancellationDialog component to display refund information:
+    - Green box with "Full refund available" message and amount
+    - Red box with "No refund available (cancelled within 24 hours)"
+    - Coach view shows "The client will receive a full refund of $X"
+  - Updated SessionCard, ClientSessionCard to accept refundInfo prop
+  - Updated SessionsList, ClientSessionsList to:
+    - Cache refund info for paid sessions
+    - Preload refund info on component mount
+    - Display refund confirmation in success toast after cancellation
+  - Updated session detail action components (CoachSessionActions, SessionDetailActions) with:
+    - hasPaidTransaction prop to load refund info
+    - useEffect to fetch refund eligibility for paid sessions
+    - Refund info passed to CancellationDialog
+- Files changed:
+  - src/lib/refunds.ts - New refund calculation utility with formatRefundAmount helper
+  - src/app/(dashboard)/dashboard/sessions/actions.ts - Added cancelSession with refund, getRefundEligibility
+  - src/app/(dashboard)/dashboard/my-sessions/actions.ts - Added cancelClientSession with refund, getClientRefundEligibility
+  - src/components/sessions/cancellation-dialog.tsx - Added RefundEligibilityInfo interface, refundInfo prop, refund display
+  - src/components/sessions/index.ts - Exported RefundEligibilityInfo type
+  - src/components/sessions/session-card.tsx - Added refundInfo prop
+  - src/components/sessions/client-session-card.tsx - Added refundInfo prop
+  - src/components/sessions/sessions-list.tsx - Added refundInfoCache state, loadRefundInfo function, preload on mount
+  - src/components/sessions/client-sessions-list.tsx - Added refundInfoCache state, loadRefundInfo function, preload on mount
+  - src/app/(dashboard)/dashboard/sessions/[id]/coach-session-actions.tsx - Added hasPaidTransaction prop, refund info loading
+  - src/app/(dashboard)/dashboard/sessions/[id]/session-detail-actions.tsx - Added hasPaidTransaction prop, refund info loading
+  - src/app/(dashboard)/dashboard/sessions/[id]/page.tsx - Pass hasPaidTransaction to action components
+- **Learnings for future iterations:**
+  - Stripe refunds API: stripe.refunds.create() with payment_intent and amount (in cents)
+  - For Connect: refund goes back to customer; platform fee may be retained (default behavior)
+  - Calculate hours until session: (sessionTime.getTime() - Date.now()) / (1000 * 60 * 60)
+  - Coach cancellations always give full refund - no timing check needed
+  - Client cancellations check calculateRefundEligibility() based on advanceNoticeHours
+  - Use useState with callback to initialize cache and preload data on mount
+  - Cache refund info per session ID to avoid repeated API calls
+  - Pass refund result in cancel action response for toast message display
+---
