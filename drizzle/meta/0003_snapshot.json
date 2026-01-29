@@ -124,12 +124,8 @@
           "name": "availability_overrides_coach_id_coach_profiles_user_id_fk",
           "tableFrom": "availability_overrides",
           "tableTo": "coach_profiles",
-          "columnsFrom": [
-            "coach_id"
-          ],
-          "columnsTo": [
-            "user_id"
-          ],
+          "columnsFrom": ["coach_id"],
+          "columnsTo": ["user_id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -233,12 +229,8 @@
           "name": "coach_availability_coach_id_coach_profiles_user_id_fk",
           "tableFrom": "coach_availability",
           "tableTo": "coach_profiles",
-          "columnsFrom": [
-            "coach_id"
-          ],
-          "columnsTo": [
-            "user_id"
-          ],
+          "columnsFrom": ["coach_id"],
+          "columnsTo": ["user_id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -403,12 +395,8 @@
           "name": "coach_profiles_user_id_users_id_fk",
           "tableFrom": "coach_profiles",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -418,9 +406,7 @@
         "coach_profiles_slug_unique": {
           "name": "coach_profiles_slug_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "slug"
-          ]
+          "columns": ["slug"]
         }
       },
       "policies": {},
@@ -485,9 +471,7 @@
         "users_email_unique": {
           "name": "users_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       },
       "policies": {},
@@ -499,11 +483,7 @@
     "public.user_role": {
       "name": "user_role",
       "schema": "public",
-      "values": [
-        "admin",
-        "coach",
-        "client"
-      ]
+      "values": ["admin", "coach", "client"]
     }
   },
   "schemas": {},

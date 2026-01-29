@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { User } from 'lucide-react';
-import { getPaymentsData, checkStripeAccountStatus } from './actions';
+import { getPaymentsData, checkStripeAccountStatus, getCoachEarnings } from './actions';
 import { PaymentsContent } from '@/components/payments';
 
 export const metadata = {
@@ -133,16 +133,31 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
     );
   }
 
+  // Fetch earnings data if Stripe is connected
+  let earningsData = null;
+  if (result.data.stripeOnboardingComplete) {
+    const earningsResult = await getCoachEarnings(1, 10);
+    if (earningsResult.success) {
+      earningsData = earningsResult.data;
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold">Payments</h1>
         <p className="text-muted-foreground">
-          Set up and manage your payment processing to receive payments from clients.
+          {result.data.stripeOnboardingComplete
+            ? 'View your earnings and manage payment settings.'
+            : 'Set up and manage your payment processing to receive payments from clients.'}
         </p>
       </div>
 
-      <PaymentsContent initialData={result.data} setupStatus={setupStatus} />
+      <PaymentsContent
+        initialData={result.data}
+        setupStatus={setupStatus}
+        earningsData={earningsData}
+      />
     </div>
   );
 }

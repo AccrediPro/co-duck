@@ -89,7 +89,8 @@ const howItWorks = [
     step: 1,
     icon: Search,
     title: 'Browse Coaches',
-    description: 'Explore profiles, read reviews, and find a coach that matches your goals and style.',
+    description:
+      'Explore profiles, read reviews, and find a coach that matches your goals and style.',
   },
   {
     step: 2,
@@ -134,8 +135,8 @@ export default async function HomePage() {
               </span>
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl">
-              Connect with expert coaches for personalized guidance on your personal and professional
-              journey. Transform your life with one-on-one coaching that works.
+              Connect with expert coaches for personalized guidance on your personal and
+              professional journey. Transform your life with one-on-one coaching that works.
             </p>
             <div className="mt-10 flex flex-col justify-center gap-4 sm:flex-row">
               <Button size="lg" className="h-12 px-8 text-base" asChild>
@@ -221,76 +222,82 @@ export default async function HomePage() {
             </p>
           </div>
           <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-            {featuredCoaches.length > 0 ? (
-              featuredCoaches.map((coach) => {
-                const lowestSession = getLowestPrice(coach.sessionTypes as SessionType[] | null);
-                const displaySpecialties = (coach.specialties as string[] | null)?.slice(0, 2) || [];
+            {featuredCoaches.length > 0
+              ? featuredCoaches.map((coach) => {
+                  const lowestSession = getLowestPrice(coach.sessionTypes as SessionType[] | null);
+                  const displaySpecialties =
+                    (coach.specialties as string[] | null)?.slice(0, 2) || [];
 
-                return (
-                  <Link key={coach.slug} href={`/coaches/${coach.slug}`}>
-                    <Card className="group h-full cursor-pointer transition-all hover:border-primary/50 hover:shadow-lg">
-                      <CardContent className="p-8">
-                        <div className="flex flex-col items-center text-center">
-                          <Avatar className="h-24 w-24 border-4 border-background shadow-lg">
-                            <AvatarImage src={coach.avatarUrl || undefined} alt={coach.name || ''} />
-                            <AvatarFallback className="text-xl">
-                              {coach.name ? getInitials(coach.name) : <User className="h-10 w-10" />}
-                            </AvatarFallback>
-                          </Avatar>
-                          <h3 className="mt-4 text-lg font-semibold transition-colors group-hover:text-primary">
-                            {coach.name}
-                          </h3>
-                          {coach.headline && (
-                            <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
-                              {coach.headline}
-                            </p>
-                          )}
-                          {displaySpecialties.length > 0 && (
-                            <div className="mt-4 flex flex-wrap justify-center gap-1">
-                              {displaySpecialties.map((specialty, index) => (
-                                <Badge key={index} variant="secondary" className="text-xs">
-                                  {specialty}
-                                </Badge>
-                              ))}
-                            </div>
-                          )}
-                          {lowestSession && (
-                            <div className="mt-4 w-full border-t pt-4">
-                              <p className="text-sm text-muted-foreground">Starting from</p>
-                              <p className="text-xl font-bold text-primary">
-                                {formatPrice(lowestSession.price, coach.currency)}
+                  return (
+                    <Link key={coach.slug} href={`/coaches/${coach.slug}`}>
+                      <Card className="group h-full cursor-pointer transition-all hover:border-primary/50 hover:shadow-lg">
+                        <CardContent className="p-8">
+                          <div className="flex flex-col items-center text-center">
+                            <Avatar className="h-24 w-24 border-4 border-background shadow-lg">
+                              <AvatarImage
+                                src={coach.avatarUrl || undefined}
+                                alt={coach.name || ''}
+                              />
+                              <AvatarFallback className="text-xl">
+                                {coach.name ? (
+                                  getInitials(coach.name)
+                                ) : (
+                                  <User className="h-10 w-10" />
+                                )}
+                              </AvatarFallback>
+                            </Avatar>
+                            <h3 className="mt-4 text-lg font-semibold transition-colors group-hover:text-primary">
+                              {coach.name}
+                            </h3>
+                            {coach.headline && (
+                              <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
+                                {coach.headline}
                               </p>
-                            </div>
-                          )}
+                            )}
+                            {displaySpecialties.length > 0 && (
+                              <div className="mt-4 flex flex-wrap justify-center gap-1">
+                                {displaySpecialties.map((specialty, index) => (
+                                  <Badge key={index} variant="secondary" className="text-xs">
+                                    {specialty}
+                                  </Badge>
+                                ))}
+                              </div>
+                            )}
+                            {lowestSession && (
+                              <div className="mt-4 w-full border-t pt-4">
+                                <p className="text-sm text-muted-foreground">Starting from</p>
+                                <p className="text-xl font-bold text-primary">
+                                  {formatPrice(lowestSession.price, coach.currency)}
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </Link>
+                  );
+                })
+              : /* Placeholder cards when no coaches are available */
+                Array.from({ length: 3 }).map((_, index) => (
+                  <Card key={index} className="border-dashed">
+                    <CardContent className="p-8">
+                      <div className="flex flex-col items-center text-center">
+                        <div className="flex h-24 w-24 items-center justify-center rounded-full bg-muted">
+                          <User className="h-10 w-10 text-muted-foreground" />
                         </div>
-                      </CardContent>
-                    </Card>
-                  </Link>
-                );
-              })
-            ) : (
-              /* Placeholder cards when no coaches are available */
-              Array.from({ length: 3 }).map((_, index) => (
-                <Card key={index} className="border-dashed">
-                  <CardContent className="p-8">
-                    <div className="flex flex-col items-center text-center">
-                      <div className="flex h-24 w-24 items-center justify-center rounded-full bg-muted">
-                        <User className="h-10 w-10 text-muted-foreground" />
+                        <div className="mt-4 h-5 w-32 rounded bg-muted" />
+                        <div className="mt-2 h-4 w-48 rounded bg-muted" />
+                        <div className="mt-4 flex gap-1">
+                          <div className="h-5 w-16 rounded bg-muted" />
+                          <div className="h-5 w-16 rounded bg-muted" />
+                        </div>
+                        <p className="mt-6 text-sm text-muted-foreground">
+                          More coaches coming soon!
+                        </p>
                       </div>
-                      <div className="mt-4 h-5 w-32 rounded bg-muted" />
-                      <div className="mt-2 h-4 w-48 rounded bg-muted" />
-                      <div className="mt-4 flex gap-1">
-                        <div className="h-5 w-16 rounded bg-muted" />
-                        <div className="h-5 w-16 rounded bg-muted" />
-                      </div>
-                      <p className="mt-6 text-sm text-muted-foreground">
-                        More coaches coming soon!
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))
-            )}
+                    </CardContent>
+                  </Card>
+                ))}
           </div>
           <div className="mt-12 text-center">
             <Button size="lg" variant="outline" asChild>

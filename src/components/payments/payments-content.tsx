@@ -19,7 +19,11 @@ import {
   createStripeConnectAccount,
   generateOnboardingLink,
   type StripeOnboardingStatus,
+  type EarningsData,
+  type TransactionWithClient,
 } from '@/app/(dashboard)/dashboard/payments/actions';
+import { EarningsOverview } from './earnings-overview';
+import { TransactionsList } from './transactions-list';
 
 interface PaymentsContentProps {
   initialData: {
@@ -28,9 +32,16 @@ interface PaymentsContentProps {
     onboardingStatus: StripeOnboardingStatus;
   };
   setupStatus?: string;
+  earningsData?: {
+    earnings: EarningsData;
+    transactions: TransactionWithClient[];
+    totalCount: number;
+    page: number;
+    pageSize: number;
+  } | null;
 }
 
-export function PaymentsContent({ initialData, setupStatus }: PaymentsContentProps) {
+export function PaymentsContent({ initialData, setupStatus, earningsData }: PaymentsContentProps) {
   const router = useRouter();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
@@ -154,6 +165,11 @@ export function PaymentsContent({ initialData, setupStatus }: PaymentsContentPro
 
   return (
     <div className="space-y-6">
+      {/* Earnings Overview - Only show when Stripe is connected */}
+      {onboardingStatus === 'complete' && earningsData && (
+        <EarningsOverview earnings={earningsData.earnings} />
+      )}
+
       {/* Stripe Connect Status Card */}
       <Card>
         <CardHeader>
@@ -161,7 +177,9 @@ export function PaymentsContent({ initialData, setupStatus }: PaymentsContentPro
             <div>
               <CardTitle>Payment Processing</CardTitle>
               <CardDescription>
-                Connect your Stripe account to receive payments from clients
+                {onboardingStatus === 'complete'
+                  ? 'Your Stripe account is connected and ready to receive payments'
+                  : 'Connect your Stripe account to receive payments from clients'}
               </CardDescription>
             </div>
             {getStatusBadge()}
@@ -269,33 +287,46 @@ export function PaymentsContent({ initialData, setupStatus }: PaymentsContentPro
         </CardContent>
       </Card>
 
-      {/* Info Card */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">About Stripe Connect</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <p className="text-sm text-muted-foreground">
-            We use Stripe Connect to securely handle payments. Your financial information is stored
-            directly with Stripe, not on our platform.
-          </p>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="rounded-lg border p-4">
-              <h4 className="font-medium">Secure Payments</h4>
-              <p className="mt-1 text-sm text-muted-foreground">
-                All transactions are processed securely through Stripe, a PCI-compliant payment
-                processor.
-              </p>
+      {/* Transactions List - Only show when Stripe is connected */}
+      {onboardingStatus === 'complete' && earningsData && (
+        <TransactionsList
+          initialTransactions={earningsData.transactions}
+          totalCount={earningsData.totalCount}
+          initialPage={earningsData.page}
+          pageSize={earningsData.pageSize}
+          currency={earningsData.earnings.currency}
+        />
+      )}
+
+      {/* Info Card - Only show when not connected */}
+      {onboardingStatus !== 'complete' && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">About Stripe Connect</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              We use Stripe Connect to securely handle payments. Your financial information is
+              stored directly with Stripe, not on our platform.
+            </p>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="rounded-lg border p-4">
+                <h4 className="font-medium">Secure Payments</h4>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  All transactions are processed securely through Stripe, a PCI-compliant payment
+                  processor.
+                </p>
+              </div>
+              <div className="rounded-lg border p-4">
+                <h4 className="font-medium">Fast Payouts</h4>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Receive payouts directly to your bank account, typically within 2-7 business days.
+                </p>
+              </div>
             </div>
-            <div className="rounded-lg border p-4">
-              <h4 className="font-medium">Fast Payouts</h4>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Receive payouts directly to your bank account, typically within 2-7 business days.
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
