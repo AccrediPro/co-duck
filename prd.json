@@ -398,7 +398,7 @@
       "title": "Payment Status in Booking Flow",
       "description": "Update booking UI to show payment status. Display payment required badge on unpaid bookings. Show payment confirmation on completed payments. Handle payment failures with retry option.",
       "priority": 34,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "Booking cards show payment status badge",
         "Unpaid bookings show 'Payment Required' with Pay Now button",

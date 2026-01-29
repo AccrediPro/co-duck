@@ -953,3 +953,34 @@
   - Separate fetching earnings data in page.tsx and passing to client component for cleaner server/client boundary
   - Use Promise.all with map to enrich transaction data with booking session type info
 ---
+
+## 2026-01-30 - COACH-034
+- What was implemented:
+  - Added payment status to session queries (both coach and client views)
+  - PaymentStatus type: 'free' | 'paid' | 'payment_required' | 'payment_failed'
+  - Payment status badges displayed on SessionCard (coach view) and ClientSessionCard (client view)
+  - "Pay Now" button on client session cards for unpaid upcoming sessions
+  - Created PaymentSection component for session detail page showing:
+    - Transaction info (amount paid, payment date, coach payout)
+    - View Receipt link for clients (links to Stripe payment)
+    - Pay Now button for retrying failed/pending payments
+  - Added createRetryCheckoutSession server action to create Stripe Checkout from existing booking
+  - Free sessions (price = 0) show no payment badge
+  - Paid sessions show green "Paid" badge with checkmark
+  - Payment required shows amber badge, payment failed shows red badge
+- Files changed:
+  - src/app/(dashboard)/dashboard/sessions/actions.ts - Added PaymentStatus type and payment status to SessionWithClient
+  - src/app/(dashboard)/dashboard/my-sessions/actions.ts - Added PaymentStatus type, payment status to SessionWithCoach, and createRetryCheckoutSession server action
+  - src/components/sessions/session-card.tsx - Added payment badge display
+  - src/components/sessions/client-session-card.tsx - Added payment badge and Pay Now button
+  - src/components/sessions/client-sessions-list.tsx - Added handlePayNow handler
+  - src/app/(dashboard)/dashboard/sessions/[id]/page.tsx - Added transaction query and PaymentSection
+  - src/app/(dashboard)/dashboard/sessions/[id]/payment-section.tsx - New component for payment info display
+- **Learnings for future iterations:**
+  - Query payment status per-session using Promise.all to enrich session data with transaction status
+  - Free sessions (price === 0) are automatically "free" status - no transaction needed
+  - PaymentSection component handles both coach and client views with conditional display
+  - Use Intl.DateTimeFormat().resolvedOptions().timeZone to get client's browser timezone
+  - createRetryCheckoutSession reuses existing booking data to create new Stripe Checkout session
+  - window.location.href for external redirects (Stripe Checkout) instead of router.push
+---
