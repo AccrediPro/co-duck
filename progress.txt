@@ -1057,3 +1057,34 @@
   - Messages table uses CASCADE delete on conversation_id so deleting a conversation removes all messages
   - message_type enum with 'text' and 'system' supports both user messages and automated system messages (e.g., booking confirmations)
 ---
+
+## 2026-01-30 - COACH-037
+- What was implemented:
+  - Created /dashboard/messages page showing list of conversations
+  - Server action getConversations() fetches user's conversations with last message and unread count
+  - For coaches: query where coach_id = user, join to get client info
+  - For clients: query where client_id = user, join to get coach info
+  - Display list sorted by last_message_at desc
+  - ConversationRow component: avatar, name, last message preview (truncated to ~50 chars), relative timestamp
+  - Unread indicator (blue dot) for conversations with unread messages
+  - Click row navigates to /dashboard/messages/[id]
+  - Empty state with "No conversations yet" message and helpful description
+  - Search/filter by name with 300ms debounce
+  - Server action getUnreadMessageCount() for navigation badge (to be used in COACH-041)
+  - Placeholder conversation detail page at /dashboard/messages/[id] for COACH-038
+- Files changed:
+  - src/app/(dashboard)/dashboard/messages/page.tsx - Main messages list page
+  - src/app/(dashboard)/dashboard/messages/actions.ts - Server actions: getConversations, getUnreadMessageCount
+  - src/app/(dashboard)/dashboard/messages/[id]/page.tsx - Placeholder conversation detail page
+  - src/components/messages/conversation-row.tsx - Conversation row component with avatar, preview, timestamp
+  - src/components/messages/conversations-list.tsx - Client component with search and list rendering
+  - src/components/messages/index.ts - Component exports
+- **Learnings for future iterations:**
+  - Use `ne()` from drizzle-orm for "not equals" condition in unread count query (messages from other user)
+  - ConversationWithDetails interface captures all needed data: otherUserId, otherUserName, otherUserAvatar, lastMessageContent, lastMessageAt, unreadCount, isCoach
+  - Relative timestamp formatting: "Just now", "Xm ago", "Xh ago", "Yesterday", "Xd ago", "Xw ago", then month/day
+  - Truncate text helper for message previews: substring + "..." for consistent length
+  - Debounced search pattern: useEffect with setTimeout(300ms) and cleanup return
+  - For role-based queries, check if userId === coachId to determine isCoach boolean
+  - Blue dot indicator positioned with absolute -right-0.5 -top-0.5 on avatar container
+---

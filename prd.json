@@ -445,7 +445,7 @@
       "title": "Conversations List Page",
       "description": "Create /dashboard/messages page showing list of conversations. For coaches: show client conversations. For clients: show coach conversations. Display last message preview, timestamp, unread indicator.",
       "priority": 37,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "Page at /dashboard/messages",
         "List of conversations sorted by last_message_at desc",
