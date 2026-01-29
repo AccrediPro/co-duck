@@ -237,7 +237,7 @@
       "title": "Reschedule Flow",
       "description": "Allow clients to reschedule confirmed sessions. Show available slots excluding original booking time. Update booking record with new time. Notify coach of change.",
       "priority": 24,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "Reschedule button on session detail/list",
         "Same flow as booking but pre-selects session type",

@@ -1,4 +1,5 @@
 ## Codebase Patterns
+- **CRITICAL: Database uses Supabase with postgres-js driver. Do NOT change src/db/index.ts to use @neondatabase/serverless - it will break the connection.**
 - Use `npx shadcn@latest add <component>` to add new UI components
 - Format with `npm run format` before committing
 - Run `npm run typecheck` and `npm run lint` for quality checks
@@ -678,4 +679,29 @@
   - ICS file generation for coaches similar to clients but shows client name instead of coach
   - Keep action components co-located with page for easier maintenance
   - Toast provides good UX for placeholder features ("coming soon")
+---
+
+## 2026-01-30 - COACH-024
+- What was implemented:
+  - Full reschedule flow at /dashboard/sessions/[id]/reschedule
+  - Server actions for reschedule: getRescheduleBookingData, getRescheduleBookableDates, getRescheduleAvailableSlots, confirmReschedule
+  - RescheduleFlow client component with 3-step wizard: Select Date -> Select Time -> Confirm
+  - Excludes current booking from slot conflicts so original time appears available
+  - Visual indicator ("Current" badge) for the original booking time slot
+  - Advance notice enforcement based on coach's advanceNoticeHours setting
+  - Sidebar showing session info, current booking, and new selected time
+  - Policy notice displaying the reschedule window requirement
+  - Success toast and redirect to session detail page after confirmation
+  - Error handling for invalid bookings, past sessions, or insufficient advance notice
+- Files changed:
+  - src/app/(dashboard)/dashboard/sessions/[id]/reschedule/page.tsx - Updated from placeholder to full reschedule page
+  - src/app/(dashboard)/dashboard/sessions/[id]/reschedule/actions.ts - New server actions for reschedule flow
+  - src/app/(dashboard)/dashboard/sessions/[id]/reschedule/reschedule-flow.tsx - New client component for reschedule wizard
+- **Learnings for future iterations:**
+  - Reuse availability calculation logic from booking flow but add `ne(bookings.id, currentBookingId)` to exclude current booking
+  - For reschedule, session type is pre-selected (from existing booking) so skip step 1 of booking flow
+  - Use underscore prefix (_coachTimezone) for parameters kept for API consistency but not used
+  - Original slot detection: compare hours and minutes on the same date to show "Current" badge
+  - Policy text in sidebar helps users understand reschedule constraints (advance notice hours)
+  - format() from date-fns is useful for consistent date formatting in confirmation screens
 ---
