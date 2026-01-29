@@ -6,23 +6,13 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
 import { Calendar, Clock, User, XCircle, Eye, CalendarPlus, RefreshCw } from 'lucide-react';
+import { CancellationDialog } from './cancellation-dialog';
 import type { SessionWithCoach } from '@/app/(dashboard)/dashboard/my-sessions/actions';
 
 interface ClientSessionCardProps {
   session: SessionWithCoach;
-  onCancel?: (sessionId: number) => Promise<void>;
+  onCancel?: (sessionId: number, reason: string, details: string) => Promise<void>;
   onAddToCalendar?: (sessionId: number) => Promise<void>;
   isUpcoming?: boolean;
 }
@@ -157,8 +147,12 @@ export function ClientSessionCard({
             )}
 
             {canCancel && onCancel && (
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
+              <CancellationDialog
+                onCancel={(reason, details) => onCancel(session.id, reason, details)}
+                otherPartyName={session.coachName || 'the coach'}
+                sessionTime={session.startTime}
+                isCoach={false}
+                triggerButton={
                   <Button
                     variant="outline"
                     size="sm"
@@ -167,26 +161,8 @@ export function ClientSessionCard({
                     <XCircle className="mr-1.5 h-4 w-4" />
                     Cancel
                   </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Cancel Session</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Are you sure you want to cancel this session with {session.coachName}? This
-                      action cannot be undone.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Keep Session</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={() => onCancel(session.id)}
-                      className="bg-red-600 hover:bg-red-700"
-                    >
-                      Cancel Session
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+                }
+              />
             )}
           </div>
         </div>

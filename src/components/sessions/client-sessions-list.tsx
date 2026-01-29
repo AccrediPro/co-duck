@@ -66,8 +66,10 @@ export function ClientSessionsList({
     });
   };
 
-  const handleCancel = async (sessionId: number) => {
-    const result = await cancelClientSession(sessionId);
+  const handleCancel = async (sessionId: number, reason: string, details: string) => {
+    // Combine reason and details into a single cancellation reason
+    const fullReason = details ? `${reason}: ${details}` : reason;
+    const result = await cancelClientSession(sessionId, fullReason);
 
     if (result.success) {
       toast({

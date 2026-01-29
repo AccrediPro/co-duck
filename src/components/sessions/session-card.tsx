@@ -6,24 +6,14 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
 import { Calendar, Clock, User, CheckCircle, XCircle, Eye } from 'lucide-react';
+import { CancellationDialog } from './cancellation-dialog';
 import type { SessionWithClient } from '@/app/(dashboard)/dashboard/sessions/actions';
 
 interface SessionCardProps {
   session: SessionWithClient;
   onMarkComplete?: (sessionId: number) => Promise<void>;
-  onCancel?: (sessionId: number) => Promise<void>;
+  onCancel?: (sessionId: number, reason: string, details: string) => Promise<void>;
   isPast?: boolean;
   isCancelled?: boolean;
 }
@@ -158,8 +148,12 @@ export function SessionCard({
               session.status !== 'completed' &&
               session.status !== 'cancelled' &&
               onCancel && (
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
+                <CancellationDialog
+                  onCancel={(reason, details) => onCancel(session.id, reason, details)}
+                  otherPartyName={session.clientName || 'the client'}
+                  sessionTime={session.startTime}
+                  isCoach={true}
+                  triggerButton={
                     <Button
                       variant="outline"
                       size="sm"
@@ -168,26 +162,8 @@ export function SessionCard({
                       <XCircle className="mr-1.5 h-4 w-4" />
                       Cancel
                     </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Cancel Session</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Are you sure you want to cancel this session with {session.clientName}? This
-                        action cannot be undone. The client will be notified of the cancellation.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Keep Session</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={() => onCancel(session.id)}
-                        className="bg-red-600 hover:bg-red-700"
-                      >
-                        Cancel Session
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+                  }
+                />
               )}
           </div>
         </div>

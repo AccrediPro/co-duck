@@ -4,19 +4,9 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
-import { CalendarPlus, RefreshCw, XCircle, Loader2 } from 'lucide-react';
+import { CalendarPlus, RefreshCw, Loader2 } from 'lucide-react';
+import { CancellationDialog } from '@/components/sessions/cancellation-dialog';
 import {
   cancelClientSession,
   generateClientIcsFile,
@@ -24,17 +14,20 @@ import {
 
 interface SessionDetailActionsProps {
   sessionId: number;
+  coachName?: string;
+  sessionTime?: Date;
   variant?: 'default' | 'sidebar';
 }
 
 export function SessionDetailActions({
   sessionId,
+  coachName = 'the coach',
+  sessionTime,
   variant = 'default',
 }: SessionDetailActionsProps) {
   const router = useRouter();
   const { toast } = useToast();
   const [isAddingToCalendar, setIsAddingToCalendar] = useState(false);
-  const [isCancelling, setIsCancelling] = useState(false);
 
   const handleAddToCalendar = async () => {
     setIsAddingToCalendar(true);
@@ -69,26 +62,22 @@ export function SessionDetailActions({
     }
   };
 
-  const handleCancel = async () => {
-    setIsCancelling(true);
-    try {
-      const result = await cancelClientSession(sessionId);
+  const handleCancel = async (reason: string, details: string) => {
+    const fullReason = details ? `${reason}: ${details}` : reason;
+    const result = await cancelClientSession(sessionId, fullReason);
 
-      if (result.success) {
-        toast({
-          title: 'Session cancelled',
-          description: 'Your session has been cancelled successfully.',
-        });
-        router.refresh();
-      } else {
-        toast({
-          title: 'Error',
-          description: result.error || 'Failed to cancel session',
-          variant: 'destructive',
-        });
-      }
-    } finally {
-      setIsCancelling(false);
+    if (result.success) {
+      toast({
+        title: 'Session cancelled',
+        description: 'Your session has been cancelled successfully.',
+      });
+      router.refresh();
+    } else {
+      toast({
+        title: 'Error',
+        description: result.error || 'Failed to cancel session',
+        variant: 'destructive',
+      });
     }
   };
 
@@ -120,37 +109,13 @@ export function SessionDetailActions({
             Reschedule
           </Link>
         </Button>
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full justify-start text-red-600 hover:bg-red-50 hover:text-red-700"
-              disabled={isCancelling}
-            >
-              {isCancelling ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <XCircle className="mr-2 h-4 w-4" />
-              )}
-              Cancel Session
-            </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Cancel Session</AlertDialogTitle>
-              <AlertDialogDescription>
-                Are you sure you want to cancel this session? This action cannot be undone.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Keep Session</AlertDialogCancel>
-              <AlertDialogAction onClick={handleCancel} className="bg-red-600 hover:bg-red-700">
-                Cancel Session
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        <CancellationDialog
+          onCancel={handleCancel}
+          otherPartyName={coachName}
+          sessionTime={sessionTime}
+          isCoach={false}
+          variant="sidebar"
+        />
       </>
     );
   }
@@ -175,36 +140,12 @@ export function SessionDetailActions({
           Reschedule
         </Link>
       </Button>
-      <AlertDialog>
-        <AlertDialogTrigger asChild>
-          <Button
-            variant="outline"
-            className="text-red-600 hover:bg-red-50 hover:text-red-700"
-            disabled={isCancelling}
-          >
-            {isCancelling ? (
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            ) : (
-              <XCircle className="mr-2 h-4 w-4" />
-            )}
-            Cancel Session
-          </Button>
-        </AlertDialogTrigger>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Cancel Session</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to cancel this session? This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Keep Session</AlertDialogCancel>
-            <AlertDialogAction onClick={handleCancel} className="bg-red-600 hover:bg-red-700">
-              Cancel Session
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <CancellationDialog
+        onCancel={handleCancel}
+        otherPartyName={coachName}
+        sessionTime={sessionTime}
+        isCoach={false}
+      />
     </div>
   );
 }

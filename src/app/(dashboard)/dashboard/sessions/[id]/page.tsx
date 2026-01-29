@@ -337,7 +337,11 @@ export default async function SessionDetailPage({ params }: PageProps) {
                 <CardDescription>Manage your session</CardDescription>
               </CardHeader>
               <CardContent>
-                <SessionDetailActions sessionId={session.id} />
+                <SessionDetailActions
+                  sessionId={session.id}
+                  coachName={otherParty?.name || 'the coach'}
+                  sessionTime={session.startTime}
+                />
               </CardContent>
             </Card>
           )}
@@ -350,7 +354,12 @@ export default async function SessionDetailPage({ params }: PageProps) {
                 <CardDescription>Manage this session</CardDescription>
               </CardHeader>
               <CardContent>
-                <CoachSessionActions sessionId={session.id} canCancel={canTakeAction} />
+                <CoachSessionActions
+                  sessionId={session.id}
+                  canCancel={canTakeAction}
+                  clientName={otherParty?.name || 'the client'}
+                  sessionTime={session.startTime}
+                />
               </CardContent>
             </Card>
           )}
@@ -412,7 +421,12 @@ export default async function SessionDetailPage({ params }: PageProps) {
                 <CardTitle className="text-base">Quick Actions</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                <SessionDetailActions sessionId={session.id} variant="sidebar" />
+                <SessionDetailActions
+                  sessionId={session.id}
+                  coachName={otherParty?.name || 'the coach'}
+                  sessionTime={session.startTime}
+                  variant="sidebar"
+                />
               </CardContent>
             </Card>
           )}
@@ -427,6 +441,8 @@ export default async function SessionDetailPage({ params }: PageProps) {
                 <CoachSessionActions
                   sessionId={session.id}
                   canCancel={canTakeAction}
+                  clientName={otherParty?.name || 'the client'}
+                  sessionTime={session.startTime}
                   variant="sidebar"
                 />
               </CardContent>
