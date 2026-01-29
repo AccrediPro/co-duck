@@ -800,3 +800,39 @@
   - NEXT_PUBLIC_ prefix makes environment variables available in client-side code
   - getStripePublishableKey() helper validates the key exists before returning, avoiding runtime errors in client components
 ---
+
+## 2026-01-30 - COACH-029
+- What was implemented:
+  - Added stripe_account_id (text, nullable) and stripe_onboarding_complete (boolean, default false) to coach_profiles schema
+  - Generated migration 0005_hesitant_red_ghost.sql with ALTER TABLE statements
+  - Created /dashboard/payments page for coaches with role-based access control
+  - Server actions: createStripeConnectAccount, checkStripeAccountStatus, generateOnboardingLink, getPaymentsData
+  - Stripe Connect Express account creation with metadata linking to coach
+  - Account Link generation for onboarding with return/refresh URLs
+  - Return URL: /dashboard/payments?setup=complete - checks account status and updates DB
+  - Refresh URL: /dashboard/payments?setup=refresh - shows toast and allows continuing onboarding
+  - PaymentsContent client component showing onboarding status (not started, pending, complete)
+  - Status badges and icons differentiate states clearly
+  - "Set Up Payments" button for not started, "Continue Setup" for pending, "Open Stripe Dashboard" for complete
+  - Info card explaining Stripe Connect benefits (secure payments, fast payouts)
+  - Added Payments link with CreditCard icon to dashboard sidebar for coaches
+- Files changed:
+  - src/db/schema.ts - Added stripeAccountId and stripeOnboardingComplete to coachProfiles
+  - drizzle/0005_hesitant_red_ghost.sql - Migration file
+  - drizzle/meta/_journal.json - Updated migration journal
+  - drizzle/meta/0005_snapshot.json - Schema snapshot
+  - src/app/(dashboard)/dashboard/payments/page.tsx - Main payments page
+  - src/app/(dashboard)/dashboard/payments/actions.ts - Server actions for Stripe Connect
+  - src/components/payments/payments-content.tsx - Client component for payments UI
+  - src/components/payments/index.ts - Component exports
+  - src/components/navigation/dashboard-sidebar.tsx - Added Payments link for coaches
+- **Learnings for future iterations:**
+  - Stripe Connect Express accounts use type: 'express' in stripe.accounts.create()
+  - Account Link URLs have type: 'account_onboarding' for initial setup flow
+  - Check account.details_submitted && account.charges_enabled to determine if onboarding is complete
+  - Use headers() from next/headers to get host for building return/refresh URLs
+  - Protocol detection: host.includes('localhost') ? 'http' : 'https'
+  - Stripe account metadata can store coachUserId for reference back to our system
+  - router.refresh() triggers Next.js to re-fetch server data after returning from Stripe
+  - router.replace() clears URL params without adding to history stack
+---

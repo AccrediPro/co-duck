@@ -315,7 +315,7 @@
       "title": "Coach Stripe Connect Onboarding",
       "description": "Create Stripe Connect Express account flow for coaches. Add stripe_account_id to coach_profiles. Create /dashboard/payments page showing onboarding status. Generate Connect onboarding link and handle return/refresh URLs.",
       "priority": 29,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "stripe_account_id column added to coach_profiles",
         "stripe_onboarding_complete boolean added",
