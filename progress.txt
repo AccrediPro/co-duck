@@ -452,3 +452,53 @@
   - Numbered step indicators with connecting lines enhance visual flow
   - Coach benefits checklist with CheckCircle icons creates compelling conversion section
 ---
+
+## 2026-01-30 - COACH-016
+- What was implemented:
+  - Created coach_availability table for weekly recurring schedule with: id (serial PK), coach_id (FK), day_of_week (0-6), start_time, end_time, is_available
+  - Created availability_overrides table for date-specific exceptions with: id (serial PK), coach_id (FK), date, is_available, start_time, end_time, reason
+  - Added three new columns to coach_profiles: buffer_minutes (default 15), advance_notice_hours (default 24), max_advance_days (default 60)
+  - Foreign key relationships cascade delete from coach_profiles
+  - Indexes for efficient querying: coach_id, day_of_week, date, and composite coach_id+date
+  - Exported TypeScript types: CoachAvailability, NewCoachAvailability, AvailabilityOverride, NewAvailabilityOverride
+  - Generated migration 0003_skinny_mach_iv.sql
+- Files changed:
+  - src/db/schema.ts - Added imports (time, date, serial), new columns to coachProfiles, new tables and type exports
+  - drizzle/0003_skinny_mach_iv.sql - Migration file
+  - drizzle/meta/_journal.json - Updated migration journal
+  - drizzle/meta/0003_snapshot.json - Schema snapshot
+- **Learnings for future iterations:**
+  - Drizzle uses `time` from pg-core for PostgreSQL time columns (stores as string "HH:MM:SS")
+  - Drizzle uses `date` from pg-core for PostgreSQL date columns (stores as string "YYYY-MM-DD")
+  - Use `serial('id')` for auto-incrementing integer primary keys
+  - Foreign keys to non-primary-key columns work with references() (coach_profiles.userId is the PK)
+  - Composite indexes use multiple columns: `index('name').on(table.col1, table.col2)`
+  - availability_overrides.start_time/end_time are nullable for "completely unavailable" days
+---
+
+## 2026-01-30 - COACH-017
+- What was implemented:
+  - Created /dashboard/availability page for coaches to set weekly schedule
+  - Weekly schedule grid showing Sun-Sat with toggle available/unavailable per day
+  - Start/end time dropdowns with 30-minute increments (6:00 AM to 11:30 PM)
+  - Copy schedule feature: select source day and target days to copy times
+  - Buffer time setting dropdown (0/15/30/45/60 minutes)
+  - Advance notice setting dropdown (1h to 1 week)
+  - Max advance booking days dropdown (1 week to 1 year)
+  - Save button persists schedule to coach_availability table and settings to coach_profiles
+  - Toast notifications for success/error using existing useToast hook
+  - Timezone display card showing coach's profile timezone
+  - Role-based access: non-coaches redirected to onboarding prompt
+- Files changed:
+  - src/app/(dashboard)/dashboard/availability/page.tsx - Main page with auth checks and data loading
+  - src/app/(dashboard)/dashboard/availability/actions.ts - Server actions: getAvailabilitySettings, saveAvailabilitySettings, copyDaySchedule
+  - src/components/availability/availability-form.tsx - Client form component with all UI elements
+  - src/components/availability/index.ts - Component exports
+- **Learnings for future iterations:**
+  - Drizzle time columns store as "HH:MM:SS" strings; use substring(0, 5) to extract "HH:MM" for UI
+  - When inserting time values, append ":00" for seconds (e.g., "09:00:00")
+  - Use useState for each setting instead of form.watch() for simpler state management in non-form scenarios
+  - Popover component from shadcn works well for "copy schedule" feature with multi-select checkboxes
+  - Generate time options programmatically with AM/PM display but store as 24-hour format
+  - Delete all existing availability records before inserting new ones (simpler than upsert logic)
+---

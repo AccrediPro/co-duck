@@ -5,7 +5,7 @@
   "techStack": {
     "frontend": "Next.js 14+ (App Router), Tailwind CSS, shadcn/ui",
     "backend": "Next.js API Routes, Drizzle ORM",
-    "database": "PostgreSQL (Neon)",
+    "database": "PostgreSQL (Supabase)",
     "auth": "Clerk",
     "payments": "Stripe Connect",
     "validation": "Zod"
@@ -14,238 +14,286 @@
     {
       "id": "COACH-001",
       "title": "Project Initialization",
-      "description": "Initialize Next.js 14 project with App Router, TypeScript, Tailwind CSS, and shadcn/ui. Set up project structure with src/app, src/components, src/lib, src/db directories. Configure ESLint and Prettier.",
       "priority": 1,
-      "passes": true,
-      "acceptanceCriteria": [
-        "Next.js 14+ with App Router is initialized",
-        "TypeScript is configured",
-        "Tailwind CSS is installed and configured",
-        "shadcn/ui is initialized with default components (button, input, card)",
-        "Project structure follows Next.js 14 conventions",
-        "ESLint and Prettier are configured",
-        "Dev server runs without errors"
-      ]
+      "passes": true
     },
     {
       "id": "COACH-002",
       "title": "Database Setup with Drizzle ORM",
-      "description": "Set up Drizzle ORM with PostgreSQL connection. Create initial schema with users table including fields for id, email, name, avatar_url, role (admin/coach/client), created_at, updated_at. Configure migrations.",
       "priority": 2,
-      "passes": true,
-      "acceptanceCriteria": [
-        "Drizzle ORM is installed and configured",
-        "Database connection uses environment variable DATABASE_URL",
-        "Users table schema is defined with proper types",
-        "Role enum includes: admin, coach, client",
-        "Migration scripts are set up (drizzle-kit)",
-        "db:generate and db:migrate scripts work"
-      ]
+      "passes": true
     },
     {
       "id": "COACH-003",
       "title": "Clerk Authentication Integration",
-      "description": "Integrate Clerk for authentication. Set up sign-in, sign-up, and user profile routes. Create middleware for protected routes. Sync Clerk users to database on sign-up via webhook.",
       "priority": 3,
-      "passes": true,
-      "acceptanceCriteria": [
-        "Clerk is installed and configured",
-        "Environment variables for Clerk keys are documented",
-        "Sign-in page at /sign-in works",
-        "Sign-up page at /sign-up works",
-        "Middleware protects /dashboard/* routes",
-        "ClerkProvider wraps the app",
-        "Webhook endpoint /api/webhooks/clerk syncs users to DB"
-      ]
+      "passes": true
     },
     {
       "id": "COACH-004",
       "title": "Base Layout and Navigation",
-      "description": "Create base application layout with responsive navigation. Include header with logo, nav links, and user menu. Create public layout (marketing) and authenticated layout (dashboard) variants.",
       "priority": 4,
-      "passes": true,
-      "acceptanceCriteria": [
-        "Root layout with proper metadata and fonts",
-        "Public layout with marketing header/footer",
-        "Dashboard layout with sidebar navigation",
-        "Responsive mobile menu (hamburger)",
-        "User menu shows avatar and sign-out option",
-        "Navigation highlights current route"
-      ]
+      "passes": true
     },
     {
       "id": "COACH-005",
       "title": "Coach Profile Database Schema",
-      "description": "Create coach_profiles table with fields: user_id (FK), slug, headline, bio, specialties (jsonb), hourly_rate, currency, timezone, video_intro_url, is_published, profile_completion_percentage. Add indexes for search.",
       "priority": 5,
-      "passes": true,
-      "acceptanceCriteria": [
-        "coach_profiles table is created with all fields",
-        "Foreign key relationship to users table",
-        "Unique constraint on slug",
-        "JSONB field for specialties array",
-        "Proper indexes for slug and is_published",
-        "Migration runs successfully"
-      ]
+      "passes": true
     },
     {
       "id": "COACH-006",
       "title": "Coach Onboarding Flow - Step 1: Basic Info",
-      "description": "Create multi-step coach onboarding wizard. Step 1 collects: display name, headline (tagline), profile photo upload, timezone selection. Save progress and allow resuming later.",
       "priority": 6,
-      "passes": true,
-      "acceptanceCriteria": [
-        "Onboarding page at /onboarding/coach",
-        "Step indicator shows progress (1 of 4)",
-        "Form fields: name, headline, photo, timezone",
-        "Photo upload with preview (store URL for now)",
-        "Timezone dropdown with auto-detect default",
-        "Data saves to coach_profiles table",
-        "Can navigate to step 2"
-      ]
+      "passes": true
     },
     {
       "id": "COACH-007",
       "title": "Coach Onboarding Flow - Step 2: Bio & Specialties",
-      "description": "Step 2 of onboarding collects: detailed bio (rich text or textarea), specialties selection from predefined list with ability to add custom ones.",
       "priority": 7,
-      "passes": true,
-      "acceptanceCriteria": [
-        "Bio textarea with character count (max 2000)",
-        "Predefined specialties list as multi-select chips",
-        "Can add custom specialty",
-        "Minimum 1 specialty required",
-        "Back button returns to step 1 with data preserved",
-        "Data saves to coach_profiles table"
-      ]
+      "passes": true
     },
     {
       "id": "COACH-008",
       "title": "Coach Onboarding Flow - Step 3: Pricing",
-      "description": "Step 3 collects: hourly rate, currency selection (USD default), session types they offer (discovery call, 1-hour session, etc.).",
       "priority": 8,
-      "passes": true,
-      "acceptanceCriteria": [
-        "Hourly rate input with currency selector",
-        "Default currency is USD",
-        "Session types: can add multiple with name, duration, price",
-        "At least one session type required",
-        "Data saves to coach_profiles table",
-        "Session types stored in separate table or JSONB"
-      ]
+      "passes": true
     },
     {
       "id": "COACH-009",
       "title": "Coach Onboarding Flow - Step 4: Review & Publish",
-      "description": "Final step shows profile preview and publish button. Calculate profile completion percentage. Show what's missing for 100%. Allow publish or save as draft.",
       "priority": 9,
-      "passes": true,
-      "acceptanceCriteria": [
-        "Profile preview card shows all entered data",
-        "Profile completion percentage displayed",
-        "Missing items listed if not 100%",
-        "Publish button sets is_published=true",
-        "Save as Draft keeps is_published=false",
-        "Redirect to /dashboard after completion",
-        "Success toast notification"
-      ]
+      "passes": true
     },
     {
       "id": "COACH-010",
       "title": "Public Coach Profile Page",
-      "description": "Create public coach profile page at /coaches/[slug]. SSR for SEO. Display all profile info: photo, name, headline, bio, specialties as tags, pricing, and CTA button.",
       "priority": 10,
-      "passes": true,
-      "acceptanceCriteria": [
-        "Page at /coaches/[slug] renders coach profile",
-        "Server-side rendered for SEO",
-        "Proper meta tags (title, description, og:image)",
-        "Shows 404 if coach not found or not published",
-        "Displays: photo, name, headline, bio, specialties, pricing",
-        "Book Session CTA button (links to booking page)",
-        "Share profile button copies URL",
-        "Responsive layout"
-      ]
+      "passes": true
     },
     {
       "id": "COACH-011",
       "title": "Browse Coaches Page",
-      "description": "Create /coaches page listing all published coaches in a grid. Each coach shows card with photo, name, headline, specialties preview, starting price. Include basic pagination.",
       "priority": 11,
-      "passes": true,
-      "acceptanceCriteria": [
-        "Page at /coaches lists published coaches",
-        "Grid layout (3 cols desktop, 2 tablet, 1 mobile)",
-        "Coach card: photo, name, headline, specialties (3 max), price",
-        "Click card goes to coach profile",
-        "Pagination (12 per page)",
-        "Loading skeleton while fetching",
-        "Empty state if no coaches"
-      ]
+      "passes": true
     },
     {
       "id": "COACH-012",
       "title": "Coach Search and Filters",
-      "description": "Add search bar and filters to /coaches page. Search by name, headline, bio. Filter by specialty, price range. Sort by: newest, price low-high, price high-low.",
       "priority": 12,
-      "passes": true,
-      "acceptanceCriteria": [
-        "Search input filters coaches by name/headline/bio",
-        "Specialty filter as multi-select dropdown",
-        "Price range filter (min-max inputs or slider)",
-        "Sort dropdown with options",
-        "Filters update URL params (shareable)",
-        "Debounced search (300ms)",
-        "Clear filters button",
-        "Results count displayed"
-      ]
+      "passes": true
     },
     {
       "id": "COACH-013",
       "title": "Coach Dashboard Home",
-      "description": "Create /dashboard page for coaches showing overview: profile status, profile views (placeholder), upcoming sessions (placeholder), quick actions (edit profile, view public profile).",
       "priority": 13,
-      "passes": true,
-      "acceptanceCriteria": [
-        "Dashboard at /dashboard requires authentication",
-        "Shows different content based on user role",
-        "Coach sees: profile status card, stats placeholders",
-        "Quick action: Edit Profile links to profile editor",
-        "Quick action: View Public Profile opens in new tab",
-        "Responsive layout with cards"
-      ]
+      "passes": true
     },
     {
       "id": "COACH-014",
       "title": "Coach Profile Editor",
-      "description": "Create /dashboard/profile page where coaches can edit their profile after initial onboarding. All fields editable. Auto-save or explicit save button. Profile completion indicator.",
       "priority": 14,
-      "passes": true,
-      "acceptanceCriteria": [
-        "Page at /dashboard/profile for editing",
-        "All onboarding fields are editable",
-        "Save button updates database",
-        "Success/error toast notifications",
-        "Profile completion percentage updates live",
-        "Publish/Unpublish toggle",
-        "Preview button opens public profile"
-      ]
+      "passes": true
     },
     {
       "id": "COACH-015",
       "title": "Landing Page",
-      "description": "Create marketing landing page at / with hero section, value props, how it works, featured coaches (placeholder), and CTA to sign up as coach or find a coach.",
       "priority": 15,
+      "passes": true
+    },
+    {
+      "id": "COACH-016",
+      "title": "Availability Database Schema",
+      "description": "Create database tables for coach availability. Create 'coach_availability' table with: coach_id (FK), day_of_week (0-6), start_time, end_time, is_available. Create 'availability_overrides' table for date-specific exceptions: coach_id, date, is_available, start_time, end_time. Add buffer_minutes and advance_notice_hours to coach_profiles.",
+      "priority": 16,
       "passes": true,
       "acceptanceCriteria": [
-        "Landing page at / with marketing content",
-        "Hero section with headline and CTAs",
-        "Value proposition section (3 benefits)",
-        "How it works section (3 steps)",
-        "Featured coaches section (placeholder or first 3)",
-        "CTA section for coaches to join",
-        "Footer with links",
-        "Fully responsive"
+        "coach_availability table created with day_of_week, start/end times",
+        "availability_overrides table for date-specific exceptions",
+        "coach_profiles extended with buffer_minutes (default 15), advance_notice_hours (default 24), max_advance_days (default 60)",
+        "Foreign key relationships to coach_profiles",
+        "Migration runs successfully"
+      ]
+    },
+    {
+      "id": "COACH-017",
+      "title": "Coach Availability Settings UI",
+      "description": "Create /dashboard/availability page for coaches to set their weekly schedule. Show 7-day grid where coach can set available hours per day. Include timezone display, buffer time setting, and advance notice setting.",
+      "priority": 17,
+      "passes": true,
+      "acceptanceCriteria": [
+        "Page at /dashboard/availability",
+        "Weekly schedule grid showing Mon-Sun",
+        "Each day: toggle available/unavailable, set start/end time",
+        "Copy schedule from one day to others",
+        "Buffer time between sessions setting (15/30/45/60 min)",
+        "Advance notice setting (hours before booking)",
+        "Max advance booking days setting",
+        "Save button persists to database",
+        "Toast notifications for success/error"
+      ]
+    },
+    {
+      "id": "COACH-018",
+      "title": "Bookings Database Schema",
+      "description": "Create bookings table: id, coach_id (FK), client_id (FK), session_type_id or session_type (JSONB snapshot), start_time, end_time, status (pending/confirmed/completed/cancelled/no_show), notes, created_at, updated_at. Add indexes for queries.",
+      "priority": 18,
+      "passes": false,
+      "acceptanceCriteria": [
+        "bookings table created with all fields",
+        "Status enum: pending, confirmed, completed, cancelled, no_show",
+        "Session type stored as JSONB snapshot (name, duration, price)",
+        "Foreign keys to users table for coach and client",
+        "Indexes on coach_id, client_id, start_time, status",
+        "Migration runs successfully"
+      ]
+    },
+    {
+      "id": "COACH-019",
+      "title": "Booking Flow - Time Selection",
+      "description": "Create /coaches/[slug]/book page. Show coach's session types to select. Display available time slots based on coach availability, existing bookings, buffer time, and advance notice. Calendar view for date selection, time slots for selected date.",
+      "priority": 19,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Page at /coaches/[slug]/book",
+        "Step 1: Select session type from coach's offerings",
+        "Step 2: Calendar shows available dates (respects max advance days)",
+        "Step 3: Time slots shown for selected date",
+        "Slots calculated from availability minus existing bookings minus buffer",
+        "Timezone shown and can be changed by client",
+        "Selected slot highlighted",
+        "Continue button enabled when slot selected"
+      ]
+    },
+    {
+      "id": "COACH-020",
+      "title": "Booking Flow - Confirmation",
+      "description": "Complete booking flow with confirmation step. Show summary of selected session, date, time, price. Add optional notes field. For now, create booking with 'confirmed' status (payment integration later). Send confirmation details.",
+      "priority": 20,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Confirmation step shows: coach name, session type, date, time, duration, price",
+        "Optional notes textarea for client",
+        "Confirm Booking button creates booking record",
+        "Booking created with status 'confirmed'",
+        "Success page with booking details",
+        "Add to Calendar button (generates .ics file)",
+        "Back to coach profile link"
+      ]
+    },
+    {
+      "id": "COACH-021",
+      "title": "Coach Session Management",
+      "description": "Create /dashboard/sessions page for coaches. Show upcoming sessions list with client info, date, time, session type. Show past sessions separately. Quick actions: view details, mark complete, cancel.",
+      "priority": 21,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Page at /dashboard/sessions",
+        "Tabs: Upcoming, Past, Cancelled",
+        "Session card: client name/avatar, date, time, session type, status",
+        "Click session opens detail view",
+        "Mark as Complete action (for past sessions)",
+        "Cancel action with confirmation",
+        "Empty states for each tab",
+        "Pagination or infinite scroll"
+      ]
+    },
+    {
+      "id": "COACH-022",
+      "title": "Client Session Management",
+      "description": "Create /dashboard/my-sessions page for clients. Show their booked sessions with coach info. Upcoming and past tabs. Actions: view details, reschedule, cancel.",
+      "priority": 22,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Page at /dashboard/my-sessions",
+        "Tabs: Upcoming, Past",
+        "Session card: coach name/avatar, date, time, session type",
+        "Click opens session detail",
+        "Reschedule button (links to reschedule flow)",
+        "Cancel button with confirmation",
+        "Add to Calendar button",
+        "Empty states"
+      ]
+    },
+    {
+      "id": "COACH-023",
+      "title": "Session Detail Page",
+      "description": "Create session detail page showing full information. For coaches: client details, notes, session history with this client. For clients: coach details, session info. Join Session button placeholder for video integration later.",
+      "priority": 23,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Page at /dashboard/sessions/[id]",
+        "Shows session: date, time, duration, type, status",
+        "Coach view: client info, client notes, past sessions count",
+        "Client view: coach info, coach profile link",
+        "Join Session button (placeholder, shows 'Video coming soon')",
+        "Add to Calendar button",
+        "Cancel/Reschedule buttons if upcoming",
+        "Notes section (editable by coach)"
+      ]
+    },
+    {
+      "id": "COACH-024",
+      "title": "Reschedule Flow",
+      "description": "Allow clients to reschedule confirmed sessions. Show available slots excluding original booking time. Update booking record with new time. Notify coach of change.",
+      "priority": 24,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Reschedule button on session detail/list",
+        "Same flow as booking but pre-selects session type",
+        "Shows available slots for coach",
+        "Original time slot shown as 'Your current booking'",
+        "Confirm reschedule updates booking record",
+        "Original time freed up for other bookings",
+        "Success message with new details",
+        "Only allowed if > 24 hours before session (configurable)"
+      ]
+    },
+    {
+      "id": "COACH-025",
+      "title": "Cancellation Flow",
+      "description": "Allow both coaches and clients to cancel sessions. Confirm cancellation with reason (optional). Update booking status. Free up the time slot. Handle cancellation policies (placeholder for payment refunds later).",
+      "priority": 25,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Cancel button opens confirmation modal",
+        "Optional reason dropdown (schedule conflict, emergency, other)",
+        "Optional text for additional details",
+        "Updates booking status to 'cancelled'",
+        "Cancelled_by field tracks who cancelled",
+        "Cancelled_at timestamp",
+        "Time slot freed for new bookings",
+        "Success toast",
+        "Cancellation policy text shown (e.g., '24 hour policy')"
+      ]
+    },
+    {
+      "id": "COACH-026",
+      "title": "Dashboard Navigation Update",
+      "description": "Update dashboard sidebar to include new pages: Sessions, Availability (coach only), My Sessions (client only). Show appropriate links based on user role.",
+      "priority": 26,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Sidebar shows Sessions link for coaches",
+        "Sidebar shows Availability link for coaches",
+        "Sidebar shows My Sessions link for clients",
+        "Active state highlights current page",
+        "Mobile navigation updated too"
+      ]
+    },
+    {
+      "id": "COACH-027",
+      "title": "Availability Display on Coach Profile",
+      "description": "Show coach's availability preview on their public profile. Display next available slots (e.g., 'Next available: Tomorrow at 2pm'). Quick book button for popular times.",
+      "priority": 27,
+      "passes": false,
+      "acceptanceCriteria": [
+        "Coach profile shows availability section",
+        "Displays timezone",
+        "Shows 'Next available' date/time",
+        "Shows this week's general availability (e.g., 'Mon-Fri, 9am-5pm')",
+        "Book Session button prominent",
+        "Handles coach with no availability set"
       ]
     }
   ]
