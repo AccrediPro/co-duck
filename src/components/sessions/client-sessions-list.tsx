@@ -14,6 +14,7 @@ import type {
 import {
   cancelClientSession,
   generateClientIcsFile,
+  createRetryCheckoutSession,
 } from '@/app/(dashboard)/dashboard/my-sessions/actions';
 
 interface ClientSessionsListProps {
@@ -117,6 +118,23 @@ export function ClientSessionsList({
       toast({
         title: 'Error',
         description: result.error || 'Failed to generate calendar file',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handlePayNow = async (sessionId: number) => {
+    // Get client's timezone from browser
+    const clientTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const result = await createRetryCheckoutSession(sessionId, clientTimezone);
+
+    if (result.success) {
+      // Redirect to Stripe Checkout
+      window.location.href = result.checkoutUrl;
+    } else {
+      toast({
+        title: 'Error',
+        description: result.error || 'Failed to create checkout session',
         variant: 'destructive',
       });
     }
@@ -261,6 +279,7 @@ export function ClientSessionsList({
               session={session}
               onCancel={handleCancel}
               onAddToCalendar={handleAddToCalendar}
+              onPayNow={handlePayNow}
               isUpcoming={tab === 'upcoming'}
             />
           ))}

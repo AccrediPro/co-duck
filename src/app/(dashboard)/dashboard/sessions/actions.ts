@@ -2,10 +2,13 @@
 
 import { auth } from '@clerk/nextjs/server';
 import { eq, and, or, gte, lt, desc, asc, sql } from 'drizzle-orm';
-import { db, bookings, users } from '@/db';
+import { db, bookings, users, transactions } from '@/db';
 import type { BookingSessionType } from '@/db/schema';
 
 export type SessionStatus = 'upcoming' | 'past' | 'cancelled';
+
+// Payment status derived from transaction existence and status
+export type PaymentStatus = 'free' | 'paid' | 'payment_required' | 'payment_failed';
 
 export interface SessionWithClient {
   id: number;
@@ -20,6 +23,7 @@ export interface SessionWithClient {
   clientNotes: string | null;
   coachNotes: string | null;
   createdAt: Date;
+  paymentStatus: PaymentStatus;
 }
 
 export interface GetSessionsResult {
@@ -106,9 +110,41 @@ export async function getCoachSessions(
       .limit(perPage)
       .offset(offset);
 
+    // Get payment status for each session
+    const sessionsWithPayment: SessionWithClient[] = await Promise.all(
+      sessionsData.map(async (session) => {
+        const sessionType = session.sessionType as BookingSessionType;
+
+        // Free sessions (price = 0) don't require payment
+        if (sessionType.price === 0) {
+          return { ...session, paymentStatus: 'free' as PaymentStatus };
+        }
+
+        // Check for a transaction for this booking
+        const transactionResult = await db
+          .select({ status: transactions.status })
+          .from(transactions)
+          .where(eq(transactions.bookingId, session.id))
+          .limit(1);
+
+        if (transactionResult.length === 0) {
+          return { ...session, paymentStatus: 'payment_required' as PaymentStatus };
+        }
+
+        const txStatus = transactionResult[0].status;
+        if (txStatus === 'succeeded') {
+          return { ...session, paymentStatus: 'paid' as PaymentStatus };
+        } else if (txStatus === 'failed') {
+          return { ...session, paymentStatus: 'payment_failed' as PaymentStatus };
+        } else {
+          return { ...session, paymentStatus: 'payment_required' as PaymentStatus };
+        }
+      })
+    );
+
     return {
       success: true,
-      sessions: sessionsData,
+      sessions: sessionsWithPayment,
       totalCount,
     };
   } catch {

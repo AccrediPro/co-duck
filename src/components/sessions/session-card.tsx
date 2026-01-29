@@ -6,9 +6,12 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Calendar, Clock, User, CheckCircle, XCircle, Eye } from 'lucide-react';
+import { Calendar, Clock, User, CheckCircle, XCircle, Eye, CreditCard } from 'lucide-react';
 import { CancellationDialog } from './cancellation-dialog';
-import type { SessionWithClient } from '@/app/(dashboard)/dashboard/sessions/actions';
+import type {
+  SessionWithClient,
+  PaymentStatus,
+} from '@/app/(dashboard)/dashboard/sessions/actions';
 
 interface SessionCardProps {
   session: SessionWithClient;
@@ -72,6 +75,37 @@ export function SessionCard({
     }
   };
 
+  const getPaymentBadge = (status: PaymentStatus, price: number) => {
+    // No badge for free sessions
+    if (status === 'free' || price === 0) return null;
+
+    switch (status) {
+      case 'paid':
+        return (
+          <Badge variant="outline" className="border-green-500 bg-green-50 text-green-700">
+            <CreditCard className="mr-1 h-3 w-3" />
+            Paid
+          </Badge>
+        );
+      case 'payment_required':
+        return (
+          <Badge variant="secondary" className="bg-amber-100 text-amber-800">
+            <CreditCard className="mr-1 h-3 w-3" />
+            Payment Required
+          </Badge>
+        );
+      case 'payment_failed':
+        return (
+          <Badge variant="destructive" className="bg-red-100 text-red-700">
+            <CreditCard className="mr-1 h-3 w-3" />
+            Payment Failed
+          </Badge>
+        );
+      default:
+        return null;
+    }
+  };
+
   const formatPrice = (cents: number) => {
     return `$${(cents / 100).toFixed(2)}`;
   };
@@ -97,6 +131,7 @@ export function SessionCard({
               <div className="flex flex-wrap items-center gap-2">
                 <h3 className="font-semibold">{session.clientName || 'Unknown Client'}</h3>
                 {getStatusBadge()}
+                {getPaymentBadge(session.paymentStatus, session.sessionType.price)}
               </div>
 
               <p className="mt-1 text-sm font-medium text-primary">{session.sessionType.name}</p>

@@ -3,7 +3,7 @@ import { redirect, notFound } from 'next/navigation';
 import { eq, and, or, lt, sql } from 'drizzle-orm';
 import { format } from 'date-fns';
 import Link from 'next/link';
-import { db, bookings, users, coachProfiles } from '@/db';
+import { db, bookings, users, coachProfiles, transactions } from '@/db';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -22,6 +22,7 @@ import {
 import { SessionDetailActions } from './session-detail-actions';
 import { CoachNotesEditor } from './coach-notes-editor';
 import { CoachSessionActions } from './coach-session-actions';
+import { PaymentSection } from './payment-section';
 
 export const metadata = {
   title: 'Session Details | Coaching Platform',
@@ -148,6 +149,39 @@ export default async function SessionDetailPage({ params }: PageProps) {
         email: coachData[0].email,
         slug: coachData[0].slug,
       };
+    }
+  }
+
+  // Fetch transaction info for this booking (if exists)
+  const transactionData = await db
+    .select({
+      id: transactions.id,
+      amountCents: transactions.amountCents,
+      currency: transactions.currency,
+      platformFeeCents: transactions.platformFeeCents,
+      coachPayoutCents: transactions.coachPayoutCents,
+      status: transactions.status,
+      createdAt: transactions.createdAt,
+      stripePaymentIntentId: transactions.stripePaymentIntentId,
+    })
+    .from(transactions)
+    .where(eq(transactions.bookingId, sessionId))
+    .limit(1);
+
+  const transaction = transactionData.length > 0 ? transactionData[0] : null;
+
+  // Determine payment status
+  type PaymentStatus = 'free' | 'paid' | 'payment_required' | 'payment_failed';
+  let paymentStatus: PaymentStatus = 'free';
+  if (session.sessionType.price > 0) {
+    if (!transaction) {
+      paymentStatus = 'payment_required';
+    } else if (transaction.status === 'succeeded') {
+      paymentStatus = 'paid';
+    } else if (transaction.status === 'failed') {
+      paymentStatus = 'payment_failed';
+    } else {
+      paymentStatus = 'payment_required';
     }
   }
 
@@ -282,6 +316,16 @@ export default async function SessionDetailPage({ params }: PageProps) {
               </div>
             </CardContent>
           </Card>
+
+          {/* Payment Information Card */}
+          <PaymentSection
+            sessionId={session.id}
+            paymentStatus={paymentStatus}
+            transaction={transaction}
+            sessionPrice={session.sessionType.price}
+            isUpcoming={isUpcoming}
+            isClientView={isClientView}
+          />
 
           {/* Client Notes Card */}
           {session.clientNotes && (
