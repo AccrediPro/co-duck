@@ -733,3 +733,48 @@
   - Policy text should be dynamic based on session timing (check isWithin24Hours)
   - Keep isCoach prop for future extensibility even if not currently used (different policies)
 ---
+
+## 2026-01-30 - COACH-026
+- What was implemented:
+  - Updated dashboard sidebar to show role-based navigation links
+  - Coach navigation: Overview, Profile, Sessions (CalendarDays icon), Availability (Clock icon), Settings
+  - Client navigation: Overview, My Sessions (CalendarDays icon), Settings
+  - Admin navigation: sees all coach and client links combined
+  - Dashboard layout now fetches user role from database and passes to sidebar components
+  - Both desktop sidebar and mobile navigation updated with role-based links
+  - Active state highlighting preserved for current page
+- Files changed:
+  - src/app/(dashboard)/layout.tsx - Added DB query to fetch user role, pass userRole prop to sidebar components
+  - src/components/navigation/dashboard-sidebar.tsx - Refactored to use role-based navigation with getNavLinksForRole() function
+- **Learnings for future iterations:**
+  - Use LucideIcon type from lucide-react for typing icon props in navigation link interfaces
+  - Separate navigation links into categories (common, coach, client) for cleaner role-based filtering
+  - Use default parameter value in props destructuring for fallback role: `userRole = 'client'`
+  - Dashboard layout is server component - can fetch user role from DB directly without API route
+  - CalendarDays icon better differentiates from generic Calendar icon when multiple calendar-related links exist
+---
+
+## 2026-01-30 - COACH-027
+- What was implemented:
+  - Added availability section to public coach profile page at /coaches/[slug]
+  - Created getCoachAvailabilityForProfile() server action to calculate next available slot and weekly summary
+  - AvailabilitySection component shows: timezone, next available date/time, weekly schedule summary
+  - Next available slot calculation considers: advance notice hours, buffer minutes, existing bookings, max advance days
+  - Weekly availability summary groups consecutive days with same hours (e.g., "Mon-Fri, 9am-5pm")
+  - Human-readable next available display: "Today at 2pm", "Tomorrow at 10am", "Wednesday at 3pm", etc.
+  - Handles coaches with no availability set - shows "Contact for Availability" state
+  - Prominent "Book Session" button in availability section
+  - Updated CoachProfileDisplay to accept and display availability data
+- Files changed:
+  - src/app/(public)/coaches/[slug]/availability-actions.ts - New server action for availability calculation
+  - src/app/(public)/coaches/[slug]/page.tsx - Fetch and pass availability data to component
+  - src/components/coaches/availability-section.tsx - New component for availability display
+  - src/components/coaches/coach-profile-display.tsx - Added availability prop and AvailabilitySection
+  - src/components/coaches/index.ts - Exported AvailabilitySection
+- **Learnings for future iterations:**
+  - Reuse slot conflict detection logic from booking flow for calculating next available
+  - Group consecutive days with same hours for readable weekly summary (Mon-Fri vs Mon, Tue, Wed, Thu, Fri)
+  - Use "Today", "Tomorrow", day name, or date format based on how far in future the slot is
+  - hasAvailability flag distinguishes between "no slots available right now" vs "coach never set up availability"
+  - formatTimeShort() helper for compact time display (9am, 10:30am) in weekly summary
+---

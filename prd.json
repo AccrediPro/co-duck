@@ -272,7 +272,7 @@
       "title": "Dashboard Navigation Update",
       "description": "Update dashboard sidebar to include new pages: Sessions, Availability (coach only), My Sessions (client only). Show appropriate links based on user role.",
       "priority": 26,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "Sidebar shows Sessions link for coaches",
         "Sidebar shows Availability link for coaches",
@@ -286,7 +286,7 @@
       "title": "Availability Display on Coach Profile",
       "description": "Show coach's availability preview on their public profile. Display next available slots (e.g., 'Next available: Tomorrow at 2pm'). Quick book button for popular times.",
       "priority": 27,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "Coach profile shows availability section",
         "Displays timezone",
