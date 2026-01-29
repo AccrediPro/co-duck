@@ -494,7 +494,7 @@
       "title": "Start Conversation from Booking",
       "description": "Add 'Message' button on session detail and coach profile. Create conversation if doesn't exist. Redirect to chat. System message on booking confirmation.",
       "priority": 40,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "Message button on session detail page",
         "Message button on coach profile page",

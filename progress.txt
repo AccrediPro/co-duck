@@ -1159,3 +1159,50 @@
   - Use gt() and asc() from drizzle-orm for "greater than" and ascending order queries
   - Filter duplicates with Set before appending polled messages to state
 ---
+
+## 2026-01-30 - COACH-040
+- What was implemented:
+  - Created src/lib/conversations.ts with core conversation utilities:
+    - getOrCreateConversation(coachId, clientId) - server action for authenticated users
+    - getOrCreateConversationInternal(coachId, clientId) - internal function for system use
+    - sendSystemMessage(conversationId, content, senderId) - for automated messages
+    - createBookingSystemMessage(coachId, clientId, sessionType, startTime) - combines the above
+  - Created MessageButton component (src/components/messages/message-button.tsx):
+    - Accepts coachId and clientId props
+    - Handles loading state during conversation creation
+    - Redirects to /dashboard/messages/[id] after getting/creating conversation
+    - Configurable variant, size, label, and icon display
+  - Added "Message" button on session detail page:
+    - For clients: "Message Coach" button in both sidebar and main actions
+    - For coaches: "Message Client" button in both sidebar and main actions
+    - Added coachId and clientId props to SessionDetailActions and CoachSessionActions
+  - Added "Message" button on public coach profile page:
+    - Only shown when user is logged in (currentUserId exists)
+    - Not shown when viewing own profile (currentUserId !== coachId)
+    - Added to both mobile and desktop CTA sections
+  - Updated booking flows to create system message:
+    - Free session booking (confirm/actions.ts): creates message after booking
+    - Paid session success page (success/actions.ts): creates message after payment
+    - Stripe webhook handler: creates message on checkout.session.completed
+    - All use async non-blocking approach (errors don't fail the booking)
+  - System message format: "Session booked: [Session Type] on [Date] at [Time]"
+- Files changed:
+  - src/lib/conversations.ts - New file with conversation utilities
+  - src/components/messages/message-button.tsx - New reusable Message button component
+  - src/components/messages/index.ts - Exported MessageButton
+  - src/app/(dashboard)/dashboard/sessions/[id]/session-detail-actions.tsx - Added Message button (client view)
+  - src/app/(dashboard)/dashboard/sessions/[id]/coach-session-actions.tsx - Added Message button (coach view)
+  - src/app/(dashboard)/dashboard/sessions/[id]/page.tsx - Pass coachId/clientId to action components
+  - src/components/coaches/coach-profile-display.tsx - Added Message button with canMessage check
+  - src/app/(public)/coaches/[slug]/page.tsx - Pass coachId and currentUserId to display component
+  - src/app/(public)/coaches/[slug]/book/confirm/actions.ts - Add system message on free booking
+  - src/app/(public)/coaches/[slug]/book/success/actions.ts - Add system message on paid booking success
+  - src/app/api/webhooks/stripe/route.ts - Add system message on webhook confirmation
+- **Learnings for future iterations:**
+  - Use separate getOrCreateConversationInternal for system processes (no auth check needed)
+  - Always use async non-blocking pattern for secondary actions: `.catch((error) => { console.error(...); })`
+  - For reusable buttons that need to work in different contexts, make props configurable (variant, size, label, fullWidth)
+  - When adding props to existing components, update all call sites (4 places for session detail actions)
+  - canMessage pattern: `currentUserId && coachId && currentUserId !== coachId` prevents messaging yourself
+  - System messages use message_type='system' - display centered with muted styling in chat view
+---
