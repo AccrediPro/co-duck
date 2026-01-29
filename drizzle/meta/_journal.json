@@ -8,6 +8,13 @@
       "when": 1769693049703,
       "tag": "0000_famous_champions",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1769693728791,
+      "tag": "0001_groovy_cargill",
+      "breakpoints": true
     }
   ]
 }
