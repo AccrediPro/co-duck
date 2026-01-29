@@ -16,6 +16,8 @@
 - Server actions use 'use server' directive at top of file; can return discriminated unions for success/error
 - React Hook Form with shadcn uses Form/FormField/FormItem/FormControl/FormMessage pattern
 - Onboarding routes at /onboarding/* are protected by auth middleware (same as /dashboard/*)
+- Dynamic route params in Next.js 14+ are Promise: use `const { slug } = await params` in page/generateMetadata
+- Public pages go in `(public)` route group; coach profile display components live in `src/components/coaches/`
 
 ---
 
@@ -278,4 +280,35 @@
   - Profile completion calculation should account for fields split across tables
   - Use catch blocks without error parameter (catch { ... }) to avoid unused variable lint errors
   - shadcn auto-generated files may need eslint-disable comments for unused variable warnings
+---
+
+## 2026-01-29 - COACH-010
+- What was implemented:
+  - Created public coach profile page at /coaches/[slug] in the (public) route group
+  - Server-side rendered with generateMetadata for SEO (title, description, og:image, twitter card)
+  - Dynamic route fetches coach by slug with isPublished=true filter
+  - Returns 404 (notFound) if coach not found or unpublished
+  - Custom not-found.tsx page with helpful navigation options
+  - CoachProfileDisplay client component with:
+    - Hero section with avatar, name, headline, timezone
+    - About section with bio (preserves whitespace/newlines)
+    - Specialties displayed as badges
+    - Sessions & Pricing sidebar with session types and prices
+    - "Book Session" CTA button linking to /coaches/[slug]/book
+    - "Share Profile" button that copies URL to clipboard with toast feedback
+  - Responsive layout: 2-column on desktop (content + sidebar), single column on mobile
+  - Mobile-specific CTA buttons in hero section for better UX
+- Files changed:
+  - src/app/(public)/coaches/[slug]/page.tsx - Main profile page with metadata generation
+  - src/app/(public)/coaches/[slug]/not-found.tsx - Custom 404 page
+  - src/components/coaches/coach-profile-display.tsx - Profile display component
+  - src/components/coaches/index.ts - Component exports
+- **Learnings for future iterations:**
+  - In Next.js 14+, dynamic route params are a Promise: use `const { slug } = await params`
+  - Use generateMetadata for dynamic SEO; it can fetch same data as the page component
+  - notFound() from 'next/navigation' triggers the not-found.tsx page in the same directory
+  - For public routes, use the (public) route group which has PublicHeader/PublicFooter layout
+  - INNER JOIN in Drizzle: use `.innerJoin(table, eq(field1, field2))` with select fields from both tables
+  - Clipboard API: `navigator.clipboard.writeText()` may fail in some browsers; always handle the error
+  - Use `whitespace-pre-wrap` class to preserve bio formatting (newlines, paragraphs)
 ---

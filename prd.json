@@ -155,7 +155,7 @@
       "title": "Public Coach Profile Page",
       "description": "Create public coach profile page at /coaches/[slug]. SSR for SEO. Display all profile info: photo, name, headline, bio, specialties as tags, pricing, and CTA button.",
       "priority": 10,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "Page at /coaches/[slug] renders coach profile",
         "Server-side rendered for SEO",
