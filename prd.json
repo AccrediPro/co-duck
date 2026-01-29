@@ -553,7 +553,7 @@
       "title": "Session Notes Editor",
       "description": "Add notes section to session detail page for coaches. Textarea with save button. Auto-save on blur. Notes private to coach.",
       "priority": 44,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "Notes section on session detail page (coach view only)",
         "Textarea for note content",

@@ -1277,3 +1277,21 @@
   - This dedicated table allows for richer note features in the future (tags, formatting, attachments, etc.)
   - Follow existing schema patterns: serial PK, CASCADE delete on FKs, timestamps with $onUpdate
 ---
+
+## 2026-01-30 - COACH-044
+- What was implemented:
+  - Updated session notes implementation to use the dedicated session_notes table (created in COACH-043)
+  - Created saveSessionNote(bookingId, content) server action with upsert logic (insert new or update existing)
+  - Created getSessionNote(bookingId) server action to fetch notes for a booking
+  - Updated session detail page to query session_notes table for coach view
+  - Added legacy alias saveCoachNotes = saveSessionNote for backward compatibility
+  - The UI was already in place from previous work: CoachNotesEditor component with textarea, save button, auto-save on blur, success toast
+- Files changed:
+  - src/app/(dashboard)/dashboard/sessions/actions.ts - Added saveSessionNote, getSessionNote server actions, imported sessionNotes from schema
+  - src/app/(dashboard)/dashboard/sessions/[id]/page.tsx - Added query for session notes, passed sessionNoteContent to CoachNotesEditor
+- **Learnings for future iterations:**
+  - When a previous story created the schema (COACH-043), the UI story (COACH-044) just needs to connect the pieces
+  - Use upsert pattern for notes: check if exists, then update or insert
+  - Legacy aliases (export const saveCoachNotes = saveSessionNote) maintain backward compatibility with existing components
+  - CoachNotesEditor component was already well-implemented with all acceptance criteria (save button, loading state, auto-save, toast)
+---
