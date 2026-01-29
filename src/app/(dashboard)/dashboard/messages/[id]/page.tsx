@@ -3,7 +3,7 @@ import { redirect, notFound } from 'next/navigation';
 import { eq, or, and } from 'drizzle-orm';
 import { db, users, conversations } from '@/db';
 import { ChatView } from '@/components/messages';
-import { getConversationDetails, getMessages } from './actions';
+import { getConversationDetails, getMessages, getClientContext } from './actions';
 
 export const metadata = {
   title: 'Conversation | Coaching Platform',
@@ -64,11 +64,21 @@ export default async function ConversationPage({ params }: PageProps) {
   const initialMessages = messagesResult.success ? messagesResult.messages || [] : [];
   const hasMore = messagesResult.success ? messagesResult.hasMore || false : false;
 
+  // Fetch client context for coaches
+  let clientContext = null;
+  if (detailsResult.conversation.isCoach) {
+    const contextResult = await getClientContext(conversationId);
+    if (contextResult.success && contextResult.context) {
+      clientContext = contextResult.context;
+    }
+  }
+
   return (
     <ChatView
       conversation={detailsResult.conversation}
       initialMessages={initialMessages}
       initialHasMore={hasMore}
+      clientContext={clientContext}
     />
   );
 }

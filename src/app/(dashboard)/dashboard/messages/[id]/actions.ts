@@ -1,8 +1,8 @@
 'use server';
 
 import { auth } from '@clerk/nextjs/server';
-import { eq, and, or, desc, lt, ne, gt, asc } from 'drizzle-orm';
-import { db, conversations, messages, users } from '@/db';
+import { eq, and, or, desc, lt, ne, gt, asc, gte, sql } from 'drizzle-orm';
+import { db, conversations, messages, users, bookings, transactions, coachProfiles } from '@/db';
 
 // Message with sender info
 export interface MessageWithSender {
@@ -360,6 +360,158 @@ export interface GetNewMessagesResult {
  * Get messages newer than the provided message ID (for polling)
  * Returns messages in chronological order (oldest to newest)
  */
+// Client context for chat panel (coach view only)
+export interface ClientContext {
+  clientId: string;
+  clientName: string | null;
+  clientAvatar: string | null;
+  pastSessionsCount: number;
+  totalSpentCents: number;
+  currency: string;
+  upcomingSessions: {
+    id: number;
+    sessionTypeName: string;
+    startTime: Date;
+  }[];
+  coachSlug: string;
+}
+
+export interface GetClientContextResult {
+  success: boolean;
+  context?: ClientContext;
+  error?: string;
+}
+
+/**
+ * Get client context for the chat panel (coach view only)
+ * Shows past sessions count, total spent, upcoming sessions, and quick links
+ */
+export async function getClientContext(conversationId: number): Promise<GetClientContextResult> {
+  const { userId } = await auth();
+
+  if (!userId) {
+    return { success: false, error: 'Not authenticated' };
+  }
+
+  try {
+    // Verify conversation exists and user is the coach
+    const conversationRecords = await db
+      .select()
+      .from(conversations)
+      .where(and(eq(conversations.id, conversationId), eq(conversations.coachId, userId)))
+      .limit(1);
+
+    if (conversationRecords.length === 0) {
+      return { success: false, error: 'Conversation not found or not a coach' };
+    }
+
+    const conversation = conversationRecords[0];
+    const clientId = conversation.clientId;
+
+    // Get client info
+    const clientRecords = await db
+      .select({
+        name: users.name,
+        avatarUrl: users.avatarUrl,
+      })
+      .from(users)
+      .where(eq(users.id, clientId))
+      .limit(1);
+
+    const client = clientRecords[0];
+
+    // Get coach profile for slug and currency
+    const coachProfileRecords = await db
+      .select({
+        slug: coachProfiles.slug,
+        currency: coachProfiles.currency,
+      })
+      .from(coachProfiles)
+      .where(eq(coachProfiles.userId, userId))
+      .limit(1);
+
+    const coachProfile = coachProfileRecords[0];
+    const currency = coachProfile?.currency || 'USD';
+    const coachSlug = coachProfile?.slug || '';
+
+    // Get past sessions count
+    const now = new Date();
+    const pastSessionsResult = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(bookings)
+      .where(
+        and(
+          eq(bookings.coachId, userId),
+          eq(bookings.clientId, clientId),
+          lt(bookings.startTime, now),
+          or(
+            eq(bookings.status, 'completed'),
+            eq(bookings.status, 'confirmed'),
+            eq(bookings.status, 'pending')
+          )
+        )
+      );
+
+    const pastSessionsCount = pastSessionsResult[0]?.count || 0;
+
+    // Get total spent from succeeded transactions
+    const totalSpentResult = await db
+      .select({ total: sql<number>`COALESCE(SUM(${transactions.amountCents}), 0)` })
+      .from(transactions)
+      .where(
+        and(
+          eq(transactions.coachId, userId),
+          eq(transactions.clientId, clientId),
+          eq(transactions.status, 'succeeded')
+        )
+      );
+
+    const totalSpentCents = totalSpentResult[0]?.total || 0;
+
+    // Get upcoming sessions (next 3)
+    const upcomingSessionsRecords = await db
+      .select({
+        id: bookings.id,
+        sessionType: bookings.sessionType,
+        startTime: bookings.startTime,
+      })
+      .from(bookings)
+      .where(
+        and(
+          eq(bookings.coachId, userId),
+          eq(bookings.clientId, clientId),
+          gte(bookings.startTime, now),
+          or(eq(bookings.status, 'confirmed'), eq(bookings.status, 'pending'))
+        )
+      )
+      .orderBy(asc(bookings.startTime))
+      .limit(3);
+
+    const upcomingSessions = upcomingSessionsRecords.map((session) => ({
+      id: session.id,
+      sessionTypeName: (session.sessionType as { name: string }).name,
+      startTime: session.startTime,
+    }));
+
+    return {
+      success: true,
+      context: {
+        clientId,
+        clientName: client?.name || null,
+        clientAvatar: client?.avatarUrl || null,
+        pastSessionsCount,
+        totalSpentCents,
+        currency,
+        upcomingSessions,
+        coachSlug,
+      },
+    };
+  } catch (error) {
+    console.error('Error fetching client context:', error);
+    return { success: false, error: 'Failed to fetch client context' };
+  }
+}
+
 export async function getNewMessages(
   conversationId: number,
   afterId: number
