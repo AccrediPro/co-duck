@@ -383,7 +383,7 @@
       "title": "Coach Earnings Dashboard",
       "description": "Create earnings section on /dashboard/payments. Show total earnings, pending payouts, completed payouts. List recent transactions with details. Link to Stripe Express dashboard for full details.",
       "priority": 33,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "Earnings overview cards: total, pending, paid out",
         "Recent transactions list with date, client, amount, status",

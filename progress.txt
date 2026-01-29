@@ -926,3 +926,30 @@
   - Webhook routes at /api/webhooks/* are automatically excluded from Clerk auth middleware per codebase patterns
   - Parse metadata strings to numbers when needed (parseInt for bookingId, sessionPrice)
 ---
+
+## 2026-01-30 - COACH-033
+- What was implemented:
+  - Added earnings section to /dashboard/payments page (visible after Stripe Connect is set up)
+  - EarningsOverview component with three cards: Total earnings (all time succeeded), This month earnings, Pending payouts
+  - TransactionsList component showing: date, client name/avatar, session type, amount (coach payout and total), status badge
+  - Pagination with 10 items per page, Previous/Next buttons, page counter
+  - Server action getCoachEarnings() fetches transactions with client info and calculates earnings aggregations
+  - Server action generateStripeDashboardLink() creates login link for Stripe Express Dashboard
+  - "View in Stripe" button opens Stripe Express Dashboard for detailed financials
+  - Empty state with icon and message when no transactions exist
+  - Updated PaymentsContent to conditionally render earnings section only when stripeOnboardingComplete is true
+  - Info card about Stripe Connect moved to only show when not connected
+- Files changed:
+  - src/app/(dashboard)/dashboard/payments/actions.ts - Added getCoachEarnings, generateStripeDashboardLink server actions, TransactionWithClient and EarningsData types
+  - src/app/(dashboard)/dashboard/payments/page.tsx - Fetch and pass earnings data when Stripe is connected
+  - src/components/payments/earnings-overview.tsx - New earnings cards component
+  - src/components/payments/transactions-list.tsx - New transactions list component with pagination
+  - src/components/payments/index.ts - Export new components
+  - src/components/payments/payments-content.tsx - Updated to show earnings section conditionally
+- **Learnings for future iterations:**
+  - Use sql template literal for COALESCE and SUM aggregations: sql<number>\`COALESCE(SUM(column), 0)\`
+  - leftJoin result columns can be null even if the source table column is NOT NULL (users.email becomes nullable)
+  - stripe.accounts.createLoginLink() generates a one-time URL for Stripe Express Dashboard access
+  - Separate fetching earnings data in page.tsx and passing to client component for cleaner server/client boundary
+  - Use Promise.all with map to enrich transaction data with booking session type info
+---
