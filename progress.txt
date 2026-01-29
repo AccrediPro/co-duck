@@ -12,6 +12,10 @@
 - Navigation components live in `src/components/navigation/` and are exported via index.ts
 - Use `usePathname()` from next/navigation for active link highlighting in client components
 - Sheet component from shadcn is good for mobile slide-out menus
+- Zod validation schemas go in `src/lib/validators/` and export types using `z.infer<typeof schema>`
+- Server actions use 'use server' directive at top of file; can return discriminated unions for success/error
+- React Hook Form with shadcn uses Form/FormField/FormItem/FormControl/FormMessage pattern
+- Onboarding routes at /onboarding/* are protected by auth middleware (same as /dashboard/*)
 
 ---
 
@@ -149,4 +153,38 @@
   - Foreign key references use callback syntax: `.references(() => users.id, { onDelete: 'cascade' })`
   - Drizzle v2 uses array syntax for table indexes: `(table) => [index(...), index(...)]`
   - Unique constraint on slug is automatic via `.unique()`, index is separate for query optimization
+---
+
+## 2026-01-29 - COACH-006
+- What was implemented:
+  - Created multi-step coach onboarding wizard at /onboarding/coach
+  - Step 1 form collects: display name, headline, profile photo URL, timezone
+  - Step indicator component showing progress (1 of 4) with visual states
+  - Timezone dropdown with 40+ common timezones, auto-detect default using Intl.DateTimeFormat
+  - Server action to save progress to coach_profiles table with Zod validation
+  - Form uses React Hook Form with Zod resolver for client-side validation
+  - Generates URL-friendly slug from display name with collision handling
+  - Updates users table with name, avatar, and role when creating new coach profile
+  - Created placeholder Step 2 page for navigation to work
+  - Updated middleware to protect /onboarding/* routes
+- Files changed:
+  - src/middleware.ts - Added /onboarding to protected routes
+  - src/lib/validators/coach-onboarding.ts - Zod schema for step 1 validation
+  - src/lib/timezones.ts - Timezone data with getDetectedTimezone() helper
+  - src/components/onboarding/step-indicator.tsx - Visual step progress component
+  - src/components/onboarding/basic-info-form.tsx - React Hook Form with shadcn/ui
+  - src/components/onboarding/index.ts - Component exports
+  - src/app/(dashboard)/onboarding/coach/page.tsx - Step 1 page (server component)
+  - src/app/(dashboard)/onboarding/coach/actions/save-basic-info.ts - Server action
+  - src/app/(dashboard)/onboarding/coach/step-2/page.tsx - Placeholder for step 2
+  - src/components/ui/form.tsx, label.tsx, select.tsx, textarea.tsx - New shadcn components
+  - package.json - Added react-hook-form, @hookform/resolvers, zod dependencies
+- **Learnings for future iterations:**
+  - Zod validation errors use `.issues` not `.errors` (ZodError.issues[0].message)
+  - shadcn Form component requires react-hook-form and uses FormProvider pattern
+  - Use `useEffect` to set detected timezone after mount (client-only Intl API)
+  - Onboarding pages go in (dashboard) route group since they need auth
+  - Server actions use 'use server' directive and can be imported into client components
+  - Profile photo uses URL input for now; file upload would need separate infrastructure
+  - Calculate profile completion percentage based on filled fields (25% per step)
 ---

@@ -93,7 +93,7 @@
       "title": "Coach Onboarding Flow - Step 1: Basic Info",
       "description": "Create multi-step coach onboarding wizard. Step 1 collects: display name, headline (tagline), profile photo upload, timezone selection. Save progress and allow resuming later.",
       "priority": 6,
-      "passes": false,
+      "passes": true,
       "acceptanceCriteria": [
         "Onboarding page at /onboarding/coach",
         "Step indicator shows progress (1 of 4)",
