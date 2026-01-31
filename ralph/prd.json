@@ -33,8 +33,8 @@
         "Typecheck passes"
       ],
       "priority": 2,
-      "passes": false,
-      "notes": "FAILING: /about returns 404 (page does not exist), /contact returns 404 (page does not exist). Working: /coaches, /sign-in, /sign-up. Typecheck passes."
+      "passes": true,
+      "notes": "FIXED: Created /about and /contact pages. All navigation links now work correctly. Verified with Playwright: /coaches, /about, /contact, /sign-in, /sign-up all load without errors. Typecheck passes."
     },
     {
       "id": "US-003",
@@ -82,8 +82,8 @@
         "Typecheck passes"
       ],
       "priority": 5,
-      "passes": false,
-      "notes": "BLOCKER: /about page does not exist - returns 404. No src/app/about/ directory found."
+      "passes": true,
+      "notes": "FIXED: Created /about page with Hero section, Stats section (4 metrics), Values section (4 values), Timeline/Journey section (3 milestones), What Makes Us Different section, and CTA section. No team section (using values instead). Typecheck passes."
     },
     {
       "id": "US-006",
@@ -99,8 +99,8 @@
         "Typecheck passes"
       ],
       "priority": 6,
-      "passes": false,
-      "notes": "BLOCKER: /contact page does not exist - returns 404. No src/app/contact/ directory found."
+      "passes": true,
+      "notes": "FIXED: Created /contact page with form (name, email, subject dropdown, message), inline validation errors, character count (0/1000), contact info cards (Email, Location, Response Time), and FAQ accordion (6 questions). Typecheck passes."
     },
     {
       "id": "US-007",
