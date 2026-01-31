@@ -92,3 +92,23 @@ Goal: Verify all pages and features work correctly.
   - Contact page uses client-side form state, so needs 'use client' directive
 ---
 
+## 2026-01-31 - US-003 - Verify coaches listing page
+- **What was implemented**: Verified coaches listing page functionality using Playwright
+- **Files changed**: None (testing only, updated prd.json and progress.txt)
+- **Test Results**:
+  - ✅ Page loaded at http://localhost:3000/coaches without errors
+  - ✅ No console errors
+  - ✅ 8 coaches displayed with cards showing name, headline, specialties, and pricing
+  - ✅ Search input filters coaches by name/headline/bio (tested "Sarah" - returned 1 result)
+  - ✅ Specialty filter dropdown works with 12 specialty options (checkboxes)
+  - ✅ Price filter has min/max spinbuttons with "$100+" indicator when set
+  - ✅ Sorting works with: Newest, Price: Low to High, Price: High to Low
+  - ✅ URL updates with query params (e.g., ?q=Sarah, ?sort=price_low, ?specialties=Career+Coaching)
+  - ✅ Clear filters button resets all filters
+  - ✅ Typecheck passes (npx tsc --noEmit)
+- **Learnings for future iterations**:
+  - Coaches page uses URL query params for all filters (search, sort, specialties, price)
+  - No "rating" sort option exists - only newest and price sorting available
+  - Coach cards link to individual coach profile pages at /coaches/[slug]
+---
+

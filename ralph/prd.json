@@ -50,8 +50,8 @@
         "Typecheck passes"
       ],
       "priority": 3,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Verified with Playwright: Page displays 8 coaches with cards showing name, headline, specialties, and pricing. Search filters coaches by name/headline/bio (tested with 'Sarah' - returned 1 result). Specialty filter dropdown has 12 specialty options with checkboxes. Price filter has min/max spinbuttons. Sorting works with Newest, Price: Low to High, Price: High to Low options (no rating sort exists). Typecheck passes."
     },
     {
       "id": "US-004",
