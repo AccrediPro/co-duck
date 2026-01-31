@@ -134,3 +134,28 @@ Goal: Verify all pages and features work correctly.
   - Icons mapped per specialty using lucide-react icons
 ---
 
+## 2026-01-31 - US-007 - Verify terms and privacy pages
+- **What was implemented**: Created /terms and /privacy pages with full legal content
+- **Files changed**:
+  - src/app/(public)/terms/page.tsx (new)
+  - src/app/(public)/privacy/page.tsx (new)
+- **Test Results**:
+  - ✅ /terms page loads at http://localhost:3000/terms without errors
+  - ✅ /privacy page loads at http://localhost:3000/privacy without errors
+  - ✅ No console errors on either page
+  - ✅ Table of contents sidebar displays on desktop (sticky navigation)
+  - ✅ Mobile table of contents as collapsible details element
+  - ✅ 12 accordion sections on each page expand/collapse correctly
+  - ✅ Back-to-top button appears after scrolling (tested and works)
+  - ✅ Print button present on both pages
+  - ✅ Cross-links between Terms and Privacy pages work
+  - ✅ Footer links to Terms and Privacy now work
+  - ✅ Typecheck passes (npx tsc --noEmit)
+- **Learnings for future iterations**:
+  - Legal pages follow same pattern as other public pages in src/app/(public)/
+  - Use 'use client' for pages with scroll event listeners and interactive elements
+  - Accordion component from shadcn supports type="multiple" for multiple open sections
+  - Back-to-top button uses fixed positioning with z-50 for visibility
+  - Print functionality uses window.print() browser API
+---
+

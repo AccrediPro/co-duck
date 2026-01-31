@@ -115,8 +115,8 @@
         "Typecheck passes"
       ],
       "priority": 7,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "CREATED: /terms and /privacy pages with 12 accordion sections each. Features: Table of contents sidebar (desktop) and collapsible details (mobile), accordion sections expand/collapse correctly, back-to-top button appears on scroll, print button present. Verified with Playwright: Both pages load without errors, accordion functionality works. Typecheck passes."
     },
     {
       "id": "US-008",
