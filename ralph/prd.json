@@ -34,7 +34,7 @@
       ],
       "priority": 2,
       "passes": false,
-      "notes": ""
+      "notes": "FAILING: /about returns 404 (page does not exist), /contact returns 404 (page does not exist). Working: /coaches, /sign-in, /sign-up. Typecheck passes."
     },
     {
       "id": "US-003",
@@ -83,7 +83,7 @@
       ],
       "priority": 5,
       "passes": false,
-      "notes": ""
+      "notes": "BLOCKER: /about page does not exist - returns 404. No src/app/about/ directory found."
     },
     {
       "id": "US-006",
@@ -100,7 +100,7 @@
       ],
       "priority": 6,
       "passes": false,
-      "notes": ""
+      "notes": "BLOCKER: /contact page does not exist - returns 404. No src/app/contact/ directory found."
     },
     {
       "id": "US-007",

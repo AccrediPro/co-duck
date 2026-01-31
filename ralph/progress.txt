@@ -46,3 +46,24 @@ Goal: Verify all pages and features work correctly.
   - Clerk dev mode warning is expected in development
 ---
 
+## 2026-01-31 - US-002 - Verify public navigation links work
+- **What was implemented**: Tested all navigation links using Playwright
+- **Files changed**: Updated prd.json with test results
+- **Test Results**:
+  - ✅ "Find Coaches" nav link navigates to /coaches successfully
+  - ❌ "About Us" footer link navigates to /about - returns 404 (PAGE DOES NOT EXIST)
+  - ❌ "Contact" footer link navigates to /contact - returns 404 (PAGE DOES NOT EXIST)
+  - ✅ "Sign In" header link navigates to /sign-in - Clerk sign-in form loads
+  - ✅ "Get Started" header link navigates to /sign-up - Clerk sign-up form loads
+  - ✅ Typecheck passes (npx tsc --noEmit)
+- **CRITICAL FINDINGS**:
+  - /about page does not exist - no src/app/about/ directory
+  - /contact page does not exist - no src/app/contact/ directory
+  - Footer links to these pages but they return 404
+  - This blocks US-002, US-005, and US-006
+- **Learnings for future iterations**:
+  - Navigation header shows "Sign In" and "Get Started" buttons only on non-homepage pages
+  - Clerk authentication pages load correctly with custom styling
+  - Footer has Product, Company, Legal sections with working and broken links
+---
+
