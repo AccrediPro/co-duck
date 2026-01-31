@@ -295,3 +295,27 @@ Goal: Verify all pages and features work correctly.
   - Price filter has min/max spinbuttons that work on mobile
 ---
 
+## 2026-01-31 - US-014 - Verify loading states on coaches page
+- **What was implemented**: Verified loading skeleton implementation using code analysis
+- **Files changed**: None (testing only, updated prd.json and progress.txt)
+- **Test Results**:
+  - ✅ Page has Suspense boundary at src/app/(public)/coaches/page.tsx:230
+  - ✅ CoachGridSkeleton used as fallback: `<Suspense fallback={<CoachGridSkeleton count={COACHES_PER_PAGE} />}>`
+  - ✅ CoachGridSkeleton renders grid with matching layout: `grid gap-6 sm:grid-cols-2 lg:grid-cols-3`
+  - ✅ CoachCardSkeleton matches CoachCard structure:
+    - Avatar: `h-20 w-20 rounded-full`
+    - Name: `h-6 w-32`
+    - Headline: Two lines `h-4 w-48` and `h-4 w-40`
+    - Specialties: 3 badges with `rounded-full`
+    - Price section with border-t separator
+  - ✅ Skeleton uses `animate-pulse` class from shadcn Skeleton component
+  - ✅ Content replaces skeleton when async CoachesContent resolves (React Suspense behavior)
+  - ✅ No console errors
+  - ✅ Typecheck passes (npx tsc --noEmit)
+- **Learnings for future iterations**:
+  - Next.js App Router uses Suspense boundaries for streaming server components
+  - Skeleton components should match the exact layout structure of content they replace
+  - CoachGridSkeleton accepts `count` prop for number of skeleton cards (defaults to 12)
+  - Loading states are brief in local development due to fast DB queries
+---
+
