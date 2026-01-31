@@ -379,3 +379,16 @@ Goal: Verify all pages and features work correctly.
   - Previous iterations have kept the codebase type-safe
 ---
 
+## 2026-01-31 - US-018 - Run ESLint on codebase
+- **What was implemented**: Verified ESLint passes on the entire codebase
+- **Files changed**: None (verification only, updated prd.json and progress.txt)
+- **Test Results**:
+  - ✅ Ran `npm run lint` (which runs `next lint`)
+  - ✅ No ESLint warnings or errors: "✔ No ESLint warnings or errors"
+  - ✅ Typecheck passes (npx tsc --noEmit)
+- **Learnings for future iterations**:
+  - Lint command: `npm run lint` from project root
+  - Uses Next.js built-in ESLint configuration via `next lint`
+  - Previous iterations have maintained lint-clean code
+---
+
