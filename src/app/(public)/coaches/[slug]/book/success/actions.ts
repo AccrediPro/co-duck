@@ -1,3 +1,31 @@
+/**
+ * @fileoverview Booking Success Server Actions
+ *
+ * This module handles the final phase of the booking flow: retrieving booking
+ * details after successful Stripe payment and generating calendar files.
+ *
+ * ## Booking Flow Overview
+ * 1. `../actions.ts`: Get coach data, weekly availability, and available time slots
+ * 2. `../confirm/actions.ts`: Create booking and Stripe Checkout session
+ * 3. **This file**: Handle post-payment confirmation and display
+ *
+ * ## Key Responsibilities
+ * - Retrieve booking from Stripe Checkout session ID
+ * - Confirm pending bookings after successful payment
+ * - Create transaction records for payment tracking
+ * - Generate ICS calendar files for download
+ * - Trigger conversation system messages
+ *
+ * ## Payment Confirmation Flow
+ * 1. Client redirected from Stripe with session_id query param
+ * 2. This module retrieves checkout session from Stripe
+ * 3. If payment succeeded, booking status updated to 'confirmed'
+ * 4. Transaction record created for financial tracking
+ * 5. System message sent in coach-client conversation
+ *
+ * @module booking/success/actions
+ */
+
 'use server';
 
 import { db, bookings, users, coachProfiles, transactions } from '@/db';
@@ -6,7 +34,14 @@ import { stripe } from '@/lib/stripe';
 import type { BookingSessionType } from '@/db/schema';
 import { createBookingSystemMessage } from '@/lib/conversations';
 
-// Booking data for success page
+// ─────────────────────────────────────────────────────────────────────────────
+// Type Definitions
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Booking data returned for the success page display.
+ * Contains all information needed to show confirmation details.
+ */
 export interface BookingSuccessData {
   id: number;
   coachName: string;
@@ -22,11 +57,48 @@ export interface BookingSuccessData {
   currency: string;
 }
 
+/**
+ * Result type for the getBookingFromCheckoutSession function.
+ */
 export type GetBookingFromCheckoutSessionResult =
   | { success: true; data: BookingSuccessData }
   | { success: false; error: string };
 
-// Get booking details from a Stripe Checkout session
+// ─────────────────────────────────────────────────────────────────────────────
+// Server Actions
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Retrieves and confirms a booking from a Stripe Checkout session.
+ *
+ * This function is called when the client is redirected back from Stripe
+ * after completing payment. It performs the following:
+ *
+ * 1. Retrieves the Checkout Session from Stripe (with payment_intent expanded)
+ * 2. Extracts booking ID from session metadata
+ * 3. Fetches booking and coach details from database
+ * 4. If payment succeeded and booking is pending:
+ *    - Updates booking status to 'confirmed'
+ *    - Creates transaction record (if not exists)
+ *    - Triggers conversation system message
+ *
+ * ## Idempotency
+ * This function is idempotent - it can be called multiple times safely.
+ * Transaction creation is guarded by checking for existing records.
+ *
+ * ## Platform Fee Calculation
+ * - Platform fee: 10% of total amount
+ * - Coach payout: 90% of total amount
+ *
+ * @param sessionId - Stripe Checkout Session ID from URL query param
+ * @returns Success with BookingSuccessData, or error message
+ *
+ * @example
+ * // Called on success page load
+ * const searchParams = useSearchParams();
+ * const sessionId = searchParams.get('session_id');
+ * const result = await getBookingFromCheckoutSession(sessionId);
+ */
 export async function getBookingFromCheckoutSession(
   sessionId: string
 ): Promise<GetBookingFromCheckoutSessionResult> {
@@ -156,7 +228,35 @@ export async function getBookingFromCheckoutSession(
   }
 }
 
-// Generate ICS file for a booking (for add to calendar)
+// ─────────────────────────────────────────────────────────────────────────────
+// Calendar Export
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Generates an ICS (iCalendar) file for a confirmed booking.
+ *
+ * Creates a downloadable calendar file that clients can add to their
+ * calendar applications. This is a duplicate of the function in confirm/actions.ts
+ * for use on the success page.
+ *
+ * ## ICS Format Details
+ * - iCalendar 2.0 specification (RFC 5545)
+ * - Includes: summary, description, start/end times
+ * - Unique UID prevents duplicate events: `booking-{id}@coachingplatform.com`
+ * - Client notes are included in description if present
+ *
+ * @param bookingId - The database ID of the booking
+ * @returns Success with ICS file content as string, or error
+ *
+ * @example
+ * const result = await generateSuccessIcsFile(123);
+ * if (result.success) {
+ *   // Trigger download
+ *   const blob = new Blob([result.data], { type: 'text/calendar' });
+ *   const url = URL.createObjectURL(blob);
+ *   // Create download link...
+ * }
+ */
 export async function generateSuccessIcsFile(
   bookingId: number
 ): Promise<{ success: true; data: string } | { success: false; error: string }> {

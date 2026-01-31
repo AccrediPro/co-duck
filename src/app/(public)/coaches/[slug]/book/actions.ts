@@ -1,10 +1,38 @@
+/**
+ * @fileoverview Booking Flow Server Actions - Availability & Time Slot Management
+ *
+ * This module handles the first phase of the booking flow: fetching coach information,
+ * retrieving availability, and calculating available time slots for session booking.
+ *
+ * ## Booking Flow Overview
+ * 1. **This file**: Get coach data, weekly availability, and available time slots
+ * 2. `confirm/actions.ts`: Create booking and Stripe Checkout session
+ * 3. `success/actions.ts`: Handle post-payment confirmation and display
+ *
+ * ## Key Features
+ * - Respects coach timezone settings
+ * - Handles availability overrides (vacation days, special hours)
+ * - Applies buffer time between sessions
+ * - Enforces advance notice requirements
+ * - Calculates available slots avoiding conflicts with existing bookings
+ *
+ * @module booking/actions
+ */
+
 'use server';
 
 import { db, users, coachProfiles, coachAvailability, bookings, availabilityOverrides } from '@/db';
 import { eq, and, gte, lte, or } from 'drizzle-orm';
 import type { SessionType } from '@/db/schema';
 
-// Types for the booking flow
+// ─────────────────────────────────────────────────────────────────────────────
+// Type Definitions
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Coach data required for the booking flow.
+ * Contains essential information for displaying the booking page and calculating slots.
+ */
 export interface CoachBookingData {
   userId: string;
   name: string;
@@ -18,20 +46,55 @@ export interface CoachBookingData {
   maxAdvanceDays: number;
 }
 
+/**
+ * Availability settings for a single day of the week.
+ * Used to represent the coach's recurring weekly schedule.
+ */
 export interface DayAvailability {
+  /** Day of week (0 = Sunday, 1 = Monday, ..., 6 = Saturday) */
   dayOfWeek: number;
-  startTime: string; // HH:MM format
-  endTime: string; // HH:MM format
+  /** Start time in HH:MM format (24-hour, e.g., "09:00") */
+  startTime: string;
+  /** End time in HH:MM format (24-hour, e.g., "17:00") */
+  endTime: string;
+  /** Whether the coach accepts bookings on this day */
   isAvailable: boolean;
 }
 
+/**
+ * An available time slot for booking.
+ * Contains both machine-readable ISO timestamps and human-readable display format.
+ */
 export interface TimeSlot {
-  startTime: string; // ISO string
-  endTime: string; // ISO string
-  displayTime: string; // Formatted for display
+  /** Session start time as ISO 8601 string (e.g., "2024-01-15T14:00:00.000Z") */
+  startTime: string;
+  /** Session end time as ISO 8601 string */
+  endTime: string;
+  /** Formatted time for display in client's timezone (e.g., "2:00 PM") */
+  displayTime: string;
 }
 
-// Fetch coach data for booking
+// ─────────────────────────────────────────────────────────────────────────────
+// Server Actions
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Fetches coach data required for the booking page.
+ *
+ * Retrieves the coach's profile, session types, and booking configuration.
+ * Only returns data for published coaches with at least one session type.
+ *
+ * @param slug - The coach's URL slug (unique identifier from their profile)
+ * @returns Success with CoachBookingData, or error if coach not found/unavailable
+ *
+ * @throws Will not throw - errors are returned in the result object
+ *
+ * @example
+ * const result = await getCoachForBooking('john-smith');
+ * if (result.success) {
+ *   console.log(result.data.sessionTypes); // Available session types
+ * }
+ */
 export async function getCoachForBooking(
   slug: string
 ): Promise<{ success: true; data: CoachBookingData } | { success: false; error: string }> {
@@ -86,7 +149,22 @@ export async function getCoachForBooking(
   }
 }
 
-// Fetch coach's weekly availability
+/**
+ * Retrieves the coach's recurring weekly availability schedule.
+ *
+ * Returns availability for all 7 days of the week. Days without explicit
+ * availability records default to unavailable (09:00-17:00).
+ *
+ * @param coachId - The coach's user ID
+ * @returns Success with array of 7 DayAvailability objects (Sun-Sat), or error
+ *
+ * @example
+ * const result = await getCoachWeeklyAvailability('user_abc123');
+ * if (result.success) {
+ *   const mondayAvail = result.data.find(d => d.dayOfWeek === 1);
+ *   console.log(mondayAvail?.isAvailable); // true/false
+ * }
+ */
 export async function getCoachWeeklyAvailability(
   coachId: string
 ): Promise<{ success: true; data: DayAvailability[] } | { success: false; error: string }> {
@@ -130,11 +208,48 @@ export async function getCoachWeeklyAvailability(
   }
 }
 
-// Get available time slots for a specific date
+/**
+ * Calculates available time slots for a specific date.
+ *
+ * This is the core slot calculation function that considers:
+ * - Coach's weekly availability schedule
+ * - Date-specific overrides (vacation days, special hours)
+ * - Existing bookings (pending or confirmed)
+ * - Buffer time between sessions
+ * - Advance notice requirements
+ * - Session duration
+ *
+ * ## Slot Generation Logic
+ * 1. Check for date-specific override, otherwise use weekly schedule
+ * 2. Generate 30-minute increment slots within available window
+ * 3. Filter out slots that don't meet advance notice requirement
+ * 4. Filter out slots that conflict with existing bookings (including buffer)
+ *
+ * @param coachId - The coach's user ID
+ * @param dateStr - Target date in YYYY-MM-DD format (e.g., "2024-01-15")
+ * @param sessionDuration - Session length in minutes (e.g., 30, 60, 90)
+ * @param coachTimezone - Coach's IANA timezone (e.g., "America/New_York")
+ * @param clientTimezone - Client's IANA timezone for display formatting
+ * @returns Success with array of TimeSlot objects, or error
+ *
+ * @example
+ * const result = await getAvailableSlots(
+ *   'user_abc123',
+ *   '2024-01-15',
+ *   60,
+ *   'America/New_York',
+ *   'America/Los_Angeles'
+ * );
+ * if (result.success) {
+ *   result.data.forEach(slot => {
+ *     console.log(slot.displayTime); // "9:00 AM", "9:30 AM", etc.
+ *   });
+ * }
+ */
 export async function getAvailableSlots(
   coachId: string,
-  dateStr: string, // YYYY-MM-DD format
-  sessionDuration: number, // in minutes
+  dateStr: string,
+  sessionDuration: number,
   coachTimezone: string,
   clientTimezone: string
 ): Promise<{ success: true; data: TimeSlot[] } | { success: false; error: string }> {
@@ -285,7 +400,20 @@ export async function getAvailableSlots(
   }
 }
 
-// Helper function to format time in a specific timezone
+// ─────────────────────────────────────────────────────────────────────────────
+// Helper Functions
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Formats a Date object as a localized time string in a specific timezone.
+ *
+ * @param date - The Date object to format
+ * @param timezone - IANA timezone identifier (e.g., "America/New_York")
+ * @returns Formatted time string (e.g., "2:30 PM")
+ *
+ * @remarks
+ * Falls back to local time formatting if the provided timezone is invalid.
+ */
 function formatTimeInTimezone(date: Date, timezone: string): string {
   try {
     return date.toLocaleTimeString('en-US', {
@@ -304,10 +432,29 @@ function formatTimeInTimezone(date: Date, timezone: string): string {
   }
 }
 
-// Check if a date is bookable (not past, not beyond max days, coach has availability)
+/**
+ * Gets all bookable dates for a given month.
+ *
+ * A date is bookable if:
+ * 1. It's in the future (with advance notice applied)
+ * 2. It's within the coach's max advance booking window
+ * 3. Coach has availability on that day of week OR a date-specific override
+ *
+ * @param coachId - The coach's user ID
+ * @param month - Month number (0-indexed: 0 = January, 11 = December)
+ * @param year - Full year (e.g., 2024)
+ * @returns Success with array of bookable date strings in YYYY-MM-DD format, or error
+ *
+ * @example
+ * // Get bookable dates for January 2024
+ * const result = await getBookableDates('user_abc123', 0, 2024);
+ * if (result.success) {
+ *   console.log(result.data); // ["2024-01-15", "2024-01-16", ...]
+ * }
+ */
 export async function getBookableDates(
   coachId: string,
-  month: number, // 0-indexed
+  month: number,
   year: number
 ): Promise<{ success: true; data: string[] } | { success: false; error: string }> {
   try {
