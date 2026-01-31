@@ -4,10 +4,33 @@ import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import {
   saveAvailabilitySettings,
-  copyDaySchedule,
   type DaySchedule,
   type AvailabilitySettings,
 } from '@/app/(dashboard)/dashboard/availability/actions';
+
+// Copy schedule from one day to others (client-side utility)
+type CopyScheduleData = {
+  sourceDay: number;
+  targetDays: number[];
+  schedule: DaySchedule[];
+};
+
+function copyDaySchedule(data: CopyScheduleData): DaySchedule[] {
+  const sourceSchedule = data.schedule.find((d) => d.dayOfWeek === data.sourceDay);
+  if (!sourceSchedule) return data.schedule;
+
+  return data.schedule.map((day) => {
+    if (data.targetDays.includes(day.dayOfWeek)) {
+      return {
+        ...day,
+        isAvailable: sourceSchedule.isAvailable,
+        startTime: sourceSchedule.startTime,
+        endTime: sourceSchedule.endTime,
+      };
+    }
+    return day;
+  });
+}
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';

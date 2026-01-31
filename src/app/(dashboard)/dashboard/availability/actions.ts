@@ -163,26 +163,3 @@ export async function getAvailabilitySettings(): Promise<GetAvailabilityResult> 
   }
 }
 
-// Copy schedule from one day to others
-export type CopyScheduleData = {
-  sourceDay: number;
-  targetDays: number[];
-  schedule: DaySchedule[];
-};
-
-export function copyDaySchedule(data: CopyScheduleData): DaySchedule[] {
-  const sourceSchedule = data.schedule.find((d) => d.dayOfWeek === data.sourceDay);
-  if (!sourceSchedule) return data.schedule;
-
-  return data.schedule.map((day) => {
-    if (data.targetDays.includes(day.dayOfWeek)) {
-      return {
-        ...day,
-        isAvailable: sourceSchedule.isAvailable,
-        startTime: sourceSchedule.startTime,
-        endTime: sourceSchedule.endTime,
-      };
-    }
-    return day;
-  });
-}
