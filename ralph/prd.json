@@ -65,8 +65,8 @@
         "Typecheck passes"
       ],
       "priority": 4,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "CREATED: /specialties page with 12 specialty cards. Each card has: icon, title, description, coach count. Verified with Playwright: Career Coaching card navigates to /coaches?specialties=Career%20Coaching and filters correctly. Typecheck passes."
     },
     {
       "id": "US-005",

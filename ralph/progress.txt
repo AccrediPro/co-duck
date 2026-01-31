@@ -112,3 +112,25 @@ Goal: Verify all pages and features work correctly.
   - Coach cards link to individual coach profile pages at /coaches/[slug]
 ---
 
+## 2026-01-31 - US-004 - Verify specialties page
+- **What was implemented**: Created /specialties page to browse coaching specialties
+- **Files changed**:
+  - src/app/(public)/specialties/page.tsx (new)
+- **Test Results**:
+  - ✅ Page loads at http://localhost:3000/specialties without errors
+  - ✅ No console errors
+  - ✅ Hero section displays with "Explore Coaching Specialties" heading
+  - ✅ 12 specialty cards displayed in grid layout
+  - ✅ Each card shows: icon, title, description, coach count
+  - ✅ Coach counts are accurate (e.g., Career Coaching: 1, Executive Coaching: 2, Leadership Coaching: 2)
+  - ✅ Clicking "Career Coaching" card navigates to /coaches?specialties=Career%20Coaching
+  - ✅ Filtered coaches page shows correct results (1 coach with specialty filter applied)
+  - ✅ CTA section with "Browse All Coaches" and "Get Recommendations" buttons
+  - ✅ Typecheck passes (npx tsc --noEmit)
+- **Learnings for future iterations**:
+  - Specialties list is defined in src/lib/validators/coach-onboarding.ts as COACH_SPECIALTIES
+  - Coach profiles store specialties as JSONB array in coachProfiles.specialties column
+  - Use encodeURIComponent() for specialty names with special chars (e.g., "Health & Wellness")
+  - Icons mapped per specialty using lucide-react icons
+---
+
