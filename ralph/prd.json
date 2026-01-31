@@ -1,0 +1,230 @@
+{
+  "project": "Coaching Platform",
+  "branchName": "ralph/code-documentation",
+  "description": "Add comprehensive code documentation - JSDoc, README files, and inline comments for all critical files",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Document Stripe webhook handler",
+      "description": "Add JSDoc documentation to the Stripe webhook handler - critical payment path.",
+      "acceptanceCriteria": [
+        "Add JSDoc to POST handler in src/app/api/webhooks/stripe/route.ts",
+        "Document each event handler function (checkout.session.completed, etc.)",
+        "Document helper functions with params and return types",
+        "Add inline comments explaining critical logic",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-002",
+      "title": "Document Clerk webhook handler",
+      "description": "Add JSDoc documentation to the Clerk webhook handler - user sync path.",
+      "acceptanceCriteria": [
+        "Add JSDoc to POST handler in src/app/api/webhooks/clerk/route.ts",
+        "Document user.created, user.updated, user.deleted handlers",
+        "Add inline comments explaining webhook verification",
+        "Typecheck passes"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-003",
+      "title": "Document booking flow actions",
+      "description": "Add JSDoc to all booking-related server actions.",
+      "acceptanceCriteria": [
+        "Document src/app/(public)/coaches/[slug]/book/actions.ts",
+        "Document src/app/(public)/coaches/[slug]/book/confirm/actions.ts",
+        "Document src/app/(public)/coaches/[slug]/book/success/actions.ts",
+        "Each function has JSDoc with @param, @returns, @throws",
+        "Typecheck passes"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-004",
+      "title": "Document session management actions",
+      "description": "Add JSDoc to session-related server actions.",
+      "acceptanceCriteria": [
+        "Document src/app/(dashboard)/dashboard/sessions/actions.ts if exists",
+        "Document reschedule actions",
+        "Document cancel session actions",
+        "Each function has JSDoc with @param, @returns, @throws",
+        "Typecheck passes"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-005",
+      "title": "Document availability actions",
+      "description": "Add JSDoc to availability-related server actions.",
+      "acceptanceCriteria": [
+        "Document src/app/(dashboard)/dashboard/availability/actions.ts",
+        "Document availability-actions.ts if separate",
+        "Each function has JSDoc with @param, @returns, @throws",
+        "Typecheck passes"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-006",
+      "title": "Document onboarding components",
+      "description": "Add JSDoc to coach onboarding form components.",
+      "acceptanceCriteria": [
+        "Document src/components/onboarding/basic-info-form.tsx",
+        "Document src/components/onboarding/bio-specialties-form.tsx",
+        "Document src/components/onboarding/pricing-form.tsx",
+        "Document src/components/onboarding/review-publish-form.tsx",
+        "Each component has JSDoc explaining purpose and props",
+        "Typecheck passes"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-007",
+      "title": "Document database schema",
+      "description": "Enhance database schema documentation.",
+      "acceptanceCriteria": [
+        "Add detailed comments to src/db/schema.ts explaining each table",
+        "Document relationship between tables",
+        "Explain JSONB fields structure (sessionTypes, availability, etc.)",
+        "Document enum values and their meanings",
+        "Create src/db/README.md with schema overview and ERD description",
+        "Typecheck passes"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-008",
+      "title": "Document messaging system",
+      "description": "Add JSDoc to messaging/conversations utilities.",
+      "acceptanceCriteria": [
+        "Verify src/lib/conversations.ts has complete JSDoc",
+        "Add examples to existing documentation",
+        "Document any message-related components",
+        "Typecheck passes"
+      ],
+      "priority": 8,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-009",
+      "title": "Document payment utilities",
+      "description": "Add JSDoc to Stripe and payment utilities.",
+      "acceptanceCriteria": [
+        "Document src/lib/stripe.ts with configuration details",
+        "Document src/lib/refunds.ts (verify existing JSDoc)",
+        "Add error handling documentation",
+        "Typecheck passes"
+      ],
+      "priority": 9,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-010",
+      "title": "Document coach validators",
+      "description": "Add JSDoc to validation schemas.",
+      "acceptanceCriteria": [
+        "Document src/lib/validators/coach-onboarding.ts",
+        "Document COACH_SPECIALTIES constant",
+        "Document each Zod schema with field explanations",
+        "Typecheck passes"
+      ],
+      "priority": 10,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-011",
+      "title": "Create components README",
+      "description": "Create overview documentation for components.",
+      "acceptanceCriteria": [
+        "Create src/components/README.md",
+        "List all component folders with brief descriptions",
+        "Document component naming conventions",
+        "Document prop patterns used",
+        "Typecheck passes"
+      ],
+      "priority": 11,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-012",
+      "title": "Create API documentation",
+      "description": "Document all API routes.",
+      "acceptanceCriteria": [
+        "Create docs/API.md in project root",
+        "Document all /api/* routes",
+        "Include request/response formats",
+        "Document authentication requirements",
+        "Typecheck passes"
+      ],
+      "priority": 12,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-013",
+      "title": "Document dashboard pages",
+      "description": "Add inline documentation to dashboard pages.",
+      "acceptanceCriteria": [
+        "Add JSDoc to src/app/(dashboard)/dashboard/page.tsx",
+        "Document key dashboard components",
+        "Document data fetching patterns used",
+        "Typecheck passes"
+      ],
+      "priority": 13,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-014",
+      "title": "Create architecture overview",
+      "description": "Document overall application architecture.",
+      "acceptanceCriteria": [
+        "Create docs/ARCHITECTURE.md",
+        "Document folder structure and conventions",
+        "Document data flow (booking, payment, messaging)",
+        "Document authentication flow with Clerk",
+        "Include diagrams in text/ASCII format",
+        "Typecheck passes"
+      ],
+      "priority": 14,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-015",
+      "title": "Update main README",
+      "description": "Update project README with comprehensive documentation.",
+      "acceptanceCriteria": [
+        "Update README.md with project overview",
+        "Add features list",
+        "Add setup instructions",
+        "Add environment variables documentation",
+        "Add links to other docs (API, Architecture, etc.)",
+        "Typecheck passes"
+      ],
+      "priority": 15,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}
