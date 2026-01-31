@@ -1,3 +1,29 @@
+/**
+ * @fileoverview Client session management server actions.
+ *
+ * This module provides server actions for clients to manage their sessions:
+ * - View sessions by status (upcoming, past/cancelled)
+ * - Cancel sessions with refund processing
+ * - Generate ICS calendar files
+ * - Retry payment for unpaid bookings
+ * - Check refund eligibility before cancelling
+ *
+ * @module my-sessions/actions
+ *
+ * @security
+ * All actions require authentication via Clerk.
+ * Clients can only access/modify sessions where they are the client.
+ *
+ * @refunds
+ * Client-initiated cancellations follow a sliding scale refund policy:
+ * - 48+ hours before: 100% refund
+ * - 24-48 hours before: 50% refund
+ * - Less than 24 hours: No refund
+ *
+ * This differs from coach cancellations which are always 100% refund.
+ *
+ * @see sessions/actions.ts for coach-side session management
+ */
 'use server';
 
 import { auth } from '@clerk/nextjs/server';
@@ -8,11 +34,30 @@ import { stripe } from '@/lib/stripe';
 import type { BookingSessionType } from '@/db/schema';
 import { calculateRefundEligibility, formatRefundAmount } from '@/lib/refunds';
 
+// ============================================================================
+// Type Definitions
+// ============================================================================
+
+/**
+ * Session tab status for filtering client's session list.
+ * - `upcoming`: Future sessions that are pending or confirmed
+ * - `past`: Past sessions OR cancelled sessions (regardless of time)
+ */
 export type ClientSessionStatus = 'upcoming' | 'past';
 
-// Payment status derived from transaction existence and status
+/**
+ * Payment status derived from transaction existence and status.
+ * - `free`: Session has price of 0, no payment required
+ * - `paid`: Transaction exists with 'succeeded' status
+ * - `payment_required`: Paid session with no successful transaction
+ * - `payment_failed`: Transaction exists with 'failed' status
+ */
 export type PaymentStatus = 'free' | 'paid' | 'payment_required' | 'payment_failed';
 
+/**
+ * Session data with coach information for client's view.
+ * Combines booking data with coach user profile.
+ */
 export interface SessionWithCoach {
   id: number;
   coachId: string;
@@ -28,13 +73,43 @@ export interface SessionWithCoach {
   paymentStatus: PaymentStatus;
 }
 
+/**
+ * Result of fetching client sessions.
+ */
 export interface GetClientSessionsResult {
   success: boolean;
+  /** List of sessions when successful */
   sessions?: SessionWithCoach[];
+  /** Total count for pagination (before limit/offset applied) */
   totalCount?: number;
+  /** Error message when success is false */
   error?: string;
 }
 
+// ============================================================================
+// Session Query Actions
+// ============================================================================
+
+/**
+ * Retrieves paginated sessions for the authenticated client.
+ *
+ * Sessions are filtered by tab status:
+ * - `upcoming`: Future sessions with pending/confirmed status, ordered by nearest first
+ * - `past`: Past sessions OR any cancelled sessions, ordered by most recent first
+ *
+ * @param tab - Filter by session status ('upcoming', 'past')
+ * @param page - Page number for pagination (1-indexed, default: 1)
+ * @param perPage - Number of sessions per page (default: 10)
+ * @returns Promise with sessions array, total count, or error
+ *
+ * @example
+ * // Get first page of upcoming sessions
+ * const result = await getClientSessions('upcoming');
+ * if (result.success) {
+ *   console.log(`Found ${result.totalCount} total sessions`);
+ *   result.sessions?.forEach(s => console.log(s.coachName));
+ * }
+ */
 export async function getClientSessions(
   tab: ClientSessionStatus,
   page: number = 1,
@@ -157,19 +232,70 @@ export async function getClientSessions(
   }
 }
 
+// ============================================================================
+// Cancellation Actions
+// ============================================================================
+
+/**
+ * Information about a refund processed during cancellation.
+ */
 export interface RefundInfo {
+  /** Whether a refund was successfully processed */
   wasRefunded: boolean;
+  /** Refund amount in cents */
   refundAmountCents: number;
+  /** Formatted refund amount (e.g., "$25.00") */
   refundAmountFormatted: string;
+  /** Explanation of refund outcome */
   reason: string;
 }
 
+/**
+ * Result of cancelling a session.
+ */
 export interface CancelSessionResult {
   success: boolean;
+  /** Error message when success is false */
   error?: string;
+  /** Refund details if a paid session was cancelled */
   refund?: RefundInfo;
 }
 
+/**
+ * Cancels a session as the client.
+ *
+ * Client cancellations follow a sliding scale refund policy based on
+ * how close to the session the cancellation occurs:
+ * - 48+ hours before: 100% refund
+ * - 24-48 hours before: 50% refund
+ * - Less than 24 hours: No refund
+ *
+ * This is different from coach cancellations which always give 100% refund.
+ *
+ * Process:
+ * 1. Verify session belongs to client and is in cancellable state
+ * 2. Check for paid transaction
+ * 3. Calculate refund based on timing policy
+ * 4. If eligible, process refund via Stripe
+ * 5. Update booking status to 'cancelled'
+ * 6. Record cancellation metadata (who, when, reason)
+ *
+ * @param sessionId - The booking ID to cancel
+ * @param reason - Optional cancellation reason for records
+ * @returns Promise with success status and refund details if applicable
+ *
+ * @throws Returns error if session is already cancelled/completed
+ *
+ * @example
+ * const result = await cancelClientSession(123, "Schedule conflict");
+ * if (result.success) {
+ *   if (result.refund?.wasRefunded) {
+ *     console.log(`Refunded ${result.refund.refundAmountFormatted}`);
+ *   } else {
+ *     console.log(`No refund: ${result.refund?.reason}`);
+ *   }
+ * }
+ */
 export async function cancelClientSession(
   sessionId: number,
   reason?: string
@@ -291,7 +417,33 @@ export async function cancelClientSession(
   }
 }
 
-// Generate ICS file content for calendar download
+// ============================================================================
+// Calendar Export Actions
+// ============================================================================
+
+/**
+ * Generates an ICS (iCalendar) file for a booking.
+ *
+ * The ICS file allows clients to download and import session details
+ * into their calendar application (Google Calendar, Outlook, Apple Calendar, etc.).
+ *
+ * ICS Format:
+ * - Uses RFC 5545 iCalendar specification
+ * - UID format: booking-{id}@coachingplatform.com (for deduplication)
+ * - Includes session type name, duration, and client's notes
+ * - Summary shows "Coaching Session with {CoachName}"
+ *
+ * @param bookingId - The booking ID to generate ICS for
+ * @returns Promise with ICS file content string or error
+ *
+ * @example
+ * const result = await generateClientIcsFile(123);
+ * if (result.success) {
+ *   // Create downloadable blob
+ *   const blob = new Blob([result.data], { type: 'text/calendar' });
+ *   // Trigger download...
+ * }
+ */
 export async function generateClientIcsFile(
   bookingId: number
 ): Promise<{ success: true; data: string } | { success: false; error: string }> {
@@ -370,12 +522,54 @@ export async function generateClientIcsFile(
   }
 }
 
-// Result of creating a checkout session for an existing booking
+// ============================================================================
+// Payment Retry Actions
+// ============================================================================
+
+/**
+ * Result of creating a retry checkout session.
+ */
 export type CreateRetryCheckoutResult =
   | { success: true; checkoutUrl: string }
   | { success: false; error: string };
 
-// Create a Stripe Checkout session for an existing booking that needs payment (retry)
+/**
+ * Creates a Stripe Checkout session for an existing booking that needs payment.
+ *
+ * Used when:
+ * - A booking was created but payment failed or was abandoned
+ * - Client wants to complete payment for a pending booking
+ *
+ * Validation:
+ * - Booking must belong to the authenticated client
+ * - Booking must be a paid session (price > 0)
+ * - Booking must be in the future (can't pay for past sessions)
+ * - Booking must not already be paid
+ * - Coach must have completed Stripe Connect onboarding
+ *
+ * The checkout session is created with:
+ * - 10% platform fee (application_fee_amount)
+ * - Remaining 90% transferred to coach (destination charge)
+ * - Booking metadata for webhook processing
+ * - Success URL: /coaches/{slug}/book/success?session_id={CHECKOUT_SESSION_ID}
+ * - Cancel URL: /dashboard/sessions/{bookingId}
+ *
+ * @param bookingId - The booking ID to create checkout for
+ * @param clientTimezone - Optional timezone for formatting session time in checkout
+ * @returns Promise with Stripe Checkout URL or error
+ *
+ * @throws Returns error if session is free
+ * @throws Returns error if session is in the past
+ * @throws Returns error if already paid
+ * @throws Returns error if coach hasn't set up payments
+ *
+ * @example
+ * const result = await createRetryCheckoutSession(123, "America/New_York");
+ * if (result.success) {
+ *   // Redirect to Stripe Checkout
+ *   window.location.href = result.checkoutUrl;
+ * }
+ */
 export async function createRetryCheckoutSession(
   bookingId: number,
   clientTimezone?: string
@@ -556,22 +750,59 @@ export async function createRetryCheckoutSession(
   }
 }
 
-// Get refund eligibility info for a booking (used by client cancellation dialog)
+// ============================================================================
+// Refund Eligibility Actions
+// ============================================================================
+
+/**
+ * Result of checking refund eligibility for a client session.
+ */
 export interface ClientRefundEligibilityResult {
   success: boolean;
+  /** Error message when success is false */
   error?: string;
+  /** Refund eligibility data when success is true */
   data?: {
+    /** Whether a successful payment exists */
     hasPaidTransaction: boolean;
+    /** Amount paid in cents */
     paidAmountCents: number;
+    /** Currency code (e.g., "USD") */
     currency: string;
+    /** Whether a refund can be issued */
     isEligibleForRefund: boolean;
+    /** Amount to refund in cents (may be partial) */
     refundAmountCents: number;
+    /** Formatted refund amount (e.g., "$25.00") */
     refundAmountFormatted: string;
+    /** Explanation of refund policy */
     refundReason: string;
+    /** Hours until the session starts (determines refund %) */
     hoursUntilSession: number;
   };
 }
 
+/**
+ * Gets refund eligibility information for a client session.
+ *
+ * Used by the cancellation dialog to show the client what refund
+ * they would receive if they cancel. Refund amounts follow a sliding scale:
+ * - 48+ hours: 100% of paid amount
+ * - 24-48 hours: 50% of paid amount
+ * - Less than 24 hours: 0%
+ *
+ * @param sessionId - The booking ID to check
+ * @returns Promise with refund eligibility details or error
+ *
+ * @example
+ * const result = await getClientRefundEligibility(123);
+ * if (result.success && result.data) {
+ *   const { hoursUntilSession, refundAmountFormatted, refundReason } = result.data;
+ *   console.log(`${hoursUntilSession}h until session`);
+ *   console.log(`Refund: ${refundAmountFormatted}`);
+ *   console.log(`Policy: ${refundReason}`);
+ * }
+ */
 export async function getClientRefundEligibility(
   sessionId: number
 ): Promise<ClientRefundEligibilityResult> {

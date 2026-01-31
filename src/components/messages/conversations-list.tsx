@@ -1,3 +1,20 @@
+/**
+ * @fileoverview Conversations list component for the messages inbox.
+ *
+ * This component displays the user's conversation inbox with search functionality
+ * and navigation to individual chat views.
+ *
+ * ## Features
+ *
+ * - List of all conversations with other user info
+ * - Debounced search by other user's name (300ms)
+ * - Unread message indicators
+ * - Empty state messaging
+ * - Loading state during navigation
+ *
+ * @module components/messages/conversations-list
+ */
+
 'use client';
 
 import { useState, useEffect, useTransition, useCallback } from 'react';
@@ -8,10 +25,37 @@ import { ConversationRow } from './conversation-row';
 import { getConversations } from '@/app/(dashboard)/dashboard/messages/actions';
 import type { ConversationWithDetails } from '@/app/(dashboard)/dashboard/messages/actions';
 
+// ============================================================================
+// TYPE DEFINITIONS
+// ============================================================================
+
+/**
+ * Props for the ConversationsList component.
+ *
+ * @property initialConversations - Pre-loaded conversations from server
+ */
 interface ConversationsListProps {
   initialConversations: ConversationWithDetails[];
 }
 
+// ============================================================================
+// COMPONENT
+// ============================================================================
+
+/**
+ * Inbox component showing all conversations for the current user.
+ *
+ * Displays conversations where the user is either coach or client,
+ * with search functionality and unread indicators.
+ *
+ * @param props - Component props with initial conversation data
+ * @returns Conversations list UI
+ *
+ * @example
+ * // In messages/page.tsx (server component)
+ * const result = await getConversations();
+ * return <ConversationsList initialConversations={result.conversations ?? []} />;
+ */
 export function ConversationsList({ initialConversations }: ConversationsListProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();

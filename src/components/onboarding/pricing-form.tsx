@@ -1,3 +1,40 @@
+/**
+ * @fileoverview Coach Onboarding Step 3 - Pricing Form
+ *
+ * This component handles the third step of the coach onboarding flow where coaches
+ * configure their pricing: currency, base hourly rate, and session types with
+ * individual pricing.
+ *
+ * @module components/onboarding/pricing-form
+ *
+ * ## Flow
+ * 1. Coach selects their preferred currency (USD, EUR, GBP, etc.)
+ * 2. Coach optionally sets a base hourly rate for reference
+ * 3. Coach defines session types (name, duration, price) - at least one required
+ * 4. On submit, data is saved via server action and user advances to step 4
+ *
+ * ## Data Flow
+ * - Input: Existing pricing data in CENTS (for edits)
+ * - Display: Prices shown in DOLLARS for user-friendly editing
+ * - Output: Prices converted back to CENTS before saving
+ * - Storage: Saves to `coach_profiles` table via `savePricing` server action
+ * - Navigation: On success, redirects to `/onboarding/coach/step-4`
+ *
+ * ## Price Handling
+ * IMPORTANT: All prices are stored in the database in CENTS (integer).
+ * This component handles the conversion:
+ * - On load: cents → dollars (divide by 100)
+ * - On save: dollars → cents (multiply by 100, rounded)
+ *
+ * ## Validation
+ * Uses Zod schema `coachPricingSchema` from coach-onboarding validators:
+ * - currency: Required, must be supported currency code
+ * - hourlyRate: Optional, must be positive if provided
+ * - sessionTypes: Required array with at least 1 session type
+ *   - name: Required, 2-100 characters
+ *   - duration: Required, must be from SESSION_DURATIONS list
+ *   - price: Required, must be non-negative
+ */
 'use client';
 
 import { useState } from 'react';
@@ -35,6 +72,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Loader2, Plus, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 
+/* ============================================================================
+ * TYPE DEFINITIONS
+ * ========================================================================= */
+
+/**
+ * Props for the PricingForm component.
+ *
+ * @property initialData - Pre-existing pricing data for editing
+ * @property initialData.hourlyRate - Base hourly rate in CENTS
+ * @property initialData.currency - Currency code (e.g., "USD", "EUR")
+ * @property initialData.sessionTypes - Array of session type configurations
+ */
 interface PricingFormProps {
   initialData?: {
     hourlyRate?: number | null;
@@ -43,22 +92,81 @@ interface PricingFormProps {
   };
 }
 
+/* ============================================================================
+ * HELPER FUNCTIONS
+ * ========================================================================= */
+
+/**
+ * Generates a unique ID for a new session type.
+ *
+ * Format: `session_{timestamp}_{random7chars}`
+ *
+ * @returns Unique session type ID string
+ *
+ * @example
+ * const id = generateSessionId(); // "session_1706745600000_abc123d"
+ */
+/**
+ * Generates a unique ID for a new session type.
+ *
+ * Format: `session_{timestamp}_{random7chars}`
+ *
+ * @returns Unique session type ID string
+ *
+ * @example
+ * const id = generateSessionId(); // "session_1706745600000_abc123d"
+ */
 function generateSessionId(): string {
   return `session_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 }
 
+/* ============================================================================
+ * COMPONENT
+ * ========================================================================= */
+
+/**
+ * Pricing Form for coach onboarding step 3.
+ *
+ * Allows coaches to configure their pricing structure including currency
+ * selection, optional base hourly rate, and customizable session types with
+ * individual pricing. Supports dynamic addition and removal of session types.
+ *
+ * @param props - Component props
+ * @param props.initialData - Pre-existing data for form pre-population (prices in cents)
+ *
+ * @returns React component rendering the pricing configuration form
+ *
+ * @example
+ * ```tsx
+ * // New coach onboarding
+ * <PricingForm />
+ *
+ * // Editing existing pricing (note: prices in CENTS)
+ * <PricingForm
+ *   initialData={{
+ *     hourlyRate: 15000, // $150.00
+ *     currency: "USD",
+ *     sessionTypes: [
+ *       { id: "session_1", name: "Discovery Call", duration: 30, price: 0 },
+ *       { id: "session_2", name: "Coaching Session", duration: 60, price: 15000 }
+ *     ]
+ *   }}
+ * />
+ * ```
+ */
 export function PricingForm({ initialData }: PricingFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Convert cents to dollars for display
+  // Convert cents to dollars for user-friendly display
   const initialHourlyRate = initialData?.hourlyRate ? initialData.hourlyRate / 100 : undefined;
   const initialSessionTypes = initialData?.sessionTypes?.map((st) => ({
     ...st,
     price: st.price / 100, // Convert cents to dollars for display
   }));
 
+  // Initialize form with react-hook-form and Zod validation
   const form = useForm<CoachPricingFormData>({
     resolver: zodResolver(coachPricingSchema),
     defaultValues: {
@@ -71,25 +179,44 @@ export function PricingForm({ initialData }: PricingFormProps) {
     },
   });
 
+  // useFieldArray for dynamic session type management
   const { fields, append, remove } = useFieldArray({
     control: form.control,
     name: 'sessionTypes',
   });
 
+  // Get currency symbol for display based on selected currency
   const watchedCurrency = form.watch('currency');
   const currencySymbol =
     SUPPORTED_CURRENCIES.find((c) => c.code === watchedCurrency)?.symbol || '$';
 
+  /**
+   * Adds a new empty session type to the form.
+   */
   const addSessionType = () => {
     append({ id: generateSessionId(), name: '', duration: 60, price: 0 });
   };
 
+  /**
+   * Removes a session type at the given index.
+   * Prevents removal if it's the last session type.
+   *
+   * @param index - Index of the session type to remove
+   */
   const removeSessionType = (index: number) => {
     if (fields.length > 1) {
       remove(index);
     }
   };
 
+  /**
+   * Handles form submission.
+   *
+   * Converts prices from dollars to cents before saving via server action.
+   * Navigates to step 4 on success.
+   *
+   * @param data - Validated form data with prices in dollars
+   */
   async function onSubmit(data: CoachPricingFormData) {
     setIsSubmitting(true);
     setError(null);

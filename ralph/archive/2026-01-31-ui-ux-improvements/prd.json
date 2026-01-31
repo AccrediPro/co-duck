@@ -1,0 +1,318 @@
+{
+  "project": "Coaching Platform",
+  "branchName": "ralph/comprehensive-testing",
+  "description": "Comprehensive testing of all platform features - UI/UX, Coach workflows, Client workflows, and interactions",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Verify homepage loads without errors",
+      "description": "As a visitor, I want the homepage to load correctly without any JavaScript errors.",
+      "acceptanceCriteria": [
+        "Navigate to http://localhost:3000/",
+        "Page renders without console errors",
+        "Hero section displays with 'Find Your Coach' button",
+        "Testimonials section renders",
+        "Footer displays correctly",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-002",
+      "title": "Verify public navigation links work",
+      "description": "As a visitor, I want all navigation links to work correctly.",
+      "acceptanceCriteria": [
+        "Click 'Browse Coaches' navigates to /coaches",
+        "Click 'About' navigates to /about",
+        "Click 'Contact' navigates to /contact",
+        "Click 'Sign In' navigates to /sign-in",
+        "Click 'Get Started' navigates to /sign-up",
+        "All pages load without errors",
+        "Typecheck passes"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-003",
+      "title": "Verify coaches listing page",
+      "description": "As a visitor, I want to browse coaches with filters.",
+      "acceptanceCriteria": [
+        "Navigate to /coaches",
+        "Page displays coach cards or empty state",
+        "Search input is visible and functional",
+        "Specialty filter dropdown works",
+        "Price filter is available",
+        "Sorting options work (newest, price, rating)",
+        "Typecheck passes"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-004",
+      "title": "Verify specialties page",
+      "description": "As a visitor, I want to browse coaching specialties.",
+      "acceptanceCriteria": [
+        "Navigate to /specialties",
+        "Page displays specialty cards with icons",
+        "Each card shows coach count",
+        "Clicking a specialty navigates to filtered coaches page",
+        "Typecheck passes"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-005",
+      "title": "Verify about page",
+      "description": "As a visitor, I want to learn about the platform.",
+      "acceptanceCriteria": [
+        "Navigate to /about",
+        "Hero section with mission statement displays",
+        "Stats section shows metrics",
+        "Team section displays",
+        "Timeline/history section displays",
+        "CTA section at bottom works",
+        "Typecheck passes"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-006",
+      "title": "Verify contact page form",
+      "description": "As a visitor, I want to submit a contact form.",
+      "acceptanceCriteria": [
+        "Navigate to /contact",
+        "Form displays with name, email, subject, message fields",
+        "Form validation shows inline errors for empty fields",
+        "Character count displays for message field",
+        "Contact info cards display (email, phone, address)",
+        "FAQ accordion works",
+        "Typecheck passes"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-007",
+      "title": "Verify terms and privacy pages",
+      "description": "As a visitor, I want to read legal pages.",
+      "acceptanceCriteria": [
+        "Navigate to /terms - page loads with table of contents",
+        "Navigate to /privacy - page loads with table of contents",
+        "Accordion sections expand/collapse",
+        "Back-to-top button appears on scroll",
+        "Print button is present",
+        "Typecheck passes"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-008",
+      "title": "Verify 404 error page",
+      "description": "As a visitor, I want to see a helpful 404 page for missing routes.",
+      "acceptanceCriteria": [
+        "Navigate to /nonexistent-page-xyz",
+        "Custom 404 page displays (not default Next.js error)",
+        "Page shows 'Page Not Found' message",
+        "Go Home button navigates to /",
+        "Browse Coaches button navigates to /coaches",
+        "Typecheck passes"
+      ],
+      "priority": 8,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-009",
+      "title": "Verify sign-in page displays",
+      "description": "As a visitor, I want to see the sign-in page.",
+      "acceptanceCriteria": [
+        "Navigate to /sign-in",
+        "Clerk sign-in component renders",
+        "Page has custom styling (not plain Clerk default)",
+        "Benefits section displays on larger screens",
+        "Typecheck passes"
+      ],
+      "priority": 9,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-010",
+      "title": "Verify sign-up page displays",
+      "description": "As a visitor, I want to see the sign-up page.",
+      "acceptanceCriteria": [
+        "Navigate to /sign-up",
+        "Clerk sign-up component renders",
+        "Page has custom styling",
+        "Benefits section displays on larger screens",
+        "Typecheck passes"
+      ],
+      "priority": 10,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-011",
+      "title": "Verify coach profile public page",
+      "description": "As a visitor, I want to view a coach's public profile.",
+      "acceptanceCriteria": [
+        "If coaches exist, navigate to a coach profile page",
+        "Hero section displays with coach avatar and info",
+        "Bio section displays",
+        "Session types cards display with pricing",
+        "Reviews section displays (or empty state)",
+        "Sticky booking sidebar on desktop",
+        "Book Session button is visible",
+        "Typecheck passes"
+      ],
+      "priority": 11,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-012",
+      "title": "Verify mobile responsiveness of homepage",
+      "description": "As a mobile user, I want the homepage to be usable.",
+      "acceptanceCriteria": [
+        "Resize browser to 375px width",
+        "Mobile navigation hamburger menu appears",
+        "Hero section stacks vertically",
+        "Testimonials carousel works on mobile",
+        "Footer stacks properly",
+        "No horizontal scroll",
+        "Typecheck passes"
+      ],
+      "priority": 12,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-013",
+      "title": "Verify mobile responsiveness of coaches page",
+      "description": "As a mobile user, I want to browse coaches on mobile.",
+      "acceptanceCriteria": [
+        "Navigate to /coaches at 375px width",
+        "Filter sheet/drawer opens on mobile",
+        "Coach cards display in single column",
+        "Search input is usable",
+        "Pagination works",
+        "Typecheck passes"
+      ],
+      "priority": 13,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-014",
+      "title": "Verify loading states on coaches page",
+      "description": "As a user, I want to see loading skeletons while data loads.",
+      "acceptanceCriteria": [
+        "Navigate to /coaches",
+        "Loading skeleton displays before content loads",
+        "Skeleton matches page layout structure",
+        "Content replaces skeleton when loaded",
+        "Typecheck passes"
+      ],
+      "priority": 14,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-015",
+      "title": "Verify footer links work",
+      "description": "As a visitor, I want footer links to navigate correctly.",
+      "acceptanceCriteria": [
+        "Scroll to footer on homepage",
+        "Quick Links section has working links",
+        "Legal links (Privacy, Terms) work",
+        "Social media links are present",
+        "Newsletter form is visible",
+        "Typecheck passes"
+      ],
+      "priority": 15,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-016",
+      "title": "Verify dashboard redirects when not authenticated",
+      "description": "As an unauthenticated user, I should be redirected from dashboard.",
+      "acceptanceCriteria": [
+        "Navigate to /dashboard while not signed in",
+        "User is redirected to sign-in page",
+        "No error is thrown",
+        "Typecheck passes"
+      ],
+      "priority": 16,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-017",
+      "title": "Run full typecheck on codebase",
+      "description": "As a developer, I want to ensure all TypeScript compiles.",
+      "acceptanceCriteria": [
+        "Run npx tsc --noEmit",
+        "No TypeScript errors",
+        "Typecheck passes"
+      ],
+      "priority": 17,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-018",
+      "title": "Run ESLint on codebase",
+      "description": "As a developer, I want to ensure no linting errors.",
+      "acceptanceCriteria": [
+        "Run npm run lint",
+        "No ESLint errors (warnings acceptable)",
+        "Typecheck passes"
+      ],
+      "priority": 18,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-019",
+      "title": "Verify production build succeeds",
+      "description": "As a developer, I want the production build to complete.",
+      "acceptanceCriteria": [
+        "Run npm run build",
+        "Build completes without errors",
+        "All routes are generated",
+        "Typecheck passes"
+      ],
+      "priority": 19,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-020",
+      "title": "Fix any critical errors found during testing",
+      "description": "As a developer, I need to fix any blocking issues found.",
+      "acceptanceCriteria": [
+        "Review all previous test results",
+        "Fix any critical errors that prevent pages from loading",
+        "All pages must render without JavaScript errors",
+        "Typecheck passes"
+      ],
+      "priority": 20,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}

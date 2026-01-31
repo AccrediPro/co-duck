@@ -1,3 +1,38 @@
+/**
+ * @fileoverview Server actions for the individual chat view page.
+ *
+ * This module provides all functionality for the real-time chat interface,
+ * including message loading, sending, read status, and coach context panel.
+ *
+ * ## Features
+ *
+ * - Load conversation details (header info)
+ * - Paginated message history with infinite scroll
+ * - Send new messages with optimistic UI support
+ * - Poll for new messages (3-second interval)
+ * - Mark messages as read
+ * - Client context panel for coaches (stats, upcoming sessions, action items)
+ *
+ * ## Pagination
+ *
+ * Messages are fetched newest-first for pagination efficiency, then reversed
+ * for display. The `beforeId` parameter enables loading older messages.
+ *
+ * ## Real-time Updates
+ *
+ * Uses polling rather than WebSocket. `getNewMessages` fetches messages
+ * with ID greater than the last known message.
+ *
+ * ## Related Files
+ *
+ * - `src/lib/conversations.ts` - Core conversation management
+ * - `src/app/(dashboard)/dashboard/messages/actions.ts` - List page actions
+ * - `src/components/messages/chat-view.tsx` - Main chat UI component
+ * - `src/components/messages/chat-context-panel.tsx` - Coach context sidebar
+ *
+ * @module dashboard/messages/[id]/actions
+ */
+
 'use server';
 
 import { auth } from '@clerk/nextjs/server';
@@ -13,7 +48,23 @@ import {
   actionItems,
 } from '@/db';
 
-// Message with sender info
+// ============================================================================
+// TYPE DEFINITIONS
+// ============================================================================
+
+/**
+ * Message with enriched sender information for display.
+ *
+ * @property id - Database message ID
+ * @property content - Message text content
+ * @property messageType - 'text' for user messages, 'system' for automated
+ * @property senderId - Clerk user ID of the sender
+ * @property senderName - Display name of sender (may be null)
+ * @property senderAvatar - Avatar URL of sender (may be null)
+ * @property isOwn - Whether the current user sent this message
+ * @property isRead - Whether the message has been read by recipient
+ * @property createdAt - Timestamp when message was created
+ */
 export interface MessageWithSender {
   id: number;
   content: string;
@@ -26,7 +77,15 @@ export interface MessageWithSender {
   createdAt: Date;
 }
 
-// Conversation details for the header
+/**
+ * Conversation details for the chat header.
+ *
+ * @property id - Database conversation ID
+ * @property otherUserId - Clerk user ID of the other participant
+ * @property otherUserName - Display name of other user (may be null)
+ * @property otherUserAvatar - Avatar URL of other user (may be null)
+ * @property isCoach - Whether the current user is the coach (affects UI)
+ */
 export interface ConversationDetails {
   id: number;
   otherUserId: string;
@@ -35,12 +94,36 @@ export interface ConversationDetails {
   isCoach: boolean;
 }
 
+/**
+ * Result type for getConversationDetails server action.
+ */
 export interface GetConversationDetailsResult {
   success: boolean;
   conversation?: ConversationDetails;
   error?: string;
 }
 
+// ============================================================================
+// SERVER ACTIONS - Conversation
+// ============================================================================
+
+/**
+ * Fetch conversation details for the chat header.
+ *
+ * Retrieves conversation metadata and other participant's info.
+ * Also determines whether current user is the coach (for context panel).
+ *
+ * @param conversationId - Database ID of the conversation
+ * @returns Result object with conversation details on success
+ *
+ * @example
+ * const result = await getConversationDetails(123);
+ * if (result.success) {
+ *   console.log(`Chatting with ${result.conversation.otherUserName}`);
+ * }
+ *
+ * @security Requires authentication. Returns 404 if user is not a participant.
+ */
 export async function getConversationDetails(
   conversationId: number
 ): Promise<GetConversationDetailsResult> {
@@ -99,6 +182,11 @@ export async function getConversationDetails(
   }
 }
 
+/**
+ * Result type for getMessages server action.
+ *
+ * @property hasMore - Whether there are older messages to load
+ */
 export interface GetMessagesResult {
   success: boolean;
   messages?: MessageWithSender[];
@@ -106,6 +194,35 @@ export interface GetMessagesResult {
   error?: string;
 }
 
+// ============================================================================
+// SERVER ACTIONS - Messages
+// ============================================================================
+
+/**
+ * Fetch paginated messages for a conversation.
+ *
+ * Messages are returned in chronological order (oldest to newest) for display.
+ * Use `beforeId` to load older messages for infinite scroll.
+ *
+ * Implementation note: Fetches `limit + 1` messages to detect if more exist,
+ * then returns only `limit` messages.
+ *
+ * @param conversationId - Database ID of the conversation
+ * @param limit - Maximum messages to return (default: 50)
+ * @param beforeId - Only return messages with ID less than this (for pagination)
+ * @returns Result object with messages array and hasMore flag
+ *
+ * @example
+ * // Initial load
+ * const result = await getMessages(conversationId, 50);
+ *
+ * @example
+ * // Load more (infinite scroll)
+ * const oldestMessageId = messages[0].id;
+ * const result = await getMessages(conversationId, 50, oldestMessageId);
+ *
+ * @security Requires authentication. Returns 404 if user is not a participant.
+ */
 export async function getMessages(
   conversationId: number,
   limit: number = 50,
@@ -206,11 +323,33 @@ export async function getMessages(
   }
 }
 
+/**
+ * Result type for markMessagesAsRead server action.
+ */
 export interface MarkMessagesAsReadResult {
   success: boolean;
   error?: string;
 }
 
+/**
+ * Mark all messages from the other user in a conversation as read.
+ *
+ * Called when a user opens a conversation and when new messages arrive
+ * while the conversation is open.
+ *
+ * Only marks messages from the OTHER user as read - never the user's own.
+ *
+ * @param conversationId - Database ID of the conversation
+ * @returns Result object indicating success
+ *
+ * @example
+ * // When opening a conversation
+ * useEffect(() => {
+ *   markMessagesAsRead(conversationId);
+ * }, [conversationId]);
+ *
+ * @security Requires authentication. Returns 404 if user is not a participant.
+ */
 export async function markMessagesAsRead(
   conversationId: number
 ): Promise<MarkMessagesAsReadResult> {
@@ -256,7 +395,11 @@ export async function markMessagesAsRead(
   }
 }
 
-// Send message result
+/**
+ * Result type for sendMessage server action.
+ *
+ * @property message - The created message with sender info (for optimistic UI reconciliation)
+ */
 export interface SendMessageResult {
   success: boolean;
   message?: MessageWithSender;
@@ -264,11 +407,29 @@ export interface SendMessageResult {
 }
 
 /**
- * Send a message in a conversation
- * - Validates user is a participant
- * - Creates message record
- * - Updates conversation.last_message_at
- * - Returns the new message
+ * Send a text message in a conversation.
+ *
+ * Creates the message record and updates the conversation's lastMessageAt.
+ * Returns the full message object for optimistic UI reconciliation.
+ *
+ * @param conversationId - Database ID of the conversation
+ * @param content - Message text (whitespace-only messages are rejected)
+ * @returns Result object with created message on success
+ *
+ * @example
+ * // With optimistic UI
+ * const optimisticMsg = { id: tempId, content, isOwn: true, ... };
+ * setMessages(prev => [...prev, optimisticMsg]);
+ *
+ * const result = await sendMessage(conversationId, content);
+ * if (result.success) {
+ *   // Replace optimistic with real message
+ *   setMessages(prev => prev.map(m =>
+ *     m.id === tempId ? result.message : m
+ *   ));
+ * }
+ *
+ * @security Requires authentication. Returns 404 if user is not a participant.
  */
 export async function sendMessage(
   conversationId: number,
@@ -358,18 +519,27 @@ export async function sendMessage(
   }
 }
 
-// Get new messages result
+/**
+ * Result type for getNewMessages server action.
+ */
 export interface GetNewMessagesResult {
   success: boolean;
   messages?: MessageWithSender[];
   error?: string;
 }
 
+// ============================================================================
+// TYPE DEFINITIONS - Client Context (Coach View)
+// ============================================================================
+
 /**
- * Get messages newer than the provided message ID (for polling)
- * Returns messages in chronological order (oldest to newest)
+ * Action item with computed status for the context panel.
+ *
+ * @property status - Computed based on isCompleted and dueDate:
+ *   - 'completed': isCompleted is true
+ *   - 'overdue': Not completed and dueDate is in the past
+ *   - 'pending': Not completed and not overdue
  */
-// Action item with computed status
 export interface ActionItemForContext {
   id: number;
   title: string;
@@ -382,7 +552,18 @@ export interface ActionItemForContext {
   bookingId: number | null;
 }
 
-// Client context for chat panel (coach view only)
+/**
+ * Client context data for the coach's chat sidebar panel.
+ *
+ * Provides coaches with helpful information about the client they're chatting with,
+ * including session history, spending, and upcoming appointments.
+ *
+ * @property pastSessionsCount - Number of completed/past sessions with this client
+ * @property totalSpentCents - Total amount paid by client (in cents)
+ * @property upcomingSessions - Next 3 upcoming sessions
+ * @property coachSlug - For "Book Session" quick link
+ * @property actionItems - Last 10 action items for this client
+ */
 export interface ClientContext {
   clientId: string;
   clientName: string | null;
@@ -399,15 +580,39 @@ export interface ClientContext {
   actionItems: ActionItemForContext[];
 }
 
+/**
+ * Result type for getClientContext server action.
+ */
 export interface GetClientContextResult {
   success: boolean;
   context?: ClientContext;
   error?: string;
 }
 
+// ============================================================================
+// SERVER ACTIONS - Client Context (Coach View Only)
+// ============================================================================
+
 /**
- * Get client context for the chat panel (coach view only)
- * Shows past sessions count, total spent, upcoming sessions, and quick links
+ * Fetch client context data for the coach's chat sidebar.
+ *
+ * This is only available when the current user is the COACH in the conversation.
+ * Returns an error if the user is the client.
+ *
+ * Data includes:
+ * - Past sessions count and total spent
+ * - Next 3 upcoming sessions
+ * - Last 10 action items (pending first, then completed)
+ *
+ * @param conversationId - Database ID of the conversation
+ * @returns Result object with client context on success
+ *
+ * @example
+ * // In chat page server component (coach view)
+ * const contextResult = await getClientContext(conversationId);
+ * return <ChatView clientContext={contextResult.success ? contextResult.context : null} />;
+ *
+ * @security Requires authentication. User must be the COACH in this conversation.
  */
 export async function getClientContext(conversationId: number): Promise<GetClientContextResult> {
   const { userId } = await auth();
@@ -574,6 +779,36 @@ export async function getClientContext(conversationId: number): Promise<GetClien
   }
 }
 
+// ============================================================================
+// SERVER ACTIONS - Polling
+// ============================================================================
+
+/**
+ * Fetch messages newer than a given message ID for polling.
+ *
+ * Used by the chat view to poll for new messages every 3 seconds.
+ * Returns messages in chronological order (oldest to newest).
+ *
+ * Implementation note: Uses message ID comparison rather than timestamp
+ * to ensure no messages are missed due to clock differences.
+ *
+ * @param conversationId - Database ID of the conversation
+ * @param afterId - Only return messages with ID greater than this
+ * @returns Result object with new messages array (may be empty)
+ *
+ * @example
+ * // Polling loop in useEffect
+ * const pollForNewMessages = async () => {
+ *   const lastId = messages[messages.length - 1].id;
+ *   const result = await getNewMessages(conversationId, lastId);
+ *   if (result.success && result.messages.length > 0) {
+ *     setMessages(prev => [...prev, ...result.messages]);
+ *   }
+ * };
+ * const interval = setInterval(pollForNewMessages, 3000);
+ *
+ * @security Requires authentication. Returns 404 if user is not a participant.
+ */
 export async function getNewMessages(
   conversationId: number,
   afterId: number

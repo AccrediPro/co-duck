@@ -1,6 +1,6 @@
 # Ralph Progress Log
 
-## Branch: ralph/comprehensive-testing
+## Branch: ralph/code-documentation
 ## Started: 2026-01-31
 
 ---
@@ -9,433 +9,509 @@
 
 - Project root: /home/premium-accredipro/code-projects/coaching-platform/
 - Uses Next.js 14 App Router with src/app/ directory
-- Public pages go in src/app/(public)/ route group (includes header/footer layout)
-- Use `npx shadcn@latest add <component> --yes` to add new UI components
 - Database: Drizzle ORM with PostgreSQL (Supabase)
 - Schema in src/db/schema.ts
-- Migrations: npm run db:generate && npm run db:migrate
 - UI components use shadcn/ui in src/components/ui/
-- Server actions in actions.ts files (ALL exports must be async - no sync helpers!)
+- Server actions in actions.ts files
 - Dev server: http://localhost:3000
 - Authentication: Clerk
 - Payments: Stripe
-- For browser testing: Use MCP Playwright tools (mcp__playwright__browser_*)
 - Typecheck command: npx tsc --noEmit
 - Lint command: npm run lint
-- Build command: npm run build
+- Session actions are split: coach view in `sessions/actions.ts`, client view in `my-sessions/actions.ts`
+- Refund policy: Coach cancellations = 100%, Client cancellations = sliding scale based on timing
+- Availability: Weekly schedule in `coach_availability` table, date overrides in `availability_overrides` table
+- Availability actions: Dashboard (coach edits) in `dashboard/availability/actions.ts`, public display in `coaches/[slug]/availability-actions.ts`
+- Messaging: 1-to-1 conversations (unique coach-client pair), polling-based real-time (3s interval)
+- Message actions: List in `messages/actions.ts`, chat view in `messages/[id]/actions.ts`, core in `lib/conversations.ts`
+- Internal vs public functions: Internal functions (no auth) named with `Internal` suffix for system use
+
+## Documentation Sprint Goals
+
+Add comprehensive code documentation:
+1. JSDoc to all server actions and API routes
+2. README files for key directories
+3. Architecture and API documentation
+4. Enhanced inline comments
+
+## JSDoc Template
+
+```typescript
+/**
+ * Brief description of function purpose.
+ *
+ * @param paramName - Description of parameter
+ * @returns Description of return value
+ * @throws {ErrorType} Description of error conditions
+ *
+ * @example
+ * const result = await functionName(params);
+ */
+```
 
 ---
 
-## Testing Sprint - Comprehensive Platform Testing
-
-Goal: Verify all pages and features work correctly.
-
+## 2026-01-31 - US-001
+- Documented Stripe webhook handler (src/app/api/webhooks/stripe/route.ts)
+- Files changed: src/app/api/webhooks/stripe/route.ts
+- Added comprehensive JSDoc documentation:
+  - File-level @fileoverview with module purpose, security, and idempotency notes
+  - POST handler with flow, response codes, and important notes
+  - getWebhookSecret with @returns and @throws annotations
+  - handleCheckoutSessionCompleted with fee structure (10% platform fee) and idempotency explanation
+  - handleCheckoutSessionExpired with time slot management notes
+  - handlePaymentIntentFailed with common error codes documentation
+- Typecheck passes
+- **Learnings for future iterations:**
+  - Webhook handlers should document idempotency guarantees
+  - Fee calculations should be documented in JSDoc (platform fee = 10%)
+  - Clear the .next cache if typecheck shows stale errors (`rm -rf .next`)
 ---
 
-## 2026-01-31 - US-001 - Verify homepage loads without errors
-- **What was implemented**: Verified homepage renders correctly using Playwright
-- **Files changed**: None (testing only, updated prd.json and progress.txt)
-- **Test Results**:
-  - ✅ Page loaded at http://localhost:3000/ without errors
-  - ✅ No console errors (only info and warnings for React DevTools and Clerk dev mode)
-  - ✅ Hero section displays with "Find Your Perfect Coach" heading and "Find a Coach" button
-  - ✅ Featured Coaches section (testimonials/social proof) renders with 3 coach cards
-  - ✅ Footer displays with Product, Company, Legal sections
-  - ✅ Typecheck passes (npx tsc --noEmit)
-- **Learnings for future iterations**:
-  - Homepage shows "Find a Coach" button (not "Find Your Coach" as per PRD - acceptable variation)
-  - Featured Coaches section serves as social proof/testimonials
-  - Clerk dev mode warning is expected in development
+## 2026-01-31 - US-002
+- Documented Clerk webhook handler (src/app/api/webhooks/clerk/route.ts)
+- Files changed: src/app/api/webhooks/clerk/route.ts
+- Added comprehensive JSDoc documentation:
+  - File-level @fileoverview with security notes and configuration instructions
+  - POST handler with request flow, response codes, and example payload
+  - Detailed inline comments explaining Svix signature verification
+  - Documented user.created handler (default 'client' role, email handling)
+  - Documented user.updated handler (syncs email, name, avatar; not role)
+  - Documented user.deleted handler (hard delete, cascade behavior note)
+  - Added section dividers for improved code readability
+- Typecheck passes
+- **Learnings for future iterations:**
+  - Clerk webhooks use Svix for signature verification (3 headers required)
+  - New users default to 'client' role - coach role assigned via onboarding flow
+  - user.updated does NOT sync role from Clerk - role is application-managed
+  - Include Clerk Dashboard setup instructions in file-level JSDoc
 ---
 
-## 2026-01-31 - US-002 - Verify public navigation links work
-- **What was implemented**: Tested all navigation links using Playwright
-- **Files changed**: Updated prd.json with test results
-- **Test Results**:
-  - ✅ "Find Coaches" nav link navigates to /coaches successfully
-  - ❌ "About Us" footer link navigates to /about - returns 404 (PAGE DOES NOT EXIST)
-  - ❌ "Contact" footer link navigates to /contact - returns 404 (PAGE DOES NOT EXIST)
-  - ✅ "Sign In" header link navigates to /sign-in - Clerk sign-in form loads
-  - ✅ "Get Started" header link navigates to /sign-up - Clerk sign-up form loads
-  - ✅ Typecheck passes (npx tsc --noEmit)
-- **CRITICAL FINDINGS**:
-  - /about page does not exist - no src/app/about/ directory
-  - /contact page does not exist - no src/app/contact/ directory
-  - Footer links to these pages but they return 404
-  - This blocks US-002, US-005, and US-006
-- **Learnings for future iterations**:
-  - Navigation header shows "Sign In" and "Get Started" buttons only on non-homepage pages
-  - Clerk authentication pages load correctly with custom styling
-  - Footer has Product, Company, Legal sections with working and broken links
+## 2026-01-31 - US-003
+- Documented booking flow actions (3 files)
+- Files changed:
+  - src/app/(public)/coaches/[slug]/book/actions.ts
+  - src/app/(public)/coaches/[slug]/book/confirm/actions.ts
+  - src/app/(public)/coaches/[slug]/book/success/actions.ts
+- Added comprehensive JSDoc documentation:
+  - File-level @fileoverview explaining each file's role in the 3-step booking flow
+  - Documented all exported interfaces (CoachBookingData, DayAvailability, TimeSlot, etc.)
+  - getCoachForBooking: Coach data retrieval with @param/@returns/@example
+  - getCoachWeeklyAvailability: Weekly schedule with day-of-week indexing notes
+  - getAvailableSlots: Core slot calculation with conflict detection, buffer time, and advance notice
+  - getBookableDates: Month date calculation with override handling
+  - createBooking: Free session creation with validation checks
+  - createCheckoutSession: Stripe Connect integration with 10% platform fee
+  - generateIcsFile/generateSuccessIcsFile: iCalendar RFC 5545 generation
+  - getBookingFromCheckoutSession: Payment confirmation with idempotency notes
+  - formatTimeInTimezone: Helper for timezone-aware display
+- Added section dividers (Type Definitions, Server Actions, Helper Functions, Calendar Export)
+- Typecheck passes
+- **Learnings for future iterations:**
+  - Booking flow is 3 phases: availability → confirm → success
+  - Platform fee is 10% (90% to coach via Stripe Connect destination charges)
+  - Pending bookings are created before Stripe redirect, confirmed via webhook or success page
+  - ICS files use unique UID format: booking-{id}@coachingplatform.com for deduplication
+  - Availability overrides take precedence over weekly schedule
+  - Time slots generated in 30-minute increments within availability window
 ---
 
-## 2026-01-31 - US-002/US-005/US-006 - Create missing About and Contact pages
-- **What was implemented**: Created /about and /contact pages to fix navigation links
-- **Files changed**:
-  - src/app/(public)/about/page.tsx (new)
-  - src/app/(public)/contact/page.tsx (new)
-  - src/components/ui/accordion.tsx (new - added via shadcn)
-  - package.json (added @radix-ui/react-accordion)
-  - tailwind.config.ts (updated by shadcn)
-- **Test Results**:
-  - ✅ /about page loads with Hero, Stats, Mission, Values, Timeline, and CTA sections
-  - ✅ /contact page loads with form, validation, character count, contact info cards, FAQ accordion
-  - ✅ Form validation shows inline errors for empty fields
-  - ✅ FAQ accordion expands/collapses correctly
-  - ✅ All navigation links now work: /coaches, /about, /contact, /sign-in, /sign-up
-  - ✅ No console errors
-  - ✅ Typecheck passes (npx tsc --noEmit)
-- **Learnings for future iterations**:
-  - Public pages go in src/app/(public)/ directory (route group)
-  - Client components with 'use client' cannot export Metadata - remove unused imports
-  - Use `npx shadcn@latest add <component> --yes` to add new UI components
-  - Contact page uses client-side form state, so needs 'use client' directive
+## 2026-01-31 - US-004
+- Documented session management actions (3 files)
+- Files changed:
+  - src/app/(dashboard)/dashboard/sessions/actions.ts (coach session management)
+  - src/app/(dashboard)/dashboard/sessions/[id]/reschedule/actions.ts (client reschedule flow)
+  - src/app/(dashboard)/dashboard/my-sessions/actions.ts (client session management)
+- Added comprehensive JSDoc documentation:
+  - File-level @fileoverview explaining each file's role and security notes
+  - sessions/actions.ts (10 functions):
+    - getCoachSessions: Paginated session retrieval with tab filtering
+    - markSessionComplete: Status update with validation
+    - cancelSession: Cancellation with full refund processing
+    - getPastSessionsCountWithClient: Client history count
+    - saveSessionNote/getSessionNote: Private coach notes
+    - updateMeetingLink: Meeting URL validation and update
+    - generateCoachIcsFile: Calendar export
+    - getRefundEligibility: Pre-cancellation refund check
+  - reschedule/actions.ts (5 functions):
+    - getRescheduleBookingData: Validation and coach info
+    - getRescheduleBookableDates: Available dates for month
+    - getRescheduleAvailableSlots: Time slot calculation
+    - confirmReschedule: Apply new booking times
+    - formatTimeInTimezone: Helper function
+  - my-sessions/actions.ts (5 functions):
+    - getClientSessions: Paginated client session retrieval
+    - cancelClientSession: Sliding scale refund processing
+    - generateClientIcsFile: Calendar export
+    - createRetryCheckoutSession: Payment retry with Stripe Connect
+    - getClientRefundEligibility: Pre-cancellation refund preview
+- Added section dividers organizing code by functionality
+- Documented all exported types/interfaces
+- Typecheck passes
+- **Learnings for future iterations:**
+  - Coach cancellations = 100% refund; Client cancellations = sliding scale (48h: 100%, 24-48h: 50%, <24h: 0%)
+  - Session notes are stored in separate `session_notes` table, not on bookings
+  - Reschedule excludes current booking from conflict detection
+  - Meeting links must be HTTPS URLs
+  - Legacy aliases exist for backward compatibility (saveCoachNotes → saveSessionNote)
 ---
 
-## 2026-01-31 - US-003 - Verify coaches listing page
-- **What was implemented**: Verified coaches listing page functionality using Playwright
-- **Files changed**: None (testing only, updated prd.json and progress.txt)
-- **Test Results**:
-  - ✅ Page loaded at http://localhost:3000/coaches without errors
-  - ✅ No console errors
-  - ✅ 8 coaches displayed with cards showing name, headline, specialties, and pricing
-  - ✅ Search input filters coaches by name/headline/bio (tested "Sarah" - returned 1 result)
-  - ✅ Specialty filter dropdown works with 12 specialty options (checkboxes)
-  - ✅ Price filter has min/max spinbuttons with "$100+" indicator when set
-  - ✅ Sorting works with: Newest, Price: Low to High, Price: High to Low
-  - ✅ URL updates with query params (e.g., ?q=Sarah, ?sort=price_low, ?specialties=Career+Coaching)
-  - ✅ Clear filters button resets all filters
-  - ✅ Typecheck passes (npx tsc --noEmit)
-- **Learnings for future iterations**:
-  - Coaches page uses URL query params for all filters (search, sort, specialties, price)
-  - No "rating" sort option exists - only newest and price sorting available
-  - Coach cards link to individual coach profile pages at /coaches/[slug]
+## 2026-01-31 - US-005
+- Documented availability actions (2 files)
+- Files changed:
+  - src/app/(dashboard)/dashboard/availability/actions.ts (coach settings)
+  - src/app/(public)/coaches/[slug]/availability-actions.ts (public display)
+- Added comprehensive JSDoc documentation:
+  - File-level @fileoverview explaining each file's purpose and data flow
+  - dashboard/availability/actions.ts:
+    - Zod schema documentation with validation rules
+    - DaySchedule/AvailabilitySettings type definitions
+    - saveAvailabilitySettings: Save weekly schedule with validation
+    - getAvailabilitySettings: Fetch current coach settings
+    - copyDaySchedule: Helper to replicate schedule across days
+  - coaches/[slug]/availability-actions.ts:
+    - AvailabilityDisplayData interface for public profile
+    - getCoachAvailabilityForProfile: Main entry point for profile display
+    - findNextAvailableSlot: Complex algorithm with buffer/override handling
+    - formatNextAvailableDisplay: Human-readable slot formatting
+    - generateWeeklyAvailabilitySummary: Compact schedule summary
+    - formatTimeShort/formatDateStr: Utility functions
+- Added critical inline comments explaining:
+  - Buffer time calculation and conflict detection algorithm
+  - Override priority (date-specific overrides > weekly schedule)
+  - Booking window boundaries (advance notice, max days)
+- Typecheck passes
+- **Learnings for future iterations:**
+  - Two availability files: dashboard (coach edits) vs public (read-only display)
+  - Availability overrides stored in `availability_overrides` table for date-specific changes
+  - Next available slot calculation caps at 60 days for performance
+  - Buffer time expands slot window on BOTH sides for conflict detection
+  - Weekly schedule stored in `coach_availability` table (7 rows per coach)
+  - Booking constraints (buffer, notice, max days) stored in `coach_profiles` table
+- Onboarding flow: 4 steps (basic-info → bio-specialties → pricing → review-publish)
+- Prices stored in CENTS in database, displayed in DOLLARS in forms
 ---
 
-## 2026-01-31 - US-004 - Verify specialties page
-- **What was implemented**: Created /specialties page to browse coaching specialties
-- **Files changed**:
-  - src/app/(public)/specialties/page.tsx (new)
-- **Test Results**:
-  - ✅ Page loads at http://localhost:3000/specialties without errors
-  - ✅ No console errors
-  - ✅ Hero section displays with "Explore Coaching Specialties" heading
-  - ✅ 12 specialty cards displayed in grid layout
-  - ✅ Each card shows: icon, title, description, coach count
-  - ✅ Coach counts are accurate (e.g., Career Coaching: 1, Executive Coaching: 2, Leadership Coaching: 2)
-  - ✅ Clicking "Career Coaching" card navigates to /coaches?specialties=Career%20Coaching
-  - ✅ Filtered coaches page shows correct results (1 coach with specialty filter applied)
-  - ✅ CTA section with "Browse All Coaches" and "Get Recommendations" buttons
-  - ✅ Typecheck passes (npx tsc --noEmit)
-- **Learnings for future iterations**:
-  - Specialties list is defined in src/lib/validators/coach-onboarding.ts as COACH_SPECIALTIES
-  - Coach profiles store specialties as JSONB array in coachProfiles.specialties column
-  - Use encodeURIComponent() for specialty names with special chars (e.g., "Health & Wellness")
-  - Icons mapped per specialty using lucide-react icons
+## 2026-01-31 - US-006
+- Documented 4 coach onboarding form components
+- Files changed:
+  - src/components/onboarding/basic-info-form.tsx (Step 1)
+  - src/components/onboarding/bio-specialties-form.tsx (Step 2)
+  - src/components/onboarding/pricing-form.tsx (Step 3)
+  - src/components/onboarding/review-publish-form.tsx (Step 4)
+- Added comprehensive JSDoc documentation:
+  - basic-info-form.tsx:
+    - File-level @fileoverview with flow, data flow, and validation details
+    - BasicInfoFormProps interface documentation
+    - Component JSDoc with @param/@returns/@example
+    - Section dividers (TYPE DEFINITIONS, COMPONENT)
+    - Inline comments for timezone detection and form submission
+  - bio-specialties-form.tsx:
+    - File-level @fileoverview with specialty selection features
+    - BioSpecialtiesFormProps interface documentation
+    - Component JSDoc with @param/@returns/@example
+    - Helper function JSDoc (toggleSpecialty, addCustomSpecialty, handleCustomKeyDown)
+    - Section dividers
+  - pricing-form.tsx:
+    - File-level @fileoverview with IMPORTANT note on cents/dollars conversion
+    - PricingFormProps interface documentation
+    - generateSessionId helper with @example
+    - Component JSDoc with @param/@returns/@example (showing prices in cents)
+    - Helper function JSDoc (addSessionType, removeSessionType)
+    - Section dividers (TYPE DEFINITIONS, HELPER FUNCTIONS, COMPONENT)
+  - review-publish-form.tsx:
+    - File-level @fileoverview with publishing states and profile preview sections
+    - ProfileData interface with @property tags for all fields
+    - ReviewPublishFormProps interface documentation
+    - Component JSDoc with comprehensive @example
+    - Helper function JSDoc (formatPrice, getInitials, handlePublish, handleSaveDraft)
+    - Section dividers
+- Typecheck passes
+- **Learnings for future iterations:**
+  - Onboarding is a 4-step wizard: basic-info → bio-specialties → pricing → review-publish
+  - All prices stored in CENTS in database, forms convert to/from DOLLARS for display
+  - Session types have generated IDs with format `session_{timestamp}_{random7chars}`
+  - Profile completion percentage calculated by parent page, not the component
+  - Published profiles appear in coach directory; draft profiles are saved but hidden
+  - Custom specialties can be added beyond the predefined COACH_SPECIALTIES list
 ---
 
-## 2026-01-31 - US-007 - Verify terms and privacy pages
-- **What was implemented**: Created /terms and /privacy pages with full legal content
-- **Files changed**:
-  - src/app/(public)/terms/page.tsx (new)
-  - src/app/(public)/privacy/page.tsx (new)
-- **Test Results**:
-  - ✅ /terms page loads at http://localhost:3000/terms without errors
-  - ✅ /privacy page loads at http://localhost:3000/privacy without errors
-  - ✅ No console errors on either page
-  - ✅ Table of contents sidebar displays on desktop (sticky navigation)
-  - ✅ Mobile table of contents as collapsible details element
-  - ✅ 12 accordion sections on each page expand/collapse correctly
-  - ✅ Back-to-top button appears after scrolling (tested and works)
-  - ✅ Print button present on both pages
-  - ✅ Cross-links between Terms and Privacy pages work
-  - ✅ Footer links to Terms and Privacy now work
-  - ✅ Typecheck passes (npx tsc --noEmit)
-- **Learnings for future iterations**:
-  - Legal pages follow same pattern as other public pages in src/app/(public)/
-  - Use 'use client' for pages with scroll event listeners and interactive elements
-  - Accordion component from shadcn supports type="multiple" for multiple open sections
-  - Back-to-top button uses fixed positioning with z-50 for visibility
-  - Print functionality uses window.print() browser API
+## 2026-01-31 - US-007
+- Documented database schema (src/db/schema.ts) and created README
+- Files changed:
+  - src/db/schema.ts (comprehensive JSDoc added)
+  - src/db/README.md (new file - schema overview documentation)
+- Added comprehensive JSDoc documentation to schema.ts:
+  - File-level @fileoverview with schema overview, ERD diagram, and key design decisions
+  - Enum documentation:
+    - userRoleEnum: admin/coach/client with role assignment notes
+    - bookingStatusEnum: State machine with transition documentation
+    - transactionStatusEnum: Payment lifecycle states
+    - messageTypeEnum: text/system message types
+  - JSONB interface documentation:
+    - SessionType: Coach session offerings (id, name, duration, price)
+    - BookingSessionType: Snapshot at booking time (preserves original pricing)
+  - Table-level JSDoc for all 10 tables:
+    - users: Clerk sync, relationships, cascade behavior
+    - coach_profiles: JSONB fields, availability settings, Stripe Connect
+    - coach_availability: Weekly schedule, dayOfWeek convention (0=Sunday)
+    - availability_overrides: Date exceptions, priority logic
+    - bookings: Lifecycle, sessionType snapshot, cancellation tracking
+    - transactions: Fee structure (10% platform, 90% coach), Stripe IDs
+    - conversations: 1-per-coach-client-pair, unique constraint
+    - messages: Types, read status tracking
+    - session_notes: Private coach notes (1 per booking)
+    - action_items: Tasks with optional booking link
+  - Field-level comments for every column with type, purpose, examples
+  - Section dividers organizing schema by entity group
+- Created src/db/README.md with:
+  - ASCII ERD diagram showing all relationships
+  - Tables overview table with purpose and key fields
+  - Enum values reference tables
+  - JSONB field structure examples (TypeScript interfaces)
+  - Key design decisions documentation (Clerk IDs, cents, soft deletes)
+  - Common query examples (availability, upcoming sessions, conflicts)
+  - Migration commands reference
+- Typecheck passes
+- **Learnings for future iterations:**
+  - Schema has 10 tables, 4 enums, 2 JSONB interfaces
+  - All monetary values in CENTS (integer) to avoid float precision
+  - bookings.sessionType is a SNAPSHOT - pricing frozen at booking time
+  - coach_availability uses dayOfWeek 0-6 (JS convention: 0=Sunday)
+  - Override priority: availability_overrides > coach_availability for specific dates
+  - Conversations have unique constraint on (coachId, clientId) pair
+  - session_notes has 1:1 relationship with bookings (unique constraint)
 ---
 
-## 2026-01-31 - US-008 - Verify 404 error page
-- **What was implemented**: Created global not-found.tsx page for custom 404 handling
-- **Files changed**:
-  - src/app/not-found.tsx (new)
-- **Test Results**:
-  - ✅ /nonexistent-page-xyz displays custom 404 page (not default Next.js error)
-  - ✅ "404" error code heading displays
-  - ✅ "Page Not Found" message displays with helpful description
-  - ✅ "Go Home" button navigates to / (verified with Playwright)
-  - ✅ "Browse Coaches" button navigates to /coaches (verified with Playwright)
-  - ✅ "Contact us" help link included
-  - ✅ Typecheck passes (npx tsc --noEmit)
-- **Learnings for future iterations**:
-  - Global 404 page goes in src/app/not-found.tsx (not in route groups)
-  - Next.js App Router uses not-found.tsx for 404 pages, not 404.tsx
-  - Route-specific not-found pages can override global (e.g., src/app/(public)/coaches/[slug]/not-found.tsx)
-  - Use lucide-react icons for consistent UI (FileQuestion for 404)
+## 2026-01-31 - US-008
+- Documented messaging system (3 action files + 7 components)
+- Files changed:
+  - src/lib/conversations.ts (core conversation management)
+  - src/app/(dashboard)/dashboard/messages/actions.ts (conversation list)
+  - src/app/(dashboard)/dashboard/messages/[id]/actions.ts (chat view)
+  - src/components/messages/index.ts (barrel export)
+  - src/components/messages/chat-view.tsx
+  - src/components/messages/conversations-list.tsx
+  - src/components/messages/conversation-row.tsx
+  - src/components/messages/message-bubble.tsx
+  - src/components/messages/message-input.tsx
+  - src/components/messages/message-button.tsx
+  - src/components/messages/chat-context-panel.tsx
+- Added comprehensive JSDoc documentation:
+  - lib/conversations.ts: File-level @fileoverview with architecture, message types, security docs; 4 function docs with @param/@returns/@example/@security/@internal annotations; section dividers
+  - messages/actions.ts: 2 interfaces, 3 functions documented (getConversations, getUnreadMessageCount, getUnreadMessageCountForUser)
+  - messages/[id]/actions.ts: 8 interfaces, 6 functions documented (getConversationDetails, getMessages, markMessagesAsRead, sendMessage, getClientContext, getNewMessages); polling and pagination docs
+  - 7 UI components: File-level @fileoverview, interface @property docs, component JSDoc with @example, helper function docs
+- Typecheck passes
+- **Learnings for future iterations:**
+  - Messaging uses 1-to-1 conversation model (unique constraint on coach-client pair)
+  - Two auth levels: public functions (require auth) vs internal (no auth, system use)
+  - Polling-based real-time: 3-second interval via getNewMessages (uses ID comparison, not timestamps)
+  - Message pagination: newest-first for DB query, reversed for display
+  - System messages (messageType: 'system') are for automated notifications
+  - Client context panel only available for coaches (isCoach flag determines visibility)
+  - Prices stored in cents, formatted for display with currency symbols
 ---
 
-## 2026-01-31 - US-009 - Verify sign-in page displays
-- **What was implemented**: Enhanced sign-in page with split-screen layout and benefits section
-- **Files changed**:
-  - src/app/sign-in/[[...sign-in]]/page.tsx (modified)
-- **Test Results**:
-  - ✅ /sign-in page loads at http://localhost:3000/sign-in without errors
-  - ✅ No console errors
-  - ✅ Clerk sign-in component renders with social login (Apple, Facebook, Google), email/password
-  - ✅ Custom styling applied: shadow-lg card, blue primary button, styled links
-  - ✅ Benefits section displays on desktop (md+ 768px): blue gradient background, 4 benefits with icons, testimonial
-  - ✅ Benefits section hidden on mobile, shows mobile-specific header instead
-  - ✅ Split-screen layout: benefits on left (50%), sign-in form on right (50%)
-  - ✅ Typecheck passes (npx tsc --noEmit)
-- **Learnings for future iterations**:
-  - Sign-in/sign-up pages are in catch-all routes: src/app/sign-in/[[...sign-in]]/page.tsx
-  - Tailwind JIT may not immediately pick up new responsive classes like lg:flex; using existing classes (md:flex) works better
-  - Clerk SignIn component accepts `appearance.elements` for custom styling overrides
-  - lucide-react icons work well for benefits sections (Users, Zap, Shield, CheckCircle)
-  - Use md: breakpoint (768px) instead of lg: (1024px) for better tablet support
+## 2026-01-31 - US-009
+- Documented payment utilities (2 files)
+- Files changed:
+  - src/lib/stripe.ts (Stripe client configuration)
+  - src/lib/refunds.ts (Refund eligibility calculations)
+- Added comprehensive JSDoc documentation:
+  - stripe.ts:
+    - File-level @fileoverview with Stripe Connect overview, env variables table, usage examples
+    - Environment validation section with fail-fast explanation
+    - Stripe client instance JSDoc with checkout session examples, platform fee (10%)
+    - getStripePublishableKey with client-side usage examples
+    - Type exports section documenting common Stripe types
+    - Comprehensive error handling documentation with error types table and common error codes
+  - refunds.ts:
+    - File-level @fileoverview with refund policy overview (coach vs client cancellations)
+    - Fee considerations for Stripe refund processing
+    - RefundEligibility interface with @property tags and examples
+    - calculateRefundEligibility with refund tiers table, calculation logic, @param/@returns/@remarks
+    - formatRefundAmount with currency formatting examples
+    - getRefundMessage with message scenarios table and UI usage examples
+    - Section dividers (TYPE DEFINITIONS, REFUND CALCULATION, FORMATTING UTILITIES, UI MESSAGE GENERATION)
+    - Inline comments explaining edge cases (past sessions, threshold boundaries)
+- Typecheck passes
+- **Learnings for future iterations:**
+  - Payment utilities are split: stripe.ts (client config) vs refunds.ts (eligibility logic)
+  - All Stripe operations should be wrapped in try-catch for StripeError handling
+  - Stripe error types: StripeCardError, StripeRateLimitError, StripeInvalidRequestError, StripeAPIError, StripeConnectionError, StripeAuthenticationError
+  - Refund eligibility is a calculation only - actual Stripe refunds processed elsewhere
+  - Client cancellation policy: >24h = 100% refund, <24h = 0% refund (threshold configurable)
+  - Coach cancellations always get 100% refund regardless of timing
 ---
 
-## 2026-01-31 - US-010 - Verify sign-up page displays
-- **What was implemented**: Enhanced sign-up page with split-screen layout and benefits section
-- **Files changed**:
-  - src/app/sign-up/[[...sign-up]]/page.tsx (modified)
-- **Test Results**:
-  - ✅ /sign-up page loads at http://localhost:3000/sign-up without errors
-  - ✅ No console errors
-  - ✅ Clerk sign-up component renders with social login (Apple, Facebook, Google) and form fields
-  - ✅ Custom styling applied: shadow-lg card, blue primary button, styled links
-  - ✅ Benefits section displays on desktop (md+ 768px): blue gradient background with 4 benefits:
-    - Expert Coaches
-    - Personalized Matching
-    - Secure Platform
-    - Proven Results
-  - ✅ Testimonial from "Michael R., Leadership Coaching Client" displays
-  - ✅ Benefits section hidden on mobile, shows mobile-specific header instead
-  - ✅ Split-screen layout: benefits on left (50%), sign-up form on right (50%)
-  - ✅ Typecheck passes (npx tsc --noEmit)
-- **Learnings for future iterations**:
-  - Sign-up page follows same pattern as sign-in page for consistency
-  - Both auth pages use catch-all routes: [[...sign-in]] and [[...sign-up]]
-  - Star icon (lucide-react) is good for "Personalized Matching" benefit
-  - Keep testimonials different between sign-in and sign-up pages for variety
+## 2026-01-31 - US-010
+- Documented coach onboarding validation schemas (1 file)
+- Files changed:
+  - src/lib/validators/coach-onboarding.ts
+- Added comprehensive JSDoc documentation:
+  - File-level @fileoverview:
+    - Onboarding steps table (4 steps mapping to schemas)
+    - React Hook Form integration example with zodResolver
+    - Price storage convention note (CENTS throughout)
+    - @module and @see references
+  - COACH_SPECIALTIES constant:
+    - Purpose and usage documentation
+    - Selection UI, custom specialties, storage notes
+    - Type-safe filtering examples
+  - coachBasicInfoSchema (Step 1):
+    - Field table (displayName, headline, profilePhotoUrl, timezone)
+    - Field-level inline comments
+    - Validation example with safeParse
+  - coachBioSpecialtiesSchema (Step 2):
+    - Field table (bio, specialties)
+    - Notes on custom specialties support
+  - SUPPORTED_CURRENCIES constant:
+    - Currency object structure table (code, symbol, name)
+    - Currency lookup and price formatting examples
+  - SESSION_DURATIONS constant:
+    - Available values (15, 30, 45, 60, 90, 120 minutes)
+    - Duration formatting example
+  - sessionTypeSchema:
+    - Field table with CENTS emphasis for price
+    - ID format documentation (session_{timestamp}_{random7chars})
+    - Free vs paid session examples
+  - coachPricingSchema (Step 3):
+    - Field table (hourlyRate, currency, sessionTypes)
+    - Cross-references to related schemas/constants
+  - generateSlug helper:
+    - Transformation rules (6 steps)
+    - Input/output examples for edge cases
+    - Note about server-side suffix handling
+  - Section dividers organizing code by step/category
+- Typecheck passes
+- **Learnings for future iterations:**
+  - Validators module has 4 schemas matching the 4-step onboarding wizard
+  - All prices stored in CENTS (integers) - emphasized in multiple JSDoc blocks
+  - Session type IDs generated client-side: session_{timestamp}_{random7chars}
+  - COACH_SPECIALTIES is not exhaustive - coaches can add custom specialties
+  - generateSlug does basic transformation; server adds suffix for uniqueness
+  - Currency codes follow ISO 4217 standard
 ---
 
-## 2026-01-31 - US-011 - Verify coach profile public page
-- **What was implemented**: Verified coach profile page functionality using Playwright
-- **Files changed**: None (testing only, updated prd.json and progress.txt)
-- **Test Results**:
-  - ✅ Navigated to /coaches/sarah-johnson successfully
-  - ✅ No console errors
-  - ✅ Hero section displays: avatar image, name (h1), headline, timezone (America/New_York)
-  - ✅ Bio section displays with full coach bio under "About" heading
-  - ✅ Specialties section shows 4 specialties: Leadership Development, Executive Coaching, Career Transitions, Team Building
-  - ✅ Session types cards display with pricing:
-    - Discovery Call: 30min, $0.00
-    - Executive Coaching Session: 60min, $200.00
-    - Deep Dive Intensive: 90min, $285.00
-  - ✅ Availability section shows next available slot (Monday at 6:00 AM) and weekly hours (Mon-Thu, 9am-5pm | Fri, 9am-2pm)
-  - ✅ Book Session buttons present in hero and sidebar
-  - ⚠️ No reviews section exists (feature not implemented in codebase)
-  - ⚠️ Sidebar is grid layout, not sticky (current implementation choice)
-  - ✅ Typecheck passes (npx tsc --noEmit)
-- **Learnings for future iterations**:
-  - Coach profile page is at src/app/(public)/coaches/[slug]/page.tsx
-  - Main display component is CoachProfileDisplay in src/components/coaches/coach-profile-display.tsx
-  - Availability is fetched via getCoachAvailabilityForProfile action
-  - Reviews feature not implemented - would need to be added if required
-  - Session types stored as JSONB array in coachProfiles.sessionTypes
-  - Coach slugs come from coachProfiles.slug column
+## 2026-01-31 - US-011
+- Created comprehensive components README (src/components/README.md)
+- Files changed:
+  - src/components/README.md (new file - 316 lines)
+- Documentation includes:
+  - Directory structure overview with 12 component folders
+  - Folder descriptions with component tables for each domain:
+    - action-items, availability, booking, coaches, messages
+    - navigation, onboarding, payments, profile, sessions, ui
+  - Naming conventions:
+    - File names: kebab-case with suffix patterns (-form, -list, -card, -dialog, -content)
+    - Component names: PascalCase matching file names
+    - Export style: named exports preferred, forwardRef for UI primitives
+  - Prop patterns:
+    - Interface naming: {ComponentName}Props
+    - Initial data pattern for server → client hydration
+    - Callback props with optional async handlers
+    - Boolean flags with sensible defaults
+    - Entity references importing types from actions/schema
+  - Client vs Server component guidance
+  - Server action integration patterns with result types
+  - Styling with Tailwind CSS and shadcn/ui variants
+  - Type safety notes (strict TypeScript, shared types)
+  - New component guidelines (7 steps)
+- Typecheck passes
+- **Learnings for future iterations:**
+  - Components are organized by feature domain (12 folders)
+  - Only `messages/` folder uses barrel exports (index.ts)
+  - Most feature components are client components (forms, browser APIs)
+  - Server components are typically page.tsx files that fetch and pass data
+  - Props interfaces follow {ComponentName}Props convention consistently
+  - shadcn/ui components in ui/ folder should not be modified directly
+  - Forms use React Hook Form with zodResolver for validation
 ---
 
-## 2026-01-31 - US-012 - Verify mobile responsiveness of homepage
-- **What was implemented**: Verified homepage mobile responsiveness using Playwright at 375px viewport
-- **Files changed**: None (testing only, updated prd.json and progress.txt)
-- **Test Results**:
-  - ✅ Browser resized to 375px width (iPhone SE viewport)
-  - ✅ Mobile navigation hamburger menu appears ("Toggle menu" button)
-  - ✅ Hamburger menu opens dialog with: Home, Find Coaches, Sign In, Get Started links
-  - ✅ Hero section stacks vertically: heading, description, CTA buttons
-  - ✅ "Why Choose CoachHub?" cards stack vertically
-  - ✅ "How It Works" steps display in single column
-  - ✅ Featured Coaches section displays cards in single column (serves as testimonials/social proof)
-  - ✅ Footer stacks properly with Product, Company, Legal sections vertical
-  - ✅ No horizontal scroll (verified via JS: body.scrollWidth === window.innerWidth === 375)
-  - ✅ No console errors
-  - ✅ Typecheck passes (npx tsc --noEmit)
-- **Learnings for future iterations**:
-  - Mobile navigation uses @radix-ui/react-dialog for the hamburger menu
-  - All sections properly use responsive Tailwind classes (flex-col on mobile, md:flex-row on desktop)
-  - Coach cards already support responsive layouts via CSS Grid with auto-fit
+## 2026-01-31 - US-012
+- Created comprehensive API documentation (docs/API.md)
+- Files changed:
+  - docs/API.md (new file - 321 lines)
+- Documentation includes:
+  - Overview table of all API routes
+  - Authentication section explaining webhook signature verification
+  - POST /api/webhooks/stripe:
+    - Headers (stripe-signature)
+    - Events handled (checkout.session.completed, checkout.session.expired, payment_intent.payment_failed)
+    - Request body format with JSON example
+    - Metadata fields table (bookingId, coachId, clientId, sessionPrice)
+    - Response codes table
+    - Processing logic for each event type
+    - Idempotency guarantees
+  - POST /api/webhooks/clerk:
+    - Headers (svix-id, svix-timestamp, svix-signature)
+    - Events handled (user.created, user.updated, user.deleted)
+    - Request body format with JSON example
+    - Response codes table
+    - Processing logic for each event type
+  - Environment variables section for both webhooks
+  - Webhook setup instructions for Stripe and Clerk dashboards
+  - Local development testing with Stripe CLI and ngrok
+  - Error handling reference tables
+  - Server actions vs API routes explanation with file locations
+- Typecheck passes
+- **Learnings for future iterations:**
+  - This platform uses primarily server actions, not API routes
+  - Only 2 API routes exist: Stripe webhook and Clerk webhook
+  - Both use signature verification, not user authentication
+  - Webhook endpoints return 200 for errors to prevent retries
+  - docs/ folder did not exist - had to create it
+  - Server actions are the primary data layer (see actions.ts files)
 ---
 
-## 2026-01-31 - US-013 - Verify mobile responsiveness of coaches page
-- **What was implemented**: Verified coaches page mobile responsiveness using Playwright at 375px viewport
-- **Files changed**: None (testing only, updated prd.json and progress.txt)
-- **Test Results**:
-  - ✅ Page loaded at http://localhost:3000/coaches at 375px width without errors
-  - ✅ No console errors
-  - ✅ Filter dialog opens correctly on mobile (Specialty filter with 12 checkbox options)
-  - ✅ Filter selection works: Career Coaching filters to 1 coach, URL updates with ?specialties=Career+Coaching
-  - ✅ Clear filters button appears and works
-  - ✅ Coach cards display in single column (CSS Grid: grid-cols-1 default, sm:grid-cols-2, lg:grid-cols-3)
-  - ✅ Search input is usable: typing "Sarah" filters to 1 coach, URL updates with ?q=Sarah
-  - ✅ Clear search button (x) appears and works
-  - ✅ No horizontal scroll (verified via JS: scrollWidth === viewportWidth === 375px)
-  - ⚠️ Pagination not visible with only 8 coaches (COACHES_PER_PAGE=12), but implementation verified in code
-  - ✅ Pagination component uses responsive Previous/Next buttons with min-w-[36px] page buttons
-  - ✅ Typecheck passes (npx tsc --noEmit)
-- **Learnings for future iterations**:
-  - CoachesGrid uses CSS Grid with responsive breakpoints: grid-cols-1 (mobile), sm:grid-cols-2, lg:grid-cols-3
-  - Specialty filter uses popover dialog (not drawer/sheet) on mobile - works well in narrow viewports
-  - Pagination only renders when totalPages > 1 (COACHES_PER_PAGE = 12)
-  - Price filter has min/max spinbuttons that work on mobile
----
-
-## 2026-01-31 - US-014 - Verify loading states on coaches page
-- **What was implemented**: Verified loading skeleton implementation using code analysis
-- **Files changed**: None (testing only, updated prd.json and progress.txt)
-- **Test Results**:
-  - ✅ Page has Suspense boundary at src/app/(public)/coaches/page.tsx:230
-  - ✅ CoachGridSkeleton used as fallback: `<Suspense fallback={<CoachGridSkeleton count={COACHES_PER_PAGE} />}>`
-  - ✅ CoachGridSkeleton renders grid with matching layout: `grid gap-6 sm:grid-cols-2 lg:grid-cols-3`
-  - ✅ CoachCardSkeleton matches CoachCard structure:
-    - Avatar: `h-20 w-20 rounded-full`
-    - Name: `h-6 w-32`
-    - Headline: Two lines `h-4 w-48` and `h-4 w-40`
-    - Specialties: 3 badges with `rounded-full`
-    - Price section with border-t separator
-  - ✅ Skeleton uses `animate-pulse` class from shadcn Skeleton component
-  - ✅ Content replaces skeleton when async CoachesContent resolves (React Suspense behavior)
-  - ✅ No console errors
-  - ✅ Typecheck passes (npx tsc --noEmit)
-- **Learnings for future iterations**:
-  - Next.js App Router uses Suspense boundaries for streaming server components
-  - Skeleton components should match the exact layout structure of content they replace
-  - CoachGridSkeleton accepts `count` prop for number of skeleton cards (defaults to 12)
-  - Loading states are brief in local development due to fast DB queries
----
-
-## 2026-01-31 - US-015 - Verify footer links work
-- **What was implemented**: Enhanced footer with newsletter form, social media links, and additional quick links
-- **Files changed**:
-  - src/components/navigation/public-footer.tsx (modified)
-- **Test Results**:
-  - ✅ All footer links verified with Playwright:
-    - Find Coaches → /coaches
-    - Specialties → /specialties (NEW)
-    - Become a Coach → /sign-up
-    - About Us → /about
-    - Contact → /contact
-    - Privacy Policy → /privacy
-    - Terms of Service → /terms
-  - ✅ Newsletter form visible with email input and Subscribe button
-  - ✅ Newsletter form tested - shows "Thanks for subscribing!" on successful submission
-  - ✅ Social media links present: Twitter, Facebook, Instagram, LinkedIn
-  - ✅ "Get in Touch" section added with email link and Contact Form link
-  - ✅ Footer copyright section has quick Privacy and Terms links
-  - ✅ No console errors
-  - ✅ Typecheck passes (npx tsc --noEmit)
-- **Learnings for future iterations**:
-  - Footer component converted to client component ('use client') for newsletter form state
-  - Social links use target="_blank" with rel="noopener noreferrer" for security
-  - Newsletter form uses local state for demo - would need API integration for production
-  - Footer grid updated from md:grid-cols-4 to md:grid-cols-5 to accommodate new "Get in Touch" section
----
-
-## 2026-01-31 - US-016 - Verify dashboard redirects when not authenticated
-- **What was implemented**: Verified dashboard authentication redirect using Playwright
-- **Files changed**: None (testing only, updated prd.json and progress.txt)
-- **Test Results**:
-  - ✅ Navigated to http://localhost:3000/dashboard while not signed in
-  - ✅ User redirected to Clerk sign-in page (communal-eagle-3.accounts.dev/sign-in)
-  - ✅ Redirect URL includes redirect_url=http://localhost:3000/dashboard for post-login redirect
-  - ✅ Sign-in page displays correctly: "Sign in to Coaching Platform" heading
-  - ✅ Social login options (Apple, Facebook, Google) and email/password fields available
-  - ✅ No application errors (only expected CSP warning from external Clerk domain)
-  - ✅ Typecheck passes (npx tsc --noEmit)
-- **Learnings for future iterations**:
-  - Dashboard protection implemented at two layers:
-    1. Clerk middleware (src/middleware.ts) with auth.protect() for /dashboard(.*)
-    2. Dashboard layout (src/app/(dashboard)/layout.tsx) with server-side redirect to /sign-in
-  - Clerk redirects to its hosted sign-in page with redirect_url parameter for seamless post-login return
-  - External Clerk domain may show CSP warnings in console - this is expected and not an application error
----
-
-## 2026-01-31 - US-017 - Run full typecheck on codebase
-- **What was implemented**: Ran full TypeScript typecheck on the entire codebase
-- **Files changed**: None (verification only, updated prd.json and progress.txt)
-- **Test Results**:
-  - ✅ Ran `npx tsc --noEmit` from project root
-  - ✅ No TypeScript errors found
-  - ✅ All source files compile successfully
-  - ✅ Typecheck passes
-- **Learnings for future iterations**:
-  - Typecheck command: `npx tsc --noEmit` from project root
-  - No output from tsc --noEmit means no errors (exit code 0)
-  - Previous iterations have kept the codebase type-safe
----
-
-## 2026-01-31 - US-018 - Run ESLint on codebase
-- **What was implemented**: Verified ESLint passes on the entire codebase
-- **Files changed**: None (verification only, updated prd.json and progress.txt)
-- **Test Results**:
-  - ✅ Ran `npm run lint` (which runs `next lint`)
-  - ✅ No ESLint warnings or errors: "✔ No ESLint warnings or errors"
-  - ✅ Typecheck passes (npx tsc --noEmit)
-- **Learnings for future iterations**:
-  - Lint command: `npm run lint` from project root
-  - Uses Next.js built-in ESLint configuration via `next lint`
-  - Previous iterations have maintained lint-clean code
----
-
-## 2026-01-31 - US-019 - Verify production build succeeds
-- **What was implemented**: Fixed build error and verified production build completes
-- **Files changed**:
-  - src/app/(dashboard)/dashboard/availability/actions.ts (removed copyDaySchedule)
-  - src/components/availability/availability-form.tsx (added copyDaySchedule)
-- **Test Results**:
-  - ✅ Initial build failed: "Server actions must be async functions" for copyDaySchedule
-  - ✅ Fix applied: Moved copyDaySchedule from 'use server' file to client component
-  - ✅ Build completes successfully after fix
-  - ✅ 25 routes generated:
-    - 7 static: /, /_not-found, /about, /contact, /privacy, /specialties, /terms
-    - 18 dynamic: /coaches, /coaches/[slug], /dashboard/*, /onboarding/*, /sign-in, /sign-up, API routes
-  - ✅ Typecheck passes (npx tsc --noEmit)
-  - ✅ ESLint passes (npm run lint)
-- **Learnings for future iterations**:
-  - ALL exports from 'use server' files must be async functions - even pure helper functions
-  - Client-side utility functions should NOT be in actions files
-  - Move non-server functions to client components or separate utility files
-  - Build command: `npm run build` from project root
-  - Production build validates more strictly than dev mode
----
-
-## 2026-01-31 - US-020 - Fix any critical errors found during testing
-- **What was implemented**: Final review and verification of all testing results
-- **Files changed**: None (verification only, updated prd.json and progress.txt)
-- **Test Results**:
-  - ✅ Reviewed all 19 previous test results
-  - ✅ All critical errors were fixed in earlier stories:
-    - US-002/005/006: Created missing /about and /contact pages
-    - US-004: Created /specialties page
-    - US-007: Created /terms and /privacy pages
-    - US-008: Created global 404 page
-    - US-019: Fixed build error (moved copyDaySchedule from 'use server' file)
-  - ✅ Final Playwright verification:
-    - http://localhost:3000/ - loads without JS errors
-    - http://localhost:3000/coaches - loads without JS errors
-    - http://localhost:3000/about - loads without JS errors
-    - http://localhost:3000/contact - loads without JS errors
-  - ✅ Typecheck passes (npx tsc --noEmit)
-- **Summary of Testing Sprint**:
-  - 20 user stories completed
-  - 5 critical issues fixed (missing pages and build error)
-  - All public pages render without JavaScript errors
-  - Production build succeeds with 25 routes
-  - TypeScript and ESLint pass
+## 2026-01-31 - US-013
+- Documented dashboard pages (4 files)
+- Files changed:
+  - src/app/(dashboard)/dashboard/page.tsx (main dashboard - role-based entry point)
+  - src/app/(dashboard)/dashboard/action-items/actions.ts (action items CRUD)
+  - src/app/(dashboard)/dashboard/sessions/page.tsx (coach sessions)
+  - src/app/(dashboard)/dashboard/messages/page.tsx (conversation list)
+- Added comprehensive JSDoc documentation:
+  - dashboard/page.tsx:
+    - File-level @fileoverview with data flow and component table
+    - getUserWithProfile helper with JSDoc (server-side data fetching)
+    - DashboardPage with role detection and rendering logic docs
+    - CoachDashboard: profile status and quick actions
+    - CoachOnboardingPrompt: CTA for incomplete onboarding
+    - ClientDashboard: async server component with action items count
+    - AdminDashboard: placeholder with future plans
+    - Section dividers for DATA FETCHING, MAIN PAGE, ROLE-SPECIFIC COMPONENTS
+  - action-items/actions.ts:
+    - File-level @fileoverview with features, permission model table, status computation rules
+    - ActionItemWithStatus interface with @example
+    - computeStatus helper with due date logic documentation
+    - createActionItem with @param/@returns/@throws/@example
+    - getClientActionItems (coach view)
+    - markActionItemComplete (both coach and client can use)
+    - deleteActionItem (coach only)
+    - getSessionActionItems (session-linked items)
+    - ActionItemWithCoach type (client view with coach info)
+    - getMyActionItems (client view with filter)
+    - getPendingActionItemsCount (lightweight count for dashboard)
+    - Section dividers for each operation category
+  - sessions/page.tsx:
+    - File-level @fileoverview with data flow, access control, URL params table
+    - PageProps interface with Next.js 15 searchParams Promise pattern
+    - SessionsPage with access control checks (4 levels) and SSR data fetching
+    - Section dividers for AUTHENTICATION, ROLE VERIFICATION, PARSE PARAMS, FETCH DATA, RENDER
+  - messages/page.tsx:
+    - File-level @fileoverview with role-based differences table
+    - MessagesPage with auth, user verification, and SSR data fetching
+    - Section dividers for clarity
+- Typecheck passes
+- **Learnings for future iterations:**
+  - Dashboard page.tsx uses nested async server components (ClientDashboard is async)
+  - Role detection defaults to 'client' if user record doesn't exist (edge case handling)
+  - Action items have computed status (pending/overdue/completed) based on dueDate and isCompleted
+  - Action items permission model: coaches create/delete, both can mark complete, clients view their own
+  - Next.js 15 searchParams is a Promise that must be awaited
+  - Sessions page has 4 access control layers: auth → user exists → coach role → coach profile
+  - SSR data fetching pattern: server actions called during render, result passed as initialData to client components
 ---
 

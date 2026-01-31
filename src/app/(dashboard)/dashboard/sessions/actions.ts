@@ -1,3 +1,25 @@
+/**
+ * @fileoverview Coach session management server actions.
+ *
+ * This module provides server actions for coaches to manage their sessions:
+ * - View sessions by status (upcoming, past, cancelled)
+ * - Mark sessions as complete
+ * - Cancel sessions with automatic refund processing
+ * - Save and retrieve session notes
+ * - Update meeting links
+ * - Generate ICS calendar files
+ * - Check refund eligibility
+ *
+ * @module sessions/actions
+ *
+ * @security
+ * All actions require authentication via Clerk.
+ * Coaches can only access/modify sessions where they are the coach.
+ *
+ * @refunds
+ * Coach-initiated cancellations always result in FULL refunds to clients.
+ * Refunds are processed via Stripe Refunds API with metadata tracking.
+ */
 'use server';
 
 import { auth } from '@clerk/nextjs/server';
@@ -7,11 +29,31 @@ import type { BookingSessionType } from '@/db/schema';
 import { stripe } from '@/lib/stripe';
 import { formatRefundAmount } from '@/lib/refunds';
 
+// ============================================================================
+// Type Definitions
+// ============================================================================
+
+/**
+ * Session tab status for filtering coach's session list.
+ * - `upcoming`: Future sessions that are pending or confirmed
+ * - `past`: Sessions that have already occurred
+ * - `cancelled`: Sessions that were cancelled by coach or client
+ */
 export type SessionStatus = 'upcoming' | 'past' | 'cancelled';
 
-// Payment status derived from transaction existence and status
+/**
+ * Payment status derived from transaction existence and status.
+ * - `free`: Session has price of 0, no payment required
+ * - `paid`: Transaction exists with 'succeeded' status
+ * - `payment_required`: Paid session with no successful transaction
+ * - `payment_failed`: Transaction exists with 'failed' status
+ */
 export type PaymentStatus = 'free' | 'paid' | 'payment_required' | 'payment_failed';
 
+/**
+ * Session data with client information for coach's view.
+ * Combines booking data with client user profile.
+ */
 export interface SessionWithClient {
   id: number;
   clientId: string;
@@ -28,13 +70,44 @@ export interface SessionWithClient {
   paymentStatus: PaymentStatus;
 }
 
+/**
+ * Result of fetching coach sessions.
+ */
 export interface GetSessionsResult {
   success: boolean;
+  /** List of sessions when successful */
   sessions?: SessionWithClient[];
+  /** Total count for pagination (before limit/offset applied) */
   totalCount?: number;
+  /** Error message when success is false */
   error?: string;
 }
 
+// ============================================================================
+// Session Query Actions
+// ============================================================================
+
+/**
+ * Retrieves paginated sessions for the authenticated coach.
+ *
+ * Sessions are filtered by tab status and ordered appropriately:
+ * - `upcoming`: Ascending by startTime (nearest first)
+ * - `past`: Descending by startTime (most recent first)
+ * - `cancelled`: Descending by startTime
+ *
+ * @param tab - Filter by session status ('upcoming', 'past', 'cancelled')
+ * @param page - Page number for pagination (1-indexed, default: 1)
+ * @param perPage - Number of sessions per page (default: 10)
+ * @returns Promise with sessions array, total count, or error
+ *
+ * @example
+ * // Get first page of upcoming sessions
+ * const result = await getCoachSessions('upcoming');
+ * if (result.success) {
+ *   console.log(`Found ${result.totalCount} total sessions`);
+ *   result.sessions?.forEach(s => console.log(s.clientName));
+ * }
+ */
 export async function getCoachSessions(
   tab: SessionStatus,
   page: number = 1,
@@ -154,11 +227,40 @@ export async function getCoachSessions(
   }
 }
 
+// ============================================================================
+// Session Status Actions
+// ============================================================================
+
+/**
+ * Result of marking a session as complete.
+ */
 export interface MarkCompleteResult {
   success: boolean;
+  /** Error message when success is false */
   error?: string;
 }
 
+/**
+ * Marks a past session as completed.
+ *
+ * This action is used by coaches to finalize sessions that have occurred.
+ * The session must meet the following criteria:
+ * - Belongs to the authenticated coach
+ * - Start time is in the past
+ * - Current status is 'pending' or 'confirmed'
+ *
+ * @param sessionId - The booking ID to mark as complete
+ * @returns Promise indicating success or error
+ *
+ * @throws Returns error if session is in the future
+ * @throws Returns error if session is already completed/cancelled
+ *
+ * @example
+ * const result = await markSessionComplete(123);
+ * if (!result.success) {
+ *   console.error(result.error);
+ * }
+ */
 export async function markSessionComplete(sessionId: number): Promise<MarkCompleteResult> {
   const { userId } = await auth();
 
@@ -199,19 +301,61 @@ export async function markSessionComplete(sessionId: number): Promise<MarkComple
   }
 }
 
+// ============================================================================
+// Cancellation Actions
+// ============================================================================
+
+/**
+ * Information about a refund processed during cancellation.
+ */
 export interface RefundInfo {
+  /** Whether a refund was successfully processed */
   wasRefunded: boolean;
+  /** Refund amount in cents */
   refundAmountCents: number;
+  /** Formatted refund amount (e.g., "$25.00") */
   refundAmountFormatted: string;
+  /** Explanation of refund outcome */
   reason: string;
 }
 
+/**
+ * Result of cancelling a session.
+ */
 export interface CancelSessionResult {
   success: boolean;
+  /** Error message when success is false */
   error?: string;
+  /** Refund details if a paid session was cancelled */
   refund?: RefundInfo;
 }
 
+/**
+ * Cancels a session as the coach.
+ *
+ * Coach-initiated cancellations ALWAYS result in a FULL refund to the client.
+ * This is different from client cancellations which follow a sliding scale
+ * based on how close to the session the cancellation occurs.
+ *
+ * Process:
+ * 1. Verify session belongs to coach and is in cancellable state
+ * 2. Check for paid transaction
+ * 3. If paid, process full refund via Stripe
+ * 4. Update booking status to 'cancelled'
+ * 5. Record cancellation metadata (who, when, reason)
+ *
+ * @param sessionId - The booking ID to cancel
+ * @param reason - Optional cancellation reason for records
+ * @returns Promise with success status and refund details if applicable
+ *
+ * @throws Returns error if session is already cancelled/completed
+ *
+ * @example
+ * const result = await cancelSession(123, "Schedule conflict");
+ * if (result.success && result.refund?.wasRefunded) {
+ *   console.log(`Refunded ${result.refund.refundAmountFormatted}`);
+ * }
+ */
 export async function cancelSession(
   sessionId: number,
   reason?: string
@@ -325,7 +469,29 @@ export async function cancelSession(
   }
 }
 
-// Get the count of past sessions between a coach and a specific client
+// ============================================================================
+// Client History Actions
+// ============================================================================
+
+/**
+ * Gets the count of past sessions between the coach and a specific client.
+ *
+ * Useful for displaying coaching history in session details, such as
+ * "This is your 5th session with this client."
+ *
+ * Counts sessions that:
+ * - Have a startTime in the past
+ * - Have status: completed, confirmed, or pending
+ *
+ * @param clientId - The Clerk user ID of the client
+ * @returns Promise with count or error
+ *
+ * @example
+ * const result = await getPastSessionsCountWithClient("user_123");
+ * if (result.success) {
+ *   console.log(`${result.count} previous sessions`);
+ * }
+ */
 export async function getPastSessionsCountWithClient(
   clientId: string
 ): Promise<{ success: true; count: number } | { success: false; error: string }> {
@@ -358,12 +524,38 @@ export async function getPastSessionsCountWithClient(
   }
 }
 
-// Save session note for a booking (uses session_notes table)
+// ============================================================================
+// Session Notes Actions
+// ============================================================================
+
+/**
+ * Result of saving a session note.
+ */
 export interface SaveSessionNoteResult {
   success: boolean;
+  /** Error message when success is false */
   error?: string;
 }
 
+/**
+ * Saves or updates a session note for a booking.
+ *
+ * Notes are stored in the `session_notes` table, separate from the booking.
+ * If a note already exists for the booking, it will be updated; otherwise
+ * a new note is created (upsert behavior).
+ *
+ * Notes are private to the coach and not visible to clients.
+ *
+ * @param bookingId - The booking ID to save notes for
+ * @param content - The note content (plain text)
+ * @returns Promise indicating success or error
+ *
+ * @example
+ * const result = await saveSessionNote(123, "Client made great progress today");
+ * if (!result.success) {
+ *   console.error("Failed to save notes:", result.error);
+ * }
+ */
 export async function saveSessionNote(
   bookingId: number,
   content: string
@@ -414,13 +606,29 @@ export async function saveSessionNote(
   }
 }
 
-// Get session note for a booking
+/**
+ * Result of retrieving a session note.
+ */
 export interface GetSessionNoteResult {
   success: boolean;
+  /** The note content, or null if no note exists */
   content?: string | null;
+  /** Error message when success is false */
   error?: string;
 }
 
+/**
+ * Retrieves the session note for a booking.
+ *
+ * @param bookingId - The booking ID to get notes for
+ * @returns Promise with note content or error
+ *
+ * @example
+ * const result = await getSessionNote(123);
+ * if (result.success && result.content) {
+ *   console.log("Notes:", result.content);
+ * }
+ */
 export async function getSessionNote(bookingId: number): Promise<GetSessionNoteResult> {
   const { userId } = await auth();
 
@@ -456,16 +664,55 @@ export async function getSessionNote(bookingId: number): Promise<GetSessionNoteR
   }
 }
 
-// Legacy alias for backward compatibility
+/**
+ * @deprecated Use SaveSessionNoteResult instead.
+ * Legacy type alias for backward compatibility.
+ */
 export type SaveCoachNotesResult = SaveSessionNoteResult;
+
+/**
+ * @deprecated Use saveSessionNote instead.
+ * Legacy function alias for backward compatibility.
+ */
 export const saveCoachNotes = saveSessionNote;
 
-// Update meeting link for a booking
+// ============================================================================
+// Meeting Link Actions
+// ============================================================================
+
+/**
+ * Result of updating a meeting link.
+ */
 export interface UpdateMeetingLinkResult {
   success: boolean;
+  /** Error message when success is false */
   error?: string;
 }
 
+/**
+ * Updates the meeting link for a booking.
+ *
+ * Meeting links are used for virtual coaching sessions (Zoom, Google Meet, etc.).
+ * The link must be a valid HTTPS URL.
+ *
+ * Validation:
+ * - Link must start with "https://"
+ * - Link must be a valid URL format
+ * - Empty string clears the meeting link
+ *
+ * @param bookingId - The booking ID to update
+ * @param meetingLink - The HTTPS meeting URL, or empty string to clear
+ * @returns Promise indicating success or error
+ *
+ * @throws Returns error if URL doesn't start with https://
+ * @throws Returns error if URL format is invalid
+ *
+ * @example
+ * const result = await updateMeetingLink(123, "https://zoom.us/j/123456");
+ * if (!result.success) {
+ *   console.error(result.error);
+ * }
+ */
 export async function updateMeetingLink(
   bookingId: number,
   meetingLink: string
@@ -515,7 +762,31 @@ export async function updateMeetingLink(
   }
 }
 
-// Generate ICS file content for coach's calendar download
+// ============================================================================
+// Calendar Export Actions
+// ============================================================================
+
+/**
+ * Generates an ICS (iCalendar) file for a booking.
+ *
+ * The ICS file allows coaches to download and import session details
+ * into their calendar application (Google Calendar, Outlook, etc.).
+ *
+ * ICS Format:
+ * - Uses RFC 5545 iCalendar specification
+ * - UID format: booking-{id}@coachingplatform.com (for deduplication)
+ * - Includes session type name, duration, and client notes
+ *
+ * @param bookingId - The booking ID to generate ICS for
+ * @returns Promise with ICS file content string or error
+ *
+ * @example
+ * const result = await generateCoachIcsFile(123);
+ * if (result.success) {
+ *   // Serve as downloadable file
+ *   const blob = new Blob([result.data], { type: 'text/calendar' });
+ * }
+ */
 export async function generateCoachIcsFile(
   bookingId: number
 ): Promise<{ success: true; data: string } | { success: false; error: string }> {
@@ -594,22 +865,54 @@ export async function generateCoachIcsFile(
   }
 }
 
-// Get refund eligibility info for a booking (used by cancellation dialog)
+// ============================================================================
+// Refund Eligibility Actions
+// ============================================================================
+
+/**
+ * Result of checking refund eligibility for a session.
+ */
 export interface RefundEligibilityResult {
   success: boolean;
+  /** Error message when success is false */
   error?: string;
+  /** Refund eligibility data when success is true */
   data?: {
+    /** Whether a successful payment exists */
     hasPaidTransaction: boolean;
+    /** Amount paid in cents */
     paidAmountCents: number;
+    /** Currency code (e.g., "USD") */
     currency: string;
+    /** Whether a refund can be issued */
     isEligibleForRefund: boolean;
+    /** Amount to refund in cents */
     refundAmountCents: number;
+    /** Formatted refund amount (e.g., "$25.00") */
     refundAmountFormatted: string;
+    /** Explanation of refund policy */
     refundReason: string;
+    /** Always true when coach is checking (context flag) */
     isCoachCancelling: boolean;
   };
 }
 
+/**
+ * Gets refund eligibility information for a session.
+ *
+ * Used by the cancellation dialog to show the coach what refund
+ * will be issued if they cancel. For coach-initiated cancellations,
+ * the refund is always 100% of the paid amount.
+ *
+ * @param sessionId - The booking ID to check
+ * @returns Promise with refund eligibility details or error
+ *
+ * @example
+ * const result = await getRefundEligibility(123);
+ * if (result.success && result.data?.hasPaidTransaction) {
+ *   console.log(`Client will receive ${result.data.refundAmountFormatted} refund`);
+ * }
+ */
 export async function getRefundEligibility(sessionId: number): Promise<RefundEligibilityResult> {
   const { userId } = await auth();
 

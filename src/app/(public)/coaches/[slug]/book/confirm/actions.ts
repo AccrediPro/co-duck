@@ -1,3 +1,26 @@
+/**
+ * @fileoverview Booking Confirmation Server Actions
+ *
+ * This module handles the second phase of the booking flow: creating bookings
+ * and initiating Stripe Checkout sessions for paid sessions.
+ *
+ * ## Booking Flow Overview
+ * 1. `../actions.ts`: Get coach data, weekly availability, and available time slots
+ * 2. **This file**: Create booking and Stripe Checkout session
+ * 3. `../success/actions.ts`: Handle post-payment confirmation and display
+ *
+ * ## Payment Flow
+ * - **Free sessions**: Created with 'confirmed' status immediately
+ * - **Paid sessions**: Created with 'pending' status, confirmed after Stripe payment
+ *
+ * ## Stripe Integration
+ * - Uses Stripe Connect for split payments (coach payout + platform fee)
+ * - Platform fee: 10% of session price
+ * - Booking metadata stored in Stripe for webhook reconciliation
+ *
+ * @module booking/confirm/actions
+ */
+
 'use server';
 
 import { auth } from '@clerk/nextjs/server';
@@ -8,16 +31,30 @@ import { stripe } from '@/lib/stripe';
 import type { BookingSessionType } from '@/db/schema';
 import { createBookingSystemMessage } from '@/lib/conversations';
 
-// Input for creating a booking
+// ─────────────────────────────────────────────────────────────────────────────
+// Type Definitions
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Input parameters for creating a new booking (free sessions).
+ */
 export interface CreateBookingInput {
+  /** The coach's user ID */
   coachId: string;
+  /** Selected session type with name, duration, and price */
   sessionType: BookingSessionType;
-  startTime: string; // ISO string
-  endTime: string; // ISO string
+  /** Session start time as ISO 8601 string */
+  startTime: string;
+  /** Session end time as ISO 8601 string */
+  endTime: string;
+  /** Optional notes from the client about the session */
   clientNotes?: string;
 }
 
-// Booking result with details for confirmation
+/**
+ * Result data returned after successfully creating a booking.
+ * Contains all information needed for the confirmation display.
+ */
 export interface BookingResult {
   id: number;
   coachName: string;
@@ -30,7 +67,36 @@ export interface BookingResult {
   coachSlug: string;
 }
 
-// Create a new booking (for free sessions only)
+// ─────────────────────────────────────────────────────────────────────────────
+// Server Actions
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Creates a new booking for a free session.
+ *
+ * For free sessions (price = 0), the booking is created with 'confirmed' status
+ * immediately. A system message is also created in the coach-client conversation.
+ *
+ * ## Validation Checks
+ * - User must be authenticated
+ * - User must exist in database
+ * - Coach must exist
+ * - Cannot book with yourself
+ * - Start time must be before end time
+ * - Cannot book in the past
+ *
+ * @param input - Booking details including coach, session type, and times
+ * @returns Success with BookingResult, or error message
+ *
+ * @example
+ * const result = await createBooking({
+ *   coachId: 'user_coach123',
+ *   sessionType: { name: 'Intro Call', duration: 30, price: 0 },
+ *   startTime: '2024-01-15T14:00:00.000Z',
+ *   endTime: '2024-01-15T14:30:00.000Z',
+ *   clientNotes: 'Looking forward to our session!'
+ * });
+ */
 export async function createBooking(
   input: CreateBookingInput
 ): Promise<{ success: true; data: BookingResult } | { success: false; error: string }> {
@@ -138,23 +204,70 @@ export async function createBooking(
   }
 }
 
-// Input for creating a Stripe Checkout session
+/**
+ * Input parameters for creating a Stripe Checkout session (paid sessions).
+ */
 export interface CreateCheckoutSessionInput {
+  /** The coach's user ID */
   coachId: string;
+  /** The coach's URL slug (for redirect URLs) */
   coachSlug: string;
+  /** Selected session type with name, duration, and price */
   sessionType: BookingSessionType;
-  startTime: string; // ISO string
-  endTime: string; // ISO string
+  /** Session start time as ISO 8601 string */
+  startTime: string;
+  /** Session end time as ISO 8601 string */
+  endTime: string;
+  /** Optional notes from the client about the session */
   clientNotes?: string;
+  /** Client's IANA timezone for display formatting */
   clientTimezone: string;
 }
 
-// Result of Checkout session creation
+/**
+ * Result of Stripe Checkout session creation.
+ */
 export type CreateCheckoutSessionResult =
   | { success: true; checkoutUrl: string; bookingId: number }
   | { success: false; error: string };
 
-// Create a Stripe Checkout Session for paid bookings
+/**
+ * Creates a Stripe Checkout Session for paid bookings.
+ *
+ * This function handles the payment flow for sessions with a price > 0:
+ * 1. Creates a booking with 'pending' status
+ * 2. Creates a Stripe Checkout Session with split payment configuration
+ * 3. Returns the checkout URL for redirect
+ *
+ * ## Payment Split (Stripe Connect)
+ * - **Coach receives**: 90% of session price
+ * - **Platform fee**: 10% of session price
+ *
+ * ## Stripe Metadata
+ * Booking details are stored in both session-level and payment_intent-level
+ * metadata for webhook processing and reconciliation.
+ *
+ * ## Error Handling
+ * If Checkout Session creation fails, the pending booking is rolled back (deleted).
+ *
+ * @param input - Checkout details including coach, session type, times, and timezone
+ * @returns Success with checkoutUrl and bookingId, or error message
+ *
+ * @throws Will not throw - errors are returned in the result object
+ *
+ * @example
+ * const result = await createCheckoutSession({
+ *   coachId: 'user_coach123',
+ *   coachSlug: 'john-smith',
+ *   sessionType: { name: '1-on-1 Coaching', duration: 60, price: 10000 },
+ *   startTime: '2024-01-15T14:00:00.000Z',
+ *   endTime: '2024-01-15T15:00:00.000Z',
+ *   clientTimezone: 'America/Los_Angeles'
+ * });
+ * if (result.success) {
+ *   // Redirect to result.checkoutUrl
+ * }
+ */
 export async function createCheckoutSession(
   input: CreateCheckoutSessionInput
 ): Promise<CreateCheckoutSessionResult> {
@@ -345,7 +458,31 @@ export async function createCheckoutSession(
   }
 }
 
-// Generate ICS file content for calendar download
+// ─────────────────────────────────────────────────────────────────────────────
+// Calendar Export
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Generates an ICS (iCalendar) file for a booking.
+ *
+ * Creates a downloadable calendar file that clients can add to their
+ * calendar applications (Google Calendar, Apple Calendar, Outlook, etc.).
+ *
+ * ## ICS Format
+ * - Uses iCalendar 2.0 specification
+ * - Includes session summary, duration, and client notes
+ * - Generates a unique UID for calendar deduplication
+ *
+ * @param bookingId - The database ID of the booking
+ * @returns Success with ICS file content as string, or error
+ *
+ * @example
+ * const result = await generateIcsFile(123);
+ * if (result.success) {
+ *   // Create download link with result.data as file content
+ *   const blob = new Blob([result.data], { type: 'text/calendar' });
+ * }
+ */
 export async function generateIcsFile(
   bookingId: number
 ): Promise<{ success: true; data: string } | { success: false; error: string }> {

@@ -1,3 +1,36 @@
+/**
+ * @fileoverview Coach Onboarding Step 4 - Review & Publish Form
+ *
+ * This component handles the final step of the coach onboarding flow where coaches
+ * review their complete profile and choose to publish it or save as draft.
+ *
+ * @module components/onboarding/review-publish-form
+ *
+ * ## Flow
+ * 1. Displays profile completion percentage and missing items
+ * 2. Shows a preview of the coach's public profile as clients will see it
+ * 3. Coach can either "Publish Profile" (make live) or "Save as Draft"
+ * 4. On success, redirects to coach dashboard
+ *
+ * ## Data Flow
+ * - Input: Complete profile data from previous steps
+ * - Output: Sets `isPublished` flag via `publishProfile` server action
+ * - Navigation: On success, redirects to `/dashboard`
+ *
+ * ## Publishing States
+ * - Published: Profile is visible in coach directory and bookable
+ * - Draft: Profile is saved but not visible to clients
+ *
+ * ## Profile Preview Sections
+ * - Header: Avatar, display name, headline, timezone
+ * - About: Coach biography
+ * - Specialties: Coaching focus areas as badges
+ * - Pricing: Session types with durations and prices
+ *
+ * ## Completion Tracking
+ * The parent page component calculates `completionPercentage` and `missingItems`
+ * to help coaches identify what to complete for a better profile.
+ */
 'use client';
 
 import { useState } from 'react';
@@ -15,6 +48,28 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { AlertCircle, CheckCircle2, Clock, DollarSign, Globe, Loader2, User } from 'lucide-react';
 
+/* ============================================================================
+ * TYPE DEFINITIONS
+ * ========================================================================= */
+
+/**
+ * Complete profile data for review display.
+ *
+ * All fields come from the `coach_profiles` table.
+ * Prices are stored in CENTS.
+ *
+ * @property displayName - Coach's public display name
+ * @property avatarUrl - URL to profile photo
+ * @property headline - Professional tagline
+ * @property bio - Full biography text
+ * @property specialties - Array of coaching specialties
+ * @property timezone - IANA timezone string
+ * @property hourlyRate - Base hourly rate in CENTS
+ * @property currency - Currency code (e.g., "USD")
+ * @property sessionTypes - Array of bookable session configurations
+ * @property slug - URL-safe profile identifier
+ * @property isPublished - Current publication status
+ */
 interface ProfileData {
   displayName: string;
   avatarUrl: string | null;
@@ -29,12 +84,65 @@ interface ProfileData {
   isPublished: boolean;
 }
 
+/**
+ * Props for the ReviewPublishForm component.
+ *
+ * @property profile - Complete coach profile data for preview
+ * @property missingItems - List of incomplete profile items (e.g., "Add a bio")
+ * @property completionPercentage - 0-100 percentage of profile completion
+ */
+/**
+ * Props for the ReviewPublishForm component.
+ *
+ * @property profile - Complete coach profile data for preview
+ * @property missingItems - List of incomplete profile items (e.g., "Add a bio")
+ * @property completionPercentage - 0-100 percentage of profile completion
+ */
 interface ReviewPublishFormProps {
   profile: ProfileData;
   missingItems: string[];
   completionPercentage: number;
 }
 
+/* ============================================================================
+ * COMPONENT
+ * ========================================================================= */
+
+/**
+ * Review & Publish Form for coach onboarding step 4 (final step).
+ *
+ * Displays a complete preview of the coach's profile as it will appear to
+ * clients, along with completion status and the ability to publish or save
+ * as a draft.
+ *
+ * @param props - Component props
+ * @param props.profile - Complete coach profile data
+ * @param props.missingItems - List of incomplete items for improvement suggestions
+ * @param props.completionPercentage - Profile completion percentage (0-100)
+ *
+ * @returns React component rendering the profile review and publish interface
+ *
+ * @example
+ * ```tsx
+ * <ReviewPublishForm
+ *   profile={{
+ *     displayName: "John Smith",
+ *     headline: "Executive Coach",
+ *     bio: "10 years of experience...",
+ *     specialties: ["Executive Coaching"],
+ *     timezone: "America/New_York",
+ *     hourlyRate: 15000, // $150.00 in cents
+ *     currency: "USD",
+ *     sessionTypes: [...],
+ *     slug: "john-smith",
+ *     isPublished: false,
+ *     avatarUrl: "https://..."
+ *   }}
+ *   missingItems={["Consider adding more specialties"]}
+ *   completionPercentage={90}
+ * />
+ * ```
+ */
 export function ReviewPublishForm({
   profile,
   missingItems,
@@ -45,13 +153,26 @@ export function ReviewPublishForm({
   const [isPublishing, setIsPublishing] = useState(false);
   const [isSavingDraft, setIsSavingDraft] = useState(false);
 
+  // Get currency symbol for price formatting
   const currency = SUPPORTED_CURRENCIES.find((c) => c.code === profile.currency);
   const currencySymbol = currency?.symbol || '$';
 
+  /**
+   * Formats a price from cents to dollars with 2 decimal places.
+   *
+   * @param cents - Price in cents
+   * @returns Formatted price string (e.g., "150.00")
+   */
   const formatPrice = (cents: number) => {
     return (cents / 100).toFixed(2);
   };
 
+  /**
+   * Extracts initials from a name for avatar fallback.
+   *
+   * @param name - Full name string
+   * @returns Up to 2 uppercase initials (e.g., "JS" for "John Smith")
+   */
   const getInitials = (name: string) => {
     return name
       .split(' ')
@@ -61,6 +182,18 @@ export function ReviewPublishForm({
       .slice(0, 2);
   };
 
+  /**
+   * Handles profile publishing.
+   *
+   * Sets isPublished=true via server action, shows success toast,
+   * and navigates to dashboard.
+   */
+  /**
+   * Handles profile publishing.
+   *
+   * Sets isPublished=true via server action, shows success toast,
+   * and navigates to dashboard.
+   */
   async function handlePublish() {
     setIsPublishing(true);
     try {
@@ -89,6 +222,12 @@ export function ReviewPublishForm({
     }
   }
 
+  /**
+   * Handles saving profile as draft.
+   *
+   * Sets isPublished=false via server action, shows success toast,
+   * and navigates to dashboard. Profile is saved but not visible to clients.
+   */
   async function handleSaveDraft() {
     setIsSavingDraft(true);
     try {

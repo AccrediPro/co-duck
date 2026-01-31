@@ -1,8 +1,51 @@
+/**
+ * @fileoverview Public Coach Availability Display Actions
+ *
+ * This module provides server actions for displaying coach availability
+ * information on public coach profile pages. Unlike the dashboard actions
+ * (which allow coaches to edit their availability), these are read-only
+ * actions optimized for the public-facing coach profile.
+ *
+ * ## Key Features
+ * - Calculate next available booking slot considering all constraints
+ * - Generate human-readable availability summary (e.g., "Mon-Fri, 9am-5pm")
+ * - Handle availability overrides for specific dates
+ * - Account for existing bookings and buffer time
+ *
+ * ## Usage Context
+ * These actions are called from the public coach profile page to show
+ * potential clients when the coach is available for booking.
+ *
+ * ## Availability Calculation
+ * The next available slot considers:
+ * 1. Weekly schedule (coach_availability table)
+ * 2. Date-specific overrides (availability_overrides table)
+ * 3. Existing bookings (pending + confirmed)
+ * 4. Buffer time between sessions
+ * 5. Advance notice requirements
+ * 6. Maximum advance booking window
+ *
+ * @module coaches/[slug]/availability-actions
+ */
+
 'use server';
 
 import { db, coachProfiles, coachAvailability, bookings, availabilityOverrides } from '@/db';
 import { eq, and, gte, lte, or } from 'drizzle-orm';
 
+// ============================================================================
+// Type Definitions
+// ============================================================================
+
+/**
+ * Availability information displayed on coach public profile.
+ *
+ * @property timezone - Coach's configured timezone (null if profile not found)
+ * @property nextAvailable - ISO timestamp of next available slot (null if none)
+ * @property nextAvailableDisplay - Human-readable format like "Tomorrow at 2:00 PM"
+ * @property weeklyAvailabilitySummary - Summary like "Mon-Fri, 9am-5pm"
+ * @property hasAvailability - Whether coach has any availability configured
+ */
 export interface AvailabilityDisplayData {
   timezone: string | null;
   nextAvailable: string | null; // ISO string or null if no availability
@@ -11,6 +54,10 @@ export interface AvailabilityDisplayData {
   hasAvailability: boolean;
 }
 
+/**
+ * Internal type for day availability details.
+ * @internal
+ */
 interface DayAvailabilityInfo {
   dayOfWeek: number;
   startTime: string;
@@ -18,7 +65,14 @@ interface DayAvailabilityInfo {
   isAvailable: boolean;
 }
 
+// ============================================================================
+// Constants
+// ============================================================================
+
+/** Short day names for summary display (e.g., "Mon-Fri") */
 const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+/** Full day names for relative date display (e.g., "Wednesday at 2:00 PM") */
 const DAY_FULL_NAMES = [
   'Sunday',
   'Monday',
@@ -29,6 +83,36 @@ const DAY_FULL_NAMES = [
   'Saturday',
 ];
 
+// ============================================================================
+// Server Actions
+// ============================================================================
+
+/**
+ * Fetches availability display data for a coach's public profile.
+ *
+ * This is the main entry point for showing availability on the public
+ * coach profile page. It calculates the next available booking slot
+ * and generates a human-readable weekly summary.
+ *
+ * @param coachId - Clerk user ID of the coach
+ * @returns Availability display data for the profile
+ *
+ * @example
+ * const availability = await getCoachAvailabilityForProfile(coachId);
+ *
+ * if (availability.hasAvailability) {
+ *   console.log(`Next available: ${availability.nextAvailableDisplay}`);
+ *   console.log(`Schedule: ${availability.weeklyAvailabilitySummary}`);
+ * } else {
+ *   console.log('No availability set');
+ * }
+ *
+ * @remarks
+ * - Returns safe defaults (null values, hasAvailability: false) on errors
+ * - Calculates next slot using minimum session duration from coach's types
+ * - Defaults to 30-minute slots if no session types configured
+ * - Checks up to 60 days ahead for next available slot
+ */
 // Get availability display data for a coach's public profile
 export async function getCoachAvailabilityForProfile(
   coachId: string
@@ -131,6 +215,35 @@ export async function getCoachAvailabilityForProfile(
   }
 }
 
+// ============================================================================
+// Internal Helper Functions
+// ============================================================================
+
+/**
+ * Finds the next available booking slot for a coach.
+ *
+ * This function iterates through future dates (up to 60 days or maxAdvanceDays)
+ * to find the first time slot that:
+ * 1. Falls within the coach's availability window
+ * 2. Does not conflict with existing bookings (including buffer)
+ * 3. Meets the advance notice requirement
+ * 4. Falls within the max advance days window
+ *
+ * @param coachId - Clerk user ID of the coach
+ * @param profile - Coach's booking constraint settings
+ * @param availabilityMap - Map of day-of-week to availability info
+ * @param sessionDuration - Minimum session duration in minutes
+ * @param timezone - Coach's configured timezone
+ * @returns Object with ISO string and display format, or null if none found
+ *
+ * @remarks
+ * - Checks availability overrides before falling back to weekly schedule
+ * - Uses 30-minute slot increments for searching
+ * - Buffer time is applied to both start and end of potential slots
+ * - Only considers 'pending' and 'confirmed' bookings as conflicts
+ *
+ * @internal
+ */
 // Find the next available time slot for booking
 async function findNextAvailableSlot(
   coachId: string,
@@ -144,10 +257,14 @@ async function findNextAvailableSlot(
   timezone: string
 ): Promise<{ isoString: string; display: string } | null> {
   const now = new Date();
+
+  // Calculate booking window boundaries:
+  // - minStartTime: earliest allowed booking (respects advance notice)
+  // - maxDate: latest allowed booking (respects max advance days)
   const minStartTime = new Date(now.getTime() + profile.advanceNoticeHours * 60 * 60 * 1000);
   const maxDate = new Date(now.getTime() + profile.maxAdvanceDays * 24 * 60 * 60 * 1000);
 
-  // Check up to maxAdvanceDays to find next available slot
+  // Cap search to 60 days for performance (avoid excessive DB queries)
   const maxDaysToCheck = Math.min(profile.maxAdvanceDays, 60);
 
   for (let dayOffset = 0; dayOffset < maxDaysToCheck; dayOffset++) {
@@ -160,7 +277,8 @@ async function findNextAvailableSlot(
     const dayOfWeek = checkDate.getDay();
     const dateStr = formatDateStr(checkDate);
 
-    // Check for override first
+    // OVERRIDE PRIORITY: Check for date-specific override before using weekly schedule.
+    // Overrides allow coaches to block specific dates (vacation) or set custom hours.
     const overrides = await db
       .select()
       .from(availabilityOverrides)
@@ -173,11 +291,13 @@ async function findNextAvailableSlot(
     let dayEndTime: string | null = null;
 
     if (overrides.length > 0) {
+      // Override found - use its settings instead of weekly schedule
       const override = overrides[0];
-      if (!override.isAvailable) continue;
+      if (!override.isAvailable) continue; // Coach blocked this date entirely
       dayStartTime = override.startTime?.substring(0, 5) || null;
       dayEndTime = override.endTime?.substring(0, 5) || null;
     } else {
+      // No override - fall back to weekly recurring schedule
       const dayAvail = availabilityMap.get(dayOfWeek);
       if (!dayAvail || !dayAvail.isAvailable) continue;
       dayStartTime = dayAvail.startTime;
@@ -221,14 +341,18 @@ async function findNextAvailableSlot(
     while (currentSlot.getTime() + sessionDuration * 60 * 1000 <= slotEndLimit.getTime()) {
       const slotEndTime = new Date(currentSlot.getTime() + sessionDuration * 60 * 1000);
 
-      // Check if slot is in the future with advance notice
+      // Only consider slots that meet the advance notice requirement
       if (currentSlot >= minStartTime) {
-        // Check if slot conflicts with existing bookings (including buffer)
+        // BUFFER TIME: Expand the slot window by buffer minutes on both sides.
+        // This ensures the coach has prep/break time between sessions.
+        // Example: 15-min buffer means a 10am slot blocks 9:45am-10:15am for conflicts.
         const slotWithBuffer = {
           start: new Date(currentSlot.getTime() - profile.bufferMinutes * 60 * 1000),
           end: new Date(slotEndTime.getTime() + profile.bufferMinutes * 60 * 1000),
         };
 
+        // CONFLICT DETECTION: Check if any existing booking overlaps with our buffered window.
+        // Uses standard interval overlap formula: A overlaps B if A.start < B.end AND A.end > B.start
         const hasConflict = existingBookings.some((booking) => {
           const bookingStart = new Date(booking.startTime);
           const bookingEnd = new Date(booking.endTime);
@@ -253,6 +377,22 @@ async function findNextAvailableSlot(
   return null;
 }
 
+/**
+ * Formats a slot date for human-readable display.
+ *
+ * Output format depends on how far away the slot is:
+ * - Same day: "Today at 2:00 PM"
+ * - Next day: "Tomorrow at 9:00 AM"
+ * - Within a week: "Wednesday at 10:30 AM"
+ * - Beyond a week: "Jan 15 at 3:00 PM"
+ *
+ * @param slotDate - The date/time of the available slot
+ * @param now - Current date/time for comparison
+ * @param timezone - Timezone for formatting the time
+ * @returns Human-readable string describing when the slot is
+ *
+ * @internal
+ */
 // Format the next available slot for display
 function formatNextAvailableDisplay(slotDate: Date, now: Date, timezone: string): string {
   const today = new Date(now);
@@ -292,6 +432,30 @@ function formatNextAvailableDisplay(slotDate: Date, now: Date, timezone: string)
   }
 }
 
+/**
+ * Generates a human-readable weekly availability summary.
+ *
+ * Creates a compact string showing when the coach is available,
+ * grouping consecutive days with the same schedule.
+ *
+ * @param availabilityMap - Map of day-of-week to availability info
+ * @returns Summary string like "Mon-Fri, 9am-5pm | Sat, 10am-2pm", or null if no availability
+ *
+ * @example
+ * // If coach is available Mon-Fri 9-5 and Sat 10-2:
+ * // Returns: "Mon-Fri, 9am-5pm | Sat, 10am-2pm"
+ *
+ * // If coach only available Tuesday and Thursday 1-6:
+ * // Returns: "Tue, 1pm-6pm | Thu, 1pm-6pm"
+ *
+ * @remarks
+ * - Groups consecutive days with identical times (same start/end)
+ * - Uses abbreviated day names (Mon, Tue, etc.)
+ * - Uses compact time format (9am, 5pm, 10:30am)
+ * - Separates groups with " | "
+ *
+ * @internal
+ */
 // Generate a human-readable weekly availability summary
 function generateWeeklyAvailabilitySummary(
   availabilityMap: Map<number, DayAvailabilityInfo>
@@ -346,6 +510,20 @@ function generateWeeklyAvailabilitySummary(
   return parts.join(' | ');
 }
 
+/**
+ * Formats a time string in compact 12-hour format.
+ *
+ * @param time - Time in HH:MM format (24-hour)
+ * @returns Compact time string like "9am", "5pm", or "10:30am"
+ *
+ * @example
+ * formatTimeShort("09:00") // "9am"
+ * formatTimeShort("17:00") // "5pm"
+ * formatTimeShort("10:30") // "10:30am"
+ * formatTimeShort("12:00") // "12pm"
+ *
+ * @internal
+ */
 // Format time for summary (e.g., "9am", "5pm", "10:30am")
 function formatTimeShort(time: string): string {
   const [hour, minute] = time.split(':').map(Number);
@@ -358,6 +536,20 @@ function formatTimeShort(time: string): string {
   return `${hour12}:${minute.toString().padStart(2, '0')}${period}`;
 }
 
+/**
+ * Formats a Date object to YYYY-MM-DD string for database queries.
+ *
+ * @param date - Date to format
+ * @returns Date string in YYYY-MM-DD format
+ *
+ * @example
+ * formatDateStr(new Date('2024-03-15')) // "2024-03-15"
+ *
+ * @remarks
+ * Uses local date components, not UTC, to match database storage format.
+ *
+ * @internal
+ */
 // Format date to YYYY-MM-DD
 function formatDateStr(date: Date): string {
   const year = date.getFullYear();

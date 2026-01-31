@@ -1,3 +1,32 @@
+/**
+ * @fileoverview Main chat view component for messaging.
+ *
+ * This component renders the full chat interface including message history,
+ * input area, and (for coaches) a context panel with client information.
+ *
+ * ## Features
+ *
+ * - Paginated message history with infinite scroll
+ * - Optimistic UI for sending messages
+ * - Real-time updates via 3-second polling
+ * - Automatic read status marking
+ * - Mobile-responsive with slide-out context panel
+ *
+ * ## Data Flow
+ *
+ * 1. Page server component fetches initial data
+ * 2. ChatView receives initialMessages and manages local state
+ * 3. New messages from polling are appended
+ * 4. Optimistic messages replaced with server response
+ *
+ * ## Related Files
+ *
+ * - `src/app/(dashboard)/dashboard/messages/[id]/page.tsx` - Parent page
+ * - `src/app/(dashboard)/dashboard/messages/[id]/actions.ts` - Server actions
+ *
+ * @module components/messages/chat-view
+ */
+
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
@@ -21,6 +50,18 @@ import {
   getNewMessages,
 } from '@/app/(dashboard)/dashboard/messages/[id]/actions';
 
+// ============================================================================
+// TYPE DEFINITIONS
+// ============================================================================
+
+/**
+ * Props for the ChatView component.
+ *
+ * @property conversation - Conversation metadata (other user info, isCoach)
+ * @property initialMessages - Pre-loaded messages from server
+ * @property initialHasMore - Whether there are older messages to load
+ * @property clientContext - Coach-only context data (null for client view)
+ */
 interface ChatViewProps {
   conversation: ConversationDetails;
   initialMessages: MessageWithSender[];
@@ -28,7 +69,16 @@ interface ChatViewProps {
   clientContext?: ClientContext | null;
 }
 
-// Get initials from name
+// ============================================================================
+// HELPER FUNCTIONS
+// ============================================================================
+
+/**
+ * Extract initials from a user's name for avatar fallback.
+ *
+ * @param name - Full name (e.g., "John Doe")
+ * @returns Initials (e.g., "JD") or "?" if name is null/empty
+ */
 function getInitials(name: string | null): string {
   if (!name) return '?';
   const parts = name.split(' ').filter(Boolean);
@@ -37,6 +87,37 @@ function getInitials(name: string | null): string {
   return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
 }
 
+// ============================================================================
+// COMPONENT
+// ============================================================================
+
+/**
+ * Main chat view component for messaging between coaches and clients.
+ *
+ * Provides a full-featured chat interface with:
+ * - Header with other user's info and back navigation
+ * - Scrollable message history with infinite scroll for older messages
+ * - Auto-resizing message input
+ * - Context panel for coaches (desktop: sidebar, mobile: slide-out sheet)
+ *
+ * @param props - Component props
+ * @returns Chat interface JSX
+ *
+ * @example
+ * // In messages/[id]/page.tsx
+ * const conversation = await getConversationDetails(id);
+ * const messages = await getMessages(id);
+ * const context = isCoach ? await getClientContext(id) : null;
+ *
+ * return (
+ *   <ChatView
+ *     conversation={conversation}
+ *     initialMessages={messages}
+ *     initialHasMore={hasMore}
+ *     clientContext={context}
+ *   />
+ * );
+ */
 export function ChatView({
   conversation,
   initialMessages,

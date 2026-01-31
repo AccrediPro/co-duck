@@ -1,3 +1,24 @@
+/**
+ * @fileoverview Stripe Webhook Handler
+ *
+ * This module handles incoming webhook events from Stripe to synchronize
+ * payment state with the application database. It processes three key events:
+ *
+ * 1. `checkout.session.completed` - When a customer successfully pays
+ * 2. `checkout.session.expired` - When a checkout session times out
+ * 3. `payment_intent.payment_failed` - When a payment attempt fails
+ *
+ * ## Security
+ * All incoming requests are verified using Stripe's webhook signature
+ * verification to prevent spoofed events.
+ *
+ * ## Idempotency
+ * Handlers are designed to be idempotent - processing the same event
+ * multiple times will not create duplicate records or corrupt state.
+ *
+ * @module api/webhooks/stripe
+ */
+
 import { headers } from 'next/headers';
 import { stripe } from '@/lib/stripe';
 import { db, bookings, transactions } from '@/db';
@@ -6,7 +27,19 @@ import type Stripe from 'stripe';
 import { createBookingSystemMessage } from '@/lib/conversations';
 import type { BookingSessionType } from '@/db/schema';
 
-// Helper to get STRIPE_WEBHOOK_SECRET
+/**
+ * Retrieves the Stripe webhook secret from environment variables.
+ *
+ * The webhook secret is used to verify that incoming webhook requests
+ * actually originated from Stripe and haven't been tampered with.
+ *
+ * @returns The STRIPE_WEBHOOK_SECRET environment variable value
+ * @throws {Error} If STRIPE_WEBHOOK_SECRET is not configured
+ *
+ * @example
+ * const secret = getWebhookSecret();
+ * stripe.webhooks.constructEvent(body, signature, secret);
+ */
 function getWebhookSecret(): string {
   const secret = process.env.STRIPE_WEBHOOK_SECRET;
 
@@ -20,12 +53,37 @@ function getWebhookSecret(): string {
   return secret;
 }
 
-// POST /api/webhooks/stripe - Handle Stripe webhook events
+/**
+ * POST /api/webhooks/stripe
+ *
+ * Handles incoming Stripe webhook events. This is the main entry point
+ * for all Stripe webhook notifications.
+ *
+ * ## Flow
+ * 1. Extract and verify the webhook signature
+ * 2. Parse the event payload
+ * 3. Route to appropriate handler based on event type
+ * 4. Return appropriate status code
+ *
+ * ## Response Codes
+ * - 200: Event processed successfully (or logged and ignored)
+ * - 400: Invalid signature or malformed request
+ *
+ * ## Important Notes
+ * - Returns 200 even for handler errors to prevent Stripe retries
+ * - Errors are logged for debugging but don't block the response
+ * - Unhandled event types are logged but return 200
+ *
+ * @param req - The incoming HTTP request from Stripe
+ * @returns Response with appropriate status code
+ */
 export async function POST(req: Request) {
   let event: Stripe.Event;
 
   try {
     // Get the raw body as text for signature verification
+    // Note: We use req.text() instead of req.json() because Stripe signature
+    // verification requires the raw body bytes exactly as received
     const body = await req.text();
     const headersList = await headers();
     const signature = headersList.get('stripe-signature');
@@ -35,7 +93,8 @@ export async function POST(req: Request) {
       return new Response('Missing stripe-signature header', { status: 400 });
     }
 
-    // Verify the webhook signature
+    // Verify the webhook signature using Stripe's SDK
+    // This ensures the request actually came from Stripe and hasn't been modified
     try {
       event = stripe.webhooks.constructEvent(body, signature, getWebhookSecret());
     } catch (err) {
@@ -51,26 +110,30 @@ export async function POST(req: Request) {
     return new Response('Error parsing request', { status: 400 });
   }
 
-  // Handle the event
+  // Route to appropriate handler based on event type
   try {
     switch (event.type) {
       case 'checkout.session.completed': {
+        // Customer successfully completed payment
         await handleCheckoutSessionCompleted(event.data.object as Stripe.Checkout.Session);
         break;
       }
 
       case 'checkout.session.expired': {
+        // Checkout session timed out (30 min default) without payment
         await handleCheckoutSessionExpired(event.data.object as Stripe.Checkout.Session);
         break;
       }
 
       case 'payment_intent.payment_failed': {
+        // Payment attempt failed (card declined, insufficient funds, etc.)
         await handlePaymentIntentFailed(event.data.object as Stripe.PaymentIntent);
         break;
       }
 
       default:
         // Log unhandled event types for monitoring
+        // This helps identify if we need to handle new event types
         console.log(`Stripe webhook: Unhandled event type: ${event.type}`);
     }
 
@@ -79,12 +142,43 @@ export async function POST(req: Request) {
     const error = err as Error;
     console.error(`Stripe webhook error handling ${event.type}:`, error.message);
     // Return 200 to prevent Stripe from retrying (we've logged the error for debugging)
-    // For critical errors, you might want to return 500 to trigger retries
+    // Returning 500 would cause Stripe to retry the webhook, which could lead to
+    // duplicate processing attempts. For critical errors that should be retried,
+    // you might want to return 500 instead.
     return new Response('Webhook handler error', { status: 200 });
   }
 }
 
-// Handle checkout.session.completed event
+/**
+ * Handles the checkout.session.completed event.
+ *
+ * This is the primary success path for payments. When a customer successfully
+ * completes the Stripe Checkout flow, this handler:
+ *
+ * 1. Validates the booking ID from session metadata
+ * 2. Confirms the payment was successful (status = 'paid')
+ * 3. Updates booking status from 'pending' to 'confirmed'
+ * 4. Creates a transaction record with fee calculations
+ * 5. Initiates a system message in the coach-client conversation
+ *
+ * ## Idempotency
+ * - Checks if transaction already exists before creating
+ * - Only updates bookings still in 'pending' status
+ * - Safe to receive multiple times for the same event
+ *
+ * ## Fee Structure
+ * - Platform fee: 10% of total
+ * - Coach payout: 90% of total
+ *
+ * @param session - The Stripe Checkout Session object from the event
+ *
+ * @example
+ * // Session metadata should include:
+ * // - bookingId: The database booking ID
+ * // - coachId: The Clerk user ID of the coach
+ * // - clientId: The Clerk user ID of the client
+ * // - sessionPrice: Original price in cents (fallback if amount_total missing)
+ */
 async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
   console.log(`Stripe webhook: checkout.session.completed for session ${session.id}`);
 
@@ -192,7 +286,25 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
   });
 }
 
-// Handle checkout.session.expired event
+/**
+ * Handles the checkout.session.expired event.
+ *
+ * When a Stripe Checkout session expires (default 30 minutes) without
+ * the customer completing payment, this handler cancels the associated
+ * booking to free up the coach's time slot.
+ *
+ * ## Behavior
+ * - Only cancels bookings still in 'pending' status
+ * - Sets cancellation reason to 'Payment session expired'
+ * - Records cancellation timestamp
+ * - Safe to receive multiple times (idempotent)
+ *
+ * ## Time Slot Management
+ * By cancelling expired bookings, we ensure that time slots that were
+ * temporarily held during checkout become available again for other clients.
+ *
+ * @param session - The expired Stripe Checkout Session object
+ */
 async function handleCheckoutSessionExpired(session: Stripe.Checkout.Session) {
   console.log(`Stripe webhook: checkout.session.expired for session ${session.id}`);
 
@@ -246,7 +358,24 @@ async function handleCheckoutSessionExpired(session: Stripe.Checkout.Session) {
   }
 }
 
-// Handle payment_intent.payment_failed event (for error tracking)
+/**
+ * Handles the payment_intent.payment_failed event.
+ *
+ * Called when a payment attempt fails (e.g., card declined, insufficient funds,
+ * expired card, etc.). This handler logs the failure for debugging and updates
+ * any pending transaction records to 'failed' status.
+ *
+ * ## Important Notes
+ * - Does NOT automatically cancel the booking
+ * - The user can retry the payment with a different card
+ * - The checkout.session.expired handler will cancel if they abandon entirely
+ *
+ * ## Error Information
+ * Logs the error message and code from Stripe for debugging purposes.
+ * Common error codes: 'card_declined', 'expired_card', 'insufficient_funds'
+ *
+ * @param paymentIntent - The failed Stripe PaymentIntent object
+ */
 async function handlePaymentIntentFailed(paymentIntent: Stripe.PaymentIntent) {
   console.log(`Stripe webhook: payment_intent.payment_failed for ${paymentIntent.id}`);
 

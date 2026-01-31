@@ -1,3 +1,31 @@
+/**
+ * @fileoverview Coach Onboarding Step 2 - Bio & Specialties Form
+ *
+ * This component handles the second step of the coach onboarding flow where coaches
+ * provide their professional biography and select their coaching specialties.
+ *
+ * @module components/onboarding/bio-specialties-form
+ *
+ * ## Flow
+ * 1. Coach writes their professional bio (up to 2000 characters)
+ * 2. Coach selects from predefined specialties and/or adds custom ones
+ * 3. On submit, data is saved via server action and user advances to step 3
+ *
+ * ## Data Flow
+ * - Input: Existing bio and specialties data (for edits)
+ * - Output: Saves to `coach_profiles` table via `saveBioSpecialties` server action
+ * - Navigation: On success, redirects to `/onboarding/coach/step-3`
+ *
+ * ## Validation
+ * Uses Zod schema `coachBioSpecialtiesSchema` from coach-onboarding validators:
+ * - bio: Optional, max 2000 characters
+ * - specialties: Required, at least 1 specialty must be selected
+ *
+ * ## Features
+ * - Predefined specialty chips for common coaching areas
+ * - Custom specialty input with Enter key support
+ * - Character count indicator for bio with warning when approaching limit
+ */
 'use client';
 
 import { useState } from 'react';
@@ -27,6 +55,24 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Loader2, X, Plus } from 'lucide-react';
 import Link from 'next/link';
 
+/* ============================================================================
+ * TYPE DEFINITIONS
+ * ========================================================================= */
+
+/**
+ * Props for the BioSpecialtiesForm component.
+ *
+ * @property initialData - Pre-existing profile data for editing
+ * @property initialData.bio - Coach's current bio text
+ * @property initialData.specialties - Array of currently selected specialties
+ */
+/**
+ * Props for the BioSpecialtiesForm component.
+ *
+ * @property initialData - Pre-existing profile data for editing
+ * @property initialData.bio - Coach's current bio text
+ * @property initialData.specialties - Array of currently selected specialties
+ */
 interface BioSpecialtiesFormProps {
   initialData?: {
     bio?: string | null;
@@ -34,12 +80,43 @@ interface BioSpecialtiesFormProps {
   };
 }
 
+/* ============================================================================
+ * COMPONENT
+ * ========================================================================= */
+
+/**
+ * Bio & Specialties Form for coach onboarding step 2.
+ *
+ * Allows coaches to write their professional biography and select their areas
+ * of expertise. Specialties can be chosen from a predefined list or custom
+ * ones can be added.
+ *
+ * @param props - Component props
+ * @param props.initialData - Pre-existing data for form pre-population
+ *
+ * @returns React component rendering the bio and specialties form
+ *
+ * @example
+ * ```tsx
+ * // New coach onboarding
+ * <BioSpecialtiesForm />
+ *
+ * // Editing existing profile
+ * <BioSpecialtiesForm
+ *   initialData={{
+ *     bio: "I am an executive coach with 10 years of experience...",
+ *     specialties: ["Executive Coaching", "Leadership Development"]
+ *   }}
+ * />
+ * ```
+ */
 export function BioSpecialtiesForm({ initialData }: BioSpecialtiesFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [customSpecialty, setCustomSpecialty] = useState('');
 
+  // Initialize form with react-hook-form and Zod validation
   const form = useForm<CoachBioSpecialtiesFormData>({
     resolver: zodResolver(coachBioSpecialtiesSchema),
     defaultValues: {
@@ -48,23 +125,41 @@ export function BioSpecialtiesForm({ initialData }: BioSpecialtiesFormProps) {
     },
   });
 
+  // Watch bio and specialties for real-time UI updates
   const watchedBio = form.watch('bio');
   const watchedSpecialties = form.watch('specialties');
   const bioLength = watchedBio?.length || 0;
 
+  /**
+   * Toggles a specialty selection on or off.
+   *
+   * @param specialty - The specialty name to toggle
+   */
+  /**
+   * Toggles a specialty selection on or off.
+   *
+   * @param specialty - The specialty name to toggle
+   */
   const toggleSpecialty = (specialty: string) => {
     const currentSpecialties = form.getValues('specialties');
     if (currentSpecialties.includes(specialty)) {
+      // Remove specialty if already selected
       form.setValue(
         'specialties',
         currentSpecialties.filter((s) => s !== specialty),
         { shouldValidate: true }
       );
     } else {
+      // Add specialty if not selected
       form.setValue('specialties', [...currentSpecialties, specialty], { shouldValidate: true });
     }
   };
 
+  /**
+   * Adds a custom specialty from the input field.
+   *
+   * Only adds if the input is non-empty and not already in the list.
+   */
   const addCustomSpecialty = () => {
     const trimmed = customSpecialty.trim();
     if (trimmed && !watchedSpecialties.includes(trimmed)) {
@@ -73,6 +168,11 @@ export function BioSpecialtiesForm({ initialData }: BioSpecialtiesFormProps) {
     }
   };
 
+  /**
+   * Handles Enter key press in custom specialty input.
+   *
+   * @param e - Keyboard event
+   */
   const handleCustomKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -80,6 +180,13 @@ export function BioSpecialtiesForm({ initialData }: BioSpecialtiesFormProps) {
     }
   };
 
+  /**
+   * Handles form submission.
+   *
+   * Saves bio and specialties via server action and navigates to step 3 on success.
+   *
+   * @param data - Validated form data
+   */
   async function onSubmit(data: CoachBioSpecialtiesFormData) {
     setIsSubmitting(true);
     setError(null);
