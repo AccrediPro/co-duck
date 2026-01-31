@@ -251,3 +251,24 @@ Goal: Verify all pages and features work correctly.
   - Coach slugs come from coachProfiles.slug column
 ---
 
+## 2026-01-31 - US-012 - Verify mobile responsiveness of homepage
+- **What was implemented**: Verified homepage mobile responsiveness using Playwright at 375px viewport
+- **Files changed**: None (testing only, updated prd.json and progress.txt)
+- **Test Results**:
+  - ✅ Browser resized to 375px width (iPhone SE viewport)
+  - ✅ Mobile navigation hamburger menu appears ("Toggle menu" button)
+  - ✅ Hamburger menu opens dialog with: Home, Find Coaches, Sign In, Get Started links
+  - ✅ Hero section stacks vertically: heading, description, CTA buttons
+  - ✅ "Why Choose CoachHub?" cards stack vertically
+  - ✅ "How It Works" steps display in single column
+  - ✅ Featured Coaches section displays cards in single column (serves as testimonials/social proof)
+  - ✅ Footer stacks properly with Product, Company, Legal sections vertical
+  - ✅ No horizontal scroll (verified via JS: body.scrollWidth === window.innerWidth === 375)
+  - ✅ No console errors
+  - ✅ Typecheck passes (npx tsc --noEmit)
+- **Learnings for future iterations**:
+  - Mobile navigation uses @radix-ui/react-dialog for the hamburger menu
+  - All sections properly use responsive Tailwind classes (flex-col on mobile, md:flex-row on desktop)
+  - Coach cards already support responsive layouts via CSS Grid with auto-fit
+---
+
