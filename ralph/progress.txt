@@ -199,3 +199,28 @@ Goal: Verify all pages and features work correctly.
   - Use md: breakpoint (768px) instead of lg: (1024px) for better tablet support
 ---
 
+## 2026-01-31 - US-010 - Verify sign-up page displays
+- **What was implemented**: Enhanced sign-up page with split-screen layout and benefits section
+- **Files changed**:
+  - src/app/sign-up/[[...sign-up]]/page.tsx (modified)
+- **Test Results**:
+  - ✅ /sign-up page loads at http://localhost:3000/sign-up without errors
+  - ✅ No console errors
+  - ✅ Clerk sign-up component renders with social login (Apple, Facebook, Google) and form fields
+  - ✅ Custom styling applied: shadow-lg card, blue primary button, styled links
+  - ✅ Benefits section displays on desktop (md+ 768px): blue gradient background with 4 benefits:
+    - Expert Coaches
+    - Personalized Matching
+    - Secure Platform
+    - Proven Results
+  - ✅ Testimonial from "Michael R., Leadership Coaching Client" displays
+  - ✅ Benefits section hidden on mobile, shows mobile-specific header instead
+  - ✅ Split-screen layout: benefits on left (50%), sign-up form on right (50%)
+  - ✅ Typecheck passes (npx tsc --noEmit)
+- **Learnings for future iterations**:
+  - Sign-up page follows same pattern as sign-in page for consistency
+  - Both auth pages use catch-all routes: [[...sign-in]] and [[...sign-up]]
+  - Star icon (lucide-react) is good for "Personalized Matching" benefit
+  - Keep testimonials different between sign-in and sign-up pages for variety
+---
+
