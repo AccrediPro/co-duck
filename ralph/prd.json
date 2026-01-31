@@ -179,8 +179,8 @@
         "Typecheck passes"
       ],
       "priority": 11,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "VERIFIED: Tested /coaches/sarah-johnson with Playwright. Hero section displays with avatar image, name (Sarah Johnson), headline (Executive Coach | Transforming Leaders & Organizations), timezone (America/New_York). Bio section displays full coach bio under 'About' heading. Session types cards show 3 options: Discovery Call (30min, $0), Executive Coaching Session (60min, $200), Deep Dive Intensive (90min, $285). Specialties section displays 4 specialties. Availability section shows next available slot and weekly hours. Book Session buttons present in hero and sidebar. No reviews section exists in implementation (feature not built). Sidebar is in grid layout (not sticky). No console errors. Typecheck passes."
     },
     {
       "id": "US-012",

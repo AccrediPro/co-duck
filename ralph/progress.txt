@@ -224,3 +224,30 @@ Goal: Verify all pages and features work correctly.
   - Keep testimonials different between sign-in and sign-up pages for variety
 ---
 
+## 2026-01-31 - US-011 - Verify coach profile public page
+- **What was implemented**: Verified coach profile page functionality using Playwright
+- **Files changed**: None (testing only, updated prd.json and progress.txt)
+- **Test Results**:
+  - ✅ Navigated to /coaches/sarah-johnson successfully
+  - ✅ No console errors
+  - ✅ Hero section displays: avatar image, name (h1), headline, timezone (America/New_York)
+  - ✅ Bio section displays with full coach bio under "About" heading
+  - ✅ Specialties section shows 4 specialties: Leadership Development, Executive Coaching, Career Transitions, Team Building
+  - ✅ Session types cards display with pricing:
+    - Discovery Call: 30min, $0.00
+    - Executive Coaching Session: 60min, $200.00
+    - Deep Dive Intensive: 90min, $285.00
+  - ✅ Availability section shows next available slot (Monday at 6:00 AM) and weekly hours (Mon-Thu, 9am-5pm | Fri, 9am-2pm)
+  - ✅ Book Session buttons present in hero and sidebar
+  - ⚠️ No reviews section exists (feature not implemented in codebase)
+  - ⚠️ Sidebar is grid layout, not sticky (current implementation choice)
+  - ✅ Typecheck passes (npx tsc --noEmit)
+- **Learnings for future iterations**:
+  - Coach profile page is at src/app/(public)/coaches/[slug]/page.tsx
+  - Main display component is CoachProfileDisplay in src/components/coaches/coach-profile-display.tsx
+  - Availability is fetched via getCoachAvailabilityForProfile action
+  - Reviews feature not implemented - would need to be added if required
+  - Session types stored as JSONB array in coachProfiles.sessionTypes
+  - Coach slugs come from coachProfiles.slug column
+---
+
