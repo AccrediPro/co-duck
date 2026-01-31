@@ -15,7 +15,7 @@
 - Schema in src/db/schema.ts
 - Migrations: npm run db:generate && npm run db:migrate
 - UI components use shadcn/ui in src/components/ui/
-- Server actions in actions.ts files
+- Server actions in actions.ts files (ALL exports must be async - no sync helpers!)
 - Dev server: http://localhost:3000
 - Authentication: Clerk
 - Payments: Stripe
@@ -390,5 +390,52 @@ Goal: Verify all pages and features work correctly.
   - Lint command: `npm run lint` from project root
   - Uses Next.js built-in ESLint configuration via `next lint`
   - Previous iterations have maintained lint-clean code
+---
+
+## 2026-01-31 - US-019 - Verify production build succeeds
+- **What was implemented**: Fixed build error and verified production build completes
+- **Files changed**:
+  - src/app/(dashboard)/dashboard/availability/actions.ts (removed copyDaySchedule)
+  - src/components/availability/availability-form.tsx (added copyDaySchedule)
+- **Test Results**:
+  - ✅ Initial build failed: "Server actions must be async functions" for copyDaySchedule
+  - ✅ Fix applied: Moved copyDaySchedule from 'use server' file to client component
+  - ✅ Build completes successfully after fix
+  - ✅ 25 routes generated:
+    - 7 static: /, /_not-found, /about, /contact, /privacy, /specialties, /terms
+    - 18 dynamic: /coaches, /coaches/[slug], /dashboard/*, /onboarding/*, /sign-in, /sign-up, API routes
+  - ✅ Typecheck passes (npx tsc --noEmit)
+  - ✅ ESLint passes (npm run lint)
+- **Learnings for future iterations**:
+  - ALL exports from 'use server' files must be async functions - even pure helper functions
+  - Client-side utility functions should NOT be in actions files
+  - Move non-server functions to client components or separate utility files
+  - Build command: `npm run build` from project root
+  - Production build validates more strictly than dev mode
+---
+
+## 2026-01-31 - US-020 - Fix any critical errors found during testing
+- **What was implemented**: Final review and verification of all testing results
+- **Files changed**: None (verification only, updated prd.json and progress.txt)
+- **Test Results**:
+  - ✅ Reviewed all 19 previous test results
+  - ✅ All critical errors were fixed in earlier stories:
+    - US-002/005/006: Created missing /about and /contact pages
+    - US-004: Created /specialties page
+    - US-007: Created /terms and /privacy pages
+    - US-008: Created global 404 page
+    - US-019: Fixed build error (moved copyDaySchedule from 'use server' file)
+  - ✅ Final Playwright verification:
+    - http://localhost:3000/ - loads without JS errors
+    - http://localhost:3000/coaches - loads without JS errors
+    - http://localhost:3000/about - loads without JS errors
+    - http://localhost:3000/contact - loads without JS errors
+  - ✅ Typecheck passes (npx tsc --noEmit)
+- **Summary of Testing Sprint**:
+  - 20 user stories completed
+  - 5 critical issues fixed (missing pages and build error)
+  - All public pages render without JavaScript errors
+  - Production build succeeds with 25 routes
+  - TypeScript and ESLint pass
 ---
 
