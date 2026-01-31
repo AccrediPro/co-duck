@@ -73,8 +73,8 @@
         "Typecheck passes"
       ],
       "priority": 5,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Documented 2 availability action files: dashboard/availability/actions.ts (coach settings - 3 functions + 3 types) and coaches/[slug]/availability-actions.ts (public display - 1 server action + 5 internal helpers). Added file-level @fileoverview, section dividers, type documentation, and @param/@returns/@throws/@example for all functions. Added inline comments for critical logic (buffer time, conflict detection, override priority)."
     },
     {
       "id": "US-006",
@@ -89,8 +89,8 @@
         "Typecheck passes"
       ],
       "priority": 6,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Documented all 4 onboarding form components with comprehensive JSDoc. Each file includes: file-level @fileoverview with flow/data/validation docs, interface documentation with @property tags, component JSDoc with @param/@returns/@example, section dividers, and inline comments for helper functions."
     },
     {
       "id": "US-007",

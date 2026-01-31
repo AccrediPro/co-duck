@@ -20,6 +20,8 @@
 - Lint command: npm run lint
 - Session actions are split: coach view in `sessions/actions.ts`, client view in `my-sessions/actions.ts`
 - Refund policy: Coach cancellations = 100%, Client cancellations = sliding scale based on timing
+- Availability: Weekly schedule in `coach_availability` table, date overrides in `availability_overrides` table
+- Availability actions: Dashboard (coach edits) in `dashboard/availability/actions.ts`, public display in `coaches/[slug]/availability-actions.ts`
 
 ## Documentation Sprint Goals
 
@@ -149,5 +151,85 @@ Add comprehensive code documentation:
   - Reschedule excludes current booking from conflict detection
   - Meeting links must be HTTPS URLs
   - Legacy aliases exist for backward compatibility (saveCoachNotes → saveSessionNote)
+---
+
+## 2026-01-31 - US-005
+- Documented availability actions (2 files)
+- Files changed:
+  - src/app/(dashboard)/dashboard/availability/actions.ts (coach settings)
+  - src/app/(public)/coaches/[slug]/availability-actions.ts (public display)
+- Added comprehensive JSDoc documentation:
+  - File-level @fileoverview explaining each file's purpose and data flow
+  - dashboard/availability/actions.ts:
+    - Zod schema documentation with validation rules
+    - DaySchedule/AvailabilitySettings type definitions
+    - saveAvailabilitySettings: Save weekly schedule with validation
+    - getAvailabilitySettings: Fetch current coach settings
+    - copyDaySchedule: Helper to replicate schedule across days
+  - coaches/[slug]/availability-actions.ts:
+    - AvailabilityDisplayData interface for public profile
+    - getCoachAvailabilityForProfile: Main entry point for profile display
+    - findNextAvailableSlot: Complex algorithm with buffer/override handling
+    - formatNextAvailableDisplay: Human-readable slot formatting
+    - generateWeeklyAvailabilitySummary: Compact schedule summary
+    - formatTimeShort/formatDateStr: Utility functions
+- Added critical inline comments explaining:
+  - Buffer time calculation and conflict detection algorithm
+  - Override priority (date-specific overrides > weekly schedule)
+  - Booking window boundaries (advance notice, max days)
+- Typecheck passes
+- **Learnings for future iterations:**
+  - Two availability files: dashboard (coach edits) vs public (read-only display)
+  - Availability overrides stored in `availability_overrides` table for date-specific changes
+  - Next available slot calculation caps at 60 days for performance
+  - Buffer time expands slot window on BOTH sides for conflict detection
+  - Weekly schedule stored in `coach_availability` table (7 rows per coach)
+  - Booking constraints (buffer, notice, max days) stored in `coach_profiles` table
+- Onboarding flow: 4 steps (basic-info → bio-specialties → pricing → review-publish)
+- Prices stored in CENTS in database, displayed in DOLLARS in forms
+---
+
+## 2026-01-31 - US-006
+- Documented 4 coach onboarding form components
+- Files changed:
+  - src/components/onboarding/basic-info-form.tsx (Step 1)
+  - src/components/onboarding/bio-specialties-form.tsx (Step 2)
+  - src/components/onboarding/pricing-form.tsx (Step 3)
+  - src/components/onboarding/review-publish-form.tsx (Step 4)
+- Added comprehensive JSDoc documentation:
+  - basic-info-form.tsx:
+    - File-level @fileoverview with flow, data flow, and validation details
+    - BasicInfoFormProps interface documentation
+    - Component JSDoc with @param/@returns/@example
+    - Section dividers (TYPE DEFINITIONS, COMPONENT)
+    - Inline comments for timezone detection and form submission
+  - bio-specialties-form.tsx:
+    - File-level @fileoverview with specialty selection features
+    - BioSpecialtiesFormProps interface documentation
+    - Component JSDoc with @param/@returns/@example
+    - Helper function JSDoc (toggleSpecialty, addCustomSpecialty, handleCustomKeyDown)
+    - Section dividers
+  - pricing-form.tsx:
+    - File-level @fileoverview with IMPORTANT note on cents/dollars conversion
+    - PricingFormProps interface documentation
+    - generateSessionId helper with @example
+    - Component JSDoc with @param/@returns/@example (showing prices in cents)
+    - Helper function JSDoc (addSessionType, removeSessionType)
+    - Section dividers (TYPE DEFINITIONS, HELPER FUNCTIONS, COMPONENT)
+  - review-publish-form.tsx:
+    - File-level @fileoverview with publishing states and profile preview sections
+    - ProfileData interface with @property tags for all fields
+    - ReviewPublishFormProps interface documentation
+    - Component JSDoc with comprehensive @example
+    - Helper function JSDoc (formatPrice, getInitials, handlePublish, handleSaveDraft)
+    - Section dividers
+- Typecheck passes
+- **Learnings for future iterations:**
+  - Onboarding is a 4-step wizard: basic-info → bio-specialties → pricing → review-publish
+  - All prices stored in CENTS in database, forms convert to/from DOLLARS for display
+  - Session types have generated IDs with format `session_{timestamp}_{random7chars}`
+  - Profile completion percentage calculated by parent page, not the component
+  - Published profiles appear in coach directory; draft profiles are saved but hidden
+  - Custom specialties can be added beyond the predefined COACH_SPECIALTIES list
 ---
 
