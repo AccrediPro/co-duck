@@ -272,3 +272,26 @@ Goal: Verify all pages and features work correctly.
   - Coach cards already support responsive layouts via CSS Grid with auto-fit
 ---
 
+## 2026-01-31 - US-013 - Verify mobile responsiveness of coaches page
+- **What was implemented**: Verified coaches page mobile responsiveness using Playwright at 375px viewport
+- **Files changed**: None (testing only, updated prd.json and progress.txt)
+- **Test Results**:
+  - ✅ Page loaded at http://localhost:3000/coaches at 375px width without errors
+  - ✅ No console errors
+  - ✅ Filter dialog opens correctly on mobile (Specialty filter with 12 checkbox options)
+  - ✅ Filter selection works: Career Coaching filters to 1 coach, URL updates with ?specialties=Career+Coaching
+  - ✅ Clear filters button appears and works
+  - ✅ Coach cards display in single column (CSS Grid: grid-cols-1 default, sm:grid-cols-2, lg:grid-cols-3)
+  - ✅ Search input is usable: typing "Sarah" filters to 1 coach, URL updates with ?q=Sarah
+  - ✅ Clear search button (x) appears and works
+  - ✅ No horizontal scroll (verified via JS: scrollWidth === viewportWidth === 375px)
+  - ⚠️ Pagination not visible with only 8 coaches (COACHES_PER_PAGE=12), but implementation verified in code
+  - ✅ Pagination component uses responsive Previous/Next buttons with min-w-[36px] page buttons
+  - ✅ Typecheck passes (npx tsc --noEmit)
+- **Learnings for future iterations**:
+  - CoachesGrid uses CSS Grid with responsive breakpoints: grid-cols-1 (mobile), sm:grid-cols-2, lg:grid-cols-3
+  - Specialty filter uses popover dialog (not drawer/sheet) on mobile - works well in narrow viewports
+  - Pagination only renders when totalPages > 1 (COACHES_PER_PAGE = 12)
+  - Price filter has min/max spinbuttons that work on mobile
+---
+

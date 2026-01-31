@@ -212,8 +212,8 @@
         "Typecheck passes"
       ],
       "priority": 13,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "VERIFIED: Tested /coaches at 375px mobile viewport with Playwright. Filter dialog opens correctly (Specialty filter opens popover with 12 checkbox options, Career Coaching selection filters to 1 coach, URL updates with ?specialties=Career+Coaching). Coach cards display in single column (CSS Grid with grid-cols-1 default, sm:grid-cols-2, lg:grid-cols-3). Search input is usable (typing 'Sarah' filters to 1 coach, URL updates with ?q=Sarah, clear button works). No horizontal scroll (verified: scrollWidth === viewportWidth === 375). Pagination implemented but not visible with only 8 coaches (COACHES_PER_PAGE=12). Pagination component has responsive Previous/Next buttons and page numbers. Typecheck passes."
     },
     {
       "id": "US-014",
