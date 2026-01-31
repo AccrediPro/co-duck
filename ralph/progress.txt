@@ -394,3 +394,124 @@ Add comprehensive code documentation:
   - Currency codes follow ISO 4217 standard
 ---
 
+## 2026-01-31 - US-011
+- Created comprehensive components README (src/components/README.md)
+- Files changed:
+  - src/components/README.md (new file - 316 lines)
+- Documentation includes:
+  - Directory structure overview with 12 component folders
+  - Folder descriptions with component tables for each domain:
+    - action-items, availability, booking, coaches, messages
+    - navigation, onboarding, payments, profile, sessions, ui
+  - Naming conventions:
+    - File names: kebab-case with suffix patterns (-form, -list, -card, -dialog, -content)
+    - Component names: PascalCase matching file names
+    - Export style: named exports preferred, forwardRef for UI primitives
+  - Prop patterns:
+    - Interface naming: {ComponentName}Props
+    - Initial data pattern for server → client hydration
+    - Callback props with optional async handlers
+    - Boolean flags with sensible defaults
+    - Entity references importing types from actions/schema
+  - Client vs Server component guidance
+  - Server action integration patterns with result types
+  - Styling with Tailwind CSS and shadcn/ui variants
+  - Type safety notes (strict TypeScript, shared types)
+  - New component guidelines (7 steps)
+- Typecheck passes
+- **Learnings for future iterations:**
+  - Components are organized by feature domain (12 folders)
+  - Only `messages/` folder uses barrel exports (index.ts)
+  - Most feature components are client components (forms, browser APIs)
+  - Server components are typically page.tsx files that fetch and pass data
+  - Props interfaces follow {ComponentName}Props convention consistently
+  - shadcn/ui components in ui/ folder should not be modified directly
+  - Forms use React Hook Form with zodResolver for validation
+---
+
+## 2026-01-31 - US-012
+- Created comprehensive API documentation (docs/API.md)
+- Files changed:
+  - docs/API.md (new file - 321 lines)
+- Documentation includes:
+  - Overview table of all API routes
+  - Authentication section explaining webhook signature verification
+  - POST /api/webhooks/stripe:
+    - Headers (stripe-signature)
+    - Events handled (checkout.session.completed, checkout.session.expired, payment_intent.payment_failed)
+    - Request body format with JSON example
+    - Metadata fields table (bookingId, coachId, clientId, sessionPrice)
+    - Response codes table
+    - Processing logic for each event type
+    - Idempotency guarantees
+  - POST /api/webhooks/clerk:
+    - Headers (svix-id, svix-timestamp, svix-signature)
+    - Events handled (user.created, user.updated, user.deleted)
+    - Request body format with JSON example
+    - Response codes table
+    - Processing logic for each event type
+  - Environment variables section for both webhooks
+  - Webhook setup instructions for Stripe and Clerk dashboards
+  - Local development testing with Stripe CLI and ngrok
+  - Error handling reference tables
+  - Server actions vs API routes explanation with file locations
+- Typecheck passes
+- **Learnings for future iterations:**
+  - This platform uses primarily server actions, not API routes
+  - Only 2 API routes exist: Stripe webhook and Clerk webhook
+  - Both use signature verification, not user authentication
+  - Webhook endpoints return 200 for errors to prevent retries
+  - docs/ folder did not exist - had to create it
+  - Server actions are the primary data layer (see actions.ts files)
+---
+
+## 2026-01-31 - US-013
+- Documented dashboard pages (4 files)
+- Files changed:
+  - src/app/(dashboard)/dashboard/page.tsx (main dashboard - role-based entry point)
+  - src/app/(dashboard)/dashboard/action-items/actions.ts (action items CRUD)
+  - src/app/(dashboard)/dashboard/sessions/page.tsx (coach sessions)
+  - src/app/(dashboard)/dashboard/messages/page.tsx (conversation list)
+- Added comprehensive JSDoc documentation:
+  - dashboard/page.tsx:
+    - File-level @fileoverview with data flow and component table
+    - getUserWithProfile helper with JSDoc (server-side data fetching)
+    - DashboardPage with role detection and rendering logic docs
+    - CoachDashboard: profile status and quick actions
+    - CoachOnboardingPrompt: CTA for incomplete onboarding
+    - ClientDashboard: async server component with action items count
+    - AdminDashboard: placeholder with future plans
+    - Section dividers for DATA FETCHING, MAIN PAGE, ROLE-SPECIFIC COMPONENTS
+  - action-items/actions.ts:
+    - File-level @fileoverview with features, permission model table, status computation rules
+    - ActionItemWithStatus interface with @example
+    - computeStatus helper with due date logic documentation
+    - createActionItem with @param/@returns/@throws/@example
+    - getClientActionItems (coach view)
+    - markActionItemComplete (both coach and client can use)
+    - deleteActionItem (coach only)
+    - getSessionActionItems (session-linked items)
+    - ActionItemWithCoach type (client view with coach info)
+    - getMyActionItems (client view with filter)
+    - getPendingActionItemsCount (lightweight count for dashboard)
+    - Section dividers for each operation category
+  - sessions/page.tsx:
+    - File-level @fileoverview with data flow, access control, URL params table
+    - PageProps interface with Next.js 15 searchParams Promise pattern
+    - SessionsPage with access control checks (4 levels) and SSR data fetching
+    - Section dividers for AUTHENTICATION, ROLE VERIFICATION, PARSE PARAMS, FETCH DATA, RENDER
+  - messages/page.tsx:
+    - File-level @fileoverview with role-based differences table
+    - MessagesPage with auth, user verification, and SSR data fetching
+    - Section dividers for clarity
+- Typecheck passes
+- **Learnings for future iterations:**
+  - Dashboard page.tsx uses nested async server components (ClientDashboard is async)
+  - Role detection defaults to 'client' if user record doesn't exist (edge case handling)
+  - Action items have computed status (pending/overdue/completed) based on dueDate and isCompleted
+  - Action items permission model: coaches create/delete, both can mark complete, clients view their own
+  - Next.js 15 searchParams is a Promise that must be awaited
+  - Sessions page has 4 access control layers: auth → user exists → coach role → coach profile
+  - SSR data fetching pattern: server actions called during render, result passed as initialData to client components
+---
+

@@ -162,8 +162,8 @@
         "Typecheck passes"
       ],
       "priority": 11,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Created comprehensive src/components/README.md with: directory structure, folder descriptions with component tables for all 12 folders, naming conventions (file kebab-case, component PascalCase, suffix patterns), prop patterns (interface naming, initial data, callbacks, boolean flags, entity refs), client vs server component guidance, server action integration patterns, styling with Tailwind/shadcn, type safety notes, and new component guidelines."
     },
     {
       "id": "US-012",
@@ -177,8 +177,8 @@
         "Typecheck passes"
       ],
       "priority": 12,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Created comprehensive docs/API.md (321 lines) documenting: Stripe webhook (POST /api/webhooks/stripe) with 3 event handlers (checkout.session.completed, checkout.session.expired, payment_intent.payment_failed), Clerk webhook (POST /api/webhooks/clerk) with 3 event handlers (user.created, user.updated, user.deleted), authentication requirements (signature verification), request/response formats with JSON examples, metadata fields, response codes, idempotency guarantees, environment variables, webhook setup instructions for both Stripe and Clerk dashboards, local development testing, error handling reference, and server actions vs API routes explanation."
     },
     {
       "id": "US-013",
@@ -191,8 +191,8 @@
         "Typecheck passes"
       ],
       "priority": 13,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Documented 4 files: dashboard/page.tsx (main dashboard with role-based components - CoachDashboard, ClientDashboard, AdminDashboard, CoachOnboardingPrompt), action-items/actions.ts (9 functions, 8 interfaces, permission model and status computation docs), sessions/page.tsx (coach sessions with SSR data fetching pattern), messages/page.tsx (conversation list with role-based UI). Added file-level @fileoverview with data flow diagrams, section dividers, inline comments explaining access control and data fetching patterns."
     },
     {
       "id": "US-014",

@@ -1,3 +1,40 @@
+/**
+ * @fileoverview Main Dashboard Page - Role-Based Entry Point
+ *
+ * This is the primary dashboard landing page that displays role-specific content
+ * based on the authenticated user's role (coach, client, or admin).
+ *
+ * ## Data Flow
+ *
+ * 1. Authenticate via Clerk (`auth()` and `currentUser()`)
+ * 2. Fetch user record from database to determine role
+ * 3. If coach, also fetch their coach profile
+ * 4. Render role-specific dashboard component:
+ *    - Coach with profile → `CoachDashboard`
+ *    - Coach without profile → `CoachOnboardingPrompt`
+ *    - Client → `ClientDashboard` (fetches action items count)
+ *    - Admin → `AdminDashboard`
+ *
+ * ## Dashboard Components
+ *
+ * | Component              | Role   | Description                        |
+ * |------------------------|--------|------------------------------------|
+ * | CoachDashboard         | coach  | Profile status, stats, quick actions |
+ * | CoachOnboardingPrompt  | coach  | CTA to complete onboarding         |
+ * | ClientDashboard        | client | Sessions, action items, find coach |
+ * | AdminDashboard         | admin  | Platform stats (placeholder)       |
+ *
+ * ## Related Files
+ *
+ * - `src/db/schema.ts` - Database schema for users and coach_profiles
+ * - `src/app/(dashboard)/dashboard/action-items/actions.ts` - Action items server actions
+ * - `src/app/onboarding/coach/page.tsx` - Coach onboarding flow
+ *
+ * @module app/(dashboard)/dashboard/page
+ * @see {@link CoachDashboard} - Coach-specific dashboard
+ * @see {@link ClientDashboard} - Client-specific dashboard
+ */
+
 import { auth, currentUser } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
@@ -20,8 +57,30 @@ import {
 } from 'lucide-react';
 import { getPendingActionItemsCount } from '@/app/(dashboard)/dashboard/action-items/actions';
 
+// ============================================================================
+// DATA FETCHING
+// ============================================================================
+
+/**
+ * Fetches the user record and their coach profile (if applicable).
+ *
+ * This is a server-side helper function that consolidates the two database
+ * queries needed to render the dashboard. It's not a server action because
+ * it's only called during server-side rendering.
+ *
+ * @param userId - The Clerk user ID (from `auth()`)
+ * @returns Object containing user record and optional coach profile
+ *
+ * @example
+ * ```ts
+ * const { user, coachProfile } = await getUserWithProfile(userId);
+ * if (user?.role === 'coach' && coachProfile) {
+ *   // Render coach dashboard
+ * }
+ * ```
+ */
 async function getUserWithProfile(userId: string) {
-  // Get user from database
+  // Get user from database - Clerk user ID is used as primary key
   const userRecords = await db.select().from(users).where(eq(users.id, userId)).limit(1);
 
   if (userRecords.length === 0) {
@@ -30,7 +89,8 @@ async function getUserWithProfile(userId: string) {
 
   const user = userRecords[0];
 
-  // If user is a coach, get their profile
+  // If user is a coach, also fetch their profile
+  // Coach profile may not exist if they haven't completed onboarding
   let coachProfile = null;
   if (user.role === 'coach') {
     const profiles = await db
@@ -44,19 +104,59 @@ async function getUserWithProfile(userId: string) {
   return { user, coachProfile };
 }
 
+// ============================================================================
+// MAIN PAGE COMPONENT
+// ============================================================================
+
+/**
+ * Main Dashboard Page - Role-based entry point for authenticated users.
+ *
+ * This is an async server component that:
+ * 1. Verifies authentication via Clerk
+ * 2. Fetches user data to determine role
+ * 3. Renders the appropriate dashboard based on role
+ *
+ * ## Authentication
+ *
+ * - Requires Clerk authentication
+ * - Redirects to `/sign-in` if not authenticated
+ * - Uses both `auth()` for userId and `currentUser()` for display name
+ *
+ * ## Role Detection
+ *
+ * The user's role is stored in the database (not Clerk) and determines
+ * which dashboard to render. Default role for new users is 'client'.
+ *
+ * @returns The role-specific dashboard page
+ *
+ * @example
+ * ```
+ * // URL: /dashboard
+ * // Renders one of:
+ * // - CoachDashboard (for coaches with profile)
+ * // - CoachOnboardingPrompt (for coaches without profile)
+ * // - ClientDashboard (for clients)
+ * // - AdminDashboard (for admins)
+ * ```
+ */
 export default async function DashboardPage() {
+  // Authentication: get user ID from Clerk session
   const { userId } = await auth();
 
   if (!userId) {
     redirect('/sign-in');
   }
 
+  // Fetch both Clerk user (for display name) and database user (for role)
   const clerkUser = await currentUser();
   const { user, coachProfile } = await getUserWithProfile(userId);
 
-  // Determine the user's role
+  // Determine role - defaults to 'client' if user record doesn't exist
+  // (edge case: Clerk user exists but webhook hasn't created DB record yet)
   const role = user?.role || 'client';
   const isCoach = role === 'coach';
+
+  // Display name priority: Clerk firstName > DB name > fallback
   const displayName = clerkUser?.firstName || user?.name || 'User';
 
   return (
@@ -107,10 +207,33 @@ export default async function DashboardPage() {
   );
 }
 
-// Coach Dashboard Component
+// ============================================================================
+// ROLE-SPECIFIC DASHBOARD COMPONENTS
+// ============================================================================
+
+/**
+ * Coach Dashboard - Displays profile status and management tools.
+ *
+ * Shows coaches their:
+ * - Profile publication status (published/draft) with completion percentage
+ * - Profile views (placeholder - analytics coming soon)
+ * - Upcoming sessions count (placeholder - coming soon)
+ * - Quick actions (edit profile, view public profile)
+ *
+ * @param props.profile - The coach's profile record from coach_profiles table
+ * @returns Coach-specific dashboard with stats and quick actions
+ *
+ * @example
+ * ```tsx
+ * <CoachDashboard profile={coachProfile} />
+ * ```
+ */
 function CoachDashboard({ profile }: { profile: typeof coachProfiles.$inferSelect }) {
+  // Profile status indicators
   const isPublished = profile.isPublished;
   const completionPercentage = profile.profileCompletionPercentage;
+
+  // Public profile URL for external link button
   const publicProfileUrl = `/coaches/${profile.slug}`;
 
   return (
@@ -211,7 +334,16 @@ function CoachDashboard({ profile }: { profile: typeof coachProfiles.$inferSelec
   );
 }
 
-// Coach Onboarding Prompt Component
+/**
+ * Coach Onboarding Prompt - Shown to coaches who haven't completed onboarding.
+ *
+ * This component is displayed when a user has the 'coach' role but no
+ * corresponding record in the coach_profiles table. This happens when:
+ * - An admin assigns the coach role but they haven't completed setup
+ * - The coach started onboarding but didn't finish
+ *
+ * @returns Call-to-action card linking to coach onboarding flow
+ */
 function CoachOnboardingPrompt() {
   return (
     <Card className="border-dashed">
@@ -233,10 +365,35 @@ function CoachOnboardingPrompt() {
   );
 }
 
-// Client Dashboard Component
+/**
+ * Client Dashboard - Main dashboard for clients (non-coaches).
+ *
+ * This is an async server component that fetches and displays:
+ * - Upcoming sessions count (placeholder - coming soon)
+ * - Pending action items count (fetched from server action)
+ * - Quick actions (find coach, view action items)
+ *
+ * ## Data Fetching Pattern
+ *
+ * Uses `getPendingActionItemsCount()` server action to fetch the count
+ * directly during server-side rendering. The result is handled gracefully:
+ * - On success: displays the count
+ * - On error: displays 0 (silent failure for better UX)
+ *
+ * @returns Client-specific dashboard with session info and action items
+ *
+ * @example
+ * ```tsx
+ * // Rendered for users with role === 'client'
+ * <ClientDashboard />
+ * ```
+ */
 async function ClientDashboard() {
-  // Fetch pending action items count
+  // Fetch pending action items count via server action
+  // This is called during SSR, not from a client component
   const actionItemsResult = await getPendingActionItemsCount();
+
+  // Graceful fallback: show 0 if fetch fails
   const pendingActionItems = actionItemsResult.success ? actionItemsResult.count || 0 : 0;
 
   return (
@@ -320,7 +477,19 @@ async function ClientDashboard() {
   );
 }
 
-// Admin Dashboard Component
+/**
+ * Admin Dashboard - Platform administration dashboard (placeholder).
+ *
+ * Currently displays placeholder cards for:
+ * - Total users count
+ * - Active coaches count (published profiles)
+ * - Total sessions booked
+ *
+ * Full admin features including user management, analytics, and platform
+ * settings are planned for future development.
+ *
+ * @returns Admin-specific dashboard with platform stats (placeholder)
+ */
 function AdminDashboard() {
   return (
     <>
