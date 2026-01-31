@@ -346,3 +346,22 @@ Goal: Verify all pages and features work correctly.
   - Footer grid updated from md:grid-cols-4 to md:grid-cols-5 to accommodate new "Get in Touch" section
 ---
 
+## 2026-01-31 - US-016 - Verify dashboard redirects when not authenticated
+- **What was implemented**: Verified dashboard authentication redirect using Playwright
+- **Files changed**: None (testing only, updated prd.json and progress.txt)
+- **Test Results**:
+  - ✅ Navigated to http://localhost:3000/dashboard while not signed in
+  - ✅ User redirected to Clerk sign-in page (communal-eagle-3.accounts.dev/sign-in)
+  - ✅ Redirect URL includes redirect_url=http://localhost:3000/dashboard for post-login redirect
+  - ✅ Sign-in page displays correctly: "Sign in to Coaching Platform" heading
+  - ✅ Social login options (Apple, Facebook, Google) and email/password fields available
+  - ✅ No application errors (only expected CSP warning from external Clerk domain)
+  - ✅ Typecheck passes (npx tsc --noEmit)
+- **Learnings for future iterations**:
+  - Dashboard protection implemented at two layers:
+    1. Clerk middleware (src/middleware.ts) with auth.protect() for /dashboard(.*)
+    2. Dashboard layout (src/app/(dashboard)/layout.tsx) with server-side redirect to /sign-in
+  - Clerk redirects to its hosted sign-in page with redirect_url parameter for seamless post-login return
+  - External Clerk domain may show CSP warnings in console - this is expected and not an application error
+---
+

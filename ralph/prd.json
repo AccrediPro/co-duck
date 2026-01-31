@@ -257,8 +257,8 @@
         "Typecheck passes"
       ],
       "priority": 16,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "VERIFIED: Navigating to /dashboard while unauthenticated redirects to Clerk's sign-in page (communal-eagle-3.accounts.dev/sign-in) with redirect_url parameter pointing back to /dashboard. Protection implemented via: (1) Clerk middleware with auth.protect() for /dashboard(.*)  routes, (2) Dashboard layout server-side check that redirects to /sign-in if userId is null. Sign-in page displays correctly with social login options (Apple, Facebook, Google) and email/password fields. No application errors (only expected CSP warning from external Clerk domain). Typecheck passes."
     },
     {
       "id": "US-017",
