@@ -313,3 +313,84 @@ Add comprehensive code documentation:
   - Prices stored in cents, formatted for display with currency symbols
 ---
 
+## 2026-01-31 - US-009
+- Documented payment utilities (2 files)
+- Files changed:
+  - src/lib/stripe.ts (Stripe client configuration)
+  - src/lib/refunds.ts (Refund eligibility calculations)
+- Added comprehensive JSDoc documentation:
+  - stripe.ts:
+    - File-level @fileoverview with Stripe Connect overview, env variables table, usage examples
+    - Environment validation section with fail-fast explanation
+    - Stripe client instance JSDoc with checkout session examples, platform fee (10%)
+    - getStripePublishableKey with client-side usage examples
+    - Type exports section documenting common Stripe types
+    - Comprehensive error handling documentation with error types table and common error codes
+  - refunds.ts:
+    - File-level @fileoverview with refund policy overview (coach vs client cancellations)
+    - Fee considerations for Stripe refund processing
+    - RefundEligibility interface with @property tags and examples
+    - calculateRefundEligibility with refund tiers table, calculation logic, @param/@returns/@remarks
+    - formatRefundAmount with currency formatting examples
+    - getRefundMessage with message scenarios table and UI usage examples
+    - Section dividers (TYPE DEFINITIONS, REFUND CALCULATION, FORMATTING UTILITIES, UI MESSAGE GENERATION)
+    - Inline comments explaining edge cases (past sessions, threshold boundaries)
+- Typecheck passes
+- **Learnings for future iterations:**
+  - Payment utilities are split: stripe.ts (client config) vs refunds.ts (eligibility logic)
+  - All Stripe operations should be wrapped in try-catch for StripeError handling
+  - Stripe error types: StripeCardError, StripeRateLimitError, StripeInvalidRequestError, StripeAPIError, StripeConnectionError, StripeAuthenticationError
+  - Refund eligibility is a calculation only - actual Stripe refunds processed elsewhere
+  - Client cancellation policy: >24h = 100% refund, <24h = 0% refund (threshold configurable)
+  - Coach cancellations always get 100% refund regardless of timing
+---
+
+## 2026-01-31 - US-010
+- Documented coach onboarding validation schemas (1 file)
+- Files changed:
+  - src/lib/validators/coach-onboarding.ts
+- Added comprehensive JSDoc documentation:
+  - File-level @fileoverview:
+    - Onboarding steps table (4 steps mapping to schemas)
+    - React Hook Form integration example with zodResolver
+    - Price storage convention note (CENTS throughout)
+    - @module and @see references
+  - COACH_SPECIALTIES constant:
+    - Purpose and usage documentation
+    - Selection UI, custom specialties, storage notes
+    - Type-safe filtering examples
+  - coachBasicInfoSchema (Step 1):
+    - Field table (displayName, headline, profilePhotoUrl, timezone)
+    - Field-level inline comments
+    - Validation example with safeParse
+  - coachBioSpecialtiesSchema (Step 2):
+    - Field table (bio, specialties)
+    - Notes on custom specialties support
+  - SUPPORTED_CURRENCIES constant:
+    - Currency object structure table (code, symbol, name)
+    - Currency lookup and price formatting examples
+  - SESSION_DURATIONS constant:
+    - Available values (15, 30, 45, 60, 90, 120 minutes)
+    - Duration formatting example
+  - sessionTypeSchema:
+    - Field table with CENTS emphasis for price
+    - ID format documentation (session_{timestamp}_{random7chars})
+    - Free vs paid session examples
+  - coachPricingSchema (Step 3):
+    - Field table (hourlyRate, currency, sessionTypes)
+    - Cross-references to related schemas/constants
+  - generateSlug helper:
+    - Transformation rules (6 steps)
+    - Input/output examples for edge cases
+    - Note about server-side suffix handling
+  - Section dividers organizing code by step/category
+- Typecheck passes
+- **Learnings for future iterations:**
+  - Validators module has 4 schemas matching the 4-step onboarding wizard
+  - All prices stored in CENTS (integers) - emphasized in multiple JSDoc blocks
+  - Session type IDs generated client-side: session_{timestamp}_{random7chars}
+  - COACH_SPECIALTIES is not exhaustive - coaches can add custom specialties
+  - generateSlug does basic transformation; server adds suffix for uniqueness
+  - Currency codes follow ISO 4217 standard
+---
+

@@ -133,8 +133,8 @@
         "Typecheck passes"
       ],
       "priority": 9,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Documented 2 payment utility files: stripe.ts (Stripe client configuration - env validation, client instance, publishable key utility, type exports) and refunds.ts (refund eligibility calculation - RefundEligibility interface, calculateRefundEligibility function, formatRefundAmount utility, getRefundMessage for UI). Added comprehensive error handling documentation with Stripe error types table and common error codes reference."
     },
     {
       "id": "US-010",
@@ -147,8 +147,8 @@
         "Typecheck passes"
       ],
       "priority": 10,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Added comprehensive JSDoc to coach-onboarding.ts: file-level @fileoverview with onboarding steps table, COACH_SPECIALTIES with usage/storage docs, all 4 schemas (coachBasicInfoSchema, coachBioSpecialtiesSchema, sessionTypeSchema, coachPricingSchema) with field tables/@example/@see, constants (SESSION_DURATIONS, SUPPORTED_CURRENCIES) with currency formatting examples, generateSlug helper with transformation rules. Emphasized CENTS storage convention throughout."
     },
     {
       "id": "US-011",
