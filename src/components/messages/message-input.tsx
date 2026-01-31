@@ -1,15 +1,68 @@
+/**
+ * @fileoverview Auto-resizing message input component.
+ *
+ * Provides a textarea that automatically grows with content (up to 150px)
+ * and a send button. Supports keyboard shortcuts.
+ *
+ * ## Keyboard Shortcuts
+ *
+ * - Enter: Send message
+ * - Shift+Enter: New line
+ *
+ * ## Features
+ *
+ * - Auto-resize based on content
+ * - Disabled state while sending
+ * - Empty message prevention
+ * - Clear input after successful send
+ *
+ * @module components/messages/message-input
+ */
+
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Send } from 'lucide-react';
 
+// ============================================================================
+// TYPE DEFINITIONS
+// ============================================================================
+
+/**
+ * Props for the MessageInput component.
+ *
+ * @property onSend - Async handler called when user sends a message
+ * @property disabled - Disable the input (e.g., during error state)
+ * @property placeholder - Placeholder text (default: "Type a message...")
+ */
 interface MessageInputProps {
   onSend: (content: string) => Promise<void>;
   disabled?: boolean;
   placeholder?: string;
 }
 
+// ============================================================================
+// COMPONENT
+// ============================================================================
+
+/**
+ * Auto-resizing message input with send button.
+ *
+ * The textarea automatically grows as the user types, up to a maximum
+ * height of 150px. Sends on Enter key, with Shift+Enter for new lines.
+ *
+ * @param props - Component props
+ * @returns Message input area JSX
+ *
+ * @example
+ * <MessageInput
+ *   onSend={async (content) => {
+ *     await sendMessage(conversationId, content);
+ *   }}
+ *   placeholder={`Message ${otherUserName}...`}
+ * />
+ */
 export function MessageInput({
   onSend,
   disabled = false,

@@ -1,3 +1,25 @@
+/**
+ * @fileoverview Message button component for starting conversations.
+ *
+ * A reusable button that initiates or navigates to a conversation between
+ * a coach and client. Typically used on coach profile pages or booking flows.
+ *
+ * ## Behavior
+ *
+ * 1. User clicks the button
+ * 2. Button shows loading state
+ * 3. Creates/finds the conversation (via getOrCreateConversation)
+ * 4. Navigates to the chat view
+ *
+ * ## Usage Locations
+ *
+ * - Coach profile pages (public)
+ * - Session detail pages
+ * - Booking confirmation pages
+ *
+ * @module components/messages/message-button
+ */
+
 'use client';
 
 import { useState } from 'react';
@@ -7,6 +29,22 @@ import { useToast } from '@/hooks/use-toast';
 import { MessageSquare, Loader2 } from 'lucide-react';
 import { getOrCreateConversation } from '@/lib/conversations';
 
+// ============================================================================
+// TYPE DEFINITIONS
+// ============================================================================
+
+/**
+ * Props for the MessageButton component.
+ *
+ * @property coachId - Clerk user ID of the coach
+ * @property clientId - Clerk user ID of the client (typically current user)
+ * @property variant - Button variant (default: 'outline')
+ * @property size - Button size (default: 'default')
+ * @property className - Additional CSS classes
+ * @property showIcon - Whether to show the message icon (default: true)
+ * @property label - Button text (default: 'Message')
+ * @property fullWidth - Whether button should be full width (default: false)
+ */
 interface MessageButtonProps {
   coachId: string;
   clientId: string;
@@ -18,6 +56,37 @@ interface MessageButtonProps {
   fullWidth?: boolean;
 }
 
+// ============================================================================
+// COMPONENT
+// ============================================================================
+
+/**
+ * Button that starts or navigates to a conversation.
+ *
+ * Creates the conversation if it doesn't exist, then navigates to the chat view.
+ * Shows a toast error if the operation fails.
+ *
+ * @param props - Component props
+ * @returns Message button JSX
+ *
+ * @example
+ * // On a coach profile page
+ * <MessageButton
+ *   coachId={coach.userId}
+ *   clientId={currentUserId}
+ *   label="Contact Coach"
+ *   fullWidth
+ * />
+ *
+ * @example
+ * // Icon-only button
+ * <MessageButton
+ *   coachId={coachId}
+ *   clientId={clientId}
+ *   size="icon"
+ *   label=""
+ * />
+ */
 export function MessageButton({
   coachId,
   clientId,

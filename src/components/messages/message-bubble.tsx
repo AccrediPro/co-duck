@@ -1,14 +1,53 @@
+/**
+ * @fileoverview Individual message bubble component.
+ *
+ * Renders a single message with appropriate styling based on sender and type.
+ * Supports both regular text messages and system messages (automated notifications).
+ *
+ * ## Visual Styles
+ *
+ * - Own messages: Right-aligned, primary color background
+ * - Other's messages: Left-aligned, muted background
+ * - System messages: Centered, subtle muted background
+ *
+ * @module components/messages/message-bubble
+ */
+
 'use client';
 
 import { cn } from '@/lib/utils';
 import type { MessageWithSender } from '@/app/(dashboard)/dashboard/messages/[id]/actions';
 
+// ============================================================================
+// TYPE DEFINITIONS
+// ============================================================================
+
+/**
+ * Props for the MessageBubble component.
+ *
+ * @property message - The message data with sender info
+ * @property showTimestamp - Whether to display the timestamp (default: true)
+ */
 interface MessageBubbleProps {
   message: MessageWithSender;
   showTimestamp?: boolean;
 }
 
-// Format timestamp for messages
+// ============================================================================
+// HELPER FUNCTIONS
+// ============================================================================
+
+/**
+ * Format a message timestamp for display.
+ *
+ * Shows relative time for recent messages:
+ * - Today: "2:30 PM"
+ * - Yesterday: "Yesterday 2:30 PM"
+ * - Older: "Jan 15 2:30 PM"
+ *
+ * @param date - Message creation timestamp
+ * @returns Formatted time string
+ */
 function formatMessageTime(date: Date): string {
   const messageDate = new Date(date);
   const today = new Date();
@@ -37,6 +76,26 @@ function formatMessageTime(date: Date): string {
   }
 }
 
+// ============================================================================
+// COMPONENT
+// ============================================================================
+
+/**
+ * Renders a single message in the chat view.
+ *
+ * Handles two distinct display modes:
+ * - System messages: Centered, muted styling for automated notifications
+ * - User messages: Aligned based on sender, with speech bubble styling
+ *
+ * @param props - Component props
+ * @returns Message bubble JSX
+ *
+ * @example
+ * // In ChatView message list
+ * {messages.map(message => (
+ *   <MessageBubble key={message.id} message={message} showTimestamp />
+ * ))}
+ */
 export function MessageBubble({ message, showTimestamp = true }: MessageBubbleProps) {
   // System messages are centered with different styling
   if (message.messageType === 'system') {

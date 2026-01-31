@@ -1,3 +1,37 @@
+/**
+ * @fileoverview Conversation management utilities for the messaging system.
+ *
+ * This module provides server actions and internal functions for managing
+ * conversations between coaches and clients in the coaching platform.
+ *
+ * ## Architecture
+ *
+ * The messaging system follows a 1-to-1 conversation model:
+ * - Each coach-client pair has exactly ONE conversation (enforced by unique constraint)
+ * - Conversations are created lazily when first message is needed
+ * - System messages are used for automated notifications (bookings, cancellations)
+ *
+ * ## Message Types
+ *
+ * - `text`: Regular user-sent messages
+ * - `system`: Automated messages (booking confirmations, etc.)
+ *
+ * ## Security
+ *
+ * - `getOrCreateConversation`: Requires auth, validates user is participant
+ * - `getOrCreateConversationInternal`: No auth - for system processes only
+ * - `sendSystemMessage`: No auth - for system processes only
+ *
+ * ## Related Files
+ *
+ * - `src/app/(dashboard)/dashboard/messages/actions.ts` - Conversation list actions
+ * - `src/app/(dashboard)/dashboard/messages/[id]/actions.ts` - Chat view actions
+ * - `src/components/messages/` - UI components
+ * - `src/db/schema.ts` - Database tables (conversations, messages)
+ *
+ * @module lib/conversations
+ */
+
 'use server';
 
 import { auth } from '@clerk/nextjs/server';
@@ -6,15 +40,49 @@ import { db, conversations, messages, users, coachProfiles } from '@/db';
 import { format } from 'date-fns';
 import type { BookingSessionType } from '@/db/schema';
 
+// ============================================================================
+// TYPE DEFINITIONS
+// ============================================================================
+
+/**
+ * Result type for getOrCreateConversation server action.
+ *
+ * @property success - Whether the operation succeeded
+ * @property conversationId - The conversation ID (on success)
+ * @property error - Error message (on failure)
+ */
 export interface GetOrCreateConversationResult {
   success: boolean;
   conversationId?: number;
   error?: string;
 }
 
+// ============================================================================
+// SERVER ACTIONS (Require Authentication)
+// ============================================================================
+
 /**
- * Get an existing conversation between a coach and client, or create a new one if it doesn't exist.
- * The coachId must be a user who has a coach profile.
+ * Get an existing conversation between a coach and client, or create a new one.
+ *
+ * This is the primary entry point for starting/resuming a conversation from the UI.
+ * It validates authentication and ensures the requesting user is a participant.
+ *
+ * @param coachId - Clerk user ID of the coach (must have a coach_profiles record)
+ * @param clientId - Clerk user ID of the client
+ * @returns Result object with conversationId on success, error on failure
+ *
+ * @throws Never throws - errors are returned in the result object
+ *
+ * @example
+ * // From a "Message Coach" button on a coach profile
+ * const result = await getOrCreateConversation(coachUserId, currentUserId);
+ * if (result.success) {
+ *   router.push(`/dashboard/messages/${result.conversationId}`);
+ * } else {
+ *   toast({ title: 'Error', description: result.error });
+ * }
+ *
+ * @security Requires authentication. User must be either the coach or client.
  */
 export async function getOrCreateConversation(
   coachId: string,
@@ -84,16 +152,46 @@ export async function getOrCreateConversation(
   }
 }
 
+/**
+ * Result type for sendSystemMessage function.
+ *
+ * @property success - Whether the message was sent successfully
+ * @property messageId - The created message ID (on success)
+ * @property error - Error message (on failure)
+ */
 export interface SendSystemMessageResult {
   success: boolean;
   messageId?: number;
   error?: string;
 }
 
+// ============================================================================
+// INTERNAL FUNCTIONS (No Authentication - System Use Only)
+// ============================================================================
+
 /**
  * Send a system message to a conversation.
- * Used for automated messages like booking confirmations.
- * This does not require auth - it's used by system processes.
+ *
+ * System messages are used for automated notifications such as:
+ * - Booking confirmations
+ * - Session cancellations
+ * - Reschedule notifications
+ *
+ * @param conversationId - Database ID of the conversation
+ * @param content - The message text to send
+ * @param senderId - Clerk user ID to attribute the message to (for display)
+ * @returns Result object with messageId on success
+ *
+ * @example
+ * // Send booking confirmation message
+ * const result = await sendSystemMessage(
+ *   conversationId,
+ *   'Session booked: Career Coaching on Monday at 2:00 PM',
+ *   clientId
+ * );
+ *
+ * @internal This function has NO authentication check - only use from
+ * trusted server-side code (webhooks, other server actions).
  */
 export async function sendSystemMessage(
   conversationId: number,
@@ -131,8 +229,26 @@ export async function sendSystemMessage(
 }
 
 /**
- * Internal function to get or create conversation by coach and client IDs.
- * Does not require auth - for use by system processes.
+ * Internal function to get or create a conversation without authentication.
+ *
+ * Unlike `getOrCreateConversation`, this function:
+ * - Does NOT verify authentication
+ * - Does NOT verify the coach has a coach profile
+ * - Is intended for system processes (webhooks, background jobs)
+ *
+ * @param coachId - Clerk user ID of the coach
+ * @param clientId - Clerk user ID of the client
+ * @returns Discriminated union with conversationId on success, error on failure
+ *
+ * @example
+ * // From a webhook handler
+ * const result = await getOrCreateConversationInternal(coachId, clientId);
+ * if (result.success) {
+ *   await sendSystemMessage(result.conversationId, message, clientId);
+ * }
+ *
+ * @internal This function has NO authentication check - only use from
+ * trusted server-side code (webhooks, other server actions).
  */
 export async function getOrCreateConversationInternal(
   coachId: string,
@@ -170,9 +286,36 @@ export async function getOrCreateConversationInternal(
   }
 }
 
+// ============================================================================
+// BOOKING INTEGRATION
+// ============================================================================
+
 /**
- * Create a system message for a new booking.
- * Gets or creates the conversation, then sends a system message about the booking.
+ * Create a system message notifying about a new booking.
+ *
+ * This is the primary integration point between the booking flow and messaging.
+ * It creates/finds the conversation and sends a formatted notification.
+ *
+ * The message format is:
+ * "Session booked: {sessionTypeName} on {date} at {time}"
+ *
+ * @param coachId - Clerk user ID of the coach
+ * @param clientId - Clerk user ID of the client who booked
+ * @param sessionType - The booked session type (name, duration, price snapshot)
+ * @param startTime - The scheduled session start time
+ * @returns Result object indicating success or failure
+ *
+ * @example
+ * // After successful payment/booking confirmation
+ * await createBookingSystemMessage(
+ *   booking.coachId,
+ *   booking.clientId,
+ *   booking.sessionType as BookingSessionType,
+ *   booking.startTime
+ * );
+ *
+ * @see BookingSessionType for session type structure (from schema.ts)
+ * @internal Called from booking confirmation flow (webhook or success page)
  */
 export async function createBookingSystemMessage(
   coachId: string,

@@ -1,3 +1,26 @@
+/**
+ * @fileoverview Client context panel for the chat sidebar (coach view only).
+ *
+ * This panel provides coaches with helpful information about the client they're
+ * messaging, including relationship stats, upcoming sessions, action items,
+ * and quick links.
+ *
+ * ## Sections
+ *
+ * 1. **Client Info** - Avatar, name, role label
+ * 2. **Stats** - Past sessions count, total spent
+ * 3. **Upcoming Sessions** - Next 3 scheduled sessions (clickable)
+ * 4. **Action Items** - Pending/completed tasks with add capability
+ * 5. **Quick Links** - Book Session, View All Sessions
+ *
+ * ## Responsive Behavior
+ *
+ * - Desktop: Visible as a sidebar on the right
+ * - Mobile: Hidden, accessed via sheet/slide-out panel
+ *
+ * @module components/messages/chat-context-panel
+ */
+
 'use client';
 
 import { useState, useCallback } from 'react';
@@ -19,11 +42,29 @@ import {
 import type { ClientContext } from '@/app/(dashboard)/dashboard/messages/[id]/actions';
 import { ActionItemsList, AddActionItemDialog } from '@/components/action-items';
 
+// ============================================================================
+// TYPE DEFINITIONS
+// ============================================================================
+
+/**
+ * Props for the ChatContextPanel component.
+ *
+ * @property context - Client context data from getClientContext action
+ */
 interface ChatContextPanelProps {
   context: ClientContext;
 }
 
-// Get initials from name
+// ============================================================================
+// HELPER FUNCTIONS
+// ============================================================================
+
+/**
+ * Extract initials from a user's name for avatar fallback.
+ *
+ * @param name - Full name (e.g., "John Doe")
+ * @returns Initials (e.g., "JD") or "?" if name is null/empty
+ */
 function getInitials(name: string | null): string {
   if (!name) return '?';
   const parts = name.split(' ').filter(Boolean);
@@ -32,7 +73,16 @@ function getInitials(name: string | null): string {
   return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
 }
 
-// Format price from cents
+/**
+ * Format a price from cents to display string with currency symbol.
+ *
+ * Handles multiple currencies with appropriate symbols.
+ * Special handling for JPY (no decimals).
+ *
+ * @param cents - Amount in cents
+ * @param currency - ISO currency code (e.g., "USD", "EUR")
+ * @returns Formatted price string (e.g., "$45.00", "€40.00", "¥5000")
+ */
 function formatPrice(cents: number, currency: string): string {
   const currencySymbols: Record<string, string> = {
     USD: '$',
@@ -57,7 +107,18 @@ function formatPrice(cents: number, currency: string): string {
   return `${symbol}${amount.toFixed(2)}`;
 }
 
-// Format relative time
+/**
+ * Format an upcoming session time in a human-friendly way.
+ *
+ * Output examples:
+ * - Same day: "Today at 2:30 PM"
+ * - Tomorrow: "Tomorrow at 10:00 AM"
+ * - This week: "Thursday at 3:00 PM"
+ * - Further out: "Feb 15 at 1:00 PM"
+ *
+ * @param date - Session start time
+ * @returns Formatted time string
+ */
 function formatSessionTime(date: Date): string {
   const now = new Date();
   const diffDays = Math.floor((date.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
@@ -73,6 +134,25 @@ function formatSessionTime(date: Date): string {
   }
 }
 
+// ============================================================================
+// COMPONENT
+// ============================================================================
+
+/**
+ * Sidebar panel showing client context for coaches during chat.
+ *
+ * Displays client stats, upcoming sessions, action items, and quick links
+ * to help coaches have context about their client relationship.
+ *
+ * @param props - Component props with ClientContext data
+ * @returns Context panel JSX
+ *
+ * @example
+ * // In ChatView (conditional on isCoach)
+ * {conversation.isCoach && clientContext && (
+ *   <ChatContextPanel context={clientContext} />
+ * )}
+ */
 export function ChatContextPanel({ context }: ChatContextPanelProps) {
   const router = useRouter();
   const [, setRefreshKey] = useState(0);

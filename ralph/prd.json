@@ -105,8 +105,8 @@
         "Typecheck passes"
       ],
       "priority": 7,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Added comprehensive JSDoc to schema.ts: file-level @fileoverview with ERD diagram, enum documentation with state transitions, JSONB interface docs (SessionType, BookingSessionType), table-level JSDoc with relationships and design decisions, field-level comments for all columns. Created src/db/README.md with ASCII ERD, tables overview, enum reference, JSONB structures, design decisions, and common query examples."
     },
     {
       "id": "US-008",
@@ -119,8 +119,8 @@
         "Typecheck passes"
       ],
       "priority": 8,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Documented 3 server action files (lib/conversations.ts, messages/actions.ts, messages/[id]/actions.ts) and 7 UI components (chat-view, conversations-list, conversation-row, message-bubble, message-input, message-button, chat-context-panel). Added file-level @fileoverview, interface docs, function JSDoc with @param/@returns/@example/@security, section dividers, and helper function documentation."
     },
     {
       "id": "US-009",

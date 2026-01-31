@@ -1,10 +1,54 @@
+/**
+ * @fileoverview Server actions for the conversations list page.
+ *
+ * This module provides functionality for displaying the user's conversation inbox,
+ * including search, unread counts, and conversation previews.
+ *
+ * ## Features
+ *
+ * - List all conversations for the authenticated user
+ * - Search conversations by other user's name
+ * - Track unread message counts per conversation and total
+ * - Support for both coaches and clients (role-agnostic inbox)
+ *
+ * ## Data Flow
+ *
+ * 1. User navigates to `/dashboard/messages`
+ * 2. Server component calls `getConversations()` to fetch list
+ * 3. ConversationsList component renders with initial data
+ * 4. Search queries trigger `getConversations(searchQuery)`
+ *
+ * ## Related Files
+ *
+ * - `src/lib/conversations.ts` - Core conversation management
+ * - `src/app/(dashboard)/dashboard/messages/[id]/actions.ts` - Chat view actions
+ * - `src/components/messages/conversations-list.tsx` - List UI component
+ *
+ * @module dashboard/messages/actions
+ */
+
 'use server';
 
 import { auth } from '@clerk/nextjs/server';
 import { eq, and, or, desc, sql, ne } from 'drizzle-orm';
 import { db, conversations, messages, users } from '@/db';
 
-// Conversation with user info and unread count
+// ============================================================================
+// TYPE DEFINITIONS
+// ============================================================================
+
+/**
+ * Conversation with enriched details for display in the inbox list.
+ *
+ * @property id - Database conversation ID
+ * @property otherUserId - Clerk user ID of the other participant
+ * @property otherUserName - Display name of the other user (may be null)
+ * @property otherUserAvatar - Avatar URL of the other user (may be null)
+ * @property lastMessageContent - Preview of the most recent message
+ * @property lastMessageAt - Timestamp of the most recent message
+ * @property unreadCount - Number of unread messages from the other user
+ * @property isCoach - Whether the current user is the coach in this conversation
+ */
 export interface ConversationWithDetails {
   id: number;
   otherUserId: string;
@@ -16,12 +60,46 @@ export interface ConversationWithDetails {
   isCoach: boolean; // Whether the current user is the coach in this conversation
 }
 
+/**
+ * Result type for getConversations server action.
+ *
+ * @property success - Whether the operation succeeded
+ * @property conversations - Array of conversations with details (on success)
+ * @property error - Error message (on failure)
+ */
 export interface GetConversationsResult {
   success: boolean;
   conversations?: ConversationWithDetails[];
   error?: string;
 }
 
+// ============================================================================
+// SERVER ACTIONS
+// ============================================================================
+
+/**
+ * Fetch all conversations for the authenticated user.
+ *
+ * Returns conversations where the user is either the coach or client,
+ * enriched with other user details, last message preview, and unread count.
+ *
+ * @param searchQuery - Optional name filter (case-insensitive substring match)
+ * @returns Result object with conversations array on success
+ *
+ * @example
+ * // Fetch all conversations
+ * const result = await getConversations();
+ * if (result.success) {
+ *   console.log(`${result.conversations.length} conversations`);
+ * }
+ *
+ * @example
+ * // Search by name
+ * const result = await getConversations('john');
+ * // Returns conversations where other user's name contains "john"
+ *
+ * @security Requires authentication. Only returns conversations where user is a participant.
+ */
 export async function getConversations(searchQuery?: string): Promise<GetConversationsResult> {
   const { userId } = await auth();
 
@@ -131,7 +209,27 @@ export async function getConversations(searchQuery?: string): Promise<GetConvers
   }
 }
 
-// Get total unread message count for navigation badge
+// ============================================================================
+// UNREAD COUNT FUNCTIONS
+// ============================================================================
+
+/**
+ * Get total unread message count for the authenticated user.
+ *
+ * This is used to display the unread badge on the messages navigation item.
+ * Counts messages from OTHER users that haven't been marked as read.
+ *
+ * @returns Result object with total unread count on success
+ *
+ * @example
+ * // In a navigation component
+ * const result = await getUnreadMessageCount();
+ * if (result.success && result.count > 0) {
+ *   return <Badge>{result.count}</Badge>;
+ * }
+ *
+ * @security Requires authentication.
+ */
 export async function getUnreadMessageCount(): Promise<{
   success: boolean;
   count?: number;
@@ -152,8 +250,26 @@ export async function getUnreadMessageCount(): Promise<{
   }
 }
 
-// Internal function for getting unread count without auth check
-// Used by the dashboard layout which already has userId
+/**
+ * Internal function to get unread message count for a specific user.
+ *
+ * Unlike `getUnreadMessageCount`, this function:
+ * - Does NOT perform authentication check
+ * - Takes userId as a parameter instead of reading from auth
+ *
+ * This is used by the dashboard layout which already has the userId
+ * from a previous auth check.
+ *
+ * @param userId - Clerk user ID to get unread count for
+ * @returns Total unread message count
+ *
+ * @example
+ * // In dashboard layout (already has userId from auth)
+ * const unreadCount = await getUnreadMessageCountForUser(userId);
+ * return <Sidebar unreadMessages={unreadCount} />;
+ *
+ * @internal Use `getUnreadMessageCount` for server actions called from client.
+ */
 export async function getUnreadMessageCountForUser(userId: string): Promise<number> {
   // Get all conversations where user is either coach or client
   const conversationIds = await db

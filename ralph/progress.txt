@@ -22,6 +22,9 @@
 - Refund policy: Coach cancellations = 100%, Client cancellations = sliding scale based on timing
 - Availability: Weekly schedule in `coach_availability` table, date overrides in `availability_overrides` table
 - Availability actions: Dashboard (coach edits) in `dashboard/availability/actions.ts`, public display in `coaches/[slug]/availability-actions.ts`
+- Messaging: 1-to-1 conversations (unique coach-client pair), polling-based real-time (3s interval)
+- Message actions: List in `messages/actions.ts`, chat view in `messages/[id]/actions.ts`, core in `lib/conversations.ts`
+- Internal vs public functions: Internal functions (no auth) named with `Internal` suffix for system use
 
 ## Documentation Sprint Goals
 
@@ -231,5 +234,82 @@ Add comprehensive code documentation:
   - Profile completion percentage calculated by parent page, not the component
   - Published profiles appear in coach directory; draft profiles are saved but hidden
   - Custom specialties can be added beyond the predefined COACH_SPECIALTIES list
+---
+
+## 2026-01-31 - US-007
+- Documented database schema (src/db/schema.ts) and created README
+- Files changed:
+  - src/db/schema.ts (comprehensive JSDoc added)
+  - src/db/README.md (new file - schema overview documentation)
+- Added comprehensive JSDoc documentation to schema.ts:
+  - File-level @fileoverview with schema overview, ERD diagram, and key design decisions
+  - Enum documentation:
+    - userRoleEnum: admin/coach/client with role assignment notes
+    - bookingStatusEnum: State machine with transition documentation
+    - transactionStatusEnum: Payment lifecycle states
+    - messageTypeEnum: text/system message types
+  - JSONB interface documentation:
+    - SessionType: Coach session offerings (id, name, duration, price)
+    - BookingSessionType: Snapshot at booking time (preserves original pricing)
+  - Table-level JSDoc for all 10 tables:
+    - users: Clerk sync, relationships, cascade behavior
+    - coach_profiles: JSONB fields, availability settings, Stripe Connect
+    - coach_availability: Weekly schedule, dayOfWeek convention (0=Sunday)
+    - availability_overrides: Date exceptions, priority logic
+    - bookings: Lifecycle, sessionType snapshot, cancellation tracking
+    - transactions: Fee structure (10% platform, 90% coach), Stripe IDs
+    - conversations: 1-per-coach-client-pair, unique constraint
+    - messages: Types, read status tracking
+    - session_notes: Private coach notes (1 per booking)
+    - action_items: Tasks with optional booking link
+  - Field-level comments for every column with type, purpose, examples
+  - Section dividers organizing schema by entity group
+- Created src/db/README.md with:
+  - ASCII ERD diagram showing all relationships
+  - Tables overview table with purpose and key fields
+  - Enum values reference tables
+  - JSONB field structure examples (TypeScript interfaces)
+  - Key design decisions documentation (Clerk IDs, cents, soft deletes)
+  - Common query examples (availability, upcoming sessions, conflicts)
+  - Migration commands reference
+- Typecheck passes
+- **Learnings for future iterations:**
+  - Schema has 10 tables, 4 enums, 2 JSONB interfaces
+  - All monetary values in CENTS (integer) to avoid float precision
+  - bookings.sessionType is a SNAPSHOT - pricing frozen at booking time
+  - coach_availability uses dayOfWeek 0-6 (JS convention: 0=Sunday)
+  - Override priority: availability_overrides > coach_availability for specific dates
+  - Conversations have unique constraint on (coachId, clientId) pair
+  - session_notes has 1:1 relationship with bookings (unique constraint)
+---
+
+## 2026-01-31 - US-008
+- Documented messaging system (3 action files + 7 components)
+- Files changed:
+  - src/lib/conversations.ts (core conversation management)
+  - src/app/(dashboard)/dashboard/messages/actions.ts (conversation list)
+  - src/app/(dashboard)/dashboard/messages/[id]/actions.ts (chat view)
+  - src/components/messages/index.ts (barrel export)
+  - src/components/messages/chat-view.tsx
+  - src/components/messages/conversations-list.tsx
+  - src/components/messages/conversation-row.tsx
+  - src/components/messages/message-bubble.tsx
+  - src/components/messages/message-input.tsx
+  - src/components/messages/message-button.tsx
+  - src/components/messages/chat-context-panel.tsx
+- Added comprehensive JSDoc documentation:
+  - lib/conversations.ts: File-level @fileoverview with architecture, message types, security docs; 4 function docs with @param/@returns/@example/@security/@internal annotations; section dividers
+  - messages/actions.ts: 2 interfaces, 3 functions documented (getConversations, getUnreadMessageCount, getUnreadMessageCountForUser)
+  - messages/[id]/actions.ts: 8 interfaces, 6 functions documented (getConversationDetails, getMessages, markMessagesAsRead, sendMessage, getClientContext, getNewMessages); polling and pagination docs
+  - 7 UI components: File-level @fileoverview, interface @property docs, component JSDoc with @example, helper function docs
+- Typecheck passes
+- **Learnings for future iterations:**
+  - Messaging uses 1-to-1 conversation model (unique constraint on coach-client pair)
+  - Two auth levels: public functions (require auth) vs internal (no auth, system use)
+  - Polling-based real-time: 3-second interval via getNewMessages (uses ID comparison, not timestamps)
+  - Message pagination: newest-first for DB query, reversed for display
+  - System messages (messageType: 'system') are for automated notifications
+  - Client context panel only available for coaches (isCoach flag determines visibility)
+  - Prices stored in cents, formatted for display with currency symbols
 ---
 
