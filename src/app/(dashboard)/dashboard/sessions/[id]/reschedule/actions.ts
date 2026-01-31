@@ -1,3 +1,32 @@
+/**
+ * @fileoverview Client reschedule flow server actions.
+ *
+ * This module handles the client-initiated reschedule process:
+ * - Get booking data for reschedule (validation + coach info)
+ * - Get bookable dates for a month
+ * - Get available time slots for a specific date
+ * - Confirm and apply the reschedule
+ *
+ * @module sessions/reschedule/actions
+ *
+ * @flow
+ * 1. Client navigates to reschedule page
+ * 2. getRescheduleBookingData validates booking and returns coach info
+ * 3. getRescheduleBookableDates returns available dates for selected month
+ * 4. getRescheduleAvailableSlots returns time slots for selected date
+ * 5. confirmReschedule updates the booking with new times
+ *
+ * @security
+ * - Only the booking's client can reschedule (verified via Clerk auth)
+ * - Must reschedule at least `advanceNoticeHours` before the session
+ * - Cannot reschedule cancelled or completed sessions
+ *
+ * @scheduling
+ * - Respects coach's weekly availability and date overrides
+ * - Excludes other bookings (but not the current booking being rescheduled)
+ * - Applies buffer time between sessions
+ * - Generates time slots in 30-minute increments
+ */
 'use server';
 
 import { auth } from '@clerk/nextjs/server';
@@ -5,7 +34,14 @@ import { db, bookings, users, coachProfiles, coachAvailability, availabilityOver
 import { eq, and, gte, lte, or, ne } from 'drizzle-orm';
 import type { BookingSessionType } from '@/db/schema';
 
-// Types for the reschedule flow
+// ============================================================================
+// Type Definitions
+// ============================================================================
+
+/**
+ * Booking data needed for the reschedule flow.
+ * Includes original booking details and coach scheduling parameters.
+ */
 export interface RescheduleBookingData {
   id: number;
   coachId: string;
@@ -23,14 +59,48 @@ export interface RescheduleBookingData {
   maxAdvanceDays: number;
 }
 
+/**
+ * A single available time slot for booking.
+ */
 export interface TimeSlot {
-  startTime: string; // ISO string
-  endTime: string; // ISO string
-  displayTime: string; // Formatted for display
-  isOriginalSlot?: boolean; // True if this is the current booking slot
+  /** Start time as ISO 8601 string */
+  startTime: string;
+  /** End time as ISO 8601 string */
+  endTime: string;
+  /** Human-readable time (e.g., "2:30 PM") in client's timezone */
+  displayTime: string;
+  /** True if this slot matches the original booking time */
+  isOriginalSlot?: boolean;
 }
 
-// Get booking data for reschedule flow
+// ============================================================================
+// Booking Data Retrieval
+// ============================================================================
+
+/**
+ * Retrieves booking data for the reschedule flow.
+ *
+ * Validates that:
+ * - User is authenticated
+ * - Booking exists and belongs to this client
+ * - Booking is in a rescheduable state (not cancelled/completed)
+ * - Session hasn't started yet
+ * - Advance notice requirement is met
+ *
+ * @param bookingId - The booking ID to reschedule
+ * @returns Promise with booking data or error message
+ *
+ * @throws Returns error if booking is cancelled or completed
+ * @throws Returns error if session is in the past
+ * @throws Returns error if advance notice requirement not met
+ *
+ * @example
+ * const result = await getRescheduleBookingData(123);
+ * if (result.success) {
+ *   console.log(`Rescheduling ${result.data.sessionType.name}`);
+ *   console.log(`Original time: ${result.data.originalStartTime}`);
+ * }
+ */
 export async function getRescheduleBookingData(
   bookingId: number
 ): Promise<{ success: true; data: RescheduleBookingData } | { success: false; error: string }> {
@@ -133,7 +203,36 @@ export async function getRescheduleBookingData(
   }
 }
 
-// Get bookable dates for reschedule (same as booking flow but excludes current booking)
+// ============================================================================
+// Date and Time Slot Calculation
+// ============================================================================
+
+/**
+ * Gets available dates for rescheduling within a specific month.
+ *
+ * Dates are filtered based on:
+ * - Coach's weekly availability schedule
+ * - Date-specific overrides (can make unavailable days available or vice versa)
+ * - Advance notice hours (minimum time before session)
+ * - Maximum advance days (how far ahead bookings are allowed)
+ *
+ * Note: This is similar to the booking flow but specifically for reschedules.
+ * The current booking is excluded from conflict detection.
+ *
+ * @param coachId - The coach's Clerk user ID
+ * @param currentBookingId - The booking being rescheduled (excluded from conflicts)
+ * @param month - Month index (0-11, January = 0)
+ * @param year - Full year (e.g., 2024)
+ * @returns Promise with array of date strings (YYYY-MM-DD) or error
+ *
+ * @example
+ * // Get bookable dates for February 2024
+ * const result = await getRescheduleBookableDates("coach_123", 456, 1, 2024);
+ * if (result.success) {
+ *   result.data.forEach(dateStr => console.log(dateStr));
+ *   // "2024-02-05", "2024-02-06", ...
+ * }
+ */
 export async function getRescheduleBookableDates(
   coachId: string,
   currentBookingId: number,
@@ -234,7 +333,44 @@ export async function getRescheduleBookableDates(
   }
 }
 
-// Get available time slots for reschedule, excluding the current booking
+/**
+ * Gets available time slots for a specific date during reschedule.
+ *
+ * Time slots are generated based on:
+ * - Coach's availability window for that day (weekly or override)
+ * - Session duration from the booking
+ * - Buffer time between sessions
+ * - Advance notice requirement
+ * - Existing bookings (excluding the current booking being rescheduled)
+ *
+ * Slots are generated in 30-minute increments within the availability window.
+ * The original booking slot is marked with `isOriginalSlot: true` if available.
+ *
+ * @param coachId - The coach's Clerk user ID
+ * @param currentBookingId - The booking being rescheduled (excluded from conflicts)
+ * @param dateStr - Date in YYYY-MM-DD format
+ * @param sessionDuration - Duration in minutes from the session type
+ * @param _coachTimezone - Coach timezone (kept for API consistency, not used)
+ * @param clientTimezone - Client timezone for formatting displayTime
+ * @param originalStartTime - Original booking start time (to mark original slot)
+ * @returns Promise with array of TimeSlot objects or error
+ *
+ * @example
+ * const result = await getRescheduleAvailableSlots(
+ *   "coach_123",
+ *   456,
+ *   "2024-02-15",
+ *   60,
+ *   "America/New_York",
+ *   "America/Los_Angeles",
+ *   new Date("2024-02-10T14:00:00Z")
+ * );
+ * if (result.success) {
+ *   result.data.forEach(slot => {
+ *     console.log(`${slot.displayTime} ${slot.isOriginalSlot ? '(current)' : ''}`);
+ *   });
+ * }
+ */
 export async function getRescheduleAvailableSlots(
   coachId: string,
   currentBookingId: number,
@@ -411,7 +547,20 @@ export async function getRescheduleAvailableSlots(
   }
 }
 
-// Helper function to format time in a specific timezone
+// ============================================================================
+// Helper Functions
+// ============================================================================
+
+/**
+ * Formats a Date object as a localized time string in the specified timezone.
+ *
+ * @param date - The Date to format
+ * @param timezone - IANA timezone identifier (e.g., "America/New_York")
+ * @returns Formatted time string (e.g., "2:30 PM")
+ *
+ * @example
+ * formatTimeInTimezone(new Date(), "America/Los_Angeles") // "10:30 AM"
+ */
 function formatTimeInTimezone(date: Date, timezone: string): string {
   try {
     return date.toLocaleTimeString('en-US', {
@@ -430,7 +579,44 @@ function formatTimeInTimezone(date: Date, timezone: string): string {
   }
 }
 
-// Confirm the reschedule - update the booking with new times
+// ============================================================================
+// Reschedule Confirmation
+// ============================================================================
+
+/**
+ * Confirms and applies a reschedule to the booking.
+ *
+ * Validation performed:
+ * - User is authenticated and owns the booking
+ * - Booking is in a rescheduable state
+ * - Advance notice met for both original and new times
+ * - New times are valid (start before end, not in past)
+ *
+ * On success, the booking's startTime and endTime are updated.
+ * The booking status remains unchanged (pending/confirmed).
+ *
+ * Note: No email notifications are sent by this action - that should be
+ * handled by the calling code if needed.
+ *
+ * @param bookingId - The booking ID to reschedule
+ * @param newStartTime - New start time as ISO 8601 string
+ * @param newEndTime - New end time as ISO 8601 string
+ * @returns Promise with updated booking ID or error
+ *
+ * @throws Returns error if advance notice not met
+ * @throws Returns error if new time is in the past
+ * @throws Returns error if start time >= end time
+ *
+ * @example
+ * const result = await confirmReschedule(
+ *   123,
+ *   "2024-02-15T14:00:00.000Z",
+ *   "2024-02-15T15:00:00.000Z"
+ * );
+ * if (result.success) {
+ *   console.log(`Rescheduled booking ${result.data.id}`);
+ * }
+ */
 export async function confirmReschedule(
   bookingId: number,
   newStartTime: string,

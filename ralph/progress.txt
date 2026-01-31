@@ -18,6 +18,8 @@
 - Payments: Stripe
 - Typecheck command: npx tsc --noEmit
 - Lint command: npm run lint
+- Session actions are split: coach view in `sessions/actions.ts`, client view in `my-sessions/actions.ts`
+- Refund policy: Coach cancellations = 100%, Client cancellations = sliding scale based on timing
 
 ## Documentation Sprint Goals
 
@@ -78,5 +80,74 @@ Add comprehensive code documentation:
   - New users default to 'client' role - coach role assigned via onboarding flow
   - user.updated does NOT sync role from Clerk - role is application-managed
   - Include Clerk Dashboard setup instructions in file-level JSDoc
+---
+
+## 2026-01-31 - US-003
+- Documented booking flow actions (3 files)
+- Files changed:
+  - src/app/(public)/coaches/[slug]/book/actions.ts
+  - src/app/(public)/coaches/[slug]/book/confirm/actions.ts
+  - src/app/(public)/coaches/[slug]/book/success/actions.ts
+- Added comprehensive JSDoc documentation:
+  - File-level @fileoverview explaining each file's role in the 3-step booking flow
+  - Documented all exported interfaces (CoachBookingData, DayAvailability, TimeSlot, etc.)
+  - getCoachForBooking: Coach data retrieval with @param/@returns/@example
+  - getCoachWeeklyAvailability: Weekly schedule with day-of-week indexing notes
+  - getAvailableSlots: Core slot calculation with conflict detection, buffer time, and advance notice
+  - getBookableDates: Month date calculation with override handling
+  - createBooking: Free session creation with validation checks
+  - createCheckoutSession: Stripe Connect integration with 10% platform fee
+  - generateIcsFile/generateSuccessIcsFile: iCalendar RFC 5545 generation
+  - getBookingFromCheckoutSession: Payment confirmation with idempotency notes
+  - formatTimeInTimezone: Helper for timezone-aware display
+- Added section dividers (Type Definitions, Server Actions, Helper Functions, Calendar Export)
+- Typecheck passes
+- **Learnings for future iterations:**
+  - Booking flow is 3 phases: availability → confirm → success
+  - Platform fee is 10% (90% to coach via Stripe Connect destination charges)
+  - Pending bookings are created before Stripe redirect, confirmed via webhook or success page
+  - ICS files use unique UID format: booking-{id}@coachingplatform.com for deduplication
+  - Availability overrides take precedence over weekly schedule
+  - Time slots generated in 30-minute increments within availability window
+---
+
+## 2026-01-31 - US-004
+- Documented session management actions (3 files)
+- Files changed:
+  - src/app/(dashboard)/dashboard/sessions/actions.ts (coach session management)
+  - src/app/(dashboard)/dashboard/sessions/[id]/reschedule/actions.ts (client reschedule flow)
+  - src/app/(dashboard)/dashboard/my-sessions/actions.ts (client session management)
+- Added comprehensive JSDoc documentation:
+  - File-level @fileoverview explaining each file's role and security notes
+  - sessions/actions.ts (10 functions):
+    - getCoachSessions: Paginated session retrieval with tab filtering
+    - markSessionComplete: Status update with validation
+    - cancelSession: Cancellation with full refund processing
+    - getPastSessionsCountWithClient: Client history count
+    - saveSessionNote/getSessionNote: Private coach notes
+    - updateMeetingLink: Meeting URL validation and update
+    - generateCoachIcsFile: Calendar export
+    - getRefundEligibility: Pre-cancellation refund check
+  - reschedule/actions.ts (5 functions):
+    - getRescheduleBookingData: Validation and coach info
+    - getRescheduleBookableDates: Available dates for month
+    - getRescheduleAvailableSlots: Time slot calculation
+    - confirmReschedule: Apply new booking times
+    - formatTimeInTimezone: Helper function
+  - my-sessions/actions.ts (5 functions):
+    - getClientSessions: Paginated client session retrieval
+    - cancelClientSession: Sliding scale refund processing
+    - generateClientIcsFile: Calendar export
+    - createRetryCheckoutSession: Payment retry with Stripe Connect
+    - getClientRefundEligibility: Pre-cancellation refund preview
+- Added section dividers organizing code by functionality
+- Documented all exported types/interfaces
+- Typecheck passes
+- **Learnings for future iterations:**
+  - Coach cancellations = 100% refund; Client cancellations = sliding scale (48h: 100%, 24-48h: 50%, <24h: 0%)
+  - Session notes are stored in separate `session_notes` table, not on bookings
+  - Reschedule excludes current booking from conflict detection
+  - Meeting links must be HTTPS URLs
+  - Legacy aliases exist for backward compatibility (saveCoachNotes → saveSessionNote)
 ---
 
