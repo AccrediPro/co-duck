@@ -44,3 +44,39 @@ Add comprehensive code documentation:
 
 ---
 
+## 2026-01-31 - US-001
+- Documented Stripe webhook handler (src/app/api/webhooks/stripe/route.ts)
+- Files changed: src/app/api/webhooks/stripe/route.ts
+- Added comprehensive JSDoc documentation:
+  - File-level @fileoverview with module purpose, security, and idempotency notes
+  - POST handler with flow, response codes, and important notes
+  - getWebhookSecret with @returns and @throws annotations
+  - handleCheckoutSessionCompleted with fee structure (10% platform fee) and idempotency explanation
+  - handleCheckoutSessionExpired with time slot management notes
+  - handlePaymentIntentFailed with common error codes documentation
+- Typecheck passes
+- **Learnings for future iterations:**
+  - Webhook handlers should document idempotency guarantees
+  - Fee calculations should be documented in JSDoc (platform fee = 10%)
+  - Clear the .next cache if typecheck shows stale errors (`rm -rf .next`)
+---
+
+## 2026-01-31 - US-002
+- Documented Clerk webhook handler (src/app/api/webhooks/clerk/route.ts)
+- Files changed: src/app/api/webhooks/clerk/route.ts
+- Added comprehensive JSDoc documentation:
+  - File-level @fileoverview with security notes and configuration instructions
+  - POST handler with request flow, response codes, and example payload
+  - Detailed inline comments explaining Svix signature verification
+  - Documented user.created handler (default 'client' role, email handling)
+  - Documented user.updated handler (syncs email, name, avatar; not role)
+  - Documented user.deleted handler (hard delete, cascade behavior note)
+  - Added section dividers for improved code readability
+- Typecheck passes
+- **Learnings for future iterations:**
+  - Clerk webhooks use Svix for signature verification (3 headers required)
+  - New users default to 'client' role - coach role assigned via onboarding flow
+  - user.updated does NOT sync role from Clerk - role is application-managed
+  - Include Clerk Dashboard setup instructions in file-level JSDoc
+---
+

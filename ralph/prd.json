@@ -15,8 +15,8 @@
         "Typecheck passes"
       ],
       "priority": 1,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Added comprehensive JSDoc to all functions including file-level docs, fee structure, idempotency notes, and error handling documentation"
     },
     {
       "id": "US-002",
@@ -29,8 +29,8 @@
         "Typecheck passes"
       ],
       "priority": 2,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "Added comprehensive JSDoc including file-level docs with security notes, POST handler with request flow and response codes, detailed inline comments for Svix signature verification, and documented each event handler (user.created, user.updated, user.deleted)"
     },
     {
       "id": "US-003",
