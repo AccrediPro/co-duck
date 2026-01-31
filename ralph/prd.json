@@ -131,8 +131,8 @@
         "Typecheck passes"
       ],
       "priority": 8,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "CREATED: Global not-found.tsx with custom 404 page design. Features: 404 error code, 'Page Not Found' heading, helpful message, Go Home button (verified navigation to /), Browse Coaches button (verified navigation to /coaches), Contact us link. Typecheck passes."
     },
     {
       "id": "US-009",
@@ -146,8 +146,8 @@
         "Typecheck passes"
       ],
       "priority": 9,
-      "passes": false,
-      "notes": ""
+      "passes": true,
+      "notes": "ENHANCED: Updated sign-in page with split-screen layout. Left side: Blue gradient benefits section with 4 benefits (Expert Coaches, Flexible Scheduling, Secure Platform, Proven Results) and testimonial. Right side: Clerk sign-in with custom styling. Benefits section visible on md+ screens (768px+), hidden on mobile with mobile-specific header. Verified with Playwright: Desktop shows both panels, mobile shows form only. No console errors. Typecheck passes."
     },
     {
       "id": "US-010",

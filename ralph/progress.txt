@@ -159,3 +159,43 @@ Goal: Verify all pages and features work correctly.
   - Print functionality uses window.print() browser API
 ---
 
+## 2026-01-31 - US-008 - Verify 404 error page
+- **What was implemented**: Created global not-found.tsx page for custom 404 handling
+- **Files changed**:
+  - src/app/not-found.tsx (new)
+- **Test Results**:
+  - ✅ /nonexistent-page-xyz displays custom 404 page (not default Next.js error)
+  - ✅ "404" error code heading displays
+  - ✅ "Page Not Found" message displays with helpful description
+  - ✅ "Go Home" button navigates to / (verified with Playwright)
+  - ✅ "Browse Coaches" button navigates to /coaches (verified with Playwright)
+  - ✅ "Contact us" help link included
+  - ✅ Typecheck passes (npx tsc --noEmit)
+- **Learnings for future iterations**:
+  - Global 404 page goes in src/app/not-found.tsx (not in route groups)
+  - Next.js App Router uses not-found.tsx for 404 pages, not 404.tsx
+  - Route-specific not-found pages can override global (e.g., src/app/(public)/coaches/[slug]/not-found.tsx)
+  - Use lucide-react icons for consistent UI (FileQuestion for 404)
+---
+
+## 2026-01-31 - US-009 - Verify sign-in page displays
+- **What was implemented**: Enhanced sign-in page with split-screen layout and benefits section
+- **Files changed**:
+  - src/app/sign-in/[[...sign-in]]/page.tsx (modified)
+- **Test Results**:
+  - ✅ /sign-in page loads at http://localhost:3000/sign-in without errors
+  - ✅ No console errors
+  - ✅ Clerk sign-in component renders with social login (Apple, Facebook, Google), email/password
+  - ✅ Custom styling applied: shadow-lg card, blue primary button, styled links
+  - ✅ Benefits section displays on desktop (md+ 768px): blue gradient background, 4 benefits with icons, testimonial
+  - ✅ Benefits section hidden on mobile, shows mobile-specific header instead
+  - ✅ Split-screen layout: benefits on left (50%), sign-in form on right (50%)
+  - ✅ Typecheck passes (npx tsc --noEmit)
+- **Learnings for future iterations**:
+  - Sign-in/sign-up pages are in catch-all routes: src/app/sign-in/[[...sign-in]]/page.tsx
+  - Tailwind JIT may not immediately pick up new responsive classes like lg:flex; using existing classes (md:flex) works better
+  - Clerk SignIn component accepts `appearance.elements` for custom styling overrides
+  - lucide-react icons work well for benefits sections (Users, Zap, Shield, CheckCircle)
+  - Use md: breakpoint (768px) instead of lg: (1024px) for better tablet support
+---
+
