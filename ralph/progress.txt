@@ -319,3 +319,30 @@ Goal: Verify all pages and features work correctly.
   - Loading states are brief in local development due to fast DB queries
 ---
 
+## 2026-01-31 - US-015 - Verify footer links work
+- **What was implemented**: Enhanced footer with newsletter form, social media links, and additional quick links
+- **Files changed**:
+  - src/components/navigation/public-footer.tsx (modified)
+- **Test Results**:
+  - ✅ All footer links verified with Playwright:
+    - Find Coaches → /coaches
+    - Specialties → /specialties (NEW)
+    - Become a Coach → /sign-up
+    - About Us → /about
+    - Contact → /contact
+    - Privacy Policy → /privacy
+    - Terms of Service → /terms
+  - ✅ Newsletter form visible with email input and Subscribe button
+  - ✅ Newsletter form tested - shows "Thanks for subscribing!" on successful submission
+  - ✅ Social media links present: Twitter, Facebook, Instagram, LinkedIn
+  - ✅ "Get in Touch" section added with email link and Contact Form link
+  - ✅ Footer copyright section has quick Privacy and Terms links
+  - ✅ No console errors
+  - ✅ Typecheck passes (npx tsc --noEmit)
+- **Learnings for future iterations**:
+  - Footer component converted to client component ('use client') for newsletter form state
+  - Social links use target="_blank" with rel="noopener noreferrer" for security
+  - Newsletter form uses local state for demo - would need API integration for production
+  - Footer grid updated from md:grid-cols-4 to md:grid-cols-5 to accommodate new "Get in Touch" section
+---
+
