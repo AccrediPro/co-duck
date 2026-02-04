@@ -1,6 +1,6 @@
 import { google } from 'googleapis';
 import { eq } from 'drizzle-orm';
-import { db, googleCalendarTokens, bookings, users } from '@/db';
+import { db, googleCalendarTokens } from '@/db';
 import type { BookingSessionType } from '@/db/schema';
 
 const SCOPES = ['https://www.googleapis.com/auth/calendar.events'];

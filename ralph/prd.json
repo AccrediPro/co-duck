@@ -18,7 +18,7 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 1,
-      "passes": false,
+      "passes": true,
       "notes": "Use Supabase Storage (already configured). Check if an avatars bucket exists, create if not."
     },
     {

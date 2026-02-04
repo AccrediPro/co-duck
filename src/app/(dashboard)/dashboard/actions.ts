@@ -1,7 +1,7 @@
 'use server';
 
 import { auth } from '@clerk/nextjs/server';
-import { eq, and, or, gte, lt, lte, desc, asc, sql, ne, count as drizzleCount } from 'drizzle-orm';
+import { eq, and, or, gte, lte, desc, asc, sql, ne } from 'drizzle-orm';
 import {
   db,
   bookings,

@@ -8,7 +8,7 @@
 
 import { db } from '@/db';
 import { users, coachProfiles, coachAvailability } from '@/db/schema';
-import { eq, and } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 
 interface RouteParams {
   params: Promise<{ slug: string }>;

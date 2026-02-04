@@ -1,3 +1,26 @@
 # Ralph Progress Log
 Started: Wed Feb  4 04:36:16 PM +04 2026
+
+## Codebase Patterns
+- Profile photo URL is stored as `profilePhotoUrl` in the form and saved to `users.avatarUrl` via `saveProfile` action
+- Supabase Storage is used for file uploads; client is created with NEXT_PUBLIC_SUPABASE_URL and anon key
+- API routes in Next.js should NOT use 'use server' directive (that's for server actions only)
+- The lint configuration is strict about unused imports - always clean them up
+- Profile editor form is in `src/components/profile/profile-editor-form.tsx`, save action is in `src/app/(dashboard)/dashboard/profile/actions.ts`
+- When using `useCallback` that references `form` from react-hook-form, declare it AFTER `useForm()` to avoid block-scoped variable errors
+
+---
+
+## 2026-02-04 - US-001
+- What was implemented: Profile photo upload with client-side compression
+- Files changed:
+  - Created `src/app/api/upload/avatar/route.ts` - API route for uploading avatars to Supabase Storage
+  - Modified `src/components/profile/profile-editor-form.tsx` - Replaced URL text input with file upload + circular preview
+- Also fixed baseline lint errors in 12 files (unused imports/variables)
+- **Learnings for future iterations:**
+  - Supabase Storage needs bucket creation on first upload - the API route auto-creates 'avatars' bucket if missing
+  - Canvas API `toBlob` with 'image/webp' works well for compression, iteratively reducing quality until under 500KB
+  - The `compressImage` function resizes to max 800x800px while preserving aspect ratio
+  - `useCallback` hooks must be declared after any variables they reference (e.g., `form` from `useForm`)
+  - Many files from previous branches had unused imports - fix these whenever working on a new branch
 ---

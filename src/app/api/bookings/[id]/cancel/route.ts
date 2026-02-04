@@ -9,7 +9,7 @@
 import { auth } from '@clerk/nextjs/server';
 import { db } from '@/db';
 import { bookings, users } from '@/db/schema';
-import { eq, or, and, inArray } from 'drizzle-orm';
+import { eq, or, and } from 'drizzle-orm';
 import { sendEmail } from '@/lib/email';
 import { CancellationEmail } from '@/lib/emails';
 

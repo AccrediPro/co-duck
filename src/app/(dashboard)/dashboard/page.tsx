@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { db, users, coachProfiles } from '@/db';
-import { User, Calendar, CheckCircle, Clock } from 'lucide-react';
+import { User, Calendar, CheckCircle } from 'lucide-react';
 import { getCoachDashboardData, getClientDashboardData } from './actions';
 import { CoachDashboardLayout } from '@/components/dashboard/coach-dashboard-layout';
 import { ClientDashboardLayout } from '@/components/dashboard/client-dashboard-layout';

@@ -8,7 +8,6 @@ import {
   MessageSquare,
   DollarSign,
   Clock,
-  User,
   CheckSquare,
   Search,
 } from 'lucide-react';

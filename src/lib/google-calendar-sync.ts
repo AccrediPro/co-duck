@@ -37,7 +37,7 @@ export async function syncBookingToCalendar(bookingId: number): Promise<void> {
     const sessionType = booking.sessionType as BookingSessionType;
 
     // Get user names
-    const [coachUser, clientUser] = await Promise.all([
+    const [coachUserResult, clientUserResult] = await Promise.all([
       db
         .select({ name: users.name, email: users.email })
         .from(users)
@@ -50,10 +50,10 @@ export async function syncBookingToCalendar(bookingId: number): Promise<void> {
         .limit(1),
     ]);
 
-    const coachName = coachUser[0]?.name || null;
-    const coachEmail = coachUser[0]?.email || null;
-    const clientName = clientUser[0]?.name || null;
-    const clientEmail = clientUser[0]?.email || null;
+    const coachName = coachUserResult[0]?.name || null;
+    const coachEmail = coachUserResult[0]?.email || null;
+    const clientName = clientUserResult[0]?.name || null;
+    const clientEmail = clientUserResult[0]?.email || null;
 
     // Check which users have Google Calendar connected
     const connectedTokens = await db
@@ -141,7 +141,7 @@ export async function updateBookingInCalendar(bookingId: number): Promise<void> 
     const sessionType = booking.sessionType as BookingSessionType;
 
     // Get user names
-    const [clientUser, coachUser] = await Promise.all([
+    const [clientUser] = await Promise.all([
       db
         .select({ name: users.name })
         .from(users)

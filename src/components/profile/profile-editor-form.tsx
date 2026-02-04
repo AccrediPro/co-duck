@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -48,7 +48,76 @@ import {
   CheckCircle,
   AlertCircle,
   Save,
+  Camera,
+  Upload,
 } from 'lucide-react';
+
+const MAX_IMAGE_DIMENSION = 800;
+const MAX_FILE_SIZE_BYTES = 500 * 1024; // 500KB
+
+async function compressImage(file: File): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+
+      let { width, height } = img;
+      if (width > MAX_IMAGE_DIMENSION || height > MAX_IMAGE_DIMENSION) {
+        if (width > height) {
+          height = Math.round((height * MAX_IMAGE_DIMENSION) / width);
+          width = MAX_IMAGE_DIMENSION;
+        } else {
+          width = Math.round((width * MAX_IMAGE_DIMENSION) / height);
+          height = MAX_IMAGE_DIMENSION;
+        }
+      }
+
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        reject(new Error('Failed to get canvas context'));
+        return;
+      }
+
+      ctx.drawImage(img, 0, 0, width, height);
+
+      let quality = 0.85;
+      const tryCompress = () => {
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) {
+              reject(new Error('Failed to compress image'));
+              return;
+            }
+
+            if (blob.size > MAX_FILE_SIZE_BYTES && quality > 0.3) {
+              quality -= 0.1;
+              tryCompress();
+              return;
+            }
+
+            resolve(blob);
+          },
+          'image/webp',
+          quality
+        );
+      };
+
+      tryCompress();
+    };
+
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      reject(new Error('Failed to load image'));
+    };
+
+    img.src = url;
+  });
+}
 
 // Combined schema for full profile
 const profileEditorSchema = z.object({
@@ -96,6 +165,8 @@ export function ProfileEditorForm({ initialData }: ProfileEditorFormProps) {
     initialData.profileCompletionPercentage
   );
   const [currentSlug, setCurrentSlug] = useState(initialData.slug);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Detect timezone on mount
   const [detectedTimezone, setDetectedTimezone] = useState<string>('America/New_York');
@@ -129,6 +200,61 @@ export function ProfileEditorForm({ initialData }: ProfileEditorFormProps) {
     control: form.control,
     name: 'sessionTypes',
   });
+
+  const handlePhotoUpload = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+      if (!allowedTypes.includes(file.type)) {
+        toast({
+          variant: 'destructive',
+          title: 'Invalid file type',
+          description: 'Please upload a JPG, PNG, or WebP image.',
+        });
+        return;
+      }
+
+      setIsUploading(true);
+
+      try {
+        const compressed = await compressImage(file);
+
+        const formData = new FormData();
+        formData.append('file', compressed, 'avatar.webp');
+
+        const response = await fetch('/api/upload/avatar', {
+          method: 'POST',
+          body: formData,
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.error || 'Upload failed');
+        }
+
+        form.setValue('profilePhotoUrl', result.url, { shouldValidate: true });
+        toast({
+          title: 'Photo uploaded',
+          description: 'Your profile photo has been updated.',
+        });
+      } catch (error) {
+        toast({
+          variant: 'destructive',
+          title: 'Upload failed',
+          description: error instanceof Error ? error.message : 'Failed to upload photo.',
+        });
+      } finally {
+        setIsUploading(false);
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+      }
+    },
+    [form, toast]
+  );
 
   // Watch all form values for live updates
   const watchedDisplayName = form.watch('displayName');
@@ -384,34 +510,72 @@ export function ProfileEditorForm({ initialData }: ProfileEditorFormProps) {
                 )}
               />
 
-              {/* Profile Photo URL */}
+              {/* Profile Photo Upload */}
               <FormField
                 control={form.control}
                 name="profilePhotoUrl"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Profile Photo URL</FormLabel>
-                    <FormControl>
-                      <Input placeholder="https://example.com/your-photo.jpg" {...field} />
-                    </FormControl>
-                    <FormDescription>
-                      Enter a URL to your profile photo. We recommend using a professional headshot.
-                    </FormDescription>
-                    <FormMessage />
-                    {field.value && (
-                      <div className="mt-2">
-                        <p className="mb-2 text-sm text-muted-foreground">Preview:</p>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={field.value}
-                          alt="Profile preview"
-                          className="h-24 w-24 rounded-full object-cover"
-                          onError={(e) => {
-                            e.currentTarget.style.display = 'none';
-                          }}
-                        />
+                    <FormLabel>Profile Photo</FormLabel>
+                    <div className="flex items-center gap-6">
+                      <div className="relative group">
+                        <div className="h-24 w-24 rounded-full overflow-hidden bg-muted flex items-center justify-center border-2 border-dashed border-muted-foreground/25">
+                          {field.value ? (
+                            <>
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={field.value}
+                                alt="Profile preview"
+                                className="h-full w-full object-cover"
+                                onError={(e) => {
+                                  e.currentTarget.style.display = 'none';
+                                }}
+                              />
+                            </>
+                          ) : (
+                            <Camera className="h-8 w-8 text-muted-foreground" />
+                          )}
+                        </div>
+                        {isUploading && (
+                          <div className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center">
+                            <Loader2 className="h-6 w-6 animate-spin text-white" />
+                          </div>
+                        )}
                       </div>
-                    )}
+                      <div className="space-y-2">
+                        <input
+                          ref={fileInputRef}
+                          type="file"
+                          accept="image/jpeg,image/png,image/webp"
+                          className="hidden"
+                          onChange={handlePhotoUpload}
+                          disabled={isUploading}
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => fileInputRef.current?.click()}
+                          disabled={isUploading}
+                        >
+                          {isUploading ? (
+                            <>
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              Uploading...
+                            </>
+                          ) : (
+                            <>
+                              <Upload className="mr-2 h-4 w-4" />
+                              {field.value ? 'Change Photo' : 'Upload Photo'}
+                            </>
+                          )}
+                        </Button>
+                        <FormDescription>
+                          JPG, PNG, or WebP. Max 800x800px, auto-compressed.
+                        </FormDescription>
+                      </div>
+                    </div>
+                    <FormMessage />
                   </FormItem>
                 )}
               />

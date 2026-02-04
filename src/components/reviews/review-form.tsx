@@ -21,6 +21,7 @@ export interface ReviewFormProps extends Omit<React.HTMLAttributes<HTMLFormEleme
 }
 
 const ReviewForm = React.forwardRef<HTMLFormElement, ReviewFormProps>(
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   ({ bookingId, onSubmit, isLoading = false, className, ...props }, ref) => {
     const [rating, setRating] = React.useState(0);
     const [title, setTitle] = React.useState('');

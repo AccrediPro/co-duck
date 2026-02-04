@@ -9,7 +9,7 @@
 
 import { db } from '@/db';
 import { users, coachProfiles } from '@/db/schema';
-import { eq, and, ilike, or, sql } from 'drizzle-orm';
+import { eq, and } from 'drizzle-orm';
 
 /**
  * GET /api/coaches

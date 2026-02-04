@@ -196,14 +196,6 @@ async function getCoaches(options: {
  * @param date - Date to format
  * @returns Formatted date string (e.g., "Jan 15, 2026")
  */
-function formatDate(date: Date): string {
-  return new Intl.DateTimeFormat('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  }).format(new Date(date));
-}
-
 /**
  * Gets user initials for avatar fallback.
  *

@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
-import { CheckCircle, BadgeCheck } from 'lucide-react';
+import { BadgeCheck } from 'lucide-react';
 import {
   Tooltip,
   TooltipContent,
