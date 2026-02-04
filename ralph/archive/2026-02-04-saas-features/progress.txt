@@ -1,0 +1,32 @@
+# Ralph Progress Log - Maestro UI Tests
+
+## Branch: ralph/maestro-tests
+## Started: 2026-02-03
+
+---
+
+## User Stories Status
+
+| ID | Title | Status |
+|----|-------|--------|
+| US-001 | Create Maestro test for home screen elements after login | Pending |
+| US-002 | Create Maestro test for drawer navigation between all screens | Pending |
+| US-003 | Create Maestro test for coaches list screen functionality | Pending |
+| US-004 | Create Maestro test for coach profile and booking flow | Pending |
+| US-005 | Create Maestro test for sessions screen with tab switching | Pending |
+| US-006 | Create Maestro test for messages screen | Pending |
+| US-007 | Create Maestro test for action items screen | Pending |
+| US-008 | Create Maestro test for profile screen and logout | Pending |
+| US-009 | Create Maestro test for dark mode rendering | Pending |
+| US-010 | Create Maestro full E2E smoke test flow | Pending |
+
+---
+
+## Notes
+
+Target: Comprehensive Maestro UI test suite for autonomous testing of all app screens.
+- Tests use existing testID attributes across all screens
+- Login pattern reuses Expo Go handling from existing flow_clerk_login.yaml
+- Environment variables: TEST_EMAIL, TEST_PASSWORD
+- Backend must be running at localhost:3001
+- Tests are read-only navigation tests (no data modification)

@@ -94,7 +94,7 @@ export function ClientActionItemsList({
       case 'overdue':
         return <AlertCircle className="h-5 w-5 text-red-500" />;
       case 'pending':
-        return <Circle className="h-5 w-5 text-blue-500" />;
+        return <Circle className="h-5 w-5 text-emerald-500" />;
     }
   };
 
@@ -114,7 +114,7 @@ export function ClientActionItemsList({
         );
       case 'pending':
         return (
-          <span className="inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
+          <span className="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400">
             Pending
           </span>
         );

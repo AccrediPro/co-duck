@@ -148,6 +148,26 @@ export const transactionStatusEnum = pgEnum('transaction_status', [
  */
 export const messageTypeEnum = pgEnum('message_type', ['text', 'system']);
 
+/**
+ * Coach Verification Status Enum
+ *
+ * Tracks the admin verification status of a coach profile.
+ *
+ * @enum {string}
+ * @property {'pending'} pending - Coach has not been verified yet (default)
+ * @property {'verified'} verified - Coach has been verified by an admin
+ * @property {'rejected'} rejected - Coach verification was rejected
+ *
+ * @remarks
+ * Verified coaches display a badge on their profile.
+ * Admin can change status via the admin dashboard.
+ */
+export const verificationStatusEnum = pgEnum('verification_status', [
+  'pending',
+  'verified',
+  'rejected',
+]);
+
 // ============================================================================
 // JSONB TYPE DEFINITIONS
 // ============================================================================
@@ -492,6 +512,59 @@ export const coachProfiles = pgTable(
      * Must be true for coach to accept paid bookings.
      */
     stripeOnboardingComplete: boolean('stripe_onboarding_complete').notNull().default(false),
+
+    // ----------------------
+    // Review Statistics
+    // ----------------------
+
+    /**
+     * Average rating from client reviews (1-5)
+     * @type {number | null}
+     *
+     * @remarks
+     * Calculated as average of all review ratings.
+     * Updated when reviews are added/modified.
+     * Stored as decimal for precision (e.g., 4.7).
+     */
+    averageRating: text('average_rating'),
+
+    /**
+     * Total number of reviews
+     * @type {number}
+     * @default 0
+     *
+     * @remarks
+     * Incremented when new review is added.
+     * Used for displaying "X reviews" on coach cards.
+     */
+    reviewCount: integer('review_count').notNull().default(0),
+
+    // ----------------------
+    // Verification Fields
+    // ----------------------
+
+    /**
+     * Admin verification status of the coach
+     * @type {'pending' | 'verified' | 'rejected'}
+     * @default 'pending'
+     *
+     * @remarks
+     * Managed by admins via the admin dashboard.
+     * Verified coaches display a badge on their profile.
+     */
+    verificationStatus: verificationStatusEnum('verification_status')
+      .notNull()
+      .default('pending'),
+
+    /**
+     * When the coach was verified by an admin
+     * @type {Date | null}
+     *
+     * @remarks
+     * Set when admin changes status to 'verified'.
+     * Null if never verified or if status is pending/rejected.
+     */
+    verifiedAt: timestamp('verified_at', { withTimezone: true }),
 
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true })
@@ -861,6 +934,36 @@ export const bookings = pgTable(
      * Must be a valid HTTPS URL.
      */
     meetingLink: text('meeting_link'),
+
+    /**
+     * When the 24-hour reminder email was sent
+     * @type {Date | null}
+     *
+     * @remarks
+     * Set by cron job when sending 24-hour reminder.
+     * Null if reminder not yet sent.
+     */
+    reminder24hSentAt: timestamp('reminder_24h_sent_at', { withTimezone: true }),
+
+    /**
+     * When the 1-hour reminder email was sent
+     * @type {Date | null}
+     *
+     * @remarks
+     * Set by cron job when sending 1-hour reminder.
+     * Null if reminder not yet sent.
+     */
+    reminder1hSentAt: timestamp('reminder_1h_sent_at', { withTimezone: true }),
+
+    /**
+     * Google Calendar event ID for synced bookings
+     * @type {string | null}
+     *
+     * @remarks
+     * Set when a booking is synced to Google Calendar.
+     * Used to update/delete the event on reschedule/cancel.
+     */
+    googleCalendarEventId: text('google_calendar_event_id'),
 
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true })
@@ -1391,3 +1494,168 @@ export type ActionItem = typeof actionItems.$inferSelect;
 
 /** Type for inserting a new action item record */
 export type NewActionItem = typeof actionItems.$inferInsert;
+
+// ============================================================================
+// REVIEWS TABLE
+// ============================================================================
+
+/**
+ * Reviews Table
+ *
+ * Client reviews for completed coaching sessions.
+ *
+ * ## Purpose
+ * Allows clients to leave reviews for coaches after completing sessions.
+ * Reviews include:
+ * - Star rating (1-5)
+ * - Title and detailed content
+ * - Optional coach response
+ * - Visibility control (public/private)
+ *
+ * ## Relationships
+ * - Belongs to bookings (1:1, unique constraint - one review per booking)
+ * - Belongs to users (as coach, many:1)
+ * - Belongs to users (as client, many:1)
+ *
+ * ## Constraints
+ * - Only one review allowed per booking (unique on bookingId)
+ * - Rating must be between 1-5 (validated at application level)
+ * - Only completed bookings can have reviews (validated at application level)
+ *
+ * @remarks
+ * Coach averageRating and reviewCount in coach_profiles are updated
+ * when reviews are created or modified.
+ */
+export const reviews = pgTable(
+  'reviews',
+  {
+    id: serial('id').primaryKey(),
+
+    /**
+     * The completed booking this review is for (unique - one review per booking)
+     * @type {number}
+     */
+    bookingId: integer('booking_id')
+      .notNull()
+      .unique()
+      .references(() => bookings.id, { onDelete: 'cascade' }),
+
+    /**
+     * The coach being reviewed
+     * @type {string}
+     */
+    coachId: text('coach_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+
+    /**
+     * The client writing the review
+     * @type {string}
+     */
+    clientId: text('client_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+
+    /**
+     * Star rating (1-5)
+     * @type {number}
+     *
+     * @remarks
+     * 1 = Poor, 2 = Fair, 3 = Good, 4 = Very Good, 5 = Excellent
+     * Validation at application level ensures 1-5 range.
+     */
+    rating: integer('rating').notNull(),
+
+    /**
+     * Review title/summary
+     * @type {string | null}
+     */
+    title: text('title'),
+
+    /**
+     * Detailed review content
+     * @type {string | null}
+     */
+    content: text('content'),
+
+    /**
+     * Coach's response to the review
+     * @type {string | null}
+     *
+     * @remarks
+     * Allows coaches to respond to reviews.
+     * Only the coach can set/edit this field.
+     */
+    coachResponse: text('coach_response'),
+
+    /**
+     * Whether review is publicly visible
+     * @type {boolean}
+     * @default true
+     *
+     * @remarks
+     * true = Visible on coach's public profile
+     * false = Only visible to coach and client
+     */
+    isPublic: boolean('is_public').notNull().default(true),
+
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
+  },
+  (table) => [
+    // Index for fetching reviews by coach (for profile display)
+    index('reviews_coach_id_idx').on(table.coachId),
+    // Index for fetching reviews by client
+    index('reviews_client_id_idx').on(table.clientId),
+    // Index for filtering public reviews
+    index('reviews_is_public_idx').on(table.isPublic),
+    // Index for sorting by creation date
+    index('reviews_created_at_idx').on(table.createdAt),
+  ]
+);
+
+/** Type for selecting a review record */
+export type Review = typeof reviews.$inferSelect;
+
+/** Type for inserting a new review record */
+export type NewReview = typeof reviews.$inferInsert;
+
+// ============================================================================
+// GOOGLE CALENDAR TOKENS TABLE
+// ============================================================================
+
+/**
+ * Google Calendar Tokens Table
+ *
+ * Stores OAuth2 tokens for Google Calendar integration.
+ * One record per user who has connected their Google Calendar.
+ */
+export const googleCalendarTokens = pgTable('google_calendar_tokens', {
+  userId: text('user_id')
+    .primaryKey()
+    .references(() => users.id, { onDelete: 'cascade' }),
+
+  accessToken: text('access_token').notNull(),
+
+  refreshToken: text('refresh_token').notNull(),
+
+  tokenExpiresAt: timestamp('token_expires_at', { withTimezone: true }).notNull(),
+
+  calendarId: text('calendar_id').notNull().default('primary'),
+
+  isConnected: boolean('is_connected').notNull().default(true),
+
+  lastSyncAt: timestamp('last_sync_at', { withTimezone: true }),
+
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp('updated_at', { withTimezone: true })
+    .notNull()
+    .defaultNow()
+    .$onUpdate(() => new Date()),
+});
+
+export type GoogleCalendarToken = typeof googleCalendarTokens.$inferSelect;
+export type NewGoogleCalendarToken = typeof googleCalendarTokens.$inferInsert;

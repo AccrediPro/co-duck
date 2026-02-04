@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { Facebook, Twitter, Instagram, Linkedin, Mail, ArrowRight } from 'lucide-react';
+import { Mail, ArrowRight } from 'lucide-react';
 
 const footerLinks = {
   product: [
@@ -19,13 +19,6 @@ const footerLinks = {
     { href: '/terms', label: 'Terms of Service' },
   ],
 };
-
-const socialLinks = [
-  { href: 'https://twitter.com/coachhub', label: 'Twitter', icon: Twitter },
-  { href: 'https://facebook.com/coachhub', label: 'Facebook', icon: Facebook },
-  { href: 'https://instagram.com/coachhub', label: 'Instagram', icon: Instagram },
-  { href: 'https://linkedin.com/company/coachhub', label: 'LinkedIn', icon: Linkedin },
-];
 
 export function PublicFooter() {
   const [email, setEmail] = useState('');
@@ -88,21 +81,6 @@ export function PublicFooter() {
             <p className="mt-2 text-sm text-muted-foreground">
               Connect with expert coaches for personalized guidance on your journey.
             </p>
-            {/* Social Media Links */}
-            <div className="mt-4 flex gap-3">
-              {socialLinks.map((social) => (
-                <a
-                  key={social.label}
-                  href={social.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="rounded-full bg-muted p-2 text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground"
-                  aria-label={social.label}
-                >
-                  <social.icon className="h-4 w-4" />
-                </a>
-              ))}
-            </div>
           </div>
 
           {/* Product Links */}

@@ -1,0 +1,431 @@
+{
+  "project": "Coaching Platform",
+  "branchName": "ralph/saas-features",
+  "description": "Critical SaaS features: Email notifications, Reviews system, Admin dashboard, Session reminders",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Install Resend and create email service",
+      "description": "As a developer, I need the email infrastructure set up.",
+      "acceptanceCriteria": [
+        "Install resend package: npm install resend",
+        "Install React Email: npm install @react-email/components",
+        "Add RESEND_API_KEY to .env.example",
+        "Create src/lib/email.ts with Resend client initialization",
+        "Create sendEmail function that accepts to, subject, react component",
+        "Handle missing API key gracefully (log warning, don't crash)",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-002",
+      "title": "Create email templates directory and base layout",
+      "description": "As a developer, I need reusable email components.",
+      "acceptanceCriteria": [
+        "Create src/lib/emails/templates/ directory",
+        "Create EmailLayout.tsx component with header, body, footer",
+        "Header shows CoachHub logo/text",
+        "Footer shows unsubscribe link placeholder and company info",
+        "Layout is responsive and works in email clients",
+        "Export from src/lib/emails/index.ts",
+        "Typecheck passes"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-003",
+      "title": "Create booking confirmation email template",
+      "description": "As a client, I want to receive booking confirmation emails.",
+      "acceptanceCriteria": [
+        "Create BookingConfirmationEmail.tsx template",
+        "Props: coachName, sessionType, date, time, duration, price, meetingLink",
+        "Shows session details in clear format",
+        "Includes Add to Calendar instructions",
+        "Shows meeting link if available",
+        "Uses EmailLayout wrapper",
+        "Typecheck passes"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-004",
+      "title": "Create cancellation email template",
+      "description": "As a user, I want to receive cancellation notifications.",
+      "acceptanceCriteria": [
+        "Create CancellationEmail.tsx template",
+        "Props: recipientName, sessionType, date, time, cancelledBy, reason, refundAmount",
+        "Shows what was cancelled and by whom",
+        "Shows refund info if applicable",
+        "Includes link to rebook",
+        "Uses EmailLayout wrapper",
+        "Typecheck passes"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-005",
+      "title": "Create session reminder email template",
+      "description": "As a user, I want reminder emails before sessions.",
+      "acceptanceCriteria": [
+        "Create SessionReminderEmail.tsx template",
+        "Props: recipientName, otherPartyName, sessionType, date, time, meetingLink, hoursUntil",
+        "Clear subject line: Reminder Session in X hours",
+        "Prominent Join Session button with meeting link",
+        "Shows all session details",
+        "Uses EmailLayout wrapper",
+        "Typecheck passes"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-006",
+      "title": "Integrate email into booking creation",
+      "description": "As a client, I receive confirmation when I book a session.",
+      "acceptanceCriteria": [
+        "In POST /api/bookings after successful booking creation",
+        "Send confirmation email to client",
+        "Send notification email to coach",
+        "Use try-catch to not fail booking if email fails",
+        "Log email errors for debugging",
+        "Typecheck passes"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-007",
+      "title": "Integrate email into cancellation flow",
+      "description": "As a user, I receive notification when a session is cancelled.",
+      "acceptanceCriteria": [
+        "In POST /api/bookings/[id]/cancel after successful cancellation",
+        "Send cancellation email to both coach and client",
+        "Include refund amount if applicable",
+        "Use try-catch to not fail cancellation if email fails",
+        "Typecheck passes"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-008",
+      "title": "Create reviews database schema",
+      "description": "As a developer, I need to store reviews in the database.",
+      "acceptanceCriteria": [
+        "Add to src/db/schema.ts: reviews table",
+        "Fields: id, bookingId (FK unique), coachId (FK), clientId (FK), rating (1-5), title, content, coachResponse, isPublic, createdAt, updatedAt",
+        "Add averageRating (decimal) and reviewCount (integer) to coachProfiles",
+        "Create index on coachId",
+        "Generate migration: npm run db:generate",
+        "Run migration: npm run db:migrate",
+        "Typecheck passes"
+      ],
+      "priority": 8,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-009",
+      "title": "Create reviews API - GET coach reviews",
+      "description": "As a visitor, I can see coach reviews.",
+      "acceptanceCriteria": [
+        "Create /api/coaches/[slug]/reviews/route.ts",
+        "GET endpoint returns paginated reviews for coach",
+        "Include client name (first name + last initial)",
+        "Include rating, title, content, coachResponse, createdAt",
+        "Sort by createdAt desc",
+        "Support ?page and ?limit params",
+        "Public endpoint (no auth required)",
+        "Typecheck passes"
+      ],
+      "priority": 9,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-010",
+      "title": "Create reviews API - POST create review",
+      "description": "As a client, I can submit a review after a completed session.",
+      "acceptanceCriteria": [
+        "Create /api/reviews/route.ts",
+        "POST endpoint creates review",
+        "Requires authentication",
+        "Validate: booking exists, is completed, belongs to user",
+        "Validate: no existing review for this booking",
+        "Validate: rating is 1-5",
+        "Update coach averageRating and reviewCount",
+        "Return created review",
+        "Typecheck passes"
+      ],
+      "priority": 10,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-011",
+      "title": "Create StarRating UI components",
+      "description": "As a user, I can see and interact with star ratings.",
+      "acceptanceCriteria": [
+        "Create src/components/ui/star-rating.tsx",
+        "StarRating component: displays filled/empty stars based on rating prop",
+        "StarRatingInput component: interactive, onClick sets rating",
+        "Support half-stars for display (2.5 shows 2.5 stars)",
+        "Accessible: keyboard navigation, aria labels",
+        "Typecheck passes"
+      ],
+      "priority": 11,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-012",
+      "title": "Create ReviewCard component",
+      "description": "As a visitor, I can see individual reviews.",
+      "acceptanceCriteria": [
+        "Create src/components/reviews/review-card.tsx",
+        "Shows: star rating, title, content, client name, date",
+        "Shows coach response if exists (indented reply)",
+        "Responsive design",
+        "Truncate long content with Read more",
+        "Typecheck passes"
+      ],
+      "priority": 12,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-013",
+      "title": "Add reviews section to coach profile page",
+      "description": "As a visitor, I can see reviews on coach profiles.",
+      "acceptanceCriteria": [
+        "Add reviews section to /coaches/[slug]/page.tsx",
+        "Fetch reviews from API",
+        "Show average rating and count at top",
+        "List ReviewCard components",
+        "Show Load more pagination",
+        "Empty state if no reviews",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 13,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-014",
+      "title": "Show rating on coach directory cards",
+      "description": "As a visitor, I can see ratings when browsing coaches.",
+      "acceptanceCriteria": [
+        "Update coach card component in /coaches page",
+        "Show StarRating with averageRating",
+        "Show review count: (X reviews)",
+        "Handle coaches with no reviews gracefully",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 14,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-015",
+      "title": "Add reminder fields to bookings table",
+      "description": "As a developer, I need to track which reminders were sent.",
+      "acceptanceCriteria": [
+        "Add to bookings table: reminder24hSentAt (timestamp nullable)",
+        "Add to bookings table: reminder1hSentAt (timestamp nullable)",
+        "Generate and run migration",
+        "Typecheck passes"
+      ],
+      "priority": 15,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-016",
+      "title": "Create session reminders cron endpoint",
+      "description": "As a user, I receive automatic reminders before sessions.",
+      "acceptanceCriteria": [
+        "Create /api/cron/session-reminders/route.ts",
+        "Verify CRON_SECRET header for security",
+        "Query confirmed bookings 24-25 hours away without reminder24hSentAt",
+        "Send reminder email to both parties",
+        "Update reminder24hSentAt timestamp",
+        "Query confirmed bookings 1-2 hours away without reminder1hSentAt",
+        "Send reminder email to both parties",
+        "Update reminder1hSentAt timestamp",
+        "Return count of reminders sent",
+        "Typecheck passes"
+      ],
+      "priority": 16,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-017",
+      "title": "Add Vercel cron configuration",
+      "description": "As a developer, I need cron jobs to run automatically.",
+      "acceptanceCriteria": [
+        "Create or update vercel.json",
+        "Add cron job for /api/cron/session-reminders",
+        "Schedule: every 15 minutes",
+        "Add CRON_SECRET to .env.example",
+        "Document cron setup in README or docs",
+        "Typecheck passes"
+      ],
+      "priority": 17,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-018",
+      "title": "Create admin middleware and layout",
+      "description": "As an admin, I can access the admin dashboard.",
+      "acceptanceCriteria": [
+        "Create src/app/admin/layout.tsx",
+        "Check user role is admin using auth()",
+        "Redirect to /dashboard with error toast if not admin",
+        "Create AdminSidebar component with navigation links",
+        "Links: Overview, Users, Coaches, Bookings",
+        "Different styling from user dashboard",
+        "Typecheck passes"
+      ],
+      "priority": 18,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-019",
+      "title": "Create admin overview page with stats",
+      "description": "As an admin, I can see platform statistics.",
+      "acceptanceCriteria": [
+        "Create src/app/admin/page.tsx",
+        "Show stat cards: total users, total coaches, total bookings, total revenue",
+        "Query counts from database",
+        "Show recent activity list (last 10 bookings)",
+        "Basic styling with cards",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 19,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-020",
+      "title": "Create admin users list page",
+      "description": "As an admin, I can view all platform users.",
+      "acceptanceCriteria": [
+        "Create src/app/admin/users/page.tsx",
+        "Paginated table of all users",
+        "Columns: avatar, name, email, role, created date",
+        "Search input filters by name or email",
+        "Role filter dropdown",
+        "Use server-side pagination",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 20,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-021",
+      "title": "Add admin user role change action",
+      "description": "As an admin, I can change user roles.",
+      "acceptanceCriteria": [
+        "Add role dropdown/select to each user row",
+        "Options: client, coach, admin",
+        "Create server action to update user role",
+        "Confirm before changing to/from admin",
+        "Toast notification on success/error",
+        "Cannot change own role (prevent lockout)",
+        "Typecheck passes"
+      ],
+      "priority": 21,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-022",
+      "title": "Add coach verification status to schema",
+      "description": "As a developer, I need to track coach verification.",
+      "acceptanceCriteria": [
+        "Add verificationStatus enum to coachProfiles: pending, verified, rejected",
+        "Add verifiedAt timestamp field (nullable)",
+        "Default new coaches to pending",
+        "Generate and run migration",
+        "Typecheck passes"
+      ],
+      "priority": 22,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-023",
+      "title": "Create admin coaches page with verification",
+      "description": "As an admin, I can verify coaches.",
+      "acceptanceCriteria": [
+        "Create src/app/admin/coaches/page.tsx",
+        "Table of all coach profiles",
+        "Columns: avatar, name, headline, verification status, created date",
+        "Filter by verification status",
+        "Verify button sets status to verified and verifiedAt",
+        "Reject button sets status to rejected",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 23,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-024",
+      "title": "Show verification badge on coach profiles",
+      "description": "As a visitor, I can see verified coaches.",
+      "acceptanceCriteria": [
+        "Create VerifiedBadge component with checkmark icon",
+        "Show badge on coach profile page if verified",
+        "Show badge on coach cards in directory if verified",
+        "Tooltip explains Verified Coach",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 24,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-025",
+      "title": "Create ReviewForm component and integration",
+      "description": "As a client, I can submit a review after a session.",
+      "acceptanceCriteria": [
+        "Create src/components/reviews/review-form.tsx",
+        "Star rating input (required)",
+        "Title input (optional, max 100 chars)",
+        "Content textarea (required, max 1000 chars)",
+        "Submit button with loading state",
+        "Add to session detail page for completed sessions",
+        "Only show if no review exists",
+        "Success toast and hide form on submit",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 25,
+      "passes": false,
+      "notes": ""
+    }
+  ]
+}

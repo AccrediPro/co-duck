@@ -50,7 +50,7 @@ const faqs = [
       'Browse our coaches page where you can filter by specialty, price range, and availability. Each coach has a detailed profile with their background, approach, and reviews from other clients.',
   },
   {
-    question: 'What if I\'m not satisfied with my session?',
+    question: "What if I'm not satisfied with my session?",
     answer:
       'We offer a satisfaction guarantee. If you are not happy with your first session with a coach, contact us within 48 hours and we will help you find a better match or provide a refund.',
   },
@@ -72,7 +72,7 @@ const faqs = [
   {
     question: 'Can I reschedule or cancel a session?',
     answer:
-      'Yes, you can reschedule or cancel sessions through your dashboard. Please check your coach\'s cancellation policy as some may require advance notice.',
+      "Yes, you can reschedule or cancel sessions through your dashboard. Please check your coach's cancellation policy as some may require advance notice.",
   },
 ];
 
@@ -130,10 +130,7 @@ export default function ContactPage() {
     setIsSubmitted(true);
   };
 
-  const handleInputChange = (
-    field: keyof typeof formState,
-    value: string
-  ) => {
+  const handleInputChange = (field: keyof typeof formState, value: string) => {
     setFormState((prev) => ({ ...prev, [field]: value }));
     // Clear error when user starts typing
     if (errors[field]) {
@@ -166,12 +163,10 @@ export default function ContactPage() {
       <section className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-background to-primary/10">
         <div className="container mx-auto px-4 py-16 md:py-24">
           <div className="mx-auto max-w-3xl text-center">
-            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
-              Get in Touch
-            </h1>
+            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">Get in Touch</h1>
             <p className="mx-auto mt-4 max-w-xl text-lg text-muted-foreground">
-              Have a question or need assistance? We are here to help. Fill out the form below
-              and we will get back to you as soon as possible.
+              Have a question or need assistance? We are here to help. Fill out the form below and
+              we will get back to you as soon as possible.
             </p>
           </div>
         </div>
@@ -221,9 +216,7 @@ export default function ContactPage() {
                     onChange={(e) => handleInputChange('name', e.target.value)}
                     className={errors.name ? 'border-red-500' : ''}
                   />
-                  {errors.name && (
-                    <p className="text-sm text-red-500">{errors.name}</p>
-                  )}
+                  {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
                 </div>
 
                 <div className="space-y-2">
@@ -236,9 +229,7 @@ export default function ContactPage() {
                     onChange={(e) => handleInputChange('email', e.target.value)}
                     className={errors.email ? 'border-red-500' : ''}
                   />
-                  {errors.email && (
-                    <p className="text-sm text-red-500">{errors.email}</p>
-                  )}
+                  {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
                 </div>
 
                 <div className="space-y-2">
@@ -258,9 +249,7 @@ export default function ContactPage() {
                       <SelectItem value="feedback">Feedback</SelectItem>
                     </SelectContent>
                   </Select>
-                  {errors.subject && (
-                    <p className="text-sm text-red-500">{errors.subject}</p>
-                  )}
+                  {errors.subject && <p className="text-sm text-red-500">{errors.subject}</p>}
                 </div>
 
                 <div className="space-y-2">
@@ -279,9 +268,7 @@ export default function ContactPage() {
                     onChange={(e) => handleInputChange('message', e.target.value)}
                     className={errors.message ? 'border-red-500' : ''}
                   />
-                  {errors.message && (
-                    <p className="text-sm text-red-500">{errors.message}</p>
-                  )}
+                  {errors.message && <p className="text-sm text-red-500">{errors.message}</p>}
                 </div>
 
                 <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
@@ -300,16 +287,12 @@ export default function ContactPage() {
             {/* FAQ Section */}
             <div>
               <h2 className="text-2xl font-bold">Frequently Asked Questions</h2>
-              <p className="mt-2 text-muted-foreground">
-                Find quick answers to common questions.
-              </p>
+              <p className="mt-2 text-muted-foreground">Find quick answers to common questions.</p>
 
               <Accordion type="single" collapsible className="mt-8">
                 {faqs.map((faq, index) => (
                   <AccordionItem key={index} value={`faq-${index}`}>
-                    <AccordionTrigger className="text-left">
-                      {faq.question}
-                    </AccordionTrigger>
+                    <AccordionTrigger className="text-left">{faq.question}</AccordionTrigger>
                     <AccordionContent className="text-muted-foreground">
                       {faq.answer}
                     </AccordionContent>
@@ -323,8 +306,8 @@ export default function ContactPage() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground">
-                    Can&apos;t find the answer you&apos;re looking for? Send us a message and we&apos;ll be
-                    happy to help.
+                    Can&apos;t find the answer you&apos;re looking for? Send us a message and
+                    we&apos;ll be happy to help.
                   </p>
                 </CardContent>
               </Card>

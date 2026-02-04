@@ -202,7 +202,7 @@ export function ClientSessionCard({
                 variant="outline"
                 size="sm"
                 asChild
-                className="text-blue-600 hover:bg-blue-50 hover:text-blue-700"
+                className="text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700"
               >
                 <Link href={`/dashboard/sessions/${session.id}/reschedule`}>
                   <RefreshCw className="mr-1.5 h-4 w-4" />

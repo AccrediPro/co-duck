@@ -19,8 +19,8 @@ export default function NotFound() {
 
         {/* Description */}
         <p className="mb-8 text-muted-foreground">
-          The page you&apos;re looking for doesn&apos;t exist or has been moved.
-          Don&apos;t worry, let&apos;s get you back on track.
+          The page you&apos;re looking for doesn&apos;t exist or has been moved. Don&apos;t worry,
+          let&apos;s get you back on track.
         </p>
 
         {/* Action Buttons */}

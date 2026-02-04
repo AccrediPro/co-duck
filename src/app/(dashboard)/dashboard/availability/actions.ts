@@ -162,4 +162,3 @@ export async function getAvailabilitySettings(): Promise<GetAvailabilityResult> 
     return { success: false, error: 'Failed to load availability settings' };
   }
 }
-

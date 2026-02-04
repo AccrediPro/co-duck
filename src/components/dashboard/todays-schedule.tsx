@@ -1,0 +1,88 @@
+import Link from 'next/link';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Calendar, ExternalLink } from 'lucide-react';
+import type { DashboardSession } from '@/app/(dashboard)/dashboard/actions';
+
+interface TodaysScheduleProps {
+  sessions: DashboardSession[];
+}
+
+export function TodaysSchedule({ sessions }: TodaysScheduleProps) {
+  const now = new Date();
+
+  return (
+    <Card className="col-span-2">
+      <CardHeader className="flex flex-row items-center justify-between">
+        <CardTitle className="flex items-center gap-2">
+          <Calendar className="h-5 w-5" />
+          Today&apos;s Schedule
+        </CardTitle>
+        <Badge variant="secondary">{sessions.length} session{sessions.length !== 1 ? 's' : ''}</Badge>
+      </CardHeader>
+      <CardContent>
+        {sessions.length === 0 ? (
+          <p className="text-sm text-muted-foreground">No sessions scheduled for today.</p>
+        ) : (
+          <div className="space-y-3">
+            {sessions.map((session) => {
+              const isNow =
+                new Date(session.startTime) <= now && new Date(session.endTime) > now;
+              const isPast = new Date(session.endTime) <= now;
+
+              return (
+                <div
+                  key={session.id}
+                  className={`flex items-center gap-4 rounded-lg border p-3 ${
+                    isNow ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950' : ''
+                  } ${isPast ? 'opacity-60' : ''}`}
+                >
+                  <div className="text-center">
+                    <p className="text-sm font-semibold">
+                      {new Date(session.startTime).toLocaleTimeString('en-US', {
+                        hour: 'numeric',
+                        minute: '2-digit',
+                        hour12: true,
+                      })}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {session.sessionType.duration}min
+                    </p>
+                  </div>
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={session.clientAvatar || undefined} />
+                    <AvatarFallback>
+                      {session.clientName?.charAt(0) || 'C'}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">
+                      {session.clientName || 'Client'}
+                    </p>
+                    <p className="text-xs text-muted-foreground truncate">
+                      {session.sessionType.name}
+                    </p>
+                  </div>
+                  {isNow && <Badge className="bg-emerald-600">Now</Badge>}
+                  {session.meetingLink && !isPast && (
+                    <Button size="sm" variant="outline" asChild>
+                      <a href={session.meetingLink} target="_blank" rel="noopener noreferrer">
+                        <ExternalLink className="mr-1 h-3 w-3" />
+                        Join
+                      </a>
+                    </Button>
+                  )}
+                  <Button size="sm" variant="ghost" asChild>
+                    <Link href={`/dashboard/sessions?tab=upcoming`}>View</Link>
+                  </Button>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}

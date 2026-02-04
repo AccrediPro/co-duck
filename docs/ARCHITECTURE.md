@@ -73,17 +73,17 @@ The Coaching Platform is a marketplace connecting coaches with clients for 1:1 c
 
 ## Tech Stack
 
-| Layer | Technology | Purpose |
-|-------|------------|---------|
-| **Frontend** | Next.js 14 (App Router) | React framework with SSR |
-| **Styling** | Tailwind CSS | Utility-first CSS |
-| **UI Components** | shadcn/ui | Headless component library |
-| **Forms** | React Hook Form + Zod | Form state and validation |
-| **Authentication** | Clerk | User auth, session management |
-| **Database** | PostgreSQL (Supabase) | Relational data storage |
-| **ORM** | Drizzle | Type-safe database queries |
-| **Payments** | Stripe Connect | Payment processing, payouts |
-| **Hosting** | Vercel (assumed) | Serverless deployment |
+| Layer              | Technology              | Purpose                       |
+| ------------------ | ----------------------- | ----------------------------- |
+| **Frontend**       | Next.js 14 (App Router) | React framework with SSR      |
+| **Styling**        | Tailwind CSS            | Utility-first CSS             |
+| **UI Components**  | shadcn/ui               | Headless component library    |
+| **Forms**          | React Hook Form + Zod   | Form state and validation     |
+| **Authentication** | Clerk                   | User auth, session management |
+| **Database**       | PostgreSQL (Supabase)   | Relational data storage       |
+| **ORM**            | Drizzle                 | Type-safe database queries    |
+| **Payments**       | Stripe Connect          | Payment processing, payouts   |
+| **Hosting**        | Vercel (assumed)        | Serverless deployment         |
 
 ---
 
@@ -162,10 +162,10 @@ coaching-platform/
 
 Next.js App Router uses **route groups** (folders in parentheses) for organization without affecting URLs:
 
-| Route Group | Purpose | Layout |
-|-------------|---------|--------|
-| `(dashboard)` | Authenticated pages | Sidebar navigation |
-| `(public)` | Public pages | Marketing header/footer |
+| Route Group   | Purpose             | Layout                  |
+| ------------- | ------------------- | ----------------------- |
+| `(dashboard)` | Authenticated pages | Sidebar navigation      |
+| `(public)`    | Public pages        | Marketing header/footer |
 
 ---
 
@@ -231,11 +231,11 @@ The platform uses Clerk for authentication with server-side session management.
 
 ### User Roles
 
-| Role | Assigned When | Capabilities |
-|------|---------------|--------------|
-| `client` | User signup (default) | Book sessions, message coaches, view action items |
-| `coach` | After completing onboarding | All client capabilities + manage sessions, set availability |
-| `admin` | Manual assignment | Platform administration |
+| Role     | Assigned When               | Capabilities                                                |
+| -------- | --------------------------- | ----------------------------------------------------------- |
+| `client` | User signup (default)       | Book sessions, message coaches, view action items           |
+| `coach`  | After completing onboarding | All client capabilities + manage sessions, set availability |
+| `admin`  | Manual assignment           | Platform administration                                     |
 
 ---
 
@@ -476,10 +476,10 @@ Time slot generation considers multiple factors.
 
 ### Component Types
 
-| Type | Directive | Use Case |
-|------|-----------|----------|
+| Type             | Directive      | Use Case                      |
+| ---------------- | -------------- | ----------------------------- |
 | Server Component | None (default) | Data fetching, static content |
-| Client Component | `'use client'` | Interactivity, browser APIs |
+| Client Component | `'use client'` | Interactivity, browser APIs   |
 
 ### Data Flow Pattern
 
@@ -517,13 +517,13 @@ Time slot generation considers multiple factors.
 
 Components are organized by feature domain in `src/components/`:
 
-| Folder | Domain | Key Components |
-|--------|--------|----------------|
-| `booking/` | Session booking | BookingFlow, BookingConfirmation |
-| `sessions/` | Session management | SessionCard, SessionsList |
-| `messages/` | Messaging | ChatView, MessageInput |
-| `onboarding/` | Coach setup | BasicInfoForm, PricingForm |
-| `ui/` | Primitives | Button, Card, Dialog (shadcn/ui) |
+| Folder        | Domain             | Key Components                   |
+| ------------- | ------------------ | -------------------------------- |
+| `booking/`    | Session booking    | BookingFlow, BookingConfirmation |
+| `sessions/`   | Session management | SessionCard, SessionsList        |
+| `messages/`   | Messaging          | ChatView, MessageInput           |
+| `onboarding/` | Coach setup        | BasicInfoForm, PricingForm       |
+| `ui/`         | Primitives         | Button, Card, Dialog (shadcn/ui) |
 
 ---
 
@@ -552,6 +552,7 @@ export async function getCoachSessions(params) {
 ```
 
 Benefits:
+
 - Type-safe function calls
 - Automatic Clerk authentication
 - Co-located with UI
@@ -563,10 +564,10 @@ Location: `src/app/api/webhooks/`
 
 Reserved for external service callbacks that cannot use server actions:
 
-| Route | Service | Purpose |
-|-------|---------|---------|
-| `/api/webhooks/stripe` | Stripe | Payment events |
-| `/api/webhooks/clerk` | Clerk | User sync events |
+| Route                  | Service | Purpose          |
+| ---------------------- | ------- | ---------------- |
+| `/api/webhooks/stripe` | Stripe  | Payment events   |
+| `/api/webhooks/clerk`  | Clerk   | User sync events |
 
 ---
 
@@ -639,23 +640,24 @@ See [Database README](../src/db/README.md) for complete schema documentation.
 
 ### Clerk (Authentication)
 
-| Feature | Usage |
-|---------|-------|
+| Feature         | Usage                            |
+| --------------- | -------------------------------- |
 | User management | Signup, signin, session handling |
-| Webhooks | User sync to database |
-| Middleware | Route protection |
-| Server helpers | `auth()` in server actions |
+| Webhooks        | User sync to database            |
+| Middleware      | Route protection                 |
+| Server helpers  | `auth()` in server actions       |
 
 ### Stripe Connect (Payments)
 
-| Feature | Usage |
-|---------|-------|
-| Checkout Sessions | Payment collection |
-| Connect accounts | Coach payout destinations |
-| Webhooks | Payment confirmation |
-| Refunds | Cancellation processing |
+| Feature           | Usage                     |
+| ----------------- | ------------------------- |
+| Checkout Sessions | Payment collection        |
+| Connect accounts  | Coach payout destinations |
+| Webhooks          | Payment confirmation      |
+| Refunds           | Cancellation processing   |
 
 Platform fee structure:
+
 - Platform: 10% of transaction
 - Coach: 90% via destination charge
 

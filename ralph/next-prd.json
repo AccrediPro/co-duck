@@ -1,0 +1,187 @@
+{
+  "project": "Coaching Platform",
+  "branchName": "ralph/coaching-tools-templates",
+  "description": "Coaching tools: template system for coaches and clients, progress tracking, homework/task templates, session note templates, client intake forms, and enhanced action items with templates",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Create coaching templates schema",
+      "description": "As a developer, I need database tables to store reusable coaching templates.",
+      "acceptanceCriteria": [
+        "Add coachingTemplates table: id, coachId (FK), title, description, category (enum: action_item, session_note, intake_form, homework), content (JSONB), isPublic (boolean, default false), createdAt, updatedAt",
+        "Add templateCategory enum: action_item, session_note, intake_form, homework",
+        "Add index on coachId and category",
+        "Generate and run migration",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": "JSONB content stores template structure: for action items it's {items: [{title, description, dueOffsetDays}]}, for notes it's {sections: [{heading, placeholder}]}, for intake forms it's {fields: [{label, type, required}]}"
+    },
+    {
+      "id": "US-002",
+      "title": "Create platform-provided default templates",
+      "description": "As a coach, I want pre-built templates available out of the box.",
+      "acceptanceCriteria": [
+        "Create seed data or constants file with default templates",
+        "Action item templates: 'Weekly Reflection', 'Goal Setting Worksheet', 'Accountability Check-in'",
+        "Session note templates: 'First Session Intake', 'Progress Review', 'Goal Review Session'",
+        "Homework templates: 'Journaling Exercise', 'Strengths Assessment', 'Vision Board Planning'",
+        "Intake form templates: 'New Client Intake', 'Coaching Goals Assessment'",
+        "Store as system templates (coachId = null or special system ID)",
+        "Typecheck passes"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": "These are read-only platform templates. Coaches can duplicate them to customize."
+    },
+    {
+      "id": "US-003",
+      "title": "Create template management page for coaches",
+      "description": "As a coach, I want to create, edit, and manage my coaching templates.",
+      "acceptanceCriteria": [
+        "Create /dashboard/templates/page.tsx with tabs by category",
+        "Show system templates (read-only) and coach's custom templates",
+        "Each template card shows: title, description, category badge, use count",
+        "Create button opens template editor dialog/page",
+        "Template editor: title, description, category select, content builder",
+        "Action item template builder: add/remove items with title, description, due offset",
+        "Session note template builder: add/remove sections with heading and placeholder",
+        "Duplicate button to copy system template into coach's own",
+        "Delete button for coach's own templates",
+        "Add Templates link to coach sidebar navigation",
+        "Create server actions: getTemplates, createTemplate, updateTemplate, deleteTemplate, duplicateTemplate",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": ""
+    },
+    {
+      "id": "US-004",
+      "title": "Apply action item template when assigning tasks",
+      "description": "As a coach, I want to use a template to quickly assign a set of action items to a client.",
+      "acceptanceCriteria": [
+        "Add 'Use Template' button to the add action item dialog",
+        "Clicking shows a dropdown/modal of available action item templates",
+        "Selecting a template pre-fills the form with the template's items",
+        "Due dates calculated from template's dueOffsetDays relative to today",
+        "Coach can edit items before saving",
+        "Batch create: all items from template created at once",
+        "Create server action createActionItemsFromTemplate(clientId, templateId, overrides)",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": "Action item creation is in action-items/actions.ts. Dialog is at src/components/action-items/add-action-item-dialog.tsx."
+    },
+    {
+      "id": "US-005",
+      "title": "Apply session note template when writing notes",
+      "description": "As a coach, I want to use a template to structure my session notes.",
+      "acceptanceCriteria": [
+        "Add 'Use Template' dropdown to session notes editor",
+        "Selecting a template inserts structured sections into the notes textarea",
+        "Format: '## Section Heading\\n[placeholder text]\\n\\n' for each section",
+        "Coach can edit freely after template is applied",
+        "Warn if overwriting existing notes content",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": "Session notes editor is at src/app/(dashboard)/dashboard/sessions/[id]/coach-notes-editor.tsx. Notes stored as plain text in session_notes table."
+    },
+    {
+      "id": "US-006",
+      "title": "Create client intake form system",
+      "description": "As a coach, I want to send an intake form to new clients that they can fill out.",
+      "acceptanceCriteria": [
+        "Add clientFormResponses table: id, templateId (FK), coachId, clientId, responses (JSONB), submittedAt, createdAt",
+        "Generate and run migration",
+        "Create server action sendIntakeForm(clientId, templateId) that creates a pending form response",
+        "Create server action submitFormResponse(responseId, responses) for client to submit",
+        "Create server action getClientForms(clientId) for coach to view submissions",
+        "Typecheck passes"
+      ],
+      "priority": 6,
+      "passes": false,
+      "notes": "Intake form template content.fields has [{label, type: 'text'|'textarea'|'select'|'checkbox', options?, required}]"
+    },
+    {
+      "id": "US-007",
+      "title": "Create client intake form UI",
+      "description": "As a client, I want to fill out intake forms assigned by my coach.",
+      "acceptanceCriteria": [
+        "Create /dashboard/forms/[id]/page.tsx for client to fill out a form",
+        "Render form fields dynamically from template content",
+        "Support field types: text input, textarea, select dropdown, checkbox",
+        "Required field validation",
+        "Submit button saves responses",
+        "Show pending forms on client dashboard with notification badge",
+        "Coach can view completed responses on client profile page",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 7,
+      "passes": false,
+      "notes": "Client profile page created in platform-ux-v2 PRD (US-011). Add forms tab there."
+    },
+    {
+      "id": "US-008",
+      "title": "Add progress tracking to client profile",
+      "description": "As a coach, I want to see a client's progress over time on their profile page.",
+      "acceptanceCriteria": [
+        "Add progress section to /dashboard/clients/[clientId] page",
+        "Show timeline of: sessions completed (with dates), action items completed (with dates), forms submitted",
+        "Show completion rate: action items completed vs assigned (percentage + chart)",
+        "Show session frequency: sessions per month bar or visual",
+        "Show streak: consecutive weeks with at least one session",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 8,
+      "passes": false,
+      "notes": "Depends on client profile page from platform-ux-v2 US-011. Query bookings, action_items, and clientFormResponses tables."
+    },
+    {
+      "id": "US-009",
+      "title": "Enhanced client dashboard with coach assignments",
+      "description": "As a client, I want to see homework, action items, and forms from my coach in a polished dashboard section.",
+      "acceptanceCriteria": [
+        "Add 'From Your Coach' section on client dashboard",
+        "Show pending action items with due dates and urgency colors",
+        "Show pending intake forms with 'Fill Out' button",
+        "Show recent coach notes/feedback if coach marks notes as shared (add isSharedWithClient boolean to session_notes)",
+        "Generate and run migration for isSharedWithClient column",
+        "Each item links to its detail page",
+        "Section shows coach avatar and name",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 9,
+      "passes": false,
+      "notes": "Client dashboard layout is at src/components/dashboard/client-dashboard-layout.tsx. Add new widget component."
+    },
+    {
+      "id": "US-010",
+      "title": "Add homework template builder with rich content",
+      "description": "As a coach, I want to create homework assignments with instructions, links, and checklists.",
+      "acceptanceCriteria": [
+        "Homework template content supports: title, instructions (text), checklist items (array), resource links (array of {label, url})",
+        "Template editor has dedicated homework builder with sections for each",
+        "When assigned to client, creates action items for checklist items",
+        "Client sees homework as a grouped card with instructions + checklist + resources",
+        "Add 'Assign Homework' button on client profile page that uses homework templates",
+        "Create server action assignHomework(clientId, templateId, customizations)",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 10,
+      "passes": false,
+      "notes": "Homework is built on top of action items but grouped together. Could use a homeworkAssignments linking table or a parentId on action_items."
+    }
+  ]
+}

@@ -13,6 +13,8 @@ import type { SessionType } from '@/db/schema';
 import { Calendar, Check, Clock, Copy, Globe, User } from 'lucide-react';
 import { AvailabilitySection } from './availability-section';
 import { MessageButton } from '@/components/messages';
+import { ReviewsSection } from '@/components/reviews';
+import { VerifiedBadge } from './verified-badge';
 
 interface AvailabilityDisplayData {
   timezone: string | null;
@@ -37,6 +39,8 @@ interface CoachProfileDisplayProps {
   // For messaging - only show if user is logged in and not viewing their own profile
   coachId?: string;
   currentUserId?: string | null;
+  // Verification status
+  isVerified?: boolean;
 }
 
 export function CoachProfileDisplay({
@@ -53,6 +57,7 @@ export function CoachProfileDisplay({
   availability,
   coachId,
   currentUserId,
+  isVerified,
 }: CoachProfileDisplayProps) {
   // Show message button only if user is logged in and not viewing their own profile
   const canMessage = currentUserId && coachId && currentUserId !== coachId;
@@ -117,7 +122,10 @@ export function CoachProfileDisplay({
 
             {/* Info */}
             <div className="flex-1 text-center sm:text-left">
-              <h1 className="text-2xl font-bold sm:text-3xl">{name}</h1>
+              <div className="flex items-center justify-center gap-2 sm:justify-start">
+                <h1 className="text-2xl font-bold sm:text-3xl">{name}</h1>
+                {isVerified && <VerifiedBadge size="lg" />}
+              </div>
               {headline && (
                 <p className="mt-1 text-lg text-muted-foreground sm:text-xl">{headline}</p>
               )}
@@ -229,6 +237,9 @@ export function CoachProfileDisplay({
               </CardContent>
             </Card>
           )}
+
+          {/* Reviews Section */}
+          <ReviewsSection slug={slug} />
         </div>
 
         {/* Sidebar - Availability & Pricing */}

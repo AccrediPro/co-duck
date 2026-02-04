@@ -5,6 +5,7 @@ A marketplace platform connecting coaches with clients for 1:1 coaching sessions
 ## Features
 
 ### For Clients
+
 - **Coach Discovery** - Browse and search coaches by specialty, view profiles and reviews
 - **Session Booking** - Book sessions with real-time availability, integrated Stripe payments
 - **Session Management** - View upcoming/past sessions, reschedule, cancel with refund policy
@@ -12,6 +13,7 @@ A marketplace platform connecting coaches with clients for 1:1 coaching sessions
 - **Action Items** - Track tasks and assignments from coaching sessions
 
 ### For Coaches
+
 - **Profile Management** - Create and publish professional coaching profile
 - **Availability Settings** - Configure weekly schedule with date-specific overrides
 - **Session Management** - View bookings, mark complete, add session notes
@@ -19,6 +21,7 @@ A marketplace platform connecting coaches with clients for 1:1 coaching sessions
 - **Earnings Dashboard** - View payment history and earnings (Stripe Connect)
 
 ### Platform Features
+
 - **Authentication** - Clerk-powered auth with role-based access (client, coach, admin)
 - **Payments** - Stripe Connect for marketplace payments (10% platform fee)
 - **Real-time Messaging** - Polling-based chat with read receipts
@@ -26,17 +29,17 @@ A marketplace platform connecting coaches with clients for 1:1 coaching sessions
 
 ## Tech Stack
 
-| Category | Technology |
-|----------|------------|
-| **Framework** | Next.js 14 (App Router) |
-| **Language** | TypeScript |
-| **Styling** | Tailwind CSS |
-| **UI Components** | shadcn/ui (Radix UI primitives) |
-| **Database** | PostgreSQL |
-| **ORM** | Drizzle ORM |
-| **Authentication** | Clerk |
-| **Payments** | Stripe Connect |
-| **Forms** | React Hook Form + Zod |
+| Category           | Technology                      |
+| ------------------ | ------------------------------- |
+| **Framework**      | Next.js 14 (App Router)         |
+| **Language**       | TypeScript                      |
+| **Styling**        | Tailwind CSS                    |
+| **UI Components**  | shadcn/ui (Radix UI primitives) |
+| **Database**       | PostgreSQL                      |
+| **ORM**            | Drizzle ORM                     |
+| **Authentication** | Clerk                           |
+| **Payments**       | Stripe Connect                  |
+| **Forms**          | React Hook Form + Zod           |
 
 ## Getting Started
 
@@ -50,12 +53,14 @@ A marketplace platform connecting coaches with clients for 1:1 coaching sessions
 ### Installation
 
 1. **Clone the repository**
+
    ```bash
    git clone <repository-url>
    cd coaching-platform
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
@@ -63,6 +68,7 @@ A marketplace platform connecting coaches with clients for 1:1 coaching sessions
 3. **Set up environment variables**
 
    Copy the example environment file and fill in your values:
+
    ```bash
    cp .env.example .env.local
    ```
@@ -70,6 +76,7 @@ A marketplace platform connecting coaches with clients for 1:1 coaching sessions
    See [Environment Variables](#environment-variables) section for required values.
 
 4. **Set up the database**
+
    ```bash
    # Generate migrations from schema
    npm run db:generate
@@ -79,6 +86,7 @@ A marketplace platform connecting coaches with clients for 1:1 coaching sessions
    ```
 
 5. **Start the development server**
+
    ```bash
    npm run dev
    ```
@@ -92,12 +100,14 @@ A marketplace platform connecting coaches with clients for 1:1 coaching sessions
 Create a `.env.local` file with the following variables:
 
 ### Database
+
 ```bash
 # PostgreSQL connection string
 DATABASE_URL="postgresql://user:password@host:5432/database"
 ```
 
 ### Clerk Authentication
+
 ```bash
 # From Clerk Dashboard > API Keys
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY="pk_test_..."
@@ -112,6 +122,7 @@ NEXT_PUBLIC_CLERK_SIGN_UP_URL="/sign-up"
 ```
 
 ### Stripe Payments
+
 ```bash
 # From Stripe Dashboard > Developers > API Keys
 STRIPE_SECRET_KEY="sk_test_..."
@@ -122,6 +133,7 @@ STRIPE_WEBHOOK_SECRET="whsec_..."
 ```
 
 ### Application URLs
+
 ```bash
 # Your application's base URL
 NEXT_PUBLIC_APP_URL="http://localhost:3000"
@@ -210,6 +222,7 @@ coaching-platform/
 4. Copy the signing secret to `STRIPE_WEBHOOK_SECRET`
 
 **Local Development:**
+
 ```bash
 # Install Stripe CLI, then:
 stripe listen --forward-to localhost:3000/api/webhooks/stripe
@@ -233,11 +246,11 @@ Use ngrok or similar to expose localhost, then configure Clerk webhook to point 
 
 ### User Roles
 
-| Role | Description |
-|------|-------------|
-| **Client** | Default role. Can browse coaches, book sessions, message coaches |
-| **Coach** | Created via onboarding flow. Can manage availability, sessions, and clients |
-| **Admin** | Platform administrator (future features) |
+| Role       | Description                                                                 |
+| ---------- | --------------------------------------------------------------------------- |
+| **Client** | Default role. Can browse coaches, book sessions, message coaches            |
+| **Coach**  | Created via onboarding flow. Can manage availability, sessions, and clients |
+| **Admin**  | Platform administrator (future features)                                    |
 
 ### Booking Flow
 
@@ -255,11 +268,11 @@ Use ngrok or similar to expose localhost, then configure Clerk webhook to point 
 
 ### Refund Policy
 
-| Cancellation By | Timing | Refund |
-|-----------------|--------|--------|
-| Coach | Any time | 100% |
-| Client | >24 hours before | 100% |
-| Client | <24 hours before | 0% |
+| Cancellation By | Timing           | Refund |
+| --------------- | ---------------- | ------ |
+| Coach           | Any time         | 100%   |
+| Client          | >24 hours before | 100%   |
+| Client          | <24 hours before | 0%     |
 
 ## Contributing
 

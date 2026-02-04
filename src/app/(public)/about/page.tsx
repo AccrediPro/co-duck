@@ -2,14 +2,7 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import {
-  Users,
-  Target,
-  Heart,
-  Sparkles,
-  ArrowRight,
-  CheckCircle,
-} from 'lucide-react';
+import { Users, Target, Heart, Sparkles, ArrowRight, CheckCircle } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'About Us | CoachHub',
@@ -55,7 +48,8 @@ const milestones = [
   {
     year: '2023',
     title: 'Founded',
-    description: 'CoachHub was launched with a vision to democratize access to professional coaching.',
+    description:
+      'CoachHub was launched with a vision to democratize access to professional coaching.',
   },
   {
     year: '2024',
@@ -115,8 +109,8 @@ export default function AboutPage() {
               We believe that everyone has the potential to achieve extraordinary things. Our
               mission is to make professional coaching accessible, affordable, and effective for
               anyone seeking personal or professional growth. By connecting you with the right
-              coach, we help you overcome obstacles, develop new skills, and create lasting
-              positive change in your life.
+              coach, we help you overcome obstacles, develop new skills, and create lasting positive
+              change in your life.
             </p>
           </div>
         </div>
@@ -152,16 +146,14 @@ export default function AboutPage() {
         <div className="container mx-auto px-4">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="text-3xl font-bold tracking-tight md:text-4xl">Our Journey</h2>
-            <p className="mt-4 text-muted-foreground">
-              Key milestones in the CoachHub story.
-            </p>
+            <p className="mt-4 text-muted-foreground">Key milestones in the CoachHub story.</p>
           </div>
           <div className="mx-auto mt-16 max-w-3xl">
             <div className="space-y-8">
               {milestones.map((milestone, index) => (
                 <div key={milestone.year} className="flex gap-6">
                   <div className="flex flex-col items-center">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary font-bold text-primary-foreground">
                       {index + 1}
                     </div>
                     {index < milestones.length - 1 && (
@@ -212,16 +204,11 @@ export default function AboutPage() {
               <div className="relative z-10">
                 <h3 className="text-2xl font-bold md:text-3xl">Ready to start your journey?</h3>
                 <p className="mt-4 text-primary-foreground/90">
-                  Join thousands of others who have transformed their lives with the help of
-                  expert coaching.
+                  Join thousands of others who have transformed their lives with the help of expert
+                  coaching.
                 </p>
                 <div className="mt-8 flex flex-col gap-4 sm:flex-row">
-                  <Button
-                    size="lg"
-                    variant="secondary"
-                    className="font-semibold"
-                    asChild
-                  >
+                  <Button size="lg" variant="secondary" className="font-semibold" asChild>
                     <Link href="/coaches">
                       Find a Coach
                       <ArrowRight className="ml-2 h-4 w-4" />
@@ -247,9 +234,7 @@ export default function AboutPage() {
       {/* CTA Section */}
       <section className="py-20">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
-            Join Our Community
-          </h2>
+          <h2 className="text-3xl font-bold tracking-tight md:text-4xl">Join Our Community</h2>
           <p className="mx-auto mt-4 max-w-xl text-muted-foreground">
             Whether you are looking for guidance or want to share your expertise, CoachHub is the
             place for you.

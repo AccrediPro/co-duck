@@ -9,7 +9,18 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import { ArrowUp, Printer, Shield, Eye, Database, Cookie, Globe, Mail, Lock, UserCheck } from 'lucide-react';
+import {
+  ArrowUp,
+  Printer,
+  Shield,
+  Eye,
+  Database,
+  Cookie,
+  Globe,
+  Mail,
+  Lock,
+  UserCheck,
+} from 'lucide-react';
 
 const sections = [
   {
@@ -245,7 +256,7 @@ If you have concerns about international data transfers, please contact us at pr
   {
     id: 'children',
     icon: Shield,
-    title: '10. Children\'s Privacy',
+    title: "10. Children's Privacy",
     content: `Our Service is not intended for children under 18 years of age.
 
 **Our Policy:**
@@ -373,9 +384,7 @@ export default function PrivacyPage() {
               <Shield className="mr-2 h-4 w-4" />
               Your Privacy Matters
             </div>
-            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
-              Privacy Policy
-            </h1>
+            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">Privacy Policy</h1>
             <p className="mx-auto mt-4 max-w-xl text-muted-foreground">
               Last updated: January 31, 2026
             </p>
@@ -429,9 +438,7 @@ export default function PrivacyPage() {
               {/* Mobile Table of Contents */}
               <div className="mb-8 lg:hidden">
                 <details className="rounded-lg border p-4">
-                  <summary className="cursor-pointer font-semibold">
-                    Table of Contents
-                  </summary>
+                  <summary className="cursor-pointer font-semibold">Table of Contents</summary>
                   <nav className="mt-4 space-y-2">
                     {tableOfContents.map((item) => (
                       <button
@@ -449,10 +456,10 @@ export default function PrivacyPage() {
               {/* Introduction */}
               <div className="mb-8 rounded-lg border bg-muted/30 p-6">
                 <p className="text-muted-foreground">
-                  At CoachHub, we take your privacy seriously. This Privacy Policy describes how
-                  we collect, use, share, and protect your personal information when you use our
-                  platform. We believe in transparency and want you to understand exactly how
-                  your data is handled.
+                  At CoachHub, we take your privacy seriously. This Privacy Policy describes how we
+                  collect, use, share, and protect your personal information when you use our
+                  platform. We believe in transparency and want you to understand exactly how your
+                  data is handled.
                 </p>
               </div>
 

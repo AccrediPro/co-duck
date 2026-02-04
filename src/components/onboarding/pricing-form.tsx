@@ -324,7 +324,7 @@ export function PricingForm({ initialData }: PricingFormProps) {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <FormLabel className="text-base">Session Types *</FormLabel>
+                  <p className="text-base font-medium leading-none">Session Types *</p>
                   <p className="text-sm text-muted-foreground">
                     Define the types of sessions you offer. At least one is required.
                   </p>

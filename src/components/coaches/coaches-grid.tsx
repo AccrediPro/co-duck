@@ -13,6 +13,9 @@ export interface CoachListItem {
   specialties: string[] | null;
   currency: string | null;
   sessionTypes: SessionType[] | null;
+  averageRating: string | null;
+  reviewCount: number | null;
+  verificationStatus: 'pending' | 'verified' | 'rejected';
   name: string | null;
   avatarUrl: string | null;
 }
@@ -85,6 +88,9 @@ export function CoachesGrid({
             sessionTypes={coach.sessionTypes}
             currency={coach.currency}
             slug={coach.slug}
+            averageRating={coach.averageRating}
+            reviewCount={coach.reviewCount}
+            isVerified={coach.verificationStatus === 'verified'}
           />
         ))}
       </div>

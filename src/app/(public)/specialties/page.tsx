@@ -55,18 +55,15 @@ const specialtyDescriptions: Record<string, string> = {
     'Enhance your leadership presence, decision-making, and strategic thinking at the executive level.',
   'Relationship Coaching':
     'Improve communication, deepen connections, and build healthier relationships.',
-  'Business Coaching':
-    'Scale your business, overcome challenges, and achieve sustainable growth.',
+  'Business Coaching': 'Scale your business, overcome challenges, and achieve sustainable growth.',
   'Leadership Coaching':
     'Develop your leadership skills, inspire teams, and drive organizational success.',
   'Mindset & Motivation':
     'Transform limiting beliefs, build resilience, and unlock your full potential.',
-  'Financial Coaching':
-    'Master money management, build wealth, and achieve financial freedom.',
+  'Financial Coaching': 'Master money management, build wealth, and achieve financial freedom.',
   'Parenting Coaching':
     'Navigate parenting challenges with confidence and build stronger family bonds.',
-  'Spiritual Coaching':
-    'Explore your inner journey, find purpose, and cultivate spiritual growth.',
+  'Spiritual Coaching': 'Explore your inner journey, find purpose, and cultivate spiritual growth.',
   'Performance Coaching':
     'Optimize your performance, break through plateaus, and achieve peak results.',
 };
@@ -144,15 +141,15 @@ export default async function SpecialtiesPage() {
                   href={`/coaches?specialties=${encodeURIComponent(specialty)}`}
                   className="group"
                 >
-                  <Card className="h-full transition-all duration-200 hover:shadow-lg hover:border-primary/50">
+                  <Card className="h-full transition-all duration-200 hover:border-primary/50 hover:shadow-lg">
                     <CardContent className="flex flex-col p-6">
                       <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 transition-colors group-hover:bg-primary/20">
                         <Icon className="h-6 w-6 text-primary" />
                       </div>
-                      <h3 className="mb-2 text-lg font-semibold group-hover:text-primary transition-colors">
+                      <h3 className="mb-2 text-lg font-semibold transition-colors group-hover:text-primary">
                         {specialty}
                       </h3>
-                      <p className="mb-4 flex-1 text-sm text-muted-foreground line-clamp-2">
+                      <p className="mb-4 line-clamp-2 flex-1 text-sm text-muted-foreground">
                         {description}
                       </p>
                       <div className="flex items-center justify-between">

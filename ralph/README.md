@@ -33,31 +33,37 @@ jq '.userStories[] | select(.passes == false) | {id, title}' prd.json
 
 ## Files
 
-| File | Purpose |
-|------|---------|
-| `ralph.sh` | Main loop script |
-| `CLAUDE.md` | Instructions for Claude during iterations |
-| `ORCHESTRATOR.md` | High-level orchestration strategy |
-| `prd.json` | Current sprint's user stories |
-| `progress.txt` | Progress log and codebase patterns |
-| `archive/` | Previous sprint PRDs and progress |
+| File              | Purpose                                   |
+| ----------------- | ----------------------------------------- |
+| `ralph.sh`        | Main loop script                          |
+| `CLAUDE.md`       | Instructions for Claude during iterations |
+| `ORCHESTRATOR.md` | High-level orchestration strategy         |
+| `prd.json`        | Current sprint's user stories             |
+| `progress.txt`    | Progress log and codebase patterns        |
+| `archive/`        | Previous sprint PRDs and progress         |
 
 ## Usage Patterns
 
 ### Development Sprint
+
 Create PRD with features to implement:
+
 ```bash
 ./ralph.sh --tool claude 30
 ```
 
 ### Testing Sprint
+
 Create PRD with test stories:
+
 ```bash
 ./ralph.sh --tool claude 20
 ```
 
 ### Overnight Run
+
 Long autonomous session:
+
 ```bash
 ./ralph.sh --tool claude 100
 ```
@@ -86,6 +92,7 @@ Long autonomous session:
 ## Workflow
 
 ### With Human Oversight
+
 1. Human + Claude plan the sprint
 2. Claude creates PRD
 3. Human runs `./ralph.sh --tool claude N`
@@ -93,6 +100,7 @@ Long autonomous session:
 5. Repeat
 
 ### Fully Autonomous
+
 1. Human gives macro goal
 2. Claude creates PRD, runs Ralph
 3. Claude creates testing PRD, runs Ralph
@@ -122,16 +130,19 @@ npx playwright install chromium
 ## Troubleshooting
 
 ### Ralph stuck on a story
+
 - Check `progress.txt` for errors
 - Manually fix the issue
 - Update prd.json to mark story as passed
 - Resume Ralph
 
 ### Build failing
+
 - Run `npm run build` manually to see error
 - Fix the error
 - Resume Ralph
 
 ### Context limit reached
+
 - Ralph handles this by working story-by-story
 - Each iteration starts fresh with context from files

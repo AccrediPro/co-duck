@@ -116,74 +116,79 @@ src/db/
 
 ### Core User Tables
 
-| Table | Purpose | Key Fields |
-|-------|---------|------------|
-| `users` | All platform users (synced from Clerk) | id, email, name, role |
-| `coach_profiles` | Extended profile for coaches | userId, slug, specialties, sessionTypes |
+| Table            | Purpose                                | Key Fields                              |
+| ---------------- | -------------------------------------- | --------------------------------------- |
+| `users`          | All platform users (synced from Clerk) | id, email, name, role                   |
+| `coach_profiles` | Extended profile for coaches           | userId, slug, specialties, sessionTypes |
 
 ### Availability Tables
 
-| Table | Purpose | Key Fields |
-|-------|---------|------------|
-| `coach_availability` | Weekly recurring schedule | coachId, dayOfWeek, startTime, endTime |
-| `availability_overrides` | Date-specific exceptions | coachId, date, isAvailable, reason |
+| Table                    | Purpose                   | Key Fields                             |
+| ------------------------ | ------------------------- | -------------------------------------- |
+| `coach_availability`     | Weekly recurring schedule | coachId, dayOfWeek, startTime, endTime |
+| `availability_overrides` | Date-specific exceptions  | coachId, date, isAvailable, reason     |
 
 ### Booking & Payment Tables
 
-| Table | Purpose | Key Fields |
-|-------|---------|------------|
-| `bookings` | Scheduled sessions | coachId, clientId, sessionType, status |
-| `transactions` | Payment records | bookingId, amountCents, status |
+| Table          | Purpose            | Key Fields                             |
+| -------------- | ------------------ | -------------------------------------- |
+| `bookings`     | Scheduled sessions | coachId, clientId, sessionType, status |
+| `transactions` | Payment records    | bookingId, amountCents, status         |
 
 ### Messaging Tables
 
-| Table | Purpose | Key Fields |
-|-------|---------|------------|
-| `conversations` | Chat threads (1 per coach-client pair) | coachId, clientId, lastMessageAt |
-| `messages` | Individual messages | conversationId, senderId, content |
+| Table           | Purpose                                | Key Fields                        |
+| --------------- | -------------------------------------- | --------------------------------- |
+| `conversations` | Chat threads (1 per coach-client pair) | coachId, clientId, lastMessageAt  |
+| `messages`      | Individual messages                    | conversationId, senderId, content |
 
 ### Supporting Tables
 
-| Table | Purpose | Key Fields |
-|-------|---------|------------|
-| `session_notes` | Private coach notes (1 per booking) | bookingId, coachId, content |
-| `action_items` | Tasks assigned to clients | coachId, clientId, title, isCompleted |
+| Table           | Purpose                             | Key Fields                            |
+| --------------- | ----------------------------------- | ------------------------------------- |
+| `session_notes` | Private coach notes (1 per booking) | bookingId, coachId, content           |
+| `action_items`  | Tasks assigned to clients           | coachId, clientId, title, isCompleted |
 
 ## Enum Values
 
 ### `user_role`
-| Value | Description |
-|-------|-------------|
-| `admin` | Platform administrators |
-| `coach` | Users who offer coaching services |
+
+| Value    | Description                       |
+| -------- | --------------------------------- |
+| `admin`  | Platform administrators           |
+| `coach`  | Users who offer coaching services |
 | `client` | Users who book sessions (default) |
 
 ### `booking_status`
-| Value | Description |
-|-------|-------------|
-| `pending` | Awaiting payment confirmation |
+
+| Value       | Description                           |
+| ----------- | ------------------------------------- |
+| `pending`   | Awaiting payment confirmation         |
 | `confirmed` | Payment successful, session scheduled |
-| `completed` | Session occurred |
-| `cancelled` | Session was cancelled |
-| `no_show` | Client didn't attend |
+| `completed` | Session occurred                      |
+| `cancelled` | Session was cancelled                 |
+| `no_show`   | Client didn't attend                  |
 
 ### `transaction_status`
-| Value | Description |
-|-------|-------------|
-| `pending` | Payment in progress |
-| `succeeded` | Payment successful |
-| `failed` | Payment failed |
-| `refunded` | Payment refunded |
+
+| Value       | Description         |
+| ----------- | ------------------- |
+| `pending`   | Payment in progress |
+| `succeeded` | Payment successful  |
+| `failed`    | Payment failed      |
+| `refunded`  | Payment refunded    |
 
 ### `message_type`
-| Value | Description |
-|-------|-------------|
-| `text` | Regular user message |
+
+| Value    | Description            |
+| -------- | ---------------------- |
+| `text`   | Regular user message   |
 | `system` | Auto-generated message |
 
 ## JSONB Field Structures
 
 ### `coach_profiles.specialties`
+
 ```typescript
 // Array of specialty strings
 string[]
@@ -191,26 +196,28 @@ string[]
 ```
 
 ### `coach_profiles.sessionTypes`
+
 ```typescript
 interface SessionType {
-  id: string;       // "session_{timestamp}_{random7chars}"
-  name: string;     // "Discovery Call", "1-Hour Coaching"
+  id: string; // "session_{timestamp}_{random7chars}"
+  name: string; // "Discovery Call", "1-Hour Coaching"
   duration: number; // Minutes (30, 60, 90)
-  price: number;    // Cents (0, 15000, 25000)
+  price: number; // Cents (0, 15000, 25000)
 }
 // Example:
 [
-  { id: "session_123_abc1234", name: "Discovery Call", duration: 30, price: 0 },
-  { id: "session_456_xyz5678", name: "1-Hour Session", duration: 60, price: 15000 }
-]
+  { id: 'session_123_abc1234', name: 'Discovery Call', duration: 30, price: 0 },
+  { id: 'session_456_xyz5678', name: '1-Hour Session', duration: 60, price: 15000 },
+];
 ```
 
 ### `bookings.sessionType`
+
 ```typescript
 interface BookingSessionType {
-  name: string;     // Session name at booking time
+  name: string; // Session name at booking time
   duration: number; // Duration in minutes
-  price: number;    // Price in cents (snapshot)
+  price: number; // Price in cents (snapshot)
 }
 // Note: Captures pricing at booking time - coach price changes don't affect existing bookings
 ```
@@ -218,38 +225,49 @@ interface BookingSessionType {
 ## Key Design Decisions
 
 ### 1. Clerk User IDs
+
 User IDs are text strings from Clerk (e.g., `user_2abc123...`), not auto-generated integers. This maintains sync between Clerk and our database.
 
 ### 2. Monetary Values in Cents
+
 All money amounts are stored as integers in **cents** to avoid floating-point precision issues:
+
 - `$150.00` → `15000` cents
 - `$25.50` → `2550` cents
 
 ### 3. Platform Fee Structure
+
 The platform takes a 10% fee on all transactions:
+
 - Total: `amountCents`
 - Platform: `platformFeeCents` (10%)
 - Coach: `coachPayoutCents` (90%)
 
 ### 4. Availability Override Priority
+
 When checking if a coach is available on a specific date:
+
 1. Check `availability_overrides` for that date
 2. If found, use override's settings
 3. If not found, use `coach_availability` weekly schedule
 
 ### 5. Soft Deletes for Bookings
+
 Bookings are never hard-deleted. Cancellations set:
+
 - `status = 'cancelled'`
 - `cancelledBy` = user who cancelled
 - `cancelledAt` = timestamp
 - `cancellationReason` = optional reason
 
 ### 6. Session Type Snapshots
+
 `bookings.sessionType` stores a **snapshot** of the session type at booking time. This preserves the original terms even if the coach updates their prices later.
 
 ## Common Queries
 
 ### Get Coach's Weekly Availability
+
 ```typescript
 const availability = await db
   .select()
@@ -259,6 +277,7 @@ const availability = await db
 ```
 
 ### Get Upcoming Sessions for Coach
+
 ```typescript
 const sessions = await db
   .select()
@@ -274,6 +293,7 @@ const sessions = await db
 ```
 
 ### Check for Booking Conflicts
+
 ```typescript
 const conflicts = await db
   .select()
@@ -291,16 +311,19 @@ const conflicts = await db
 ## Migrations
 
 ### Generate Migration
+
 ```bash
 npm run db:generate
 ```
 
 ### Run Migration
+
 ```bash
 npm run db:migrate
 ```
 
 ### Migration Files
+
 Migrations are stored in `/drizzle` directory at project root.
 
 ## Environment Variables

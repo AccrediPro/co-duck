@@ -1,0 +1,593 @@
+# Ralph Progress Log
+
+## Branch: ralph/code-documentation
+## Started: 2026-01-31
+
+---
+
+## Codebase Patterns
+
+- Project root: /home/premium-accredipro/code-projects/coaching-platform/
+- Uses Next.js 14 App Router with src/app/ directory
+- Database: Drizzle ORM with PostgreSQL (Supabase)
+- Schema in src/db/schema.ts
+- UI components use shadcn/ui in src/components/ui/
+- Server actions in actions.ts files
+- Dev server: http://localhost:3000
+- Authentication: Clerk
+- Payments: Stripe
+- Typecheck command: npx tsc --noEmit
+- Lint command: npm run lint
+- Session actions are split: coach view in `sessions/actions.ts`, client view in `my-sessions/actions.ts`
+- Refund policy: Coach cancellations = 100%, Client cancellations = sliding scale based on timing
+- Availability: Weekly schedule in `coach_availability` table, date overrides in `availability_overrides` table
+- Availability actions: Dashboard (coach edits) in `dashboard/availability/actions.ts`, public display in `coaches/[slug]/availability-actions.ts`
+- Messaging: 1-to-1 conversations (unique coach-client pair), polling-based real-time (3s interval)
+- Message actions: List in `messages/actions.ts`, chat view in `messages/[id]/actions.ts`, core in `lib/conversations.ts`
+- Internal vs public functions: Internal functions (no auth) named with `Internal` suffix for system use
+
+## Documentation Sprint Goals
+
+Add comprehensive code documentation:
+1. JSDoc to all server actions and API routes
+2. README files for key directories
+3. Architecture and API documentation
+4. Enhanced inline comments
+
+## JSDoc Template
+
+```typescript
+/**
+ * Brief description of function purpose.
+ *
+ * @param paramName - Description of parameter
+ * @returns Description of return value
+ * @throws {ErrorType} Description of error conditions
+ *
+ * @example
+ * const result = await functionName(params);
+ */
+```
+
+---
+
+## 2026-01-31 - US-001
+- Documented Stripe webhook handler (src/app/api/webhooks/stripe/route.ts)
+- Files changed: src/app/api/webhooks/stripe/route.ts
+- Added comprehensive JSDoc documentation:
+  - File-level @fileoverview with module purpose, security, and idempotency notes
+  - POST handler with flow, response codes, and important notes
+  - getWebhookSecret with @returns and @throws annotations
+  - handleCheckoutSessionCompleted with fee structure (10% platform fee) and idempotency explanation
+  - handleCheckoutSessionExpired with time slot management notes
+  - handlePaymentIntentFailed with common error codes documentation
+- Typecheck passes
+- **Learnings for future iterations:**
+  - Webhook handlers should document idempotency guarantees
+  - Fee calculations should be documented in JSDoc (platform fee = 10%)
+  - Clear the .next cache if typecheck shows stale errors (`rm -rf .next`)
+---
+
+## 2026-01-31 - US-002
+- Documented Clerk webhook handler (src/app/api/webhooks/clerk/route.ts)
+- Files changed: src/app/api/webhooks/clerk/route.ts
+- Added comprehensive JSDoc documentation:
+  - File-level @fileoverview with security notes and configuration instructions
+  - POST handler with request flow, response codes, and example payload
+  - Detailed inline comments explaining Svix signature verification
+  - Documented user.created handler (default 'client' role, email handling)
+  - Documented user.updated handler (syncs email, name, avatar; not role)
+  - Documented user.deleted handler (hard delete, cascade behavior note)
+  - Added section dividers for improved code readability
+- Typecheck passes
+- **Learnings for future iterations:**
+  - Clerk webhooks use Svix for signature verification (3 headers required)
+  - New users default to 'client' role - coach role assigned via onboarding flow
+  - user.updated does NOT sync role from Clerk - role is application-managed
+  - Include Clerk Dashboard setup instructions in file-level JSDoc
+---
+
+## 2026-01-31 - US-003
+- Documented booking flow actions (3 files)
+- Files changed:
+  - src/app/(public)/coaches/[slug]/book/actions.ts
+  - src/app/(public)/coaches/[slug]/book/confirm/actions.ts
+  - src/app/(public)/coaches/[slug]/book/success/actions.ts
+- Added comprehensive JSDoc documentation:
+  - File-level @fileoverview explaining each file's role in the 3-step booking flow
+  - Documented all exported interfaces (CoachBookingData, DayAvailability, TimeSlot, etc.)
+  - getCoachForBooking: Coach data retrieval with @param/@returns/@example
+  - getCoachWeeklyAvailability: Weekly schedule with day-of-week indexing notes
+  - getAvailableSlots: Core slot calculation with conflict detection, buffer time, and advance notice
+  - getBookableDates: Month date calculation with override handling
+  - createBooking: Free session creation with validation checks
+  - createCheckoutSession: Stripe Connect integration with 10% platform fee
+  - generateIcsFile/generateSuccessIcsFile: iCalendar RFC 5545 generation
+  - getBookingFromCheckoutSession: Payment confirmation with idempotency notes
+  - formatTimeInTimezone: Helper for timezone-aware display
+- Added section dividers (Type Definitions, Server Actions, Helper Functions, Calendar Export)
+- Typecheck passes
+- **Learnings for future iterations:**
+  - Booking flow is 3 phases: availability → confirm → success
+  - Platform fee is 10% (90% to coach via Stripe Connect destination charges)
+  - Pending bookings are created before Stripe redirect, confirmed via webhook or success page
+  - ICS files use unique UID format: booking-{id}@coachingplatform.com for deduplication
+  - Availability overrides take precedence over weekly schedule
+  - Time slots generated in 30-minute increments within availability window
+---
+
+## 2026-01-31 - US-004
+- Documented session management actions (3 files)
+- Files changed:
+  - src/app/(dashboard)/dashboard/sessions/actions.ts (coach session management)
+  - src/app/(dashboard)/dashboard/sessions/[id]/reschedule/actions.ts (client reschedule flow)
+  - src/app/(dashboard)/dashboard/my-sessions/actions.ts (client session management)
+- Added comprehensive JSDoc documentation:
+  - File-level @fileoverview explaining each file's role and security notes
+  - sessions/actions.ts (10 functions):
+    - getCoachSessions: Paginated session retrieval with tab filtering
+    - markSessionComplete: Status update with validation
+    - cancelSession: Cancellation with full refund processing
+    - getPastSessionsCountWithClient: Client history count
+    - saveSessionNote/getSessionNote: Private coach notes
+    - updateMeetingLink: Meeting URL validation and update
+    - generateCoachIcsFile: Calendar export
+    - getRefundEligibility: Pre-cancellation refund check
+  - reschedule/actions.ts (5 functions):
+    - getRescheduleBookingData: Validation and coach info
+    - getRescheduleBookableDates: Available dates for month
+    - getRescheduleAvailableSlots: Time slot calculation
+    - confirmReschedule: Apply new booking times
+    - formatTimeInTimezone: Helper function
+  - my-sessions/actions.ts (5 functions):
+    - getClientSessions: Paginated client session retrieval
+    - cancelClientSession: Sliding scale refund processing
+    - generateClientIcsFile: Calendar export
+    - createRetryCheckoutSession: Payment retry with Stripe Connect
+    - getClientRefundEligibility: Pre-cancellation refund preview
+- Added section dividers organizing code by functionality
+- Documented all exported types/interfaces
+- Typecheck passes
+- **Learnings for future iterations:**
+  - Coach cancellations = 100% refund; Client cancellations = sliding scale (48h: 100%, 24-48h: 50%, <24h: 0%)
+  - Session notes are stored in separate `session_notes` table, not on bookings
+  - Reschedule excludes current booking from conflict detection
+  - Meeting links must be HTTPS URLs
+  - Legacy aliases exist for backward compatibility (saveCoachNotes → saveSessionNote)
+---
+
+## 2026-01-31 - US-005
+- Documented availability actions (2 files)
+- Files changed:
+  - src/app/(dashboard)/dashboard/availability/actions.ts (coach settings)
+  - src/app/(public)/coaches/[slug]/availability-actions.ts (public display)
+- Added comprehensive JSDoc documentation:
+  - File-level @fileoverview explaining each file's purpose and data flow
+  - dashboard/availability/actions.ts:
+    - Zod schema documentation with validation rules
+    - DaySchedule/AvailabilitySettings type definitions
+    - saveAvailabilitySettings: Save weekly schedule with validation
+    - getAvailabilitySettings: Fetch current coach settings
+    - copyDaySchedule: Helper to replicate schedule across days
+  - coaches/[slug]/availability-actions.ts:
+    - AvailabilityDisplayData interface for public profile
+    - getCoachAvailabilityForProfile: Main entry point for profile display
+    - findNextAvailableSlot: Complex algorithm with buffer/override handling
+    - formatNextAvailableDisplay: Human-readable slot formatting
+    - generateWeeklyAvailabilitySummary: Compact schedule summary
+    - formatTimeShort/formatDateStr: Utility functions
+- Added critical inline comments explaining:
+  - Buffer time calculation and conflict detection algorithm
+  - Override priority (date-specific overrides > weekly schedule)
+  - Booking window boundaries (advance notice, max days)
+- Typecheck passes
+- **Learnings for future iterations:**
+  - Two availability files: dashboard (coach edits) vs public (read-only display)
+  - Availability overrides stored in `availability_overrides` table for date-specific changes
+  - Next available slot calculation caps at 60 days for performance
+  - Buffer time expands slot window on BOTH sides for conflict detection
+  - Weekly schedule stored in `coach_availability` table (7 rows per coach)
+  - Booking constraints (buffer, notice, max days) stored in `coach_profiles` table
+- Onboarding flow: 4 steps (basic-info → bio-specialties → pricing → review-publish)
+- Prices stored in CENTS in database, displayed in DOLLARS in forms
+---
+
+## 2026-01-31 - US-006
+- Documented 4 coach onboarding form components
+- Files changed:
+  - src/components/onboarding/basic-info-form.tsx (Step 1)
+  - src/components/onboarding/bio-specialties-form.tsx (Step 2)
+  - src/components/onboarding/pricing-form.tsx (Step 3)
+  - src/components/onboarding/review-publish-form.tsx (Step 4)
+- Added comprehensive JSDoc documentation:
+  - basic-info-form.tsx:
+    - File-level @fileoverview with flow, data flow, and validation details
+    - BasicInfoFormProps interface documentation
+    - Component JSDoc with @param/@returns/@example
+    - Section dividers (TYPE DEFINITIONS, COMPONENT)
+    - Inline comments for timezone detection and form submission
+  - bio-specialties-form.tsx:
+    - File-level @fileoverview with specialty selection features
+    - BioSpecialtiesFormProps interface documentation
+    - Component JSDoc with @param/@returns/@example
+    - Helper function JSDoc (toggleSpecialty, addCustomSpecialty, handleCustomKeyDown)
+    - Section dividers
+  - pricing-form.tsx:
+    - File-level @fileoverview with IMPORTANT note on cents/dollars conversion
+    - PricingFormProps interface documentation
+    - generateSessionId helper with @example
+    - Component JSDoc with @param/@returns/@example (showing prices in cents)
+    - Helper function JSDoc (addSessionType, removeSessionType)
+    - Section dividers (TYPE DEFINITIONS, HELPER FUNCTIONS, COMPONENT)
+  - review-publish-form.tsx:
+    - File-level @fileoverview with publishing states and profile preview sections
+    - ProfileData interface with @property tags for all fields
+    - ReviewPublishFormProps interface documentation
+    - Component JSDoc with comprehensive @example
+    - Helper function JSDoc (formatPrice, getInitials, handlePublish, handleSaveDraft)
+    - Section dividers
+- Typecheck passes
+- **Learnings for future iterations:**
+  - Onboarding is a 4-step wizard: basic-info → bio-specialties → pricing → review-publish
+  - All prices stored in CENTS in database, forms convert to/from DOLLARS for display
+  - Session types have generated IDs with format `session_{timestamp}_{random7chars}`
+  - Profile completion percentage calculated by parent page, not the component
+  - Published profiles appear in coach directory; draft profiles are saved but hidden
+  - Custom specialties can be added beyond the predefined COACH_SPECIALTIES list
+---
+
+## 2026-01-31 - US-007
+- Documented database schema (src/db/schema.ts) and created README
+- Files changed:
+  - src/db/schema.ts (comprehensive JSDoc added)
+  - src/db/README.md (new file - schema overview documentation)
+- Added comprehensive JSDoc documentation to schema.ts:
+  - File-level @fileoverview with schema overview, ERD diagram, and key design decisions
+  - Enum documentation:
+    - userRoleEnum: admin/coach/client with role assignment notes
+    - bookingStatusEnum: State machine with transition documentation
+    - transactionStatusEnum: Payment lifecycle states
+    - messageTypeEnum: text/system message types
+  - JSONB interface documentation:
+    - SessionType: Coach session offerings (id, name, duration, price)
+    - BookingSessionType: Snapshot at booking time (preserves original pricing)
+  - Table-level JSDoc for all 10 tables:
+    - users: Clerk sync, relationships, cascade behavior
+    - coach_profiles: JSONB fields, availability settings, Stripe Connect
+    - coach_availability: Weekly schedule, dayOfWeek convention (0=Sunday)
+    - availability_overrides: Date exceptions, priority logic
+    - bookings: Lifecycle, sessionType snapshot, cancellation tracking
+    - transactions: Fee structure (10% platform, 90% coach), Stripe IDs
+    - conversations: 1-per-coach-client-pair, unique constraint
+    - messages: Types, read status tracking
+    - session_notes: Private coach notes (1 per booking)
+    - action_items: Tasks with optional booking link
+  - Field-level comments for every column with type, purpose, examples
+  - Section dividers organizing schema by entity group
+- Created src/db/README.md with:
+  - ASCII ERD diagram showing all relationships
+  - Tables overview table with purpose and key fields
+  - Enum values reference tables
+  - JSONB field structure examples (TypeScript interfaces)
+  - Key design decisions documentation (Clerk IDs, cents, soft deletes)
+  - Common query examples (availability, upcoming sessions, conflicts)
+  - Migration commands reference
+- Typecheck passes
+- **Learnings for future iterations:**
+  - Schema has 10 tables, 4 enums, 2 JSONB interfaces
+  - All monetary values in CENTS (integer) to avoid float precision
+  - bookings.sessionType is a SNAPSHOT - pricing frozen at booking time
+  - coach_availability uses dayOfWeek 0-6 (JS convention: 0=Sunday)
+  - Override priority: availability_overrides > coach_availability for specific dates
+  - Conversations have unique constraint on (coachId, clientId) pair
+  - session_notes has 1:1 relationship with bookings (unique constraint)
+---
+
+## 2026-01-31 - US-008
+- Documented messaging system (3 action files + 7 components)
+- Files changed:
+  - src/lib/conversations.ts (core conversation management)
+  - src/app/(dashboard)/dashboard/messages/actions.ts (conversation list)
+  - src/app/(dashboard)/dashboard/messages/[id]/actions.ts (chat view)
+  - src/components/messages/index.ts (barrel export)
+  - src/components/messages/chat-view.tsx
+  - src/components/messages/conversations-list.tsx
+  - src/components/messages/conversation-row.tsx
+  - src/components/messages/message-bubble.tsx
+  - src/components/messages/message-input.tsx
+  - src/components/messages/message-button.tsx
+  - src/components/messages/chat-context-panel.tsx
+- Added comprehensive JSDoc documentation:
+  - lib/conversations.ts: File-level @fileoverview with architecture, message types, security docs; 4 function docs with @param/@returns/@example/@security/@internal annotations; section dividers
+  - messages/actions.ts: 2 interfaces, 3 functions documented (getConversations, getUnreadMessageCount, getUnreadMessageCountForUser)
+  - messages/[id]/actions.ts: 8 interfaces, 6 functions documented (getConversationDetails, getMessages, markMessagesAsRead, sendMessage, getClientContext, getNewMessages); polling and pagination docs
+  - 7 UI components: File-level @fileoverview, interface @property docs, component JSDoc with @example, helper function docs
+- Typecheck passes
+- **Learnings for future iterations:**
+  - Messaging uses 1-to-1 conversation model (unique constraint on coach-client pair)
+  - Two auth levels: public functions (require auth) vs internal (no auth, system use)
+  - Polling-based real-time: 3-second interval via getNewMessages (uses ID comparison, not timestamps)
+  - Message pagination: newest-first for DB query, reversed for display
+  - System messages (messageType: 'system') are for automated notifications
+  - Client context panel only available for coaches (isCoach flag determines visibility)
+  - Prices stored in cents, formatted for display with currency symbols
+---
+
+## 2026-01-31 - US-009
+- Documented payment utilities (2 files)
+- Files changed:
+  - src/lib/stripe.ts (Stripe client configuration)
+  - src/lib/refunds.ts (Refund eligibility calculations)
+- Added comprehensive JSDoc documentation:
+  - stripe.ts:
+    - File-level @fileoverview with Stripe Connect overview, env variables table, usage examples
+    - Environment validation section with fail-fast explanation
+    - Stripe client instance JSDoc with checkout session examples, platform fee (10%)
+    - getStripePublishableKey with client-side usage examples
+    - Type exports section documenting common Stripe types
+    - Comprehensive error handling documentation with error types table and common error codes
+  - refunds.ts:
+    - File-level @fileoverview with refund policy overview (coach vs client cancellations)
+    - Fee considerations for Stripe refund processing
+    - RefundEligibility interface with @property tags and examples
+    - calculateRefundEligibility with refund tiers table, calculation logic, @param/@returns/@remarks
+    - formatRefundAmount with currency formatting examples
+    - getRefundMessage with message scenarios table and UI usage examples
+    - Section dividers (TYPE DEFINITIONS, REFUND CALCULATION, FORMATTING UTILITIES, UI MESSAGE GENERATION)
+    - Inline comments explaining edge cases (past sessions, threshold boundaries)
+- Typecheck passes
+- **Learnings for future iterations:**
+  - Payment utilities are split: stripe.ts (client config) vs refunds.ts (eligibility logic)
+  - All Stripe operations should be wrapped in try-catch for StripeError handling
+  - Stripe error types: StripeCardError, StripeRateLimitError, StripeInvalidRequestError, StripeAPIError, StripeConnectionError, StripeAuthenticationError
+  - Refund eligibility is a calculation only - actual Stripe refunds processed elsewhere
+  - Client cancellation policy: >24h = 100% refund, <24h = 0% refund (threshold configurable)
+  - Coach cancellations always get 100% refund regardless of timing
+---
+
+## 2026-01-31 - US-010
+- Documented coach onboarding validation schemas (1 file)
+- Files changed:
+  - src/lib/validators/coach-onboarding.ts
+- Added comprehensive JSDoc documentation:
+  - File-level @fileoverview:
+    - Onboarding steps table (4 steps mapping to schemas)
+    - React Hook Form integration example with zodResolver
+    - Price storage convention note (CENTS throughout)
+    - @module and @see references
+  - COACH_SPECIALTIES constant:
+    - Purpose and usage documentation
+    - Selection UI, custom specialties, storage notes
+    - Type-safe filtering examples
+  - coachBasicInfoSchema (Step 1):
+    - Field table (displayName, headline, profilePhotoUrl, timezone)
+    - Field-level inline comments
+    - Validation example with safeParse
+  - coachBioSpecialtiesSchema (Step 2):
+    - Field table (bio, specialties)
+    - Notes on custom specialties support
+  - SUPPORTED_CURRENCIES constant:
+    - Currency object structure table (code, symbol, name)
+    - Currency lookup and price formatting examples
+  - SESSION_DURATIONS constant:
+    - Available values (15, 30, 45, 60, 90, 120 minutes)
+    - Duration formatting example
+  - sessionTypeSchema:
+    - Field table with CENTS emphasis for price
+    - ID format documentation (session_{timestamp}_{random7chars})
+    - Free vs paid session examples
+  - coachPricingSchema (Step 3):
+    - Field table (hourlyRate, currency, sessionTypes)
+    - Cross-references to related schemas/constants
+  - generateSlug helper:
+    - Transformation rules (6 steps)
+    - Input/output examples for edge cases
+    - Note about server-side suffix handling
+  - Section dividers organizing code by step/category
+- Typecheck passes
+- **Learnings for future iterations:**
+  - Validators module has 4 schemas matching the 4-step onboarding wizard
+  - All prices stored in CENTS (integers) - emphasized in multiple JSDoc blocks
+  - Session type IDs generated client-side: session_{timestamp}_{random7chars}
+  - COACH_SPECIALTIES is not exhaustive - coaches can add custom specialties
+  - generateSlug does basic transformation; server adds suffix for uniqueness
+  - Currency codes follow ISO 4217 standard
+---
+
+## 2026-01-31 - US-011
+- Created comprehensive components README (src/components/README.md)
+- Files changed:
+  - src/components/README.md (new file - 316 lines)
+- Documentation includes:
+  - Directory structure overview with 12 component folders
+  - Folder descriptions with component tables for each domain:
+    - action-items, availability, booking, coaches, messages
+    - navigation, onboarding, payments, profile, sessions, ui
+  - Naming conventions:
+    - File names: kebab-case with suffix patterns (-form, -list, -card, -dialog, -content)
+    - Component names: PascalCase matching file names
+    - Export style: named exports preferred, forwardRef for UI primitives
+  - Prop patterns:
+    - Interface naming: {ComponentName}Props
+    - Initial data pattern for server → client hydration
+    - Callback props with optional async handlers
+    - Boolean flags with sensible defaults
+    - Entity references importing types from actions/schema
+  - Client vs Server component guidance
+  - Server action integration patterns with result types
+  - Styling with Tailwind CSS and shadcn/ui variants
+  - Type safety notes (strict TypeScript, shared types)
+  - New component guidelines (7 steps)
+- Typecheck passes
+- **Learnings for future iterations:**
+  - Components are organized by feature domain (12 folders)
+  - Only `messages/` folder uses barrel exports (index.ts)
+  - Most feature components are client components (forms, browser APIs)
+  - Server components are typically page.tsx files that fetch and pass data
+  - Props interfaces follow {ComponentName}Props convention consistently
+  - shadcn/ui components in ui/ folder should not be modified directly
+  - Forms use React Hook Form with zodResolver for validation
+---
+
+## 2026-01-31 - US-012
+- Created comprehensive API documentation (docs/API.md)
+- Files changed:
+  - docs/API.md (new file - 321 lines)
+- Documentation includes:
+  - Overview table of all API routes
+  - Authentication section explaining webhook signature verification
+  - POST /api/webhooks/stripe:
+    - Headers (stripe-signature)
+    - Events handled (checkout.session.completed, checkout.session.expired, payment_intent.payment_failed)
+    - Request body format with JSON example
+    - Metadata fields table (bookingId, coachId, clientId, sessionPrice)
+    - Response codes table
+    - Processing logic for each event type
+    - Idempotency guarantees
+  - POST /api/webhooks/clerk:
+    - Headers (svix-id, svix-timestamp, svix-signature)
+    - Events handled (user.created, user.updated, user.deleted)
+    - Request body format with JSON example
+    - Response codes table
+    - Processing logic for each event type
+  - Environment variables section for both webhooks
+  - Webhook setup instructions for Stripe and Clerk dashboards
+  - Local development testing with Stripe CLI and ngrok
+  - Error handling reference tables
+  - Server actions vs API routes explanation with file locations
+- Typecheck passes
+- **Learnings for future iterations:**
+  - This platform uses primarily server actions, not API routes
+  - Only 2 API routes exist: Stripe webhook and Clerk webhook
+  - Both use signature verification, not user authentication
+  - Webhook endpoints return 200 for errors to prevent retries
+  - docs/ folder did not exist - had to create it
+  - Server actions are the primary data layer (see actions.ts files)
+---
+
+## 2026-01-31 - US-013
+- Documented dashboard pages (4 files)
+- Files changed:
+  - src/app/(dashboard)/dashboard/page.tsx (main dashboard - role-based entry point)
+  - src/app/(dashboard)/dashboard/action-items/actions.ts (action items CRUD)
+  - src/app/(dashboard)/dashboard/sessions/page.tsx (coach sessions)
+  - src/app/(dashboard)/dashboard/messages/page.tsx (conversation list)
+- Added comprehensive JSDoc documentation:
+  - dashboard/page.tsx:
+    - File-level @fileoverview with data flow and component table
+    - getUserWithProfile helper with JSDoc (server-side data fetching)
+    - DashboardPage with role detection and rendering logic docs
+    - CoachDashboard: profile status and quick actions
+    - CoachOnboardingPrompt: CTA for incomplete onboarding
+    - ClientDashboard: async server component with action items count
+    - AdminDashboard: placeholder with future plans
+    - Section dividers for DATA FETCHING, MAIN PAGE, ROLE-SPECIFIC COMPONENTS
+  - action-items/actions.ts:
+    - File-level @fileoverview with features, permission model table, status computation rules
+    - ActionItemWithStatus interface with @example
+    - computeStatus helper with due date logic documentation
+    - createActionItem with @param/@returns/@throws/@example
+    - getClientActionItems (coach view)
+    - markActionItemComplete (both coach and client can use)
+    - deleteActionItem (coach only)
+    - getSessionActionItems (session-linked items)
+    - ActionItemWithCoach type (client view with coach info)
+    - getMyActionItems (client view with filter)
+    - getPendingActionItemsCount (lightweight count for dashboard)
+    - Section dividers for each operation category
+  - sessions/page.tsx:
+    - File-level @fileoverview with data flow, access control, URL params table
+    - PageProps interface with Next.js 15 searchParams Promise pattern
+    - SessionsPage with access control checks (4 levels) and SSR data fetching
+    - Section dividers for AUTHENTICATION, ROLE VERIFICATION, PARSE PARAMS, FETCH DATA, RENDER
+  - messages/page.tsx:
+    - File-level @fileoverview with role-based differences table
+    - MessagesPage with auth, user verification, and SSR data fetching
+    - Section dividers for clarity
+- Typecheck passes
+- **Learnings for future iterations:**
+  - Dashboard page.tsx uses nested async server components (ClientDashboard is async)
+  - Role detection defaults to 'client' if user record doesn't exist (edge case handling)
+  - Action items have computed status (pending/overdue/completed) based on dueDate and isCompleted
+  - Action items permission model: coaches create/delete, both can mark complete, clients view their own
+  - Next.js 15 searchParams is a Promise that must be awaited
+  - Sessions page has 4 access control layers: auth → user exists → coach role → coach profile
+  - SSR data fetching pattern: server actions called during render, result passed as initialData to client components
+---
+
+## 2026-01-31 - US-014
+- Created comprehensive architecture overview documentation (docs/ARCHITECTURE.md)
+- Files changed:
+  - docs/ARCHITECTURE.md (new file - 709 lines)
+- Documentation includes:
+  - System Overview:
+    - ASCII system architecture diagram showing Browser, Clerk, Stripe, Next.js App, and PostgreSQL
+    - Feature summary (coach discovery, booking, sessions, messaging, action items)
+  - Tech Stack:
+    - Complete table of technologies by layer (Frontend, Styling, UI, Forms, Auth, DB, ORM, Payments)
+  - Folder Structure:
+    - Complete directory tree with descriptions
+    - Route groups explanation ((dashboard) vs (public))
+  - Authentication Flow:
+    - ASCII sequence diagram showing auth lifecycle
+    - Middleware route protection details
+    - User roles table (client, coach, admin)
+  - Core Data Flows:
+    - Booking Flow: 3-step ASCII diagram with server actions
+    - Payment Structure: Platform fee calculation (10% platform, 90% coach)
+    - Messaging Flow: Polling architecture diagram, message types
+    - Availability Calculation: 5-step algorithm with constraints
+  - Component Architecture:
+    - Server vs Client component guidance
+    - Data flow pattern (SSR → hydration)
+    - Component organization by domain
+  - Server Actions vs API Routes:
+    - Benefits comparison
+    - When to use each
+  - Database Architecture:
+    - Schema overview diagram (10 tables)
+    - Key design decisions list
+  - External Services:
+    - Clerk integration points
+    - Stripe Connect fee structure
+  - Environment Configuration:
+    - Required variables
+    - Development setup steps
+    - Webhook testing commands
+- Typecheck passes
+- **Learnings for future iterations:**
+  - Architecture docs should include ASCII diagrams for terminal compatibility
+  - Data flow diagrams are most useful when they show the actual function names being called
+  - Route groups ((dashboard), (public)) are a Next.js App Router pattern for layout organization
+  - All 4 major data flows documented: booking, payment, messaging, availability
+  - Link to related docs at the end helps navigation (API.md, db/README.md, components/README.md)
+---
+
+## 2026-01-31 - US-015
+- Updated main README with comprehensive project documentation
+- Files changed:
+  - README.md (complete rewrite - 256 lines, replacing default Next.js boilerplate)
+- Documentation includes:
+  - Project overview: Marketplace platform description
+  - Features list (3 sections):
+    - For Clients: discovery, booking, sessions, messaging, action items
+    - For Coaches: profile, availability, sessions, clients, earnings
+    - Platform: auth, payments, messaging, calendar export
+  - Tech stack table: Next.js 14, TypeScript, Tailwind, shadcn/ui, PostgreSQL, Drizzle, Clerk, Stripe
+  - Getting started guide: Prerequisites (4), Installation steps (6)
+  - Environment variables: DATABASE_URL, Clerk keys (5), Stripe keys (3), app URL
+  - Development scripts: All 10 npm scripts documented with descriptions
+  - Project structure tree: Full directory layout with descriptions
+  - Documentation links: ARCHITECTURE.md, API.md, db/README.md, components/README.md
+  - Webhook setup: Stripe (4 steps + CLI command), Clerk (4 steps + ngrok note)
+  - Key concepts tables: User roles, Booking flow, Payment structure (10% fee), Refund policy
+  - Contributing guidelines
+- Typecheck passes
+- **Learnings for future iterations:**
+  - README should serve as entry point with links to detailed documentation
+  - Environment variables section is critical for onboarding - list ALL required vars
+  - Tables are effective for presenting structured info (tech stack, roles, policies)
+  - Webhook setup instructions save significant developer time
+  - Keep README focused on "how to get started" - detailed docs live elsewhere
+---
+

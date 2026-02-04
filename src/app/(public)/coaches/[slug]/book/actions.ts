@@ -487,8 +487,9 @@ export async function getBookableDates(
     const availableDays = new Set(weeklyAvail.filter((a) => a.isAvailable).map((a) => a.dayOfWeek));
 
     // Get overrides for this month
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
     const monthStart = `${year}-${String(month + 1).padStart(2, '0')}-01`;
-    const monthEnd = `${year}-${String(month + 1).padStart(2, '0')}-31`;
+    const monthEnd = `${year}-${String(month + 1).padStart(2, '0')}-${String(daysInMonth).padStart(2, '0')}`;
 
     const overrides = await db
       .select({
@@ -512,7 +513,6 @@ export async function getBookableDates(
     const maxDate = new Date(now.getTime() + profile.maxAdvanceDays * 24 * 60 * 60 * 1000);
 
     const bookableDates: string[] = [];
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
 
     for (let day = 1; day <= daysInMonth; day++) {
       const date = new Date(year, month, day);

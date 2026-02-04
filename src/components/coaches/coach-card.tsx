@@ -4,9 +4,11 @@ import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { StarRating } from '@/components/ui/star-rating';
 import { SUPPORTED_CURRENCIES } from '@/lib/validators/coach-onboarding';
 import type { SessionType } from '@/db/schema';
 import { User } from 'lucide-react';
+import { VerifiedBadge } from './verified-badge';
 
 interface CoachCardProps {
   name: string;
@@ -16,6 +18,9 @@ interface CoachCardProps {
   sessionTypes: SessionType[] | null;
   currency: string | null;
   slug: string;
+  averageRating?: string | null;
+  reviewCount?: number | null;
+  isVerified?: boolean;
 }
 
 export function CoachCard({
@@ -26,6 +31,9 @@ export function CoachCard({
   sessionTypes,
   currency,
   slug,
+  averageRating,
+  reviewCount,
+  isVerified,
 }: CoachCardProps) {
   const currencyData = SUPPORTED_CURRENCIES.find((c) => c.code === currency);
   const currencySymbol = currencyData?.symbol || '$';
@@ -67,13 +75,28 @@ export function CoachCard({
             </Avatar>
 
             {/* Name */}
-            <h3 className="mt-4 text-lg font-semibold transition-colors group-hover:text-primary">
-              {name}
-            </h3>
+            <div className="mt-4 flex items-center gap-1">
+              <h3 className="text-lg font-semibold transition-colors group-hover:text-primary">
+                {name}
+              </h3>
+              {isVerified && <VerifiedBadge size="sm" />}
+            </div>
 
             {/* Headline */}
             {headline && (
               <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{headline}</p>
+            )}
+
+            {/* Rating */}
+            {reviewCount && reviewCount > 0 ? (
+              <div className="mt-2 flex items-center gap-1.5">
+                <StarRating rating={parseFloat(averageRating || '0')} size="sm" />
+                <span className="text-sm text-muted-foreground">
+                  ({reviewCount})
+                </span>
+              </div>
+            ) : (
+              <p className="mt-2 text-xs text-muted-foreground">No reviews yet</p>
             )}
 
             {/* Specialties */}

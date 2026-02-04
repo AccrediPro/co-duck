@@ -99,7 +99,7 @@ export function ActionItemsList({
       case 'overdue':
         return <AlertCircle className="h-4 w-4 text-red-500" />;
       case 'pending':
-        return <Circle className="h-4 w-4 text-blue-500" />;
+        return <Circle className="h-4 w-4 text-emerald-500" />;
     }
   };
 
@@ -110,7 +110,7 @@ export function ActionItemsList({
       case 'overdue':
         return 'text-red-500';
       case 'pending':
-        return 'text-blue-500';
+        return 'text-emerald-500';
     }
   };
 

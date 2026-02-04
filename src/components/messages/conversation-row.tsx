@@ -158,7 +158,7 @@ export function ConversationRow({ conversation, onClick }: ConversationRowProps)
         </Avatar>
         {/* Unread indicator dot */}
         {hasUnread && (
-          <div className="absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full border-2 border-background bg-blue-500" />
+          <div className="absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full border-2 border-background bg-emerald-500" />
         )}
       </div>
 

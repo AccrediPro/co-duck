@@ -33,6 +33,7 @@ import { headers } from 'next/headers';
 import { stripe } from '@/lib/stripe';
 import type { BookingSessionType } from '@/db/schema';
 import { calculateRefundEligibility, formatRefundAmount } from '@/lib/refunds';
+import { removeBookingFromCalendar } from '@/lib/google-calendar-sync';
 
 // ============================================================================
 // Type Definitions
@@ -410,6 +411,11 @@ export async function cancelClientSession(
         cancellationReason: reason || null,
       })
       .where(eq(bookings.id, sessionId));
+
+    // Remove from Google Calendar
+    removeBookingFromCalendar(sessionId).catch((error) => {
+      console.error('Error removing cancelled session from calendar:', error);
+    });
 
     return { success: true, refund: refundInfo };
   } catch {

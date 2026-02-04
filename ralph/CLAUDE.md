@@ -18,6 +18,7 @@ You are an autonomous coding agent working on a software project.
 ## Progress Report Format
 
 APPEND to progress.txt (never replace, always append):
+
 ```
 ## [Date/Time] - [Story ID]
 - What was implemented
@@ -58,12 +59,14 @@ Before committing, check if any edited files have learnings worth preserving in 
    - Configuration or environment requirements
 
 **Examples of good CLAUDE.md additions:**
+
 - "When modifying X, also update Y to keep them in sync"
 - "This module uses pattern Z for all API calls"
 - "Tests require the dev server running on PORT 3000"
 - "Field names must match the template exactly"
 
 **Do NOT add:**
+
 - Story-specific implementation details
 - Temporary debugging notes
 - Information already in progress.txt
@@ -90,7 +93,7 @@ import { test, expect } from '@playwright/test';
 test('verify page loads', async ({ page }) => {
   // Capture console errors
   const errors: string[] = [];
-  page.on('console', msg => {
+  page.on('console', (msg) => {
     if (msg.type() === 'error') errors.push(msg.text());
   });
 
@@ -101,16 +104,17 @@ test('verify page loads', async ({ page }) => {
   await page.waitForLoadState('networkidle');
 
   // Verify no errors
-  expect(errors.filter(e => !e.includes('favicon'))).toHaveLength(0);
+  expect(errors.filter((e) => !e.includes('favicon'))).toHaveLength(0);
 
   // Verify content
   await expect(page.locator('body')).toBeVisible();
 });
 ```
 
-### Using mcp__playwright Tools (if available)
+### Using mcp\_\_playwright Tools (if available)
 
 If MCP Playwright tools are available, use them:
+
 1. `mcp__playwright__browser_navigate` - Go to URL
 2. `mcp__playwright__browser_snapshot` - Get page accessibility tree
 3. `mcp__playwright__browser_console_messages` - Check for errors
@@ -129,6 +133,7 @@ test('mobile responsive', async ({ page }) => {
 ### Dev Server Requirement
 
 **IMPORTANT**: Ensure the dev server is running before UI tests:
+
 ```bash
 npm run dev &
 sleep 5

@@ -100,6 +100,9 @@ async function getCoaches(
       specialties: coachProfiles.specialties,
       currency: coachProfiles.currency,
       sessionTypes: coachProfiles.sessionTypes,
+      averageRating: coachProfiles.averageRating,
+      reviewCount: coachProfiles.reviewCount,
+      verificationStatus: coachProfiles.verificationStatus,
       name: users.name,
       avatarUrl: users.avatarUrl,
     })

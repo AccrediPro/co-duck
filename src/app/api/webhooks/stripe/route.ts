@@ -26,6 +26,7 @@ import { eq, and } from 'drizzle-orm';
 import type Stripe from 'stripe';
 import { createBookingSystemMessage } from '@/lib/conversations';
 import type { BookingSessionType } from '@/db/schema';
+import { syncBookingToCalendar } from '@/lib/google-calendar-sync';
 
 /**
  * Retrieves the Stripe webhook secret from environment variables.
@@ -283,6 +284,12 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
   createBookingSystemMessage(coachId, clientId, sessionType, booking.startTime).catch((error) => {
     console.error('Stripe webhook: Error creating booking system message:', error);
     // Don't fail the webhook if message creation fails
+  });
+
+  // Sync booking to Google Calendar for connected users
+  syncBookingToCalendar(bookingIdNum).catch((error) => {
+    console.error('Stripe webhook: Error syncing booking to calendar:', error);
+    // Don't fail the webhook if calendar sync fails
   });
 }
 

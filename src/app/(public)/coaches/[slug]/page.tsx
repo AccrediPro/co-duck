@@ -24,6 +24,7 @@ async function getCoachProfile(slug: string) {
       timezone: coachProfiles.timezone,
       sessionTypes: coachProfiles.sessionTypes,
       isPublished: coachProfiles.isPublished,
+      verificationStatus: coachProfiles.verificationStatus,
       name: users.name,
       avatarUrl: users.avatarUrl,
     })
@@ -99,6 +100,7 @@ export default async function CoachProfilePage({ params }: PageProps) {
         availability={availability}
         coachId={coach.userId}
         currentUserId={userId}
+        isVerified={coach.verificationStatus === 'verified'}
       />
     </div>
   );

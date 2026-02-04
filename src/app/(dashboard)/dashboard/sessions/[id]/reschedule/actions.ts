@@ -33,6 +33,7 @@ import { auth } from '@clerk/nextjs/server';
 import { db, bookings, users, coachProfiles, coachAvailability, availabilityOverrides } from '@/db';
 import { eq, and, gte, lte, or, ne } from 'drizzle-orm';
 import type { BookingSessionType } from '@/db/schema';
+import { updateBookingInCalendar } from '@/lib/google-calendar-sync';
 
 // ============================================================================
 // Type Definitions
@@ -718,6 +719,11 @@ export async function confirmReschedule(
     if (updated.length === 0) {
       return { success: false, error: 'Failed to update booking' };
     }
+
+    // Sync updated booking to Google Calendar
+    updateBookingInCalendar(bookingId).catch((error) => {
+      console.error('Error updating booking in calendar after reschedule:', error);
+    });
 
     return { success: true, data: { id: updated[0].id } };
   } catch (error) {

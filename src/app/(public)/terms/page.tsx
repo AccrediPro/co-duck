@@ -9,7 +9,16 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from '@/components/ui/accordion';
-import { ArrowUp, Printer, FileText, Scale, Users, CreditCard, ShieldAlert, Mail } from 'lucide-react';
+import {
+  ArrowUp,
+  Printer,
+  FileText,
+  Scale,
+  Users,
+  CreditCard,
+  ShieldAlert,
+  Mail,
+} from 'lucide-react';
 
 const sections = [
   {
@@ -192,6 +201,33 @@ const tableOfContents = sections.map((section) => ({
   title: section.title,
 }));
 
+// Simple markdown renderer for bold text and bullet points
+function renderMarkdown(text: string): React.ReactNode {
+  // Split by bold markers and create alternating text/bold elements
+  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+
+  return parts.map((part, index) => {
+    // Check if this part is bold (wrapped in **)
+    if (part.startsWith('**') && part.endsWith('**')) {
+      const boldText = part.slice(2, -2);
+      return (
+        <strong key={index} className="font-semibold text-foreground">
+          {boldText}
+        </strong>
+      );
+    }
+    // Check for bullet points
+    if (part.startsWith('• ')) {
+      return (
+        <span key={index} className="block pl-4">
+          • {part.slice(2)}
+        </span>
+      );
+    }
+    return part;
+  });
+}
+
 export default function TermsPage() {
   const [showBackToTop, setShowBackToTop] = useState(false);
   const [activeSection, setActiveSection] = useState<string>('');
@@ -249,9 +285,7 @@ export default function TermsPage() {
               <Scale className="mr-2 h-4 w-4" />
               Legal Document
             </div>
-            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
-              Terms of Service
-            </h1>
+            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">Terms of Service</h1>
             <p className="mx-auto mt-4 max-w-xl text-muted-foreground">
               Last updated: January 31, 2026
             </p>
@@ -305,9 +339,7 @@ export default function TermsPage() {
               {/* Mobile Table of Contents */}
               <div className="mb-8 lg:hidden">
                 <details className="rounded-lg border p-4">
-                  <summary className="cursor-pointer font-semibold">
-                    Table of Contents
-                  </summary>
+                  <summary className="cursor-pointer font-semibold">Table of Contents</summary>
                   <nav className="mt-4 space-y-2">
                     {tableOfContents.map((item) => (
                       <button
@@ -325,9 +357,9 @@ export default function TermsPage() {
               {/* Introduction */}
               <div className="mb-8 rounded-lg border bg-muted/30 p-6">
                 <p className="text-muted-foreground">
-                  Welcome to CoachHub. These Terms of Service govern your use of our platform
-                  and services. By accessing or using CoachHub, you agree to be bound by these
-                  terms. Please read them carefully.
+                  Welcome to CoachHub. These Terms of Service govern your use of our platform and
+                  services. By accessing or using CoachHub, you agree to be bound by these terms.
+                  Please read them carefully.
                 </p>
               </div>
 
@@ -352,7 +384,7 @@ export default function TermsPage() {
                       <div className="prose prose-sm max-w-none text-muted-foreground">
                         {section.content.split('\n\n').map((paragraph, i) => (
                           <p key={i} className="mb-4 whitespace-pre-line">
-                            {paragraph}
+                            {renderMarkdown(paragraph)}
                           </p>
                         ))}
                       </div>
@@ -364,8 +396,8 @@ export default function TermsPage() {
               {/* Footer Note */}
               <div className="mt-12 rounded-lg border bg-muted/30 p-6 text-center">
                 <p className="text-sm text-muted-foreground">
-                  By using CoachHub, you acknowledge that you have read, understood, and agree
-                  to be bound by these Terms of Service.
+                  By using CoachHub, you acknowledge that you have read, understood, and agree to be
+                  bound by these Terms of Service.
                 </p>
                 <div className="mt-4 flex justify-center gap-4">
                   <Button variant="outline" asChild>

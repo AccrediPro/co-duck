@@ -28,6 +28,7 @@ import { db, bookings, users, transactions, coachProfiles, sessionNotes } from '
 import type { BookingSessionType } from '@/db/schema';
 import { stripe } from '@/lib/stripe';
 import { formatRefundAmount } from '@/lib/refunds';
+import { removeBookingFromCalendar, updateBookingInCalendar } from '@/lib/google-calendar-sync';
 
 // ============================================================================
 // Type Definitions
@@ -463,6 +464,11 @@ export async function cancelSession(
       })
       .where(eq(bookings.id, sessionId));
 
+    // Remove from Google Calendar
+    removeBookingFromCalendar(sessionId).catch((error) => {
+      console.error('Error removing cancelled session from calendar:', error);
+    });
+
     return { success: true, refund: refundInfo };
   } catch {
     return { success: false, error: 'Failed to cancel session' };
@@ -755,6 +761,11 @@ export async function updateMeetingLink(
       .update(bookings)
       .set({ meetingLink: trimmedLink || null })
       .where(eq(bookings.id, bookingId));
+
+    // Update in Google Calendar
+    updateBookingInCalendar(bookingId).catch((error) => {
+      console.error('Error updating meeting link in calendar:', error);
+    });
 
     return { success: true };
   } catch {

@@ -1,230 +1,292 @@
 {
   "project": "Coaching Platform",
-  "branchName": "ralph/code-documentation",
-  "description": "Add comprehensive code documentation - JSDoc, README files, and inline comments for all critical files",
+  "branchName": "ralph/platform-ux-v2",
+  "description": "Platform UX overhaul: profile photo upload, sessions calendar view with urgency indicators, availability overrides and multi-slot days, client management portal, messaging improvements, role switching for coaches, manual reminder button",
   "userStories": [
     {
       "id": "US-001",
-      "title": "Document Stripe webhook handler",
-      "description": "Add JSDoc documentation to the Stripe webhook handler - critical payment path.",
+      "title": "Add profile photo upload with compression",
+      "description": "As a coach, I want to upload a profile photo directly instead of pasting a URL, with automatic compression.",
       "acceptanceCriteria": [
-        "Add JSDoc to POST handler in src/app/api/webhooks/stripe/route.ts",
-        "Document each event handler function (checkout.session.completed, etc.)",
-        "Document helper functions with params and return types",
-        "Add inline comments explaining critical logic",
-        "Typecheck passes"
+        "Add file input to profile editor form that accepts image files (jpg, png, webp)",
+        "Compress/resize image client-side before upload (max 500KB, max 800x800px) using canvas API",
+        "Create API route POST /api/upload/avatar that uploads to Supabase Storage and returns public URL",
+        "Show preview of uploaded photo in the profile editor",
+        "Save the returned URL to coachProfiles.profilePhotoUrl or users.avatarUrl",
+        "Show current photo if one exists, with option to change",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
       ],
       "priority": 1,
-      "passes": true,
-      "notes": "Added comprehensive JSDoc to all functions including file-level docs, fee structure, idempotency notes, and error handling documentation"
+      "passes": false,
+      "notes": "Use Supabase Storage (already configured). Check if an avatars bucket exists, create if not."
     },
     {
       "id": "US-002",
-      "title": "Document Clerk webhook handler",
-      "description": "Add JSDoc documentation to the Clerk webhook handler - user sync path.",
+      "title": "Improve profile page layout and UX",
+      "description": "As a coach, I want a cleaner profile editing experience with better visual hierarchy.",
       "acceptanceCriteria": [
-        "Add JSDoc to POST handler in src/app/api/webhooks/clerk/route.ts",
-        "Document user.created, user.updated, user.deleted handlers",
-        "Add inline comments explaining webhook verification",
-        "Typecheck passes"
+        "Reorganize profile form into clear sections with card containers: Photo & Identity, About, Session Types, Settings",
+        "Photo section shows large circular preview of current photo with upload overlay",
+        "Add profile completion progress bar at the top",
+        "Add 'Preview Public Profile' button that opens coach's public page in new tab",
+        "Session types section has clearer add/edit/remove UI",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
       ],
       "priority": 2,
-      "passes": true,
-      "notes": "Added comprehensive JSDoc including file-level docs with security notes, POST handler with request flow and response codes, detailed inline comments for Svix signature verification, and documented each event handler (user.created, user.updated, user.deleted)"
+      "passes": false,
+      "notes": "Coach slug is at coachProfiles.slug. Public profile at /coaches/{slug}."
     },
     {
       "id": "US-003",
-      "title": "Document booking flow actions",
-      "description": "Add JSDoc to all booking-related server actions.",
+      "title": "Add urgency border colors to session cards",
+      "description": "As a coach, I want to see at a glance which sessions are most urgent based on colored borders.",
       "acceptanceCriteria": [
-        "Document src/app/(public)/coaches/[slug]/book/actions.ts",
-        "Document src/app/(public)/coaches/[slug]/book/confirm/actions.ts",
-        "Document src/app/(public)/coaches/[slug]/book/success/actions.ts",
-        "Each function has JSDoc with @param, @returns, @throws",
-        "Typecheck passes"
+        "Session cards get left border color based on time proximity: red if within 2 hours, orange if today, yellow if tomorrow, emerald if within 7 days, default border otherwise",
+        "Apply to both coach session-card.tsx and client-session-card.tsx",
+        "Apply to upcoming sessions widgets on dashboard (todays-schedule, upcoming-sessions-widget, client-upcoming-sessions)",
+        "Show date and day-of-week clearly on each card",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
       ],
       "priority": 3,
-      "passes": true,
-      "notes": "Added comprehensive JSDoc to all 3 booking flow action files including file-level @fileoverview, function docs with @param/@returns/@throws/@example, section dividers, and inline comments for critical logic"
+      "passes": false,
+      "notes": "Session card components are in src/components/sessions/. Dashboard widgets in src/components/dashboard/."
     },
     {
       "id": "US-004",
-      "title": "Document session management actions",
-      "description": "Add JSDoc to session-related server actions.",
+      "title": "Fix sessions page tabs to show correct data",
+      "description": "As a coach, I want the upcoming/past/cancelled tabs on the sessions page to show distinct, correct data.",
       "acceptanceCriteria": [
-        "Document src/app/(dashboard)/dashboard/sessions/actions.ts if exists",
-        "Document reschedule actions",
-        "Document cancel session actions",
-        "Each function has JSDoc with @param, @returns, @throws",
-        "Typecheck passes"
+        "Upcoming tab: only future confirmed/pending sessions, sorted by soonest first",
+        "Past tab: only sessions where endTime has passed AND status is completed/confirmed/no_show, sorted by most recent first",
+        "Cancelled tab: only sessions with status cancelled, sorted by most recent first",
+        "Each tab shows count badge with number of items",
+        "Empty states are different per tab with relevant messaging",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
       ],
       "priority": 4,
-      "passes": true,
-      "notes": "Documented 3 session action files: sessions/actions.ts (coach view - 10 functions), sessions/[id]/reschedule/actions.ts (client reschedule - 5 functions), and my-sessions/actions.ts (client view - 5 functions). Added file-level @fileoverview, section dividers, type documentation, and @param/@returns/@throws/@example for all functions."
+      "passes": false,
+      "notes": "Check getCoachSessions in sessions/actions.ts. Verify the SQL queries filter correctly."
     },
     {
       "id": "US-005",
-      "title": "Document availability actions",
-      "description": "Add JSDoc to availability-related server actions.",
+      "title": "Add calendar view toggle to sessions page",
+      "description": "As a coach, I want to switch between list view and calendar view on the sessions page.",
       "acceptanceCriteria": [
-        "Document src/app/(dashboard)/dashboard/availability/actions.ts",
-        "Document availability-actions.ts if separate",
-        "Each function has JSDoc with @param, @returns, @throws",
-        "Typecheck passes"
+        "Add toggle button group (List / Calendar) above the sessions list",
+        "Calendar view reuses the existing CalendarView component from dashboard",
+        "Calendar shows all sessions (not just upcoming), color-coded by status",
+        "Clicking a day in calendar shows that day's sessions in a list below",
+        "Selected day shows full session cards (not just dots)",
+        "Toggle state persists via URL search param (?view=calendar or ?view=list)",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
       ],
       "priority": 5,
-      "passes": true,
-      "notes": "Documented 2 availability action files: dashboard/availability/actions.ts (coach settings - 3 functions + 3 types) and coaches/[slug]/availability-actions.ts (public display - 1 server action + 5 internal helpers). Added file-level @fileoverview, section dividers, type documentation, and @param/@returns/@throws/@example for all functions. Added inline comments for critical logic (buffer time, conflict detection, override priority)."
+      "passes": false,
+      "notes": "CalendarView is at src/components/dashboard/calendar-view.tsx. It uses getSessionsForMonth from dashboard/actions.ts."
     },
     {
       "id": "US-006",
-      "title": "Document onboarding components",
-      "description": "Add JSDoc to coach onboarding form components.",
+      "title": "Improve dashboard calendar - click day for session list",
+      "description": "As a coach, I want to click on a calendar day to see a full list of sessions for that day instead of just hovering.",
       "acceptanceCriteria": [
-        "Document src/components/onboarding/basic-info-form.tsx",
-        "Document src/components/onboarding/bio-specialties-form.tsx",
-        "Document src/components/onboarding/pricing-form.tsx",
-        "Document src/components/onboarding/review-publish-form.tsx",
-        "Each component has JSDoc explaining purpose and props",
-        "Typecheck passes"
+        "Clicking a day on the dashboard calendar selects it and shows a session list panel below",
+        "Selected day is visually highlighted (filled background, not just ring)",
+        "Session list shows full details: client name, time, session type, status badge, join button",
+        "If no sessions on selected day, show 'No sessions' message",
+        "Calendar dots use urgency colors (same scheme as session cards)",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
       ],
       "priority": 6,
-      "passes": true,
-      "notes": "Documented all 4 onboarding form components with comprehensive JSDoc. Each file includes: file-level @fileoverview with flow/data/validation docs, interface documentation with @property tags, component JSDoc with @param/@returns/@example, section dividers, and inline comments for helper functions."
+      "passes": false,
+      "notes": "CalendarView at src/components/dashboard/calendar-view.tsx is already a client component with click handling."
     },
     {
       "id": "US-007",
-      "title": "Document database schema",
-      "description": "Enhance database schema documentation.",
+      "title": "Add manual reminder button for upcoming sessions",
+      "description": "As a coach, I want to send a manual reminder message to a client for an upcoming session.",
       "acceptanceCriteria": [
-        "Add detailed comments to src/db/schema.ts explaining each table",
-        "Document relationship between tables",
-        "Explain JSONB fields structure (sessionTypes, availability, etc.)",
-        "Document enum values and their meanings",
-        "Create src/db/README.md with schema overview and ERD description",
+        "Add 'Send Reminder' button on each upcoming session card (coach view only)",
+        "Button creates a system message in the conversation: 'Reminder: You have a {sessionType} session on {date} at {time}'",
+        "Button shows loading state while sending",
+        "Button shows 'Sent' with checkmark after success, disabled for 1 hour",
+        "Create server action sendSessionReminder(bookingId) in sessions/actions.ts",
+        "Action validates: booking is upcoming, user is the coach, booking is confirmed",
         "Typecheck passes"
       ],
       "priority": 7,
-      "passes": true,
-      "notes": "Added comprehensive JSDoc to schema.ts: file-level @fileoverview with ERD diagram, enum documentation with state transitions, JSONB interface docs (SessionType, BookingSessionType), table-level JSDoc with relationships and design decisions, field-level comments for all columns. Created src/db/README.md with ASCII ERD, tables overview, enum reference, JSONB structures, design decisions, and common query examples."
+      "passes": false,
+      "notes": "Use createBookingSystemMessage or similar from src/lib/conversations.ts. The conversation is between coachId and clientId."
     },
     {
       "id": "US-008",
-      "title": "Document messaging system",
-      "description": "Add JSDoc to messaging/conversations utilities.",
+      "title": "Enforce 24h cancellation policy for clients",
+      "description": "As a platform, I want to enforce that clients can only cancel up to 24 hours before the session. After that, they must message the coach.",
       "acceptanceCriteria": [
-        "Verify src/lib/conversations.ts has complete JSDoc",
-        "Add examples to existing documentation",
-        "Document any message-related components",
-        "Typecheck passes"
+        "In cancelClientSession action: if less than 24 hours before session, return error with message directing client to contact their coach",
+        "Update cancellation dialog UI to show different content based on time: if >24h show normal cancel button, if <24h show 'Contact Coach' button that links to messages",
+        "Coach can still cancel anytime (no change to coach cancellation)",
+        "Client cancellation dialog shows refund info: 100% if >48h, 50% if 24-48h, 'Contact coach' if <24h",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
       ],
       "priority": 8,
-      "passes": true,
-      "notes": "Documented 3 server action files (lib/conversations.ts, messages/actions.ts, messages/[id]/actions.ts) and 7 UI components (chat-view, conversations-list, conversation-row, message-bubble, message-input, message-button, chat-context-panel). Added file-level @fileoverview, interface docs, function JSDoc with @param/@returns/@example/@security, section dividers, and helper function documentation."
+      "passes": false,
+      "notes": "Client cancellation is in my-sessions/actions.ts cancelClientSession. Cancellation dialog is at src/components/sessions/cancellation-dialog.tsx. Refund logic in src/lib/refunds.ts."
     },
     {
       "id": "US-009",
-      "title": "Document payment utilities",
-      "description": "Add JSDoc to Stripe and payment utilities.",
+      "title": "Add availability overrides UI - block specific dates",
+      "description": "As a coach, I want to block specific dates or date ranges from my schedule without changing my weekly availability.",
       "acceptanceCriteria": [
-        "Document src/lib/stripe.ts with configuration details",
-        "Document src/lib/refunds.ts (verify existing JSDoc)",
-        "Add error handling documentation",
-        "Typecheck passes"
+        "Add 'Date Exceptions' section to availability page below the weekly schedule",
+        "Show a calendar where coach can click dates to toggle them blocked (red) or available (green)",
+        "Support selecting a date range by clicking start date then end date",
+        "Each blocked date creates a row in availabilityOverrides with isAvailable=false",
+        "Optional reason field per override (e.g. 'Vacation', 'Holiday')",
+        "Show list of current overrides with delete button",
+        "Create server actions: getAvailabilityOverrides, addAvailabilityOverride, deleteAvailabilityOverride",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
       ],
       "priority": 9,
-      "passes": true,
-      "notes": "Documented 2 payment utility files: stripe.ts (Stripe client configuration - env validation, client instance, publishable key utility, type exports) and refunds.ts (refund eligibility calculation - RefundEligibility interface, calculateRefundEligibility function, formatRefundAmount utility, getRefundMessage for UI). Added comprehensive error handling documentation with Stripe error types table and common error codes reference."
+      "passes": false,
+      "notes": "availabilityOverrides table already exists in schema.ts. Booking flow already checks overrides. Only the UI is missing."
     },
     {
       "id": "US-010",
-      "title": "Document coach validators",
-      "description": "Add JSDoc to validation schemas.",
+      "title": "Support multiple time slots per day in availability",
+      "description": "As a coach, I want to set multiple available time ranges per day (e.g., 9-12 and 14-17, skipping lunch).",
       "acceptanceCriteria": [
-        "Document src/lib/validators/coach-onboarding.ts",
-        "Document COACH_SPECIALTIES constant",
-        "Document each Zod schema with field explanations",
+        "Change availability schema: coachAvailability can have multiple rows per coach+dayOfWeek",
+        "Add unique constraint on (coachId, dayOfWeek, startTime) instead of (coachId, dayOfWeek)",
+        "Update availability form to allow adding multiple time slots per day with + button",
+        "Each slot has its own start/end time and can be individually removed",
+        "Update saveAvailability action to handle multiple slots per day",
+        "Generate and run migration",
+        "Update booking flow slot generation to check all slots for a day (not just one)",
         "Typecheck passes"
       ],
       "priority": 10,
-      "passes": true,
-      "notes": "Added comprehensive JSDoc to coach-onboarding.ts: file-level @fileoverview with onboarding steps table, COACH_SPECIALTIES with usage/storage docs, all 4 schemas (coachBasicInfoSchema, coachBioSpecialtiesSchema, sessionTypeSchema, coachPricingSchema) with field tables/@example/@see, constants (SESSION_DURATIONS, SUPPORTED_CURRENCIES) with currency formatting examples, generateSlug helper with transformation rules. Emphasized CENTS storage convention throughout."
+      "passes": false,
+      "notes": "This changes the data model. Currently 1 row per coach+day. Need to update getCoachAvailability, getRescheduleAvailableSlots, and booking slot generation to iterate over multiple slots per day."
     },
     {
       "id": "US-011",
-      "title": "Create components README",
-      "description": "Create overview documentation for components.",
+      "title": "Add coach-side client profile page",
+      "description": "As a coach, I want a dedicated page to view a client's full history, notes, and action items.",
       "acceptanceCriteria": [
-        "Create src/components/README.md",
-        "List all component folders with brief descriptions",
-        "Document component naming conventions",
-        "Document prop patterns used",
-        "Typecheck passes"
+        "Create /dashboard/clients/[clientId]/page.tsx",
+        "Show client info: name, avatar, email, member since",
+        "Show session history with this coach: list of all past/upcoming bookings",
+        "Show total sessions count, total hours coached together",
+        "Show action items assigned to this client by this coach",
+        "Show coach's private notes for each session (from session_notes table)",
+        "Add 'Message Client' button linking to conversation",
+        "Create server action getClientProfile(clientId) in a new clients/actions.ts",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
       ],
       "priority": 11,
-      "passes": true,
-      "notes": "Created comprehensive src/components/README.md with: directory structure, folder descriptions with component tables for all 12 folders, naming conventions (file kebab-case, component PascalCase, suffix patterns), prop patterns (interface naming, initial data, callbacks, boolean flags, entity refs), client vs server component guidance, server action integration patterns, styling with Tailwind/shadcn, type safety notes, and new component guidelines."
+      "passes": false,
+      "notes": "Session notes are in session_notes table. Action items have coachId+clientId. Conversations have coachId+clientId."
     },
     {
       "id": "US-012",
-      "title": "Create API documentation",
-      "description": "Document all API routes.",
+      "title": "Add clients list page for coaches",
+      "description": "As a coach, I want to see a list of all my clients with key stats.",
       "acceptanceCriteria": [
-        "Create docs/API.md in project root",
-        "Document all /api/* routes",
-        "Include request/response formats",
-        "Document authentication requirements",
-        "Typecheck passes"
+        "Create /dashboard/clients/page.tsx",
+        "List all unique clients who have booked with this coach",
+        "Show per client: avatar, name, email, total sessions, last session date, next upcoming session",
+        "Search by client name",
+        "Sort by: last session, total sessions, name",
+        "Each row links to /dashboard/clients/[clientId]",
+        "Add 'Clients' link to dashboard sidebar navigation",
+        "Create server action getCoachClients in clients/actions.ts",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
       ],
       "priority": 12,
-      "passes": true,
-      "notes": "Created comprehensive docs/API.md (321 lines) documenting: Stripe webhook (POST /api/webhooks/stripe) with 3 event handlers (checkout.session.completed, checkout.session.expired, payment_intent.payment_failed), Clerk webhook (POST /api/webhooks/clerk) with 3 event handlers (user.created, user.updated, user.deleted), authentication requirements (signature verification), request/response formats with JSON examples, metadata fields, response codes, idempotency guarantees, environment variables, webhook setup instructions for both Stripe and Clerk dashboards, local development testing, error handling reference, and server actions vs API routes explanation."
+      "passes": false,
+      "notes": "Query distinct clientId from bookings where coachId matches. Join with users for name/avatar."
     },
     {
       "id": "US-013",
-      "title": "Document dashboard pages",
-      "description": "Add inline documentation to dashboard pages.",
+      "title": "Add message labels and bookmarks",
+      "description": "As a user, I want to label and bookmark conversations for better organization.",
       "acceptanceCriteria": [
-        "Add JSDoc to src/app/(dashboard)/dashboard/page.tsx",
-        "Document key dashboard components",
-        "Document data fetching patterns used",
-        "Typecheck passes"
+        "Add isBookmarked boolean column to conversations table (default false)",
+        "Add label text column to conversations table (nullable)",
+        "Add bookmark toggle icon on each conversation row in the list",
+        "Add label dropdown on each conversation (options: None, Important, Follow Up, Urgent)",
+        "Add filter buttons at top of conversations list: All, Bookmarked, by label",
+        "Create server actions: toggleBookmark, setConversationLabel",
+        "Generate and run migration for new columns",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
       ],
       "priority": 13,
-      "passes": true,
-      "notes": "Documented 4 files: dashboard/page.tsx (main dashboard with role-based components - CoachDashboard, ClientDashboard, AdminDashboard, CoachOnboardingPrompt), action-items/actions.ts (9 functions, 8 interfaces, permission model and status computation docs), sessions/page.tsx (coach sessions with SSR data fetching pattern), messages/page.tsx (conversation list with role-based UI). Added file-level @fileoverview with data flow diagrams, section dividers, inline comments explaining access control and data fetching patterns."
+      "passes": false,
+      "notes": "Conversations table is in schema.ts. Conversation list component at src/components/messages/conversations-list.tsx."
     },
     {
       "id": "US-014",
-      "title": "Create architecture overview",
-      "description": "Document overall application architecture.",
+      "title": "Add unread reply indicator and sort by upcoming session",
+      "description": "As a user, I want to see which conversations need replies and have the most urgent client at the top.",
       "acceptanceCriteria": [
-        "Create docs/ARCHITECTURE.md",
-        "Document folder structure and conventions",
-        "Document data flow (booking, payment, messaging)",
-        "Document authentication flow with Clerk",
-        "Include diagrams in text/ASCII format",
-        "Typecheck passes"
+        "Conversations with unread messages where the last message is NOT from the current user show a 'Needs Reply' badge",
+        "For coaches: sort conversations by default with the client who has the nearest upcoming session first",
+        "Show next session date/time inline on each conversation row if one exists",
+        "Unread conversations float to top within the sort order",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
       ],
       "priority": 14,
       "passes": false,
-      "notes": ""
+      "notes": "getConversations in messages/actions.ts returns conversation list. Need to join with bookings to get next upcoming session per client."
     },
     {
       "id": "US-015",
-      "title": "Update main README",
-      "description": "Update project README with comprehensive documentation.",
+      "title": "Add role switching for coaches",
+      "description": "As a coach, I want to switch to client mode so I can also book sessions with other coaches.",
       "acceptanceCriteria": [
-        "Update README.md with project overview",
-        "Add features list",
-        "Add setup instructions",
-        "Add environment variables documentation",
-        "Add links to other docs (API, Architecture, etc.)",
-        "Typecheck passes"
+        "Add role switcher component in the dashboard sidebar (only visible for users with role=coach)",
+        "Two modes: 'Coach Mode' and 'Client Mode'",
+        "In Coach Mode: show coach sidebar (Sessions, Clients, Availability, Payments, etc.)",
+        "In Client Mode: show client sidebar (My Sessions, Find a Coach, Action Items, etc.)",
+        "Store active mode in a cookie or localStorage (persists across page loads)",
+        "Dashboard page renders coach or client dashboard based on active mode",
+        "When in Client Mode, user can browse coaches and book sessions (self-booking already prevented)",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
       ],
       "priority": 15,
       "passes": false,
-      "notes": ""
+      "notes": "Self-booking prevention already exists in book/confirm/actions.ts. Sidebar is at src/components/navigation/dashboard-sidebar.tsx. Dashboard page is at src/app/(dashboard)/dashboard/page.tsx."
+    },
+    {
+      "id": "US-016",
+      "title": "Improve dashboard upcoming sessions clarity",
+      "description": "As a user, I want the dashboard upcoming sessions to show dates clearly with urgency colors.",
+      "acceptanceCriteria": [
+        "Upcoming sessions widget shows full date (e.g., 'Tuesday, Feb 4' not just 'in 2 hours')",
+        "Show both relative time AND absolute date/time",
+        "Apply urgency border colors (same as US-003)",
+        "Add Join button directly on the widget if meeting link exists",
+        "Empty state for coaches shows 'No upcoming sessions' with link to availability settings",
+        "Empty state for clients shows 'No upcoming sessions' with link to find a coach",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 16,
+      "passes": false,
+      "notes": "Coach widget: src/components/dashboard/upcoming-sessions-widget.tsx. Client widget: src/components/dashboard/client-upcoming-sessions.tsx."
     }
   ]
 }
