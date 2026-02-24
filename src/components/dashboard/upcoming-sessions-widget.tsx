@@ -46,19 +46,13 @@ export function UpcomingSessionsWidget({ sessions }: UpcomingSessionsWidgetProps
               <div key={session.id} className="flex items-center gap-3">
                 <Avatar className="h-8 w-8">
                   <AvatarImage src={session.clientAvatar || undefined} />
-                  <AvatarFallback>
-                    {session.clientName?.charAt(0) || 'C'}
-                  </AvatarFallback>
+                  <AvatarFallback>{session.clientName?.charAt(0) || 'C'}</AvatarFallback>
                 </Avatar>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium truncate">
-                    {session.clientName || 'Client'}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {session.sessionType.name}
-                  </p>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium">{session.clientName || 'Client'}</p>
+                  <p className="text-xs text-muted-foreground">{session.sessionType.name}</p>
                 </div>
-                <span className="text-xs text-muted-foreground whitespace-nowrap">
+                <span className="whitespace-nowrap text-xs text-muted-foreground">
                   {getRelativeTime(new Date(session.startTime))}
                 </span>
               </div>

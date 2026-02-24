@@ -10,8 +10,18 @@ import type { CalendarSession } from '@/app/(dashboard)/dashboard/actions';
 
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 const MONTHS = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December',
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
 ];
 
 export function CalendarView() {
@@ -74,7 +84,7 @@ export function CalendarView() {
           <Button variant="ghost" size="icon" onClick={goToPreviousMonth}>
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <span className="text-sm font-medium min-w-[140px] text-center">
+          <span className="min-w-[140px] text-center text-sm font-medium">
             {MONTHS[month - 1]} {year}
           </span>
           <Button variant="ghost" size="icon" onClick={goToNextMonth}>
@@ -85,9 +95,9 @@ export function CalendarView() {
       <CardContent>
         <div className={`transition-opacity ${isPending ? 'opacity-50' : ''}`}>
           {/* Day headers */}
-          <div className="grid grid-cols-7 gap-1 mb-1">
+          <div className="mb-1 grid grid-cols-7 gap-1">
             {DAYS.map((day) => (
-              <div key={day} className="text-center text-xs font-medium text-muted-foreground py-1">
+              <div key={day} className="py-1 text-center text-xs font-medium text-muted-foreground">
                 {day}
               </div>
             ))}
@@ -105,20 +115,14 @@ export function CalendarView() {
               const day = i + 1;
               const daySessions = sessionsByDay.get(day) || [];
               const isToday =
-                day === now.getDate() &&
-                month === now.getMonth() + 1 &&
-                year === now.getFullYear();
+                day === now.getDate() && month === now.getMonth() + 1 && year === now.getFullYear();
               const isSelected = day === selectedDay;
 
               return (
                 <button
                   key={day}
                   onClick={() => setSelectedDay(day === selectedDay ? null : day)}
-                  className={`h-10 rounded-md text-sm relative flex items-center justify-center transition-colors
-                    ${isToday ? 'font-bold' : ''}
-                    ${isSelected ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'}
-                    ${isToday && !isSelected ? 'ring-1 ring-primary' : ''}
-                  `}
+                  className={`relative flex h-10 items-center justify-center rounded-md text-sm transition-colors ${isToday ? 'font-bold' : ''} ${isSelected ? 'bg-primary text-primary-foreground' : 'hover:bg-muted'} ${isToday && !isSelected ? 'ring-1 ring-primary' : ''} `}
                 >
                   {day}
                   {daySessions.length > 0 && (
@@ -136,8 +140,9 @@ export function CalendarView() {
           {/* Selected day sessions */}
           {selectedDay !== null && (
             <div className="mt-4 border-t pt-3">
-              <h4 className="text-sm font-medium mb-2">
-                {MONTHS[month - 1]} {selectedDay} — {selectedSessions.length} session{selectedSessions.length !== 1 ? 's' : ''}
+              <h4 className="mb-2 text-sm font-medium">
+                {MONTHS[month - 1]} {selectedDay} — {selectedSessions.length} session
+                {selectedSessions.length !== 1 ? 's' : ''}
               </h4>
               {selectedSessions.length === 0 ? (
                 <p className="text-xs text-muted-foreground">No sessions this day.</p>

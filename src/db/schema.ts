@@ -287,6 +287,24 @@ export const users = pgTable('users', {
   avatarUrl: text('avatar_url'),
 
   /**
+   * User's phone number (optional, set by user)
+   * @type {string | null}
+   */
+  phone: text('phone'),
+
+  /**
+   * User's IANA timezone (e.g., "America/New_York")
+   * @type {string | null}
+   */
+  timezone: text('timezone'),
+
+  /**
+   * Email notification preferences (JSONB)
+   * @type {{ bookings?: boolean, messages?: boolean, reviews?: boolean, reminders?: boolean, marketing?: boolean } | null}
+   */
+  emailPreferences: jsonb('email_preferences'),
+
+  /**
    * User role determining platform access level
    * @type {'admin' | 'coach' | 'client'}
    * @default 'client'
@@ -552,9 +570,7 @@ export const coachProfiles = pgTable(
      * Managed by admins via the admin dashboard.
      * Verified coaches display a badge on their profile.
      */
-    verificationStatus: verificationStatusEnum('verification_status')
-      .notNull()
-      .default('pending'),
+    verificationStatus: verificationStatusEnum('verification_status').notNull().default('pending'),
 
     /**
      * When the coach was verified by an admin
@@ -1659,3 +1675,245 @@ export const googleCalendarTokens = pgTable('google_calendar_tokens', {
 
 export type GoogleCalendarToken = typeof googleCalendarTokens.$inferSelect;
 export type NewGoogleCalendarToken = typeof googleCalendarTokens.$inferInsert;
+
+// ============================================================================
+// NOTIFICATION TYPE ENUM
+// ============================================================================
+
+/**
+ * Notification Type Enum
+ *
+ * Categorizes in-app notifications for filtering and display.
+ *
+ * @enum {string}
+ * @property {'booking_confirmed'} booking_confirmed - Booking payment confirmed
+ * @property {'booking_cancelled'} booking_cancelled - Booking was cancelled
+ * @property {'session_completed'} session_completed - Session marked complete
+ * @property {'new_message'} new_message - New chat message received
+ * @property {'new_review'} new_review - New review submitted for coach
+ * @property {'review_response'} review_response - Coach responded to a review
+ * @property {'action_item'} action_item - New action item assigned
+ * @property {'session_reminder'} session_reminder - Upcoming session reminder
+ * @property {'system'} system - System announcement
+ */
+export const notificationTypeEnum = pgEnum('notification_type', [
+  'booking_confirmed',
+  'booking_cancelled',
+  'session_completed',
+  'new_message',
+  'new_review',
+  'review_response',
+  'action_item',
+  'session_reminder',
+  'system',
+]);
+
+// ============================================================================
+// NOTIFICATIONS TABLE
+// ============================================================================
+
+/**
+ * Notifications Table
+ *
+ * In-app notifications for all platform users.
+ * Created by system events (bookings, messages, reviews, etc.)
+ * and consumed by the notification bell/panel in the UI.
+ */
+export const notifications = pgTable(
+  'notifications',
+  {
+    id: serial('id').primaryKey(),
+
+    /** The user who receives the notification */
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+
+    /** Notification category for filtering and icon display */
+    type: notificationTypeEnum('type').notNull(),
+
+    /** Short title displayed in notification list */
+    title: text('title').notNull(),
+
+    /** Longer description/body text */
+    body: text('body'),
+
+    /** Deep link path within the app (e.g., "/dashboard/sessions/42") */
+    link: text('link'),
+
+    /** Whether the user has read/seen this notification */
+    isRead: boolean('is_read').notNull().default(false),
+
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('notifications_user_id_idx').on(table.userId),
+    index('notifications_user_unread_idx').on(table.userId, table.isRead),
+    index('notifications_created_at_idx').on(table.createdAt),
+  ]
+);
+
+export type Notification = typeof notifications.$inferSelect;
+export type NewNotification = typeof notifications.$inferInsert;
+
+// ============================================================================
+// GROUP COACHING ENUMS
+// ============================================================================
+
+/**
+ * Group Session Status Enum
+ *
+ * @enum {string}
+ * @property {'draft'} draft - Created but not published
+ * @property {'published'} published - Open for registration
+ * @property {'full'} full - Max participants reached
+ * @property {'in_progress'} in_progress - Session is happening now
+ * @property {'completed'} completed - Session finished
+ * @property {'cancelled'} cancelled - Session was cancelled
+ */
+export const groupSessionStatusEnum = pgEnum('group_session_status', [
+  'draft',
+  'published',
+  'full',
+  'in_progress',
+  'completed',
+  'cancelled',
+]);
+
+/**
+ * Group Participant Status Enum
+ *
+ * @enum {string}
+ * @property {'registered'} registered - Participant signed up and paid
+ * @property {'cancelled'} cancelled - Participant cancelled their registration
+ * @property {'attended'} attended - Confirmed attendance after session
+ * @property {'no_show'} no_show - Did not attend
+ */
+export const groupParticipantStatusEnum = pgEnum('group_participant_status', [
+  'registered',
+  'cancelled',
+  'attended',
+  'no_show',
+]);
+
+// ============================================================================
+// GROUP SESSIONS TABLE
+// ============================================================================
+
+/**
+ * Group Sessions Table
+ *
+ * Stores group coaching sessions created by coaches. Multiple clients
+ * can join a single session up to maxParticipants.
+ */
+export const groupSessions = pgTable(
+  'group_sessions',
+  {
+    id: serial('id').primaryKey(),
+
+    /** Coach who created this group session */
+    coachId: text('coach_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+
+    /** Session title displayed to clients */
+    title: text('title').notNull(),
+
+    /** Detailed description of what the session covers */
+    description: text('description'),
+
+    /** Maximum number of participants (excluding coach) */
+    maxParticipants: integer('max_participants').notNull().default(10),
+
+    /** Current registered participant count (denormalized for query performance) */
+    participantCount: integer('participant_count').notNull().default(0),
+
+    /** Price per participant in cents */
+    priceCents: integer('price_cents').notNull(),
+
+    /** Currency code (e.g., 'usd') */
+    currency: text('currency').notNull().default('usd'),
+
+    /** Session start time */
+    startTime: timestamp('start_time', { withTimezone: true }).notNull(),
+
+    /** Session end time */
+    endTime: timestamp('end_time', { withTimezone: true }).notNull(),
+
+    /** Duration in minutes */
+    duration: integer('duration').notNull(),
+
+    /** Online meeting link */
+    meetingLink: text('meeting_link'),
+
+    /** Session status */
+    status: groupSessionStatusEnum('status').notNull().default('draft'),
+
+    /** Optional specialties/tags for this session (JSONB array of strings) */
+    tags: jsonb('tags').$type<string[]>(),
+
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
+  },
+  (table) => [
+    index('group_sessions_coach_id_idx').on(table.coachId),
+    index('group_sessions_status_idx').on(table.status),
+    index('group_sessions_start_time_idx').on(table.startTime),
+  ]
+);
+
+export type GroupSession = typeof groupSessions.$inferSelect;
+export type NewGroupSession = typeof groupSessions.$inferInsert;
+
+// ============================================================================
+// GROUP SESSION PARTICIPANTS TABLE
+// ============================================================================
+
+/**
+ * Group Session Participants Table
+ *
+ * Join table tracking which clients have registered for group sessions.
+ * One record per client per group session.
+ */
+export const groupSessionParticipants = pgTable(
+  'group_session_participants',
+  {
+    id: serial('id').primaryKey(),
+
+    /** The group session */
+    groupSessionId: integer('group_session_id')
+      .notNull()
+      .references(() => groupSessions.id, { onDelete: 'cascade' }),
+
+    /** The client who registered */
+    clientId: text('client_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+
+    /** Registration/attendance status */
+    status: groupParticipantStatusEnum('status').notNull().default('registered'),
+
+    /** Stripe payment intent ID for this participant's payment */
+    stripePaymentIntentId: text('stripe_payment_intent_id'),
+
+    /** Amount paid in cents */
+    amountPaidCents: integer('amount_paid_cents'),
+
+    /** When they registered */
+    registeredAt: timestamp('registered_at', { withTimezone: true }).notNull().defaultNow(),
+
+    /** When they cancelled (if applicable) */
+    cancelledAt: timestamp('cancelled_at', { withTimezone: true }),
+  },
+  (table) => [
+    index('group_participants_session_idx').on(table.groupSessionId),
+    index('group_participants_client_idx').on(table.clientId),
+    unique('group_participants_unique').on(table.groupSessionId, table.clientId),
+  ]
+);
+
+export type GroupSessionParticipant = typeof groupSessionParticipants.$inferSelect;
+export type NewGroupSessionParticipant = typeof groupSessionParticipants.$inferInsert;

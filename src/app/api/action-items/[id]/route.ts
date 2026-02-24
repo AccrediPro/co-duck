@@ -182,7 +182,10 @@ export async function PATCH(request: Request, { params }: RouteParams) {
           const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
           if (!dateRegex.test(body.dueDate)) {
             return Response.json(
-              { success: false, error: { code: 'INVALID_DATE', message: 'Due date must be in YYYY-MM-DD format' } },
+              {
+                success: false,
+                error: { code: 'INVALID_DATE', message: 'Due date must be in YYYY-MM-DD format' },
+              },
               { status: 400 }
             );
           }
@@ -226,7 +229,10 @@ export async function PATCH(request: Request, { params }: RouteParams) {
   } catch (error) {
     console.error('Error updating action item:', error);
     return Response.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to update action item' } },
+      {
+        success: false,
+        error: { code: 'INTERNAL_ERROR', message: 'Failed to update action item' },
+      },
       { status: 500 }
     );
   }
@@ -277,7 +283,10 @@ export async function DELETE(request: Request, { params }: RouteParams) {
     // Only coach can delete
     if (item.coachId !== userId) {
       return Response.json(
-        { success: false, error: { code: 'FORBIDDEN', message: 'Only the coach can delete action items' } },
+        {
+          success: false,
+          error: { code: 'FORBIDDEN', message: 'Only the coach can delete action items' },
+        },
         { status: 403 }
       );
     }
@@ -294,7 +303,10 @@ export async function DELETE(request: Request, { params }: RouteParams) {
   } catch (error) {
     console.error('Error deleting action item:', error);
     return Response.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to delete action item' } },
+      {
+        success: false,
+        error: { code: 'INTERNAL_ERROR', message: 'Failed to delete action item' },
+      },
       { status: 500 }
     );
   }

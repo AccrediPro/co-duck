@@ -91,9 +91,7 @@ export function CoachCard({
             {reviewCount && reviewCount > 0 ? (
               <div className="mt-2 flex items-center gap-1.5">
                 <StarRating rating={parseFloat(averageRating || '0')} size="sm" />
-                <span className="text-sm text-muted-foreground">
-                  ({reviewCount})
-                </span>
+                <span className="text-sm text-muted-foreground">({reviewCount})</span>
               </div>
             ) : (
               <p className="mt-2 text-xs text-muted-foreground">No reviews yet</p>

@@ -10,6 +10,11 @@ import { auth } from '@clerk/nextjs/server';
 import { db } from '@/db';
 import { actionItems, users } from '@/db/schema';
 import { eq, or, desc, and, inArray } from 'drizzle-orm';
+import { rateLimit, WRITE_LIMIT, rateLimitResponse } from '@/lib/rate-limit';
+import { createNotification } from '@/lib/notifications';
+import { sendEmail } from '@/lib/email';
+import { ActionItemEmail } from '@/lib/emails';
+import { getUnsubscribeUrl } from '@/lib/unsubscribe';
 
 /**
  * GET /api/action-items
@@ -125,7 +130,10 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error('Error fetching action items:', error);
     return Response.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch action items' } },
+      {
+        success: false,
+        error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch action items' },
+      },
       { status: 500 }
     );
   }
@@ -145,6 +153,10 @@ export async function GET(request: Request) {
  * @returns {Object} Created action item
  */
 export async function POST(request: Request) {
+  // Rate limit: 10 requests per minute
+  const rl = rateLimit(request, WRITE_LIMIT, 'action-items-create');
+  if (!rl.success) return rateLimitResponse(rl);
+
   const { userId } = await auth();
 
   if (!userId) {
@@ -161,7 +173,10 @@ export async function POST(request: Request) {
     // Validate required fields
     if (!clientId || !title) {
       return Response.json(
-        { success: false, error: { code: 'MISSING_FIELDS', message: 'clientId and title are required' } },
+        {
+          success: false,
+          error: { code: 'MISSING_FIELDS', message: 'clientId and title are required' },
+        },
         { status: 400 }
       );
     }
@@ -173,7 +188,10 @@ export async function POST(request: Request) {
 
     if (!currentUser || currentUser.role !== 'coach') {
       return Response.json(
-        { success: false, error: { code: 'FORBIDDEN', message: 'Only coaches can create action items' } },
+        {
+          success: false,
+          error: { code: 'FORBIDDEN', message: 'Only coaches can create action items' },
+        },
         { status: 403 }
       );
     }
@@ -196,7 +214,10 @@ export async function POST(request: Request) {
       const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
       if (!dateRegex.test(dueDate)) {
         return Response.json(
-          { success: false, error: { code: 'INVALID_DATE', message: 'Due date must be in YYYY-MM-DD format' } },
+          {
+            success: false,
+            error: { code: 'INVALID_DATE', message: 'Due date must be in YYYY-MM-DD format' },
+          },
           { status: 400 }
         );
       }
@@ -217,6 +238,38 @@ export async function POST(request: Request) {
       })
       .returning();
 
+    // Notify the client about the new action item
+    createNotification({
+      userId: clientId,
+      type: 'action_item',
+      title: 'New action item assigned',
+      body: title,
+      link: '/dashboard/action-items',
+    });
+
+    // Send action item email to client (non-blocking)
+    if (client.email) {
+      sendEmail({
+        to: client.email,
+        subject: `New action item from ${currentUser.name || 'your coach'}: ${title}`,
+        react: ActionItemEmail({
+          clientName: client.name || 'there',
+          coachName: currentUser.name || 'Your Coach',
+          title,
+          description: description || undefined,
+          dueDate: parsedDueDate
+            ? new Date(parsedDueDate).toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              })
+            : undefined,
+          unsubscribeUrl: getUnsubscribeUrl(clientId, 'bookings'),
+        }),
+      }).catch((err) => console.error('Failed to send action item email:', err));
+    }
+
     return Response.json({
       success: true,
       data: {
@@ -232,7 +285,10 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('Error creating action item:', error);
     return Response.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to create action item' } },
+      {
+        success: false,
+        error: { code: 'INTERNAL_ERROR', message: 'Failed to create action item' },
+      },
       { status: 500 }
     );
   }

@@ -43,20 +43,16 @@ export function RecentMessagesWidget({ messages, unreadCount }: RecentMessagesWi
               >
                 <Avatar className="h-8 w-8">
                   <AvatarImage src={msg.otherUserAvatar || undefined} />
-                  <AvatarFallback>
-                    {msg.otherUserName?.charAt(0) || '?'}
-                  </AvatarFallback>
+                  <AvatarFallback>{msg.otherUserName?.charAt(0) || '?'}</AvatarFallback>
                 </Avatar>
-                <div className="flex-1 min-w-0">
+                <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <p className="text-sm font-medium truncate">
-                      {msg.otherUserName || 'User'}
-                    </p>
+                    <p className="truncate text-sm font-medium">{msg.otherUserName || 'User'}</p>
                     {msg.unreadCount > 0 && (
                       <span className="h-2 w-2 rounded-full bg-emerald-500" />
                     )}
                   </div>
-                  <p className="text-xs text-muted-foreground truncate">
+                  <p className="truncate text-xs text-muted-foreground">
                     {msg.lastMessageContent || 'No messages'}
                   </p>
                 </div>

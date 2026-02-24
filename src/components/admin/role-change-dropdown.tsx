@@ -18,11 +18,7 @@ interface RoleChangeDropdownProps {
 /**
  * Client-side role change dropdown with auto-submit on change.
  */
-export function RoleChangeDropdown({
-  userId,
-  currentRole,
-  onRoleChange,
-}: RoleChangeDropdownProps) {
+export function RoleChangeDropdown({ userId, currentRole, onRoleChange }: RoleChangeDropdownProps) {
   const [isLoading, setIsLoading] = React.useState(false);
   const [value, setValue] = React.useState(currentRole);
 

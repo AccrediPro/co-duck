@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { createClient } from '@supabase/supabase-js';
+import { rateLimit, SENSITIVE_LIMIT, rateLimitResponse } from '@/lib/rate-limit';
 
 const BUCKET_NAME = 'avatars';
 const MAX_FILE_SIZE = 500 * 1024; // 500KB
@@ -18,6 +19,10 @@ function getSupabaseAdmin() {
 }
 
 export async function POST(request: NextRequest) {
+  // Rate limit: 5 requests per minute
+  const rl = rateLimit(request, SENSITIVE_LIMIT, 'upload-avatar');
+  if (!rl.success) return rateLimitResponse(rl);
+
   try {
     const { userId } = await auth();
     if (!userId) {
@@ -26,10 +31,7 @@ export async function POST(request: NextRequest) {
 
     const supabase = getSupabaseAdmin();
     if (!supabase) {
-      return NextResponse.json(
-        { error: 'Storage not configured' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'Storage not configured' }, { status: 500 });
     }
 
     const formData = await request.formData();
@@ -74,9 +76,7 @@ export async function POST(request: NextRequest) {
       search: userId,
     });
     if (existingFiles && existingFiles.length > 0) {
-      const oldFiles = existingFiles
-        .filter((f) => f.name.startsWith(userId))
-        .map((f) => f.name);
+      const oldFiles = existingFiles.filter((f) => f.name.startsWith(userId)).map((f) => f.name);
       if (oldFiles.length > 0) {
         await supabase.storage.from(BUCKET_NAME).remove(oldFiles);
       }
@@ -93,10 +93,7 @@ export async function POST(request: NextRequest) {
 
     if (uploadError) {
       console.error('Upload error:', uploadError);
-      return NextResponse.json(
-        { error: 'Failed to upload file' },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: 'Failed to upload file' }, { status: 500 });
     }
 
     // Get public URL
@@ -105,9 +102,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ url: urlData.publicUrl });
   } catch (error) {
     console.error('Avatar upload error:', error);
-    return NextResponse.json(
-      { error: 'An error occurred during upload' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'An error occurred during upload' }, { status: 500 });
   }
 }

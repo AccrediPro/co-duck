@@ -318,7 +318,10 @@ const TEST_SECTIONS = [
         steps: [
           { id: 'email-1', text: 'Set RESEND_API_KEY in .env.local (get from resend.com)' },
           { id: 'email-2', text: 'Book a session - check for booking confirmation email' },
-          { id: 'email-3', text: 'Cancel a session - check for cancellation email to both parties' },
+          {
+            id: 'email-3',
+            text: 'Cancel a session - check for cancellation email to both parties',
+          },
           { id: 'email-4', text: 'Check email includes session details, date, time' },
           { id: 'email-5', text: 'Check email includes meeting link if set' },
           { id: 'email-6', text: 'Verify emails have proper CoachHub branding' },
@@ -349,7 +352,10 @@ const TEST_SECTIONS = [
         steps: [
           { id: 'remind-1', text: 'Set CRON_SECRET in .env.local' },
           { id: 'remind-2', text: 'Book a session 24 hours from now' },
-          { id: 'remind-3', text: 'Manually trigger: curl -H "Authorization: Bearer YOUR_CRON_SECRET" localhost:3001/api/cron/session-reminders' },
+          {
+            id: 'remind-3',
+            text: 'Manually trigger: curl -H "Authorization: Bearer YOUR_CRON_SECRET" localhost:3001/api/cron/session-reminders',
+          },
           { id: 'remind-4', text: 'Check 24-hour reminder email sent to both parties' },
           { id: 'remind-5', text: 'Check 1-hour reminder for sessions starting soon' },
         ],
@@ -672,42 +678,74 @@ export default function TestPage() {
                   <tr className="border-b border-dashed">
                     <td className="py-1.5 pr-4">coach.qa.test@gmail.com</td>
                     <td className="py-1.5 pr-4">test-coach</td>
-                    <td className="py-1.5"><Badge variant="outline" className="text-xs">pending</Badge></td>
+                    <td className="py-1.5">
+                      <Badge variant="outline" className="text-xs">
+                        pending
+                      </Badge>
+                    </td>
                   </tr>
                   <tr className="border-b border-dashed">
                     <td className="py-1.5 pr-4">tettypottycoach@gmail.com</td>
                     <td className="py-1.5 pr-4">tettypotty-coach</td>
-                    <td className="py-1.5"><Badge variant="outline" className="text-xs">pending</Badge></td>
+                    <td className="py-1.5">
+                      <Badge variant="outline" className="text-xs">
+                        pending
+                      </Badge>
+                    </td>
                   </tr>
                   <tr className="border-b border-dashed">
                     <td className="py-1.5 pr-4">sarah.johnson@demomail.com</td>
                     <td className="py-1.5 pr-4">sarah-johnson</td>
-                    <td className="py-1.5"><Badge variant="outline" className="text-xs">pending</Badge></td>
+                    <td className="py-1.5">
+                      <Badge variant="outline" className="text-xs">
+                        pending
+                      </Badge>
+                    </td>
                   </tr>
                   <tr className="border-b border-dashed">
                     <td className="py-1.5 pr-4">michael.chen@demomail.com</td>
                     <td className="py-1.5 pr-4">michael-chen</td>
-                    <td className="py-1.5"><Badge variant="outline" className="text-xs">pending</Badge></td>
+                    <td className="py-1.5">
+                      <Badge variant="outline" className="text-xs">
+                        pending
+                      </Badge>
+                    </td>
                   </tr>
                   <tr className="border-b border-dashed">
                     <td className="py-1.5 pr-4">emily.rodriguez@demomail.com</td>
                     <td className="py-1.5 pr-4">emily-rodriguez</td>
-                    <td className="py-1.5"><Badge variant="outline" className="text-xs">pending</Badge></td>
+                    <td className="py-1.5">
+                      <Badge variant="outline" className="text-xs">
+                        pending
+                      </Badge>
+                    </td>
                   </tr>
                   <tr className="border-b border-dashed">
                     <td className="py-1.5 pr-4">david.kim@demomail.com</td>
                     <td className="py-1.5 pr-4">david-kim</td>
-                    <td className="py-1.5"><Badge variant="outline" className="text-xs">pending</Badge></td>
+                    <td className="py-1.5">
+                      <Badge variant="outline" className="text-xs">
+                        pending
+                      </Badge>
+                    </td>
                   </tr>
                   <tr className="border-b border-dashed">
                     <td className="py-1.5 pr-4">lisa.thompson@demomail.com</td>
                     <td className="py-1.5 pr-4">lisa-thompson</td>
-                    <td className="py-1.5"><Badge variant="outline" className="text-xs">pending</Badge></td>
+                    <td className="py-1.5">
+                      <Badge variant="outline" className="text-xs">
+                        pending
+                      </Badge>
+                    </td>
                   </tr>
                   <tr>
                     <td className="py-1.5 pr-4">james.wilson@demomail.com</td>
                     <td className="py-1.5 pr-4">james-wilson</td>
-                    <td className="py-1.5"><Badge variant="outline" className="text-xs">pending</Badge></td>
+                    <td className="py-1.5">
+                      <Badge variant="outline" className="text-xs">
+                        pending
+                      </Badge>
+                    </td>
                   </tr>
                 </tbody>
               </table>
@@ -744,13 +782,21 @@ export default function TestPage() {
           <div className="rounded-md bg-amber-100/50 p-3 dark:bg-amber-900/20">
             <h4 className="font-semibold text-amber-700 dark:text-amber-400">Quick Links</h4>
             <div className="mt-2 flex flex-wrap gap-2 text-xs">
-              <a href="/coaches/test-coach" className="text-emerald-600 hover:underline">/coaches/test-coach</a>
+              <a href="/coaches/test-coach" className="text-emerald-600 hover:underline">
+                /coaches/test-coach
+              </a>
               <span className="text-muted-foreground">|</span>
-              <a href="/coaches/sarah-johnson" className="text-emerald-600 hover:underline">/coaches/sarah-johnson</a>
+              <a href="/coaches/sarah-johnson" className="text-emerald-600 hover:underline">
+                /coaches/sarah-johnson
+              </a>
               <span className="text-muted-foreground">|</span>
-              <a href="/coaches/michael-chen" className="text-emerald-600 hover:underline">/coaches/michael-chen</a>
+              <a href="/coaches/michael-chen" className="text-emerald-600 hover:underline">
+                /coaches/michael-chen
+              </a>
               <span className="text-muted-foreground">|</span>
-              <a href="/admin" className="text-emerald-600 hover:underline">/admin</a>
+              <a href="/admin" className="text-emerald-600 hover:underline">
+                /admin
+              </a>
             </div>
           </div>
         </CardContent>

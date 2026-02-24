@@ -7,7 +7,11 @@ interface SessionStatsProps {
   totalSessions: number;
 }
 
-export function SessionStats({ distinctClients, sessionsThisMonth, totalSessions }: SessionStatsProps) {
+export function SessionStats({
+  distinctClients,
+  sessionsThisMonth,
+  totalSessions,
+}: SessionStatsProps) {
   return (
     <Card>
       <CardHeader>

@@ -62,30 +62,18 @@ const ReviewForm = React.forwardRef<HTMLFormElement, ReviewFormProps>(
     };
 
     return (
-      <form
-        ref={ref}
-        onSubmit={handleSubmit}
-        className={cn('space-y-6', className)}
-        {...props}
-      >
+      <form ref={ref} onSubmit={handleSubmit} className={cn('space-y-6', className)} {...props}>
         <div className="space-y-2">
           <Label htmlFor="rating">Your Rating</Label>
           <div className="flex items-center gap-2">
-            <StarRatingInput
-              value={rating}
-              onChange={setRating}
-              size="lg"
-              disabled={isLoading}
-            />
+            <StarRatingInput value={rating} onChange={setRating} size="lg" disabled={isLoading} />
             {rating > 0 && (
               <span className="text-sm text-muted-foreground">
                 {rating} star{rating !== 1 ? 's' : ''}
               </span>
             )}
           </div>
-          {errors.rating && (
-            <p className="text-sm text-destructive">{errors.rating}</p>
-          )}
+          {errors.rating && <p className="text-sm text-destructive">{errors.rating}</p>}
         </div>
 
         <div className="space-y-2">
@@ -98,12 +86,8 @@ const ReviewForm = React.forwardRef<HTMLFormElement, ReviewFormProps>(
             disabled={isLoading}
             maxLength={100}
           />
-          {errors.title && (
-            <p className="text-sm text-destructive">{errors.title}</p>
-          )}
-          <p className="text-xs text-muted-foreground">
-            {title.length}/100 characters
-          </p>
+          {errors.title && <p className="text-sm text-destructive">{errors.title}</p>}
+          <p className="text-xs text-muted-foreground">{title.length}/100 characters</p>
         </div>
 
         <div className="space-y-2">
@@ -117,12 +101,8 @@ const ReviewForm = React.forwardRef<HTMLFormElement, ReviewFormProps>(
             rows={4}
             maxLength={1000}
           />
-          {errors.content && (
-            <p className="text-sm text-destructive">{errors.content}</p>
-          )}
-          <p className="text-xs text-muted-foreground">
-            {content.length}/1000 characters
-          </p>
+          {errors.content && <p className="text-sm text-destructive">{errors.content}</p>}
+          <p className="text-xs text-muted-foreground">{content.length}/1000 characters</p>
         </div>
 
         <Button type="submit" disabled={isLoading || rating === 0}>

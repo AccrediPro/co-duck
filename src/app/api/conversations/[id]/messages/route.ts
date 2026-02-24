@@ -10,6 +10,11 @@ import { auth } from '@clerk/nextjs/server';
 import { db } from '@/db';
 import { conversations, messages, users } from '@/db/schema';
 import { eq, or, and, desc, inArray, lt } from 'drizzle-orm';
+import { rateLimit, FREQUENT_LIMIT, rateLimitResponse } from '@/lib/rate-limit';
+import { sendEmail } from '@/lib/email';
+import { NewMessageEmail } from '@/lib/emails';
+import { createNotification } from '@/lib/notifications';
+import { getUnsubscribeUrl } from '@/lib/unsubscribe';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -144,6 +149,10 @@ export async function GET(request: Request, { params }: RouteParams) {
  * @returns {Object} Created message
  */
 export async function POST(request: Request, { params }: RouteParams) {
+  // Rate limit: 30 requests per minute
+  const rl = rateLimit(request, FREQUENT_LIMIT, 'messages-send');
+  if (!rl.success) return rateLimitResponse(rl);
+
   const { userId } = await auth();
 
   if (!userId) {
@@ -168,7 +177,10 @@ export async function POST(request: Request, { params }: RouteParams) {
 
     if (!content || typeof content !== 'string' || content.trim().length === 0) {
       return Response.json(
-        { success: false, error: { code: 'INVALID_CONTENT', message: 'Message content is required' } },
+        {
+          success: false,
+          error: { code: 'INVALID_CONTENT', message: 'Message content is required' },
+        },
         { status: 400 }
       );
     }
@@ -210,6 +222,38 @@ export async function POST(request: Request, { params }: RouteParams) {
     const sender = await db.query.users.findFirst({
       where: eq(users.id, userId),
     });
+
+    // In-app notification for the other party
+    const recipientId =
+      conversation.coachId === userId ? conversation.clientId : conversation.coachId;
+
+    createNotification({
+      userId: recipientId,
+      type: 'new_message',
+      title: `New message from ${sender?.name || 'Someone'}`,
+      body: content.trim().length > 100 ? content.trim().slice(0, 100) + '...' : content.trim(),
+      link: `/dashboard/messages/${conversationId}`,
+    });
+
+    // Send email notification to the other party (non-blocking)
+    const recipient = await db.query.users.findFirst({
+      where: eq(users.id, recipientId),
+    });
+    if (recipient?.email && sender) {
+      sendEmail({
+        to: recipient.email,
+        subject: `New message from ${sender.name || 'your coach'}`,
+        react: NewMessageEmail({
+          recipientName: recipient.name || 'there',
+          senderName: sender.name || 'Someone',
+          messagePreview: content.trim(),
+          conversationId,
+          unsubscribeUrl: getUnsubscribeUrl(recipientId, 'messages'),
+        }),
+      }).catch((err) => {
+        console.error('Failed to send new message email:', err);
+      });
+    }
 
     return Response.json({
       success: true,

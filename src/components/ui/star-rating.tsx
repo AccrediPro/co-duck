@@ -74,10 +74,7 @@ const sizeClasses = {
 };
 
 const StarRating = React.forwardRef<HTMLDivElement, StarRatingProps>(
-  (
-    { rating, maxRating = 5, size = 'md', showValue = false, className, ...props },
-    ref
-  ) => {
+  ({ rating, maxRating = 5, size = 'md', showValue = false, className, ...props }, ref) => {
     const stars = [];
 
     for (let i = 1; i <= maxRating; i++) {
@@ -119,8 +116,10 @@ const StarRating = React.forwardRef<HTMLDivElement, StarRatingProps>(
 StarRating.displayName = 'StarRating';
 
 // Interactive input component for selecting rating
-export interface StarRatingInputProps
-  extends Omit<React.HTMLAttributes<HTMLDivElement>, 'onChange'> {
+export interface StarRatingInputProps extends Omit<
+  React.HTMLAttributes<HTMLDivElement>,
+  'onChange'
+> {
   value: number;
   onChange: (value: number) => void;
   maxRating?: number;
@@ -129,10 +128,7 @@ export interface StarRatingInputProps
 }
 
 const StarRatingInput = React.forwardRef<HTMLDivElement, StarRatingInputProps>(
-  (
-    { value, onChange, maxRating = 5, size = 'md', disabled = false, className, ...props },
-    ref
-  ) => {
+  ({ value, onChange, maxRating = 5, size = 'md', disabled = false, className, ...props }, ref) => {
     const [hoverValue, setHoverValue] = React.useState<number | null>(null);
     const displayValue = hoverValue ?? value;
 
@@ -187,8 +183,8 @@ const StarRatingInput = React.forwardRef<HTMLDivElement, StarRatingInputProps>(
           onBlur={() => setHoverValue(null)}
           onKeyDown={(e) => handleKeyDown(e, i)}
           className={cn(
-            'focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm transition-transform',
-            !disabled && 'hover:scale-110 cursor-pointer',
+            'rounded-sm transition-transform focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+            !disabled && 'cursor-pointer hover:scale-110',
             disabled && 'cursor-not-allowed opacity-50'
           )}
           aria-label={`Rate ${i} out of ${maxRating} stars`}

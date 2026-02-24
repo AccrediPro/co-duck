@@ -8,8 +8,12 @@
 
 import { auth } from '@clerk/nextjs/server';
 import { db } from '@/db';
-import { bookings, users } from '@/db/schema';
+import { bookings, users, coachProfiles } from '@/db/schema';
 import { eq, or, and } from 'drizzle-orm';
+import { sendEmail } from '@/lib/email';
+import { ReviewRequestEmail } from '@/lib/emails';
+import { createNotification } from '@/lib/notifications';
+import { getUnsubscribeUrl } from '@/lib/unsubscribe';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -205,6 +209,49 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       .set(updateData)
       .where(eq(bookings.id, bookingId))
       .returning();
+
+    // Notify client when session is completed and send review request email
+    if (updateData.status === 'completed') {
+      createNotification({
+        userId: booking.clientId,
+        type: 'session_completed',
+        title: 'Session completed',
+        body: 'Your coaching session has been marked as complete. Leave a review!',
+        link: `/dashboard/my-sessions/${bookingId}`,
+      });
+      const [client, coach, coachProfile] = await Promise.all([
+        db.query.users.findFirst({ where: eq(users.id, booking.clientId) }),
+        db.query.users.findFirst({ where: eq(users.id, booking.coachId) }),
+        db.query.coachProfiles.findFirst({ where: eq(coachProfiles.userId, booking.coachId) }),
+      ]);
+
+      if (client?.email && coach && coachProfile) {
+        const sessionType = booking.sessionType as {
+          name: string;
+          duration: number;
+          price: number;
+        } | null;
+        sendEmail({
+          to: client.email,
+          subject: `How was your session with ${coach.name || 'your coach'}?`,
+          react: ReviewRequestEmail({
+            clientName: client.name || 'there',
+            coachName: coach.name || 'Your Coach',
+            sessionType: sessionType?.name || 'Coaching',
+            sessionDate: booking.startTime.toLocaleDateString('en-US', {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            }),
+            coachSlug: coachProfile.slug,
+            unsubscribeUrl: getUnsubscribeUrl(booking.clientId, 'reviews'),
+          }),
+        }).catch((err) => {
+          console.error('Failed to send review request email:', err);
+        });
+      }
+    }
 
     return Response.json({
       success: true,

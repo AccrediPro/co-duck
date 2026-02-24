@@ -50,38 +50,41 @@ const ReviewsSection = React.forwardRef<HTMLDivElement, ReviewsSectionProps>(
     const [isLoadingMore, setIsLoadingMore] = React.useState(false);
 
     // Fetch reviews
-    const fetchReviews = React.useCallback(async (pageNum: number, append: boolean = false) => {
-      try {
-        if (append) {
-          setIsLoadingMore(true);
-        } else {
-          setIsLoading(true);
-        }
-
-        const response = await fetch(`/api/coaches/${slug}/reviews?page=${pageNum}&limit=5`);
-        const result = await response.json();
-
-        if (!result.success) {
-          throw new Error(result.error?.message || 'Failed to fetch reviews');
-        }
-
-        setData((prev) => {
-          if (append && prev) {
-            return {
-              ...result.data,
-              reviews: [...prev.reviews, ...result.data.reviews],
-            };
+    const fetchReviews = React.useCallback(
+      async (pageNum: number, append: boolean = false) => {
+        try {
+          if (append) {
+            setIsLoadingMore(true);
+          } else {
+            setIsLoading(true);
           }
-          return result.data;
-        });
-        setError(null);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load reviews');
-      } finally {
-        setIsLoading(false);
-        setIsLoadingMore(false);
-      }
-    }, [slug]);
+
+          const response = await fetch(`/api/coaches/${slug}/reviews?page=${pageNum}&limit=5`);
+          const result = await response.json();
+
+          if (!result.success) {
+            throw new Error(result.error?.message || 'Failed to fetch reviews');
+          }
+
+          setData((prev) => {
+            if (append && prev) {
+              return {
+                ...result.data,
+                reviews: [...prev.reviews, ...result.data.reviews],
+              };
+            }
+            return result.data;
+          });
+          setError(null);
+        } catch (err) {
+          setError(err instanceof Error ? err.message : 'Failed to load reviews');
+        } finally {
+          setIsLoading(false);
+          setIsLoadingMore(false);
+        }
+      },
+      [slug]
+    );
 
     // Initial fetch
     React.useEffect(() => {
@@ -136,9 +139,7 @@ const ReviewsSection = React.forwardRef<HTMLDivElement, ReviewsSectionProps>(
             {hasReviews && (
               <div className="flex items-center gap-2">
                 <StarRating rating={averageRating} size="sm" />
-                <span className="text-sm font-medium">
-                  {averageRating.toFixed(1)}
-                </span>
+                <span className="text-sm font-medium">{averageRating.toFixed(1)}</span>
                 <span className="text-sm text-muted-foreground">
                   ({reviewCount} {reviewCount === 1 ? 'review' : 'reviews'})
                 </span>
@@ -163,11 +164,7 @@ const ReviewsSection = React.forwardRef<HTMLDivElement, ReviewsSectionProps>(
 
               {hasMorePages && (
                 <div className="flex justify-center pt-4">
-                  <Button
-                    variant="outline"
-                    onClick={handleLoadMore}
-                    disabled={isLoadingMore}
-                  >
+                  <Button variant="outline" onClick={handleLoadMore} disabled={isLoadingMore}>
                     {isLoadingMore ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />

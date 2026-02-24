@@ -95,12 +95,7 @@ async function updateUserRole(userId: string, newRole: string) {
  * @param options - Query options
  * @returns Paginated user list and total count
  */
-async function getUsers(options: {
-  search?: string;
-  role?: string;
-  page: number;
-  limit: number;
-}) {
+async function getUsers(options: { search?: string; role?: string; page: number; limit: number }) {
   const { search, role, page, limit } = options;
   const offset = (page - 1) * limit;
 
@@ -110,9 +105,7 @@ async function getUsers(options: {
 
     if (search && search.trim()) {
       const searchTerm = `%${search.trim()}%`;
-      conditions.push(
-        or(ilike(users.name, searchTerm), ilike(users.email, searchTerm))
-      );
+      conditions.push(or(ilike(users.name, searchTerm), ilike(users.email, searchTerm)));
     }
 
     if (role && role !== 'all' && ['admin', 'coach', 'client'].includes(role)) {
@@ -293,11 +286,7 @@ function UserRow({
           </Badge>
         </div>
         <div className="text-sm text-muted-foreground">{formatDate(user.createdAt)}</div>
-        <RoleChangeDropdown
-          userId={user.id}
-          currentRole={user.role}
-          onRoleChange={onRoleChange}
-        />
+        <RoleChangeDropdown userId={user.id} currentRole={user.role} onRoleChange={onRoleChange} />
       </div>
     </div>
   );
@@ -387,7 +376,12 @@ export default async function AdminUsersPage({
   const role = params.role || 'all';
   const page = Math.max(1, parseInt(params.page || '1', 10));
 
-  const { users: userList, totalCount, totalPages, currentPage } = await getUsers({
+  const {
+    users: userList,
+    totalCount,
+    totalPages,
+    currentPage,
+  } = await getUsers({
     search,
     role,
     page,

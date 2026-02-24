@@ -1,12 +1,7 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 import { BadgeCheck } from 'lucide-react';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface VerifiedBadgeProps {
   /** Size variant of the badge */
@@ -55,21 +50,11 @@ export const VerifiedBadge = React.forwardRef<HTMLDivElement, VerifiedBadgeProps
           <TooltipTrigger asChild>
             <div
               ref={ref}
-              className={cn(
-                'inline-flex items-center gap-1 text-emerald-600',
-                className
-              )}
+              className={cn('inline-flex items-center gap-1 text-emerald-600', className)}
             >
-              <BadgeCheck
-                className={cn(
-                  sizeClasses[size],
-                  'fill-emerald-600 text-white'
-                )}
-              />
+              <BadgeCheck className={cn(sizeClasses[size], 'fill-emerald-600 text-white')} />
               {showLabel && (
-                <span className={cn('font-medium', textSizeClasses[size])}>
-                  Verified
-                </span>
+                <span className={cn('font-medium', textSizeClasses[size])}>Verified</span>
               )}
             </div>
           </TooltipTrigger>

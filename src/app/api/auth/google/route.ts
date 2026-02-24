@@ -11,7 +11,9 @@ export async function GET() {
   const { userId } = await auth();
 
   if (!userId) {
-    return NextResponse.redirect(new URL('/sign-in', process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'));
+    return NextResponse.redirect(
+      new URL('/sign-in', process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000')
+    );
   }
 
   const authUrl = getAuthUrl(userId);

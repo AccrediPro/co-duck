@@ -19,7 +19,9 @@ export function isGoogleCalendarConfigured(): boolean {
 
 export function getGoogleOAuth2Client() {
   if (!isGoogleCalendarConfigured()) {
-    throw new Error('Google Calendar is not configured. Set GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, and GOOGLE_REDIRECT_URI.');
+    throw new Error(
+      'Google Calendar is not configured. Set GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, and GOOGLE_REDIRECT_URI.'
+    );
   }
   return new google.auth.OAuth2(
     process.env.GOOGLE_CLIENT_ID,
@@ -189,10 +191,7 @@ export async function updateCalendarEvent(
   return true;
 }
 
-export async function deleteCalendarEvent(
-  userId: string,
-  eventId: string
-): Promise<boolean> {
+export async function deleteCalendarEvent(userId: string, eventId: string): Promise<boolean> {
   const oauth2Client = await getAuthenticatedClient(userId);
   if (!oauth2Client) return false;
 

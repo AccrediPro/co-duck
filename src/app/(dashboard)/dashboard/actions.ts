@@ -420,7 +420,7 @@ export async function getClientDashboardData(): Promise<
         recentActionItems: recentItemsRaw,
         sessionHistory: {
           completedCount: Number(completedSessionsResult[0]?.count || 0),
-          totalHours: Math.round(Number(totalHoursResult[0]?.totalMinutes || 0) / 60 * 10) / 10,
+          totalHours: Math.round((Number(totalHoursResult[0]?.totalMinutes || 0) / 60) * 10) / 10,
         },
       },
     };
@@ -437,9 +437,7 @@ export async function getClientDashboardData(): Promise<
 export async function getSessionsForMonth(
   year: number,
   month: number
-): Promise<
-  { success: true; sessions: CalendarSession[] } | { success: false; error: string }
-> {
+): Promise<{ success: true; sessions: CalendarSession[] } | { success: false; error: string }> {
   const { userId } = await auth();
   if (!userId) return { success: false, error: 'Not authenticated' };
 
@@ -467,10 +465,7 @@ export async function getSessionsForMonth(
         status: bookings.status,
       })
       .from(bookings)
-      .innerJoin(
-        users,
-        isCoach ? eq(bookings.clientId, users.id) : eq(bookings.coachId, users.id)
-      )
+      .innerJoin(users, isCoach ? eq(bookings.clientId, users.id) : eq(bookings.coachId, users.id))
       .where(
         and(
           isCoach ? eq(bookings.coachId, userId) : eq(bookings.clientId, userId),
@@ -521,10 +516,7 @@ async function getUnreadCountForUser(userId: string): Promise<number> {
   return total;
 }
 
-async function getRecentMessagesForUser(
-  userId: string,
-  limit: number
-): Promise<MessagePreview[]> {
+async function getRecentMessagesForUser(userId: string, limit: number): Promise<MessagePreview[]> {
   const convs = await db
     .select({
       id: conversations.id,

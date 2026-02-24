@@ -49,7 +49,10 @@ export async function GET(request: Request, { params }: RouteParams) {
     const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
     if (!dateRegex.test(date)) {
       return Response.json(
-        { success: false, error: { code: 'INVALID_DATE', message: 'Date must be in YYYY-MM-DD format' } },
+        {
+          success: false,
+          error: { code: 'INVALID_DATE', message: 'Date must be in YYYY-MM-DD format' },
+        },
         { status: 400 }
       );
     }
@@ -68,7 +71,10 @@ export async function GET(request: Request, { params }: RouteParams) {
 
     if (!coach.isPublished) {
       return Response.json(
-        { success: false, error: { code: 'NOT_PUBLISHED', message: 'Coach profile is not published' } },
+        {
+          success: false,
+          error: { code: 'NOT_PUBLISHED', message: 'Coach profile is not published' },
+        },
         { status: 404 }
       );
     }
@@ -163,7 +169,10 @@ export async function GET(request: Request, { params }: RouteParams) {
   } catch (error) {
     console.error('Error fetching availability:', error);
     return Response.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch availability' } },
+      {
+        success: false,
+        error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch availability' },
+      },
       { status: 500 }
     );
   }

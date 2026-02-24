@@ -103,9 +103,7 @@ async function getRecentBookings(limit: number = 10) {
       .limit(limit);
 
     // Fetch user names for coaches and clients
-    const userIds = Array.from(
-      new Set(recentBookings.flatMap((b) => [b.coachId, b.clientId]))
-    );
+    const userIds = Array.from(new Set(recentBookings.flatMap((b) => [b.coachId, b.clientId])));
 
     if (userIds.length === 0) {
       return [];
@@ -168,9 +166,7 @@ function formatDate(date: Date): string {
  * @param status - Booking status
  * @returns Badge variant for the status
  */
-function getStatusVariant(
-  status: string
-): 'default' | 'secondary' | 'destructive' | 'outline' {
+function getStatusVariant(status: string): 'default' | 'secondary' | 'destructive' | 'outline' {
   switch (status) {
     case 'confirmed':
       return 'default';
@@ -198,10 +194,7 @@ function getStatusVariant(
  */
 export default async function AdminOverviewPage() {
   // Fetch data in parallel
-  const [stats, recentBookings] = await Promise.all([
-    getPlatformStats(),
-    getRecentBookings(10),
-  ]);
+  const [stats, recentBookings] = await Promise.all([getPlatformStats(), getRecentBookings(10)]);
 
   return (
     <div className="space-y-6">
@@ -271,7 +264,7 @@ export default async function AdminOverviewPage() {
         <CardContent>
           {recentBookings.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-8 text-center">
-              <Clock className="h-8 w-8 text-muted-foreground mb-2" />
+              <Clock className="mb-2 h-8 w-8 text-muted-foreground" />
               <p className="text-muted-foreground">No bookings yet</p>
               <p className="text-xs text-muted-foreground">
                 Bookings will appear here as they are created
@@ -289,14 +282,16 @@ export default async function AdminOverviewPage() {
                       <span className="font-medium">
                         {(booking.sessionType as { name?: string })?.name || 'Session'}
                       </span>
-                      <Badge variant={getStatusVariant(booking.status)}>
-                        {booking.status}
-                      </Badge>
+                      <Badge variant={getStatusVariant(booking.status)}>{booking.status}</Badge>
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      <span className="font-medium">{booking.client.name || booking.client.email}</span>
+                      <span className="font-medium">
+                        {booking.client.name || booking.client.email}
+                      </span>
                       {' with '}
-                      <span className="font-medium">{booking.coach.name || booking.coach.email}</span>
+                      <span className="font-medium">
+                        {booking.coach.name || booking.coach.email}
+                      </span>
                     </p>
                   </div>
                   <div className="text-sm text-muted-foreground sm:text-right">

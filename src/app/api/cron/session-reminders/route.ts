@@ -24,6 +24,7 @@ import { eq, and, isNull, gte, lte } from 'drizzle-orm';
 import { sendEmail } from '@/lib/email';
 import { SessionReminderEmail } from '@/lib/emails';
 import type { BookingSessionType } from '@/db/schema';
+import { getUnsubscribeUrl } from '@/lib/unsubscribe';
 
 /**
  * Verifies the CRON_SECRET from the Authorization header.
@@ -46,9 +47,7 @@ function verifyCronSecret(request: Request): boolean {
   }
 
   // Support both "Bearer <token>" and plain "<token>" formats
-  const token = authHeader.startsWith('Bearer ')
-    ? authHeader.slice(7)
-    : authHeader;
+  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : authHeader;
 
   return token === cronSecret;
 }
@@ -66,10 +65,7 @@ function verifyCronSecret(request: Request): boolean {
 export async function GET(request: Request) {
   // Verify cron secret
   if (!verifyCronSecret(request)) {
-    return NextResponse.json(
-      { error: 'Unauthorized' },
-      { status: 401 }
-    );
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   const now = new Date();
@@ -154,7 +150,9 @@ async function send24HourReminders(now: Date): Promise<{ sent: number; failed: n
         .limit(1);
 
       if (clientResult.length === 0) {
-        console.error(`[SessionReminders] Client ${booking.clientId} not found for booking ${booking.id}`);
+        console.error(
+          `[SessionReminders] Client ${booking.clientId} not found for booking ${booking.id}`
+        );
         failed++;
         continue;
       }
@@ -188,6 +186,7 @@ async function send24HourReminders(now: Date): Promise<{ sent: number; failed: n
           duration: sessionType.duration,
           meetingLink: booking.meetingLink || undefined,
           timeUntilSession: '24 hours',
+          unsubscribeUrl: getUnsubscribeUrl(booking.clientId, 'reminders'),
         }),
       });
 
@@ -203,6 +202,7 @@ async function send24HourReminders(now: Date): Promise<{ sent: number; failed: n
           duration: sessionType.duration,
           meetingLink: booking.meetingLink || undefined,
           timeUntilSession: '24 hours',
+          unsubscribeUrl: getUnsubscribeUrl(booking.coachId, 'reminders'),
         }),
       });
 
@@ -216,12 +216,16 @@ async function send24HourReminders(now: Date): Promise<{ sent: number; failed: n
         sent++;
         console.log(`[SessionReminders] 24h reminder sent for booking ${booking.id}`);
       } else {
-        console.error(`[SessionReminders] Failed to send 24h reminder for booking ${booking.id}: ${clientEmailResult.error}`);
+        console.error(
+          `[SessionReminders] Failed to send 24h reminder for booking ${booking.id}: ${clientEmailResult.error}`
+        );
         failed++;
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      console.error(`[SessionReminders] Error sending 24h reminder for booking ${booking.id}: ${errorMessage}`);
+      console.error(
+        `[SessionReminders] Error sending 24h reminder for booking ${booking.id}: ${errorMessage}`
+      );
       failed++;
     }
   }
@@ -271,7 +275,9 @@ async function send1HourReminders(now: Date): Promise<{ sent: number; failed: nu
         .limit(1);
 
       if (clientResult.length === 0) {
-        console.error(`[SessionReminders] Client ${booking.clientId} not found for booking ${booking.id}`);
+        console.error(
+          `[SessionReminders] Client ${booking.clientId} not found for booking ${booking.id}`
+        );
         failed++;
         continue;
       }
@@ -305,6 +311,7 @@ async function send1HourReminders(now: Date): Promise<{ sent: number; failed: nu
           duration: sessionType.duration,
           meetingLink: booking.meetingLink || undefined,
           timeUntilSession: '1 hour',
+          unsubscribeUrl: getUnsubscribeUrl(booking.clientId, 'reminders'),
         }),
       });
 
@@ -320,6 +327,7 @@ async function send1HourReminders(now: Date): Promise<{ sent: number; failed: nu
           duration: sessionType.duration,
           meetingLink: booking.meetingLink || undefined,
           timeUntilSession: '1 hour',
+          unsubscribeUrl: getUnsubscribeUrl(booking.coachId, 'reminders'),
         }),
       });
 
@@ -333,12 +341,16 @@ async function send1HourReminders(now: Date): Promise<{ sent: number; failed: nu
         sent++;
         console.log(`[SessionReminders] 1h reminder sent for booking ${booking.id}`);
       } else {
-        console.error(`[SessionReminders] Failed to send 1h reminder for booking ${booking.id}: ${clientEmailResult.error}`);
+        console.error(
+          `[SessionReminders] Failed to send 1h reminder for booking ${booking.id}: ${clientEmailResult.error}`
+        );
         failed++;
       }
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      console.error(`[SessionReminders] Error sending 1h reminder for booking ${booking.id}: ${errorMessage}`);
+      console.error(
+        `[SessionReminders] Error sending 1h reminder for booking ${booking.id}: ${errorMessage}`
+      );
       failed++;
     }
   }

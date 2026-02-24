@@ -8,10 +8,15 @@
 
 import { auth } from '@clerk/nextjs/server';
 import { db } from '@/db';
-import { bookings, users } from '@/db/schema';
+import { bookings, users, transactions } from '@/db/schema';
 import { eq, or, and } from 'drizzle-orm';
 import { sendEmail } from '@/lib/email';
 import { CancellationEmail } from '@/lib/emails';
+import { rateLimit, WRITE_LIMIT, rateLimitResponse } from '@/lib/rate-limit';
+import { getUnsubscribeUrl } from '@/lib/unsubscribe';
+import { calculateRefundEligibility } from '@/lib/refunds';
+import { stripe } from '@/lib/stripe';
+import { createNotification } from '@/lib/notifications';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -30,6 +35,10 @@ interface RouteParams {
  * @returns {Object} Cancelled booking
  */
 export async function POST(request: Request, { params }: RouteParams) {
+  // Rate limit: 10 requests per minute
+  const rl = rateLimit(request, WRITE_LIMIT, 'bookings-cancel');
+  if (!rl.success) return rateLimitResponse(rl);
+
   const { userId } = await auth();
 
   if (!userId) {
@@ -70,7 +79,10 @@ export async function POST(request: Request, { params }: RouteParams) {
     // Check if booking can be cancelled
     if (!['pending', 'confirmed'].includes(booking.status)) {
       return Response.json(
-        { success: false, error: { code: 'INVALID_STATUS', message: 'This booking cannot be cancelled' } },
+        {
+          success: false,
+          error: { code: 'INVALID_STATUS', message: 'This booking cannot be cancelled' },
+        },
         { status: 400 }
       );
     }
@@ -87,6 +99,69 @@ export async function POST(request: Request, { params }: RouteParams) {
       .where(eq(bookings.id, bookingId))
       .returning();
 
+    // Process Stripe refund for confirmed bookings
+    let refundAmountCents = 0;
+    let refundStatus: 'full' | 'none' | 'error' = 'none';
+
+    if (booking.status === 'confirmed') {
+      const transaction = await db.query.transactions.findFirst({
+        where: and(eq(transactions.bookingId, bookingId), eq(transactions.status, 'succeeded')),
+      });
+
+      if (transaction?.stripePaymentIntentId) {
+        const isCoachCancel = userId === booking.coachId;
+
+        // Coach cancellations always get full refund; client cancellations use time-based policy
+        let eligibleAmount: number;
+        if (isCoachCancel) {
+          eligibleAmount = transaction.amountCents;
+        } else {
+          const eligibility = calculateRefundEligibility(
+            booking.startTime,
+            transaction.amountCents,
+            24
+          );
+          eligibleAmount = eligibility.refundAmountCents;
+        }
+
+        if (eligibleAmount > 0) {
+          try {
+            await stripe.refunds.create({
+              payment_intent: transaction.stripePaymentIntentId,
+              amount: eligibleAmount,
+              reason: isCoachCancel ? 'requested_by_customer' : 'requested_by_customer',
+            });
+
+            await db
+              .update(transactions)
+              .set({
+                status: 'refunded',
+                refundAmountCents: eligibleAmount,
+              })
+              .where(eq(transactions.id, transaction.id));
+
+            refundAmountCents = eligibleAmount;
+            refundStatus = 'full';
+            console.log(`Refund of ${eligibleAmount} cents processed for booking ${bookingId}`);
+          } catch (refundError) {
+            console.error('Stripe refund failed:', refundError);
+            refundStatus = 'error';
+          }
+        }
+      }
+    }
+
+    // Notify both parties about the cancellation
+    const isCoach = userId === booking.coachId;
+    const otherPartyId = isCoach ? booking.clientId : booking.coachId;
+    createNotification({
+      userId: otherPartyId,
+      type: 'booking_cancelled',
+      title: 'Session cancelled',
+      body: reason || `A session has been cancelled by the ${isCoach ? 'coach' : 'client'}.`,
+      link: isCoach ? `/dashboard/my-sessions/${bookingId}` : `/dashboard/sessions/${bookingId}`,
+    });
+
     // Send cancellation emails to both client and coach
     try {
       // Get coach and client user data
@@ -96,7 +171,11 @@ export async function POST(request: Request, { params }: RouteParams) {
       ]);
 
       if (coachUser && clientUser) {
-        const sessionType = booking.sessionType as { name: string; duration: number; price: number };
+        const sessionType = booking.sessionType as {
+          name: string;
+          duration: number;
+          price: number;
+        };
         const startTime = new Date(booking.startTime);
 
         const emailData = {
@@ -115,9 +194,9 @@ export async function POST(request: Request, { params }: RouteParams) {
           }),
           duration: sessionType.duration,
           price: sessionType.price / 100, // Convert cents to dollars
-          refundAmount: sessionType.price / 100, // Assume full refund for now
-          refundStatus: 'pending' as const,
-          cancelledBy: userId === booking.coachId ? 'coach' as const : 'client' as const,
+          refundAmount: refundAmountCents / 100,
+          refundStatus: refundStatus === 'full' ? ('processed' as const) : ('pending' as const),
+          cancelledBy: userId === booking.coachId ? ('coach' as const) : ('client' as const),
           reason: reason || undefined,
         };
 
@@ -125,11 +204,17 @@ export async function POST(request: Request, { params }: RouteParams) {
         const clientEmailResult = await sendEmail({
           to: clientUser.email,
           subject: `Session Cancelled: ${sessionType.name} with ${emailData.coachName}`,
-          react: CancellationEmail(emailData),
+          react: CancellationEmail({
+            ...emailData,
+            unsubscribeUrl: getUnsubscribeUrl(booking.clientId, 'bookings'),
+          }),
         });
 
         if (!clientEmailResult.success) {
-          console.error('[Booking] Failed to send cancellation email to client:', clientEmailResult.error);
+          console.error(
+            '[Booking] Failed to send cancellation email to client:',
+            clientEmailResult.error
+          );
         }
 
         // Send email to coach
@@ -139,11 +224,15 @@ export async function POST(request: Request, { params }: RouteParams) {
           react: CancellationEmail({
             ...emailData,
             coachName: clientUser.name || 'Client', // For coach, show client name
+            unsubscribeUrl: getUnsubscribeUrl(booking.coachId, 'bookings'),
           }),
         });
 
         if (!coachEmailResult.success) {
-          console.error('[Booking] Failed to send cancellation email to coach:', coachEmailResult.error);
+          console.error(
+            '[Booking] Failed to send cancellation email to coach:',
+            coachEmailResult.error
+          );
         }
       }
     } catch (emailError) {
@@ -159,6 +248,10 @@ export async function POST(request: Request, { params }: RouteParams) {
         cancelledBy: cancelledBooking.cancelledBy,
         cancelledAt: cancelledBooking.cancelledAt,
         cancellationReason: cancelledBooking.cancellationReason,
+        refund: {
+          amountCents: refundAmountCents,
+          status: refundStatus,
+        },
       },
     });
   } catch (error) {

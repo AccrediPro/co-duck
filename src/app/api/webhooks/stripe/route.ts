@@ -21,12 +21,16 @@
 
 import { headers } from 'next/headers';
 import { stripe } from '@/lib/stripe';
-import { db, bookings, transactions } from '@/db';
-import { eq, and } from 'drizzle-orm';
+import { db, bookings, transactions, users, coachProfiles } from '@/db';
+import { eq, and, gte } from 'drizzle-orm';
 import type Stripe from 'stripe';
 import { createBookingSystemMessage } from '@/lib/conversations';
 import type { BookingSessionType } from '@/db/schema';
 import { syncBookingToCalendar } from '@/lib/google-calendar-sync';
+import { createNotification } from '@/lib/notifications';
+import { sendEmail } from '@/lib/email';
+import { PaymentReceiptEmail } from '@/lib/emails';
+import { getUnsubscribeUrl } from '@/lib/unsubscribe';
 
 /**
  * Retrieves the Stripe webhook secret from environment variables.
@@ -129,6 +133,12 @@ export async function POST(req: Request) {
       case 'payment_intent.payment_failed': {
         // Payment attempt failed (card declined, insufficient funds, etc.)
         await handlePaymentIntentFailed(event.data.object as Stripe.PaymentIntent);
+        break;
+      }
+
+      case 'account.application.deauthorized': {
+        // Coach disconnected their Stripe Connect account
+        await handleConnectDeauthorized(event.account as string);
         break;
       }
 
@@ -263,27 +273,82 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
   const currency = session.currency || 'usd';
 
   // Create transaction record
-  await db.insert(transactions).values({
-    bookingId: bookingIdNum,
-    coachId,
-    clientId,
-    amountCents: amountTotal,
-    currency: currency.toLowerCase(),
-    platformFeeCents,
-    coachPayoutCents,
-    stripePaymentIntentId: paymentIntentId || null,
-    stripeCheckoutSessionId: session.id,
-    status: 'succeeded',
-  });
+  const [newTransaction] = await db
+    .insert(transactions)
+    .values({
+      bookingId: bookingIdNum,
+      coachId,
+      clientId,
+      amountCents: amountTotal,
+      currency: currency.toLowerCase(),
+      platformFeeCents,
+      coachPayoutCents,
+      stripePaymentIntentId: paymentIntentId || null,
+      stripeCheckoutSessionId: session.id,
+      status: 'succeeded',
+    })
+    .returning();
 
   console.log(`Stripe webhook: Transaction created for booking ${bookingIdNum}`);
 
+  // Send payment receipt email to client (non-blocking)
+  const sessionType = booking.sessionType as BookingSessionType;
+  const [clientUser, coachUser] = await Promise.all([
+    db.query.users.findFirst({ where: eq(users.id, clientId) }),
+    db.query.users.findFirst({ where: eq(users.id, coachId) }),
+  ]);
+
+  if (clientUser?.email && coachUser) {
+    sendEmail({
+      to: clientUser.email,
+      subject: `Payment receipt for ${sessionType?.name || 'Coaching session'} with ${coachUser.name || 'your coach'}`,
+      react: PaymentReceiptEmail({
+        clientName: clientUser.name || 'there',
+        coachName: coachUser.name || 'Your Coach',
+        sessionType: sessionType?.name || 'Coaching Session',
+        sessionDate: booking.startTime.toLocaleDateString('en-US', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+        }),
+        sessionTime: booking.startTime.toLocaleTimeString('en-US', {
+          hour: 'numeric',
+          minute: '2-digit',
+          hour12: true,
+        }),
+        duration: sessionType?.duration || 60,
+        amountCents: amountTotal,
+        currency,
+        transactionId: newTransaction.id,
+        bookingId: bookingIdNum,
+        unsubscribeUrl: getUnsubscribeUrl(clientId, 'bookings'),
+      }),
+    }).catch((err) => console.error('Failed to send payment receipt email:', err));
+  }
+
   // Create system message in conversation for the booking
   // Get session type from booking for the message
-  const sessionType = booking.sessionType as BookingSessionType;
   createBookingSystemMessage(coachId, clientId, sessionType, booking.startTime).catch((error) => {
     console.error('Stripe webhook: Error creating booking system message:', error);
     // Don't fail the webhook if message creation fails
+  });
+
+  // Notify both parties about the confirmed booking
+  const sessionName = sessionType?.name || 'Coaching session';
+  createNotification({
+    userId: coachId,
+    type: 'booking_confirmed',
+    title: 'New booking confirmed',
+    body: `${sessionName} has been booked and paid.`,
+    link: `/dashboard/sessions/${bookingIdNum}`,
+  });
+  createNotification({
+    userId: clientId,
+    type: 'booking_confirmed',
+    title: 'Booking confirmed',
+    body: `Your ${sessionName} has been confirmed.`,
+    link: `/dashboard/my-sessions/${bookingIdNum}`,
   });
 
   // Sync booking to Google Calendar for connected users
@@ -431,4 +496,93 @@ async function handlePaymentIntentFailed(paymentIntent: Stripe.PaymentIntent) {
   // Note: We don't automatically cancel the booking on payment failure
   // The user can retry the payment. The checkout.session.expired webhook
   // handles the case where the user abandons the payment entirely.
+}
+
+/**
+ * Handles the account.application.deauthorized event.
+ *
+ * When a coach disconnects their Stripe Connect account from the CoachHub platform,
+ * this handler:
+ * 1. Finds the coach profile with that Stripe account ID
+ * 2. Clears the stripeAccountId
+ * 3. Unpublishes the coach profile (can't accept payments)
+ * 4. Cancels all future pending/confirmed bookings
+ * 5. Notifies the coach
+ *
+ * @param stripeAccountId - The Stripe Connect account ID that was deauthorized
+ */
+async function handleConnectDeauthorized(stripeAccountId: string) {
+  console.log(`Stripe webhook: account.application.deauthorized for ${stripeAccountId}`);
+
+  if (!stripeAccountId) {
+    console.error('Stripe webhook: No account ID in deauthorization event');
+    return;
+  }
+
+  // Find the coach with this Stripe account
+  const profile = await db.query.coachProfiles.findFirst({
+    where: eq(coachProfiles.stripeAccountId, stripeAccountId),
+  });
+
+  if (!profile) {
+    console.log(`Stripe webhook: No coach profile found for Stripe account ${stripeAccountId}`);
+    return;
+  }
+
+  // Clear Stripe account and unpublish profile
+  await db
+    .update(coachProfiles)
+    .set({
+      stripeAccountId: null,
+      isPublished: false,
+    })
+    .where(eq(coachProfiles.userId, profile.userId));
+
+  console.log(
+    `Stripe webhook: Coach ${profile.userId} Stripe account cleared, profile unpublished`
+  );
+
+  // Cancel future bookings (can't process payments anymore)
+  const now = new Date();
+  const futureBookings = await db
+    .select()
+    .from(bookings)
+    .where(and(eq(bookings.coachId, profile.userId), gte(bookings.startTime, now)));
+
+  const pendingOrConfirmed = futureBookings.filter(
+    (b) => b.status === 'pending' || b.status === 'confirmed'
+  );
+
+  for (const booking of pendingOrConfirmed) {
+    await db
+      .update(bookings)
+      .set({
+        status: 'cancelled',
+        cancelledAt: now,
+        cancellationReason: 'Coach payment account disconnected',
+      })
+      .where(eq(bookings.id, booking.id));
+
+    // Notify the client
+    createNotification({
+      userId: booking.clientId,
+      type: 'booking_cancelled',
+      title: 'Session cancelled',
+      body: 'Your session was cancelled because the coach updated their payment settings.',
+      link: `/dashboard/my-sessions/${booking.id}`,
+    });
+  }
+
+  // Notify the coach
+  createNotification({
+    userId: profile.userId,
+    type: 'system',
+    title: 'Stripe account disconnected',
+    body: 'Your Stripe Connect account has been disconnected. Your profile has been unpublished and future bookings cancelled. Reconnect Stripe to resume.',
+    link: '/dashboard/payments',
+  });
+
+  console.log(
+    `Stripe webhook: Cancelled ${pendingOrConfirmed.length} future bookings for coach ${profile.userId}`
+  );
 }

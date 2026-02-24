@@ -88,10 +88,7 @@ async function updateVerificationStatus(coachId: string, newStatus: string) {
       updateData.verifiedAt = null;
     }
 
-    await db
-      .update(coachProfiles)
-      .set(updateData)
-      .where(eq(coachProfiles.userId, coachId));
+    await db.update(coachProfiles).set(updateData).where(eq(coachProfiles.userId, coachId));
 
     // Revalidate the admin coaches page
     revalidatePath('/admin/coaches');
@@ -125,13 +122,13 @@ async function getCoaches(options: {
 
     if (search && search.trim()) {
       const searchTerm = `%${search.trim()}%`;
-      conditions.push(
-        or(ilike(users.name, searchTerm), ilike(users.email, searchTerm))
-      );
+      conditions.push(or(ilike(users.name, searchTerm), ilike(users.email, searchTerm)));
     }
 
     if (status && status !== 'all' && ['pending', 'verified', 'rejected'].includes(status)) {
-      conditions.push(eq(coachProfiles.verificationStatus, status as 'pending' | 'verified' | 'rejected'));
+      conditions.push(
+        eq(coachProfiles.verificationStatus, status as 'pending' | 'verified' | 'rejected')
+      );
     }
 
     const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
@@ -283,7 +280,10 @@ function CoachRow({
     <div className="flex flex-col gap-4 border-b py-4 last:border-0 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex items-center gap-3">
         <Avatar className="h-10 w-10">
-          <AvatarImage src={coach.userAvatarUrl || undefined} alt={coach.userName || coach.userEmail} />
+          <AvatarImage
+            src={coach.userAvatarUrl || undefined}
+            alt={coach.userName || coach.userEmail}
+          />
           <AvatarFallback>{getInitials(coach.userName, coach.userEmail)}</AvatarFallback>
         </Avatar>
         <div className="min-w-0 flex-1">
@@ -412,9 +412,7 @@ async function getCoachStats() {
         .select({ count: sql<number>`count(*)` })
         .from(coachProfiles)
         .where(eq(coachProfiles.verificationStatus, 'rejected')),
-      db
-        .select({ count: sql<number>`count(*)` })
-        .from(coachProfiles),
+      db.select({ count: sql<number>`count(*)` }).from(coachProfiles),
     ]);
 
     return {
@@ -510,7 +508,9 @@ export default async function AdminCoachesPage({
       <Card>
         <CardHeader>
           <CardTitle className="text-lg">Search Coaches</CardTitle>
-          <CardDescription>Find coaches by name, email, or filter by verification status</CardDescription>
+          <CardDescription>
+            Find coaches by name, email, or filter by verification status
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <SearchFilters currentSearch={search} currentStatus={status} />
@@ -542,7 +542,11 @@ export default async function AdminCoachesPage({
           ) : (
             <div className="space-y-0">
               {coachList.map((coach) => (
-                <CoachRow key={coach.userId} coach={coach} onStatusChange={updateVerificationStatus} />
+                <CoachRow
+                  key={coach.userId}
+                  coach={coach}
+                  onStatusChange={updateVerificationStatus}
+                />
               ))}
             </div>
           )}

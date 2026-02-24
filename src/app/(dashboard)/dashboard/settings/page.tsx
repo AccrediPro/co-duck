@@ -103,10 +103,7 @@ export default function SettingsPage() {
               Your account is secured by Clerk. You can manage your password, two-factor
               authentication, and connected accounts through your profile.
             </p>
-            <Button
-              variant="outline"
-              onClick={() => router.push('/dashboard/settings/security')}
-            >
+            <Button variant="outline" onClick={() => router.push('/dashboard/settings/security')}>
               Manage Security Settings
             </Button>
           </CardContent>

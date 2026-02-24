@@ -142,16 +142,8 @@ export async function updateBookingInCalendar(bookingId: number): Promise<void> 
 
     // Get user names
     const [clientUser] = await Promise.all([
-      db
-        .select({ name: users.name })
-        .from(users)
-        .where(eq(users.id, booking.clientId))
-        .limit(1),
-      db
-        .select({ name: users.name })
-        .from(users)
-        .where(eq(users.id, booking.coachId))
-        .limit(1),
+      db.select({ name: users.name }).from(users).where(eq(users.id, booking.clientId)).limit(1),
+      db.select({ name: users.name }).from(users).where(eq(users.id, booking.coachId)).limit(1),
     ]);
 
     // Try updating for coach

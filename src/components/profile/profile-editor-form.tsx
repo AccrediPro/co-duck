@@ -518,8 +518,8 @@ export function ProfileEditorForm({ initialData }: ProfileEditorFormProps) {
                   <FormItem>
                     <FormLabel>Profile Photo</FormLabel>
                     <div className="flex items-center gap-6">
-                      <div className="relative group">
-                        <div className="h-24 w-24 rounded-full overflow-hidden bg-muted flex items-center justify-center border-2 border-dashed border-muted-foreground/25">
+                      <div className="group relative">
+                        <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border-2 border-dashed border-muted-foreground/25 bg-muted">
                           {field.value ? (
                             <>
                               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -537,7 +537,7 @@ export function ProfileEditorForm({ initialData }: ProfileEditorFormProps) {
                           )}
                         </div>
                         {isUploading && (
-                          <div className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center">
+                          <div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/50">
                             <Loader2 className="h-6 w-6 animate-spin text-white" />
                           </div>
                         )}

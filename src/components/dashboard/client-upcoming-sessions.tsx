@@ -39,8 +39,8 @@ export function ClientUpcomingSessions({ sessions }: ClientUpcomingSessionsProps
       </CardHeader>
       <CardContent>
         {sessions.length === 0 ? (
-          <div className="text-center py-6">
-            <p className="text-sm text-muted-foreground mb-3">No upcoming sessions scheduled.</p>
+          <div className="py-6 text-center">
+            <p className="mb-3 text-sm text-muted-foreground">No upcoming sessions scheduled.</p>
             <Button size="sm" asChild>
               <Link href="/coaches">Find a Coach</Link>
             </Button>
@@ -49,8 +49,7 @@ export function ClientUpcomingSessions({ sessions }: ClientUpcomingSessionsProps
           <div className="space-y-3">
             {sessions.map((session) => {
               const now = new Date();
-              const isNow =
-                new Date(session.startTime) <= now && new Date(session.endTime) > now;
+              const isNow = new Date(session.startTime) <= now && new Date(session.endTime) > now;
 
               return (
                 <div
@@ -59,7 +58,7 @@ export function ClientUpcomingSessions({ sessions }: ClientUpcomingSessionsProps
                     isNow ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950' : ''
                   }`}
                 >
-                  <div className="text-center min-w-[60px]">
+                  <div className="min-w-[60px] text-center">
                     <p className="text-xs text-muted-foreground">
                       {new Date(session.startTime).toLocaleDateString('en-US', {
                         month: 'short',
@@ -76,19 +75,15 @@ export function ClientUpcomingSessions({ sessions }: ClientUpcomingSessionsProps
                   </div>
                   <Avatar className="h-8 w-8">
                     <AvatarImage src={session.coachAvatar || undefined} />
-                    <AvatarFallback>
-                      {session.coachName?.charAt(0) || 'C'}
-                    </AvatarFallback>
+                    <AvatarFallback>{session.coachName?.charAt(0) || 'C'}</AvatarFallback>
                   </Avatar>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">
-                      {session.coachName || 'Coach'}
-                    </p>
-                    <p className="text-xs text-muted-foreground truncate">
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium">{session.coachName || 'Coach'}</p>
+                    <p className="truncate text-xs text-muted-foreground">
                       {session.sessionType.name} ({session.sessionType.duration}min)
                     </p>
                   </div>
-                  <span className="text-xs text-muted-foreground whitespace-nowrap">
+                  <span className="whitespace-nowrap text-xs text-muted-foreground">
                     {getRelativeTime(new Date(session.startTime))}
                   </span>
                   {session.meetingLink && (

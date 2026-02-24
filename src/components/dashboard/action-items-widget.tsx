@@ -44,12 +44,18 @@ export function ActionItemsWidget({ count, recentItems }: ActionItemsWidgetProps
             {recentItems.map((item) => (
               <div key={item.id} className="flex items-start gap-2">
                 <Circle className="mt-0.5 h-3 w-3 text-muted-foreground" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm truncate">{item.title}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm">{item.title}</p>
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
                     {item.coachName && <span>From {item.coachName}</span>}
                     {item.dueDate && (
-                      <span>Due {new Date(item.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+                      <span>
+                        Due{' '}
+                        {new Date(item.dueDate).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                        })}
+                      </span>
                     )}
                   </div>
                 </div>

@@ -90,7 +90,10 @@ export async function GET(request: Request, { params }: RouteParams) {
     // Check if coach is published
     if (!coachData.isPublished) {
       return Response.json(
-        { success: false, error: { code: 'NOT_PUBLISHED', message: 'Coach profile is not published' } },
+        {
+          success: false,
+          error: { code: 'NOT_PUBLISHED', message: 'Coach profile is not published' },
+        },
         { status: 404 }
       );
     }

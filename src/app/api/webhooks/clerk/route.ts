@@ -32,6 +32,9 @@ import { WebhookEvent } from '@clerk/nextjs/server';
 import { db } from '@/db';
 import { users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
+import { sendEmail } from '@/lib/email';
+import { WelcomeEmail } from '@/lib/emails';
+import { getUnsubscribeUrl } from '@/lib/unsubscribe';
 
 /**
  * Handles incoming Clerk webhook events for user synchronization.
@@ -172,6 +175,18 @@ export async function POST(req: Request) {
       });
 
       console.log(`User created: ${id}`);
+
+      // Send welcome email (non-blocking)
+      sendEmail({
+        to: email,
+        subject: 'Welcome to CoachHub!',
+        react: WelcomeEmail({
+          name: name || 'there',
+          unsubscribeUrl: getUnsubscribeUrl(id, 'marketing'),
+        }),
+      }).catch((err) => {
+        console.error('Failed to send welcome email:', err);
+      });
     } catch (error) {
       console.error('Error creating user in database:', error);
       return new Response('Error creating user', { status: 500 });

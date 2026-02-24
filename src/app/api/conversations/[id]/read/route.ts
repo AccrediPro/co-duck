@@ -83,7 +83,10 @@ export async function POST(request: Request, { params }: RouteParams) {
   } catch (error) {
     console.error('Error marking messages as read:', error);
     return Response.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to mark messages as read' } },
+      {
+        success: false,
+        error: { code: 'INTERNAL_ERROR', message: 'Failed to mark messages as read' },
+      },
       { status: 500 }
     );
   }

@@ -9,9 +9,7 @@ let resend: Resend | null = null;
 if (resendApiKey) {
   resend = new Resend(resendApiKey);
 } else {
-  console.warn(
-    '[Email] RESEND_API_KEY is not configured. Email sending will be disabled.'
-  );
+  console.warn('[Email] RESEND_API_KEY is not configured. Email sending will be disabled.');
 }
 
 interface SendEmailOptions {
@@ -67,8 +65,7 @@ export async function sendEmail({
       data: data ?? undefined,
     };
   } catch (error) {
-    const errorMessage =
-      error instanceof Error ? error.message : 'Unknown error';
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     console.error('[Email] Exception while sending email:', errorMessage);
     return {
       success: false,

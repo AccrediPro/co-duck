@@ -13,10 +13,11 @@ import * as React from 'react';
 
 interface EmailLayoutProps {
   preview?: string;
+  unsubscribeUrl?: string;
   children: React.ReactNode;
 }
 
-export function EmailLayout({ preview, children }: EmailLayoutProps) {
+export function EmailLayout({ preview, unsubscribeUrl, children }: EmailLayoutProps) {
   return (
     <Html>
       <Head />
@@ -35,14 +36,17 @@ export function EmailLayout({ preview, children }: EmailLayoutProps) {
           <Hr style={hr} />
           <Section style={footer}>
             <Text style={footerText}>
-              You&apos;re receiving this email because you have an account with
-              CoachHub.
+              You&apos;re receiving this email because you have an account with CoachHub.
             </Text>
             <Text style={footerText}>
-              <Link href="{{unsubscribe_url}}" style={link}>
-                Unsubscribe
-              </Link>{' '}
-              |{' '}
+              {unsubscribeUrl && (
+                <>
+                  <Link href={unsubscribeUrl} style={link}>
+                    Unsubscribe
+                  </Link>
+                  {' | '}
+                </>
+              )}
               <Link href="https://coachhub.com/privacy" style={link}>
                 Privacy Policy
               </Link>

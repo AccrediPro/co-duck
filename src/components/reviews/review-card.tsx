@@ -15,7 +15,19 @@ export interface ReviewCardProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const ReviewCard = React.forwardRef<HTMLDivElement, ReviewCardProps>(
-  ({ rating, reviewTitle, reviewContent, clientName, createdAt, coachResponse, className, ...props }, ref) => {
+  (
+    {
+      rating,
+      reviewTitle,
+      reviewContent,
+      clientName,
+      createdAt,
+      coachResponse,
+      className,
+      ...props
+    },
+    ref
+  ) => {
     const formattedDate = new Date(createdAt).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
@@ -28,11 +40,9 @@ const ReviewCard = React.forwardRef<HTMLDivElement, ReviewCardProps>(
           <div className="flex items-start justify-between gap-4">
             <div className="space-y-1">
               <StarRating rating={rating} size="sm" />
-              {reviewTitle && (
-                <h4 className="font-semibold leading-tight">{reviewTitle}</h4>
-              )}
+              {reviewTitle && <h4 className="font-semibold leading-tight">{reviewTitle}</h4>}
             </div>
-            <div className="text-right text-sm text-muted-foreground shrink-0">
+            <div className="shrink-0 text-right text-sm text-muted-foreground">
               <p className="font-medium">{clientName}</p>
               <p>{formattedDate}</p>
             </div>
@@ -40,14 +50,10 @@ const ReviewCard = React.forwardRef<HTMLDivElement, ReviewCardProps>(
         </CardHeader>
         {(reviewContent || coachResponse) && (
           <CardContent className="pt-0">
-            {reviewContent && (
-              <p className="text-sm text-muted-foreground">{reviewContent}</p>
-            )}
+            {reviewContent && <p className="text-sm text-muted-foreground">{reviewContent}</p>}
             {coachResponse && (
               <div className="mt-4 rounded-lg bg-muted p-3">
-                <p className="text-xs font-medium text-muted-foreground mb-1">
-                  Coach Response
-                </p>
+                <p className="mb-1 text-xs font-medium text-muted-foreground">Coach Response</p>
                 <p className="text-sm">{coachResponse}</p>
               </div>
             )}

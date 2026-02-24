@@ -147,7 +147,10 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error('Error fetching conversations:', error);
     return Response.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch conversations' } },
+      {
+        success: false,
+        error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch conversations' },
+      },
       { status: 500 }
     );
   }
@@ -185,7 +188,10 @@ export async function POST(request: Request) {
 
     if (otherUserId === userId) {
       return Response.json(
-        { success: false, error: { code: 'INVALID_USER', message: 'Cannot create conversation with yourself' } },
+        {
+          success: false,
+          error: { code: 'INVALID_USER', message: 'Cannot create conversation with yourself' },
+        },
         { status: 400 }
       );
     }
@@ -260,7 +266,10 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('Error creating conversation:', error);
     return Response.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to create conversation' } },
+      {
+        success: false,
+        error: { code: 'INTERNAL_ERROR', message: 'Failed to create conversation' },
+      },
       { status: 500 }
     );
   }

@@ -1,11 +1,4 @@
-import {
-  Button,
-  Column,
-  Link,
-  Row,
-  Section,
-  Text,
-} from '@react-email/components';
+import { Button, Column, Link, Row, Section, Text } from '@react-email/components';
 import * as React from 'react';
 import { EmailLayout } from './EmailLayout';
 
@@ -17,6 +10,7 @@ interface SessionReminderEmailProps {
   duration: number;
   meetingLink?: string;
   timeUntilSession: string; // e.g., "24 hours", "1 hour"
+  unsubscribeUrl?: string;
 }
 
 export function SessionReminderEmail({
@@ -27,9 +21,13 @@ export function SessionReminderEmail({
   duration,
   meetingLink,
   timeUntilSession,
+  unsubscribeUrl,
 }: SessionReminderEmailProps) {
   return (
-    <EmailLayout preview={`Reminder: Your session with ${coachName} is in ${timeUntilSession}`}>
+    <EmailLayout
+      preview={`Reminder: Your session with ${coachName} is in ${timeUntilSession}`}
+      unsubscribeUrl={unsubscribeUrl}
+    >
       <Text style={heading}>Session Reminder</Text>
       <Text style={paragraph}>
         Your coaching session with <strong>{coachName}</strong> is coming up in{' '}
@@ -119,9 +117,7 @@ export function SessionReminderEmail({
         before the session starts.
       </Text>
 
-      <Text style={closingText}>
-        We hope you have a great session!
-      </Text>
+      <Text style={closingText}>We hope you have a great session!</Text>
     </EmailLayout>
   );
 }

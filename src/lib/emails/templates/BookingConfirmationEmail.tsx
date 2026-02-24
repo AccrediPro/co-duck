@@ -1,12 +1,4 @@
-import {
-  Button,
-  Column,
-  Hr,
-  Link,
-  Row,
-  Section,
-  Text,
-} from '@react-email/components';
+import { Button, Column, Hr, Link, Row, Section, Text } from '@react-email/components';
 import * as React from 'react';
 import { EmailLayout } from './EmailLayout';
 
@@ -18,6 +10,7 @@ interface BookingConfirmationEmailProps {
   duration: number;
   price: number;
   meetingLink?: string;
+  unsubscribeUrl?: string;
 }
 
 export function BookingConfirmationEmail({
@@ -28,13 +21,15 @@ export function BookingConfirmationEmail({
   duration,
   price,
   meetingLink,
+  unsubscribeUrl,
 }: BookingConfirmationEmailProps) {
   return (
-    <EmailLayout preview={`Your session with ${coachName} is confirmed!`}>
+    <EmailLayout
+      preview={`Your session with ${coachName} is confirmed!`}
+      unsubscribeUrl={unsubscribeUrl}
+    >
       <Text style={heading}>Booking Confirmed!</Text>
-      <Text style={paragraph}>
-        Great news! Your coaching session has been successfully booked.
-      </Text>
+      <Text style={paragraph}>Great news! Your coaching session has been successfully booked.</Text>
 
       <Section style={detailsContainer}>
         <Text style={sectionTitle}>Session Details</Text>
@@ -98,9 +93,7 @@ export function BookingConfirmationEmail({
 
       {meetingLink && (
         <Section style={meetingSection}>
-          <Text style={paragraph}>
-            Join your session using the link below:
-          </Text>
+          <Text style={paragraph}>Join your session using the link below:</Text>
           <Button style={button} href={meetingLink}>
             Join Meeting
           </Button>

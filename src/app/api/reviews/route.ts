@@ -8,8 +8,10 @@
 
 import { auth } from '@clerk/nextjs/server';
 import { db } from '@/db';
-import { bookings, reviews, coachProfiles } from '@/db/schema';
+import { bookings, reviews, coachProfiles, users } from '@/db/schema';
 import { eq, sql } from 'drizzle-orm';
+import { rateLimit, SENSITIVE_LIMIT, rateLimitResponse } from '@/lib/rate-limit';
+import { createNotification } from '@/lib/notifications';
 
 /**
  * POST /api/reviews
@@ -48,6 +50,10 @@ import { eq, sql } from 'drizzle-orm';
  * }
  */
 export async function POST(request: Request) {
+  // Rate limit: 5 requests per minute
+  const rl = rateLimit(request, SENSITIVE_LIMIT, 'reviews-create');
+  if (!rl.success) return rateLimitResponse(rl);
+
   const { userId } = await auth();
 
   if (!userId) {
@@ -64,7 +70,10 @@ export async function POST(request: Request) {
     // Validate required fields
     if (!bookingId || rating === undefined || rating === null) {
       return Response.json(
-        { success: false, error: { code: 'MISSING_FIELDS', message: 'bookingId and rating are required' } },
+        {
+          success: false,
+          error: { code: 'MISSING_FIELDS', message: 'bookingId and rating are required' },
+        },
         { status: 400 }
       );
     }
@@ -73,7 +82,10 @@ export async function POST(request: Request) {
     const ratingNum = parseInt(rating);
     if (isNaN(ratingNum) || ratingNum < 1 || ratingNum > 5) {
       return Response.json(
-        { success: false, error: { code: 'INVALID_RATING', message: 'Rating must be between 1 and 5' } },
+        {
+          success: false,
+          error: { code: 'INVALID_RATING', message: 'Rating must be between 1 and 5' },
+        },
         { status: 400 }
       );
     }
@@ -93,7 +105,10 @@ export async function POST(request: Request) {
     // Verify the user is the client for this booking
     if (booking.clientId !== userId) {
       return Response.json(
-        { success: false, error: { code: 'NOT_AUTHORIZED', message: 'You can only review your own bookings' } },
+        {
+          success: false,
+          error: { code: 'NOT_AUTHORIZED', message: 'You can only review your own bookings' },
+        },
         { status: 403 }
       );
     }
@@ -101,7 +116,13 @@ export async function POST(request: Request) {
     // Verify booking is completed
     if (booking.status !== 'completed') {
       return Response.json(
-        { success: false, error: { code: 'BOOKING_NOT_COMPLETED', message: 'You can only review completed sessions' } },
+        {
+          success: false,
+          error: {
+            code: 'BOOKING_NOT_COMPLETED',
+            message: 'You can only review completed sessions',
+          },
+        },
         { status: 400 }
       );
     }
@@ -113,7 +134,10 @@ export async function POST(request: Request) {
 
     if (existingReview) {
       return Response.json(
-        { success: false, error: { code: 'ALREADY_REVIEWED', message: 'You have already reviewed this session' } },
+        {
+          success: false,
+          error: { code: 'ALREADY_REVIEWED', message: 'You have already reviewed this session' },
+        },
         { status: 409 }
       );
     }
@@ -152,6 +176,18 @@ export async function POST(request: Request) {
         reviewCount: stats.totalCount,
       })
       .where(eq(coachProfiles.userId, booking.coachId));
+
+    // Notify coach about the new review
+    const reviewer = await db.query.users.findFirst({
+      where: eq(users.id, userId),
+    });
+    createNotification({
+      userId: booking.coachId,
+      type: 'new_review',
+      title: `New ${ratingNum}-star review`,
+      body: title || `${reviewer?.name || 'A client'} left a review.`,
+      link: `/dashboard/sessions/${booking.id}`,
+    });
 
     return Response.json({
       success: true,

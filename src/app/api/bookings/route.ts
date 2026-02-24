@@ -12,6 +12,8 @@ import { bookings, users, coachProfiles } from '@/db/schema';
 import { eq, or, desc, and, gte, lt, inArray } from 'drizzle-orm';
 import { sendEmail } from '@/lib/email';
 import { BookingConfirmationEmail } from '@/lib/emails';
+import { rateLimit, WRITE_LIMIT, rateLimitResponse } from '@/lib/rate-limit';
+import { getUnsubscribeUrl } from '@/lib/unsubscribe';
 
 /**
  * GET /api/bookings
@@ -58,7 +60,12 @@ export async function GET(request: Request) {
 
     // Status filter
     if (status) {
-      conditions.push(eq(bookings.status, status as 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'no_show'));
+      conditions.push(
+        eq(
+          bookings.status,
+          status as 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'no_show'
+        )
+      );
     }
 
     // Upcoming filter
@@ -154,6 +161,10 @@ export async function GET(request: Request) {
  * @returns {Object} Created booking
  */
 export async function POST(request: Request) {
+  // Rate limit: 10 requests per minute
+  const rl = rateLimit(request, WRITE_LIMIT, 'bookings-create');
+  if (!rl.success) return rateLimitResponse(rl);
+
   const { userId } = await auth();
 
   if (!userId) {
@@ -170,7 +181,13 @@ export async function POST(request: Request) {
     // Validate required fields
     if (!coachId || !sessionTypeId || !startTime) {
       return Response.json(
-        { success: false, error: { code: 'MISSING_FIELDS', message: 'coachId, sessionTypeId, and startTime are required' } },
+        {
+          success: false,
+          error: {
+            code: 'MISSING_FIELDS',
+            message: 'coachId, sessionTypeId, and startTime are required',
+          },
+        },
         { status: 400 }
       );
     }
@@ -197,19 +214,25 @@ export async function POST(request: Request) {
 
     if (!coach.isPublished) {
       return Response.json(
-        { success: false, error: { code: 'COACH_NOT_AVAILABLE', message: 'Coach is not accepting bookings' } },
+        {
+          success: false,
+          error: { code: 'COACH_NOT_AVAILABLE', message: 'Coach is not accepting bookings' },
+        },
         { status: 400 }
       );
     }
 
     // Find session type
-    const sessionType = (coach.sessionTypes as { id: string; name: string; duration: number; price: number }[])?.find(
-      (st) => st.id === sessionTypeId
-    );
+    const sessionType = (
+      coach.sessionTypes as { id: string; name: string; duration: number; price: number }[]
+    )?.find((st) => st.id === sessionTypeId);
 
     if (!sessionType) {
       return Response.json(
-        { success: false, error: { code: 'SESSION_TYPE_NOT_FOUND', message: 'Session type not found' } },
+        {
+          success: false,
+          error: { code: 'SESSION_TYPE_NOT_FOUND', message: 'Session type not found' },
+        },
         { status: 404 }
       );
     }
@@ -238,7 +261,10 @@ export async function POST(request: Request) {
 
     if (conflictingBooking) {
       return Response.json(
-        { success: false, error: { code: 'TIME_CONFLICT', message: 'This time slot is no longer available' } },
+        {
+          success: false,
+          error: { code: 'TIME_CONFLICT', message: 'This time slot is no longer available' },
+        },
         { status: 409 }
       );
     }
@@ -293,11 +319,17 @@ export async function POST(request: Request) {
         const clientEmailResult = await sendEmail({
           to: clientUser.email,
           subject: `Booking Confirmed: ${sessionType.name} with ${emailData.coachName}`,
-          react: BookingConfirmationEmail(emailData),
+          react: BookingConfirmationEmail({
+            ...emailData,
+            unsubscribeUrl: getUnsubscribeUrl(userId, 'bookings'),
+          }),
         });
 
         if (!clientEmailResult.success) {
-          console.error('[Booking] Failed to send confirmation email to client:', clientEmailResult.error);
+          console.error(
+            '[Booking] Failed to send confirmation email to client:',
+            clientEmailResult.error
+          );
         }
 
         // Send email to coach
@@ -307,11 +339,15 @@ export async function POST(request: Request) {
           react: BookingConfirmationEmail({
             ...emailData,
             coachName: clientUser.name || 'A client', // For coach, show client name
+            unsubscribeUrl: getUnsubscribeUrl(coachId, 'bookings'),
           }),
         });
 
         if (!coachEmailResult.success) {
-          console.error('[Booking] Failed to send confirmation email to coach:', coachEmailResult.error);
+          console.error(
+            '[Booking] Failed to send confirmation email to coach:',
+            coachEmailResult.error
+          );
         }
       }
     } catch (emailError) {

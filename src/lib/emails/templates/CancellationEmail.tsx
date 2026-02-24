@@ -1,11 +1,4 @@
-import {
-  Column,
-  Hr,
-  Link,
-  Row,
-  Section,
-  Text,
-} from '@react-email/components';
+import { Column, Hr, Link, Row, Section, Text } from '@react-email/components';
 import * as React from 'react';
 import { EmailLayout } from './EmailLayout';
 
@@ -20,6 +13,7 @@ interface CancellationEmailProps {
   refundStatus?: 'pending' | 'processed' | 'not_applicable';
   cancelledBy: 'client' | 'coach';
   reason?: string;
+  unsubscribeUrl?: string;
 }
 
 export function CancellationEmail({
@@ -33,6 +27,7 @@ export function CancellationEmail({
   refundStatus = 'pending',
   cancelledBy,
   reason,
+  unsubscribeUrl,
 }: CancellationEmailProps) {
   const getRefundMessage = () => {
     if (refundStatus === 'not_applicable') {
@@ -45,7 +40,10 @@ export function CancellationEmail({
   };
 
   return (
-    <EmailLayout preview={`Session with ${coachName} has been cancelled`}>
+    <EmailLayout
+      preview={`Session with ${coachName} has been cancelled`}
+      unsubscribeUrl={unsubscribeUrl}
+    >
       <Text style={heading}>Session Cancelled</Text>
       <Text style={paragraph}>
         {cancelledBy === 'client'

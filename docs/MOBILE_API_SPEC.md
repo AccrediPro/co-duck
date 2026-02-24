@@ -490,16 +490,16 @@ STRIPE_WEBHOOK_SECRET=whsec_...
 
 ## Files to Reference
 
-| File                                     | Contents                                       |
-| ---------------------------------------- | ---------------------------------------------- |
-| `src/db/schema.ts`                       | Complete database schema with types            |
-| `src/lib/supabase.ts`                    | Supabase Realtime client & subscription helpers|
-| `docs/API.md`                            | Webhook endpoint documentation                 |
-| `docs/ARCHITECTURE.md`                   | System architecture overview                   |
-| `src/lib/stripe.ts`                      | Stripe client configuration                    |
-| `src/lib/refunds.ts`                     | Refund calculation logic                       |
-| `src/lib/conversations.ts`               | Messaging utilities                            |
-| `src/lib/validators/coach-onboarding.ts` | Validation schemas                             |
+| File                                     | Contents                                        |
+| ---------------------------------------- | ----------------------------------------------- |
+| `src/db/schema.ts`                       | Complete database schema with types             |
+| `src/lib/supabase.ts`                    | Supabase Realtime client & subscription helpers |
+| `docs/API.md`                            | Webhook endpoint documentation                  |
+| `docs/ARCHITECTURE.md`                   | System architecture overview                    |
+| `src/lib/stripe.ts`                      | Stripe client configuration                     |
+| `src/lib/refunds.ts`                     | Refund calculation logic                        |
+| `src/lib/conversations.ts`               | Messaging utilities                             |
+| `src/lib/validators/coach-onboarding.ts` | Validation schemas                              |
 
 ---
 
@@ -641,43 +641,48 @@ To enable Realtime on your tables:
 The following REST API endpoints are now implemented at `src/app/api/*`:
 
 ### Authentication
-| Method | Endpoint | Status |
-|--------|----------|--------|
-| POST | `/api/auth/sync` | ✅ Implemented |
-| GET | `/api/auth/me` | ✅ Implemented |
+
+| Method | Endpoint         | Status         |
+| ------ | ---------------- | -------------- |
+| POST   | `/api/auth/sync` | ✅ Implemented |
+| GET    | `/api/auth/me`   | ✅ Implemented |
 
 ### Coaches
-| Method | Endpoint | Status |
-|--------|----------|--------|
-| GET | `/api/coaches` | ✅ Implemented |
-| GET | `/api/coaches/:slug` | ✅ Implemented |
-| GET | `/api/coaches/:slug/availability/:date` | ✅ Implemented |
+
+| Method | Endpoint                                | Status         |
+| ------ | --------------------------------------- | -------------- |
+| GET    | `/api/coaches`                          | ✅ Implemented |
+| GET    | `/api/coaches/:slug`                    | ✅ Implemented |
+| GET    | `/api/coaches/:slug/availability/:date` | ✅ Implemented |
 
 ### Bookings
-| Method | Endpoint | Status |
-|--------|----------|--------|
-| GET | `/api/bookings` | ✅ Implemented |
-| POST | `/api/bookings` | ✅ Implemented |
-| GET | `/api/bookings/:id` | ✅ Implemented |
-| PATCH | `/api/bookings/:id` | ✅ Implemented |
-| POST | `/api/bookings/:id/cancel` | ✅ Implemented |
+
+| Method | Endpoint                   | Status         |
+| ------ | -------------------------- | -------------- |
+| GET    | `/api/bookings`            | ✅ Implemented |
+| POST   | `/api/bookings`            | ✅ Implemented |
+| GET    | `/api/bookings/:id`        | ✅ Implemented |
+| PATCH  | `/api/bookings/:id`        | ✅ Implemented |
+| POST   | `/api/bookings/:id/cancel` | ✅ Implemented |
 
 ### Conversations & Messaging
-| Method | Endpoint | Status |
-|--------|----------|--------|
-| GET | `/api/conversations` | ✅ Implemented |
-| POST | `/api/conversations` | ✅ Implemented |
-| GET | `/api/conversations/:id/messages` | ✅ Implemented |
-| POST | `/api/conversations/:id/messages` | ✅ Implemented |
-| POST | `/api/conversations/:id/read` | ✅ Implemented |
+
+| Method | Endpoint                          | Status         |
+| ------ | --------------------------------- | -------------- |
+| GET    | `/api/conversations`              | ✅ Implemented |
+| POST   | `/api/conversations`              | ✅ Implemented |
+| GET    | `/api/conversations/:id/messages` | ✅ Implemented |
+| POST   | `/api/conversations/:id/messages` | ✅ Implemented |
+| POST   | `/api/conversations/:id/read`     | ✅ Implemented |
 
 ### Action Items
-| Method | Endpoint | Status |
-|--------|----------|--------|
-| GET | `/api/action-items` | ✅ Implemented |
-| POST | `/api/action-items` | ✅ Implemented |
-| GET | `/api/action-items/:id` | ✅ Implemented |
-| PATCH | `/api/action-items/:id` | ✅ Implemented |
+
+| Method | Endpoint                | Status         |
+| ------ | ----------------------- | -------------- |
+| GET    | `/api/action-items`     | ✅ Implemented |
+| POST   | `/api/action-items`     | ✅ Implemented |
+| GET    | `/api/action-items/:id` | ✅ Implemented |
+| PATCH  | `/api/action-items/:id` | ✅ Implemented |
 | DELETE | `/api/action-items/:id` | ✅ Implemented |
 
 ---
