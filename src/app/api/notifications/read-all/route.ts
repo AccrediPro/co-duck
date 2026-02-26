@@ -8,6 +8,7 @@ import { auth } from '@clerk/nextjs/server';
 import { db } from '@/db';
 import { notifications } from '@/db/schema';
 import { eq, and } from 'drizzle-orm';
+import { rateLimit, WRITE_LIMIT, rateLimitResponse } from '@/lib/rate-limit';
 
 /**
  * POST /api/notifications/read-all
@@ -16,7 +17,10 @@ import { eq, and } from 'drizzle-orm';
  *
  * @returns {Object} Count of notifications marked as read
  */
-export async function POST() {
+export async function POST(request: Request) {
+  const rl = rateLimit(request, WRITE_LIMIT, 'notifications-read-all');
+  if (!rl.success) return rateLimitResponse(rl);
+
   const { userId } = await auth();
 
   if (!userId) {

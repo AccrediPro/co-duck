@@ -1,12 +1,22 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { format } from 'date-fns';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Calendar, Clock, User, CheckCircle, XCircle, Eye, CreditCard } from 'lucide-react';
+import {
+  Calendar,
+  Clock,
+  User,
+  CheckCircle,
+  XCircle,
+  Eye,
+  CreditCard,
+  Loader2,
+} from 'lucide-react';
 import { CancellationDialog } from './cancellation-dialog';
 import type { RefundEligibilityInfo } from './cancellation-dialog';
 import type {
@@ -18,6 +28,8 @@ interface SessionCardProps {
   session: SessionWithClient;
   onMarkComplete?: (sessionId: number) => Promise<void>;
   onCancel?: (sessionId: number, reason: string, details: string) => Promise<void>;
+  onAccept?: (sessionId: number) => Promise<void>;
+  onReject?: (sessionId: number) => Promise<void>;
   isPast?: boolean;
   isCancelled?: boolean;
   refundInfo?: RefundEligibilityInfo;
@@ -27,10 +39,15 @@ export function SessionCard({
   session,
   onMarkComplete,
   onCancel,
+  onAccept,
+  onReject,
   isPast = false,
   isCancelled = false,
   refundInfo,
 }: SessionCardProps) {
+  const [isAccepting, setIsAccepting] = useState(false);
+  const [isRejecting, setIsRejecting] = useState(false);
+  const isPendingApproval = session.status === 'pending' && !isPast;
   const getInitials = (name: string | null) => {
     if (!name) return 'U';
     return name
@@ -52,7 +69,7 @@ export function SessionCard({
       case 'pending':
         return (
           <Badge variant="secondary" className="bg-amber-100 text-amber-800 hover:bg-amber-200">
-            Pending
+            Pending Approval
           </Badge>
         );
       case 'completed':
@@ -113,8 +130,34 @@ export function SessionCard({
     return `$${(cents / 100).toFixed(2)}`;
   };
 
+  const handleAccept = async () => {
+    if (!onAccept) return;
+    setIsAccepting(true);
+    try {
+      await onAccept(session.id);
+    } finally {
+      setIsAccepting(false);
+    }
+  };
+
+  const handleReject = async () => {
+    if (!onReject) return;
+    setIsRejecting(true);
+    try {
+      await onReject(session.id);
+    } finally {
+      setIsRejecting(false);
+    }
+  };
+
   return (
-    <Card className="transition-all hover:border-primary/30 hover:shadow-md">
+    <Card
+      className={
+        isPendingApproval
+          ? 'border-amber-300 bg-amber-50/30 transition-all hover:border-amber-400 hover:shadow-md dark:border-amber-800 dark:bg-amber-950/20'
+          : 'transition-all hover:border-primary/30 hover:shadow-md'
+      }
+    >
       <CardContent className="p-4 sm:p-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           {/* Left: Client info and session details */}
@@ -166,6 +209,42 @@ export function SessionCard({
               </Link>
             </Button>
 
+            {/* Accept/Reject buttons for pending approval */}
+            {isPendingApproval && onAccept && (
+              <Button
+                variant="default"
+                size="sm"
+                className="bg-green-600 hover:bg-green-700"
+                onClick={handleAccept}
+                disabled={isAccepting || isRejecting}
+              >
+                {isAccepting ? (
+                  <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+                ) : (
+                  <CheckCircle className="mr-1.5 h-4 w-4" />
+                )}
+                Accept
+              </Button>
+            )}
+
+            {isPendingApproval && onReject && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-red-600 hover:bg-red-50 hover:text-red-700"
+                onClick={handleReject}
+                disabled={isAccepting || isRejecting}
+              >
+                {isRejecting ? (
+                  <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+                ) : (
+                  <XCircle className="mr-1.5 h-4 w-4" />
+                )}
+                Reject
+              </Button>
+            )}
+
+            {/* Mark complete button for past sessions */}
             {isPast &&
               !isCancelled &&
               session.status !== 'completed' &&
@@ -182,7 +261,9 @@ export function SessionCard({
                 </Button>
               )}
 
-            {!isCancelled &&
+            {/* Cancel button for non-pending sessions */}
+            {!isPendingApproval &&
+              !isCancelled &&
               session.status !== 'completed' &&
               session.status !== 'cancelled' &&
               onCancel && (

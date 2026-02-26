@@ -11,6 +11,7 @@ import { db } from '@/db';
 import { groupSessions, groupSessionParticipants, users, coachProfiles } from '@/db/schema';
 import { eq, and } from 'drizzle-orm';
 import { z } from 'zod';
+import { rateLimit, FREQUENT_LIMIT, WRITE_LIMIT, rateLimitResponse } from '@/lib/rate-limit';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -23,6 +24,9 @@ interface RouteParams {
  * Coach sees full details including meeting link and participant list.
  */
 export async function GET(request: Request, { params }: RouteParams) {
+  const rl = rateLimit(request, FREQUENT_LIMIT, 'group-sessions-get');
+  if (!rl.success) return rateLimitResponse(rl);
+
   try {
     const { id } = await params;
     const sessionId = parseInt(id);
@@ -150,6 +154,9 @@ const updateGroupSessionSchema = z.object({
  * Update a group session (coach only).
  */
 export async function PATCH(request: Request, { params }: RouteParams) {
+  const rlp = rateLimit(request, WRITE_LIMIT, 'group-sessions-patch');
+  if (!rlp.success) return rateLimitResponse(rlp);
+
   const { userId } = await auth();
 
   if (!userId) {

@@ -2,8 +2,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import { eq } from 'drizzle-orm';
 import { db, googleCalendarTokens } from '@/db';
 import { exchangeCodeForTokens } from '@/lib/google-calendar';
+import { rateLimit, WRITE_LIMIT, rateLimitResponse } from '@/lib/rate-limit';
 
 export async function GET(request: NextRequest) {
+  const rl = rateLimit(request, WRITE_LIMIT, 'auth-google-callback');
+  if (!rl.success) return rateLimitResponse(rl);
   const searchParams = request.nextUrl.searchParams;
   const code = searchParams.get('code');
   const state = searchParams.get('state'); // userId

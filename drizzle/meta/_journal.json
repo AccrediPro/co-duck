@@ -106,6 +106,20 @@
       "when": 1770114883567,
       "tag": "0014_volatile_dark_beast",
       "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1772022116768,
+      "tag": "0015_even_sandman",
+      "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1772097658566,
+      "tag": "0016_opposite_kang",
+      "breakpoints": true
     }
   ]
 }

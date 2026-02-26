@@ -10,6 +10,7 @@ import { db } from '@/db';
 import { coachProfiles, users } from '@/db/schema';
 import { eq, desc, and, sql } from 'drizzle-orm';
 import { requireAdmin } from '@/lib/admin-auth';
+import { rateLimit, FREQUENT_LIMIT, rateLimitResponse } from '@/lib/rate-limit';
 
 /**
  * GET /api/admin/coaches
@@ -23,6 +24,9 @@ import { requireAdmin } from '@/lib/admin-auth';
  * @returns Paginated coach profiles
  */
 export async function GET(request: Request) {
+  const rl = rateLimit(request, FREQUENT_LIMIT, 'admin-coaches-list');
+  if (!rl.success) return rateLimitResponse(rl);
+
   const auth = await requireAdmin();
   if (!auth.authorized) return auth.response!;
 

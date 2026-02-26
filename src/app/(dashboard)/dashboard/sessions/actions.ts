@@ -40,7 +40,7 @@ import { removeBookingFromCalendar, updateBookingInCalendar } from '@/lib/google
  * - `past`: Sessions that have already occurred
  * - `cancelled`: Sessions that were cancelled by coach or client
  */
-export type SessionStatus = 'upcoming' | 'past' | 'cancelled';
+export type SessionStatus = 'upcoming' | 'confirmed' | 'past' | 'cancelled';
 
 /**
  * Payment status derived from transaction existence and status.
@@ -129,11 +129,19 @@ export async function getCoachSessions(
     let orderDirection: typeof desc | typeof asc = desc;
 
     if (tab === 'upcoming') {
-      // Upcoming: future sessions with confirmed or pending status
+      // Upcoming: future sessions with pending status (awaiting coach response)
       statusCondition = and(
         eq(bookings.coachId, userId),
         gte(bookings.startTime, now),
-        or(eq(bookings.status, 'confirmed'), eq(bookings.status, 'pending'))
+        eq(bookings.status, 'pending')
+      );
+      orderDirection = asc; // Nearest session first
+    } else if (tab === 'confirmed') {
+      // Confirmed: future sessions that coach has accepted
+      statusCondition = and(
+        eq(bookings.coachId, userId),
+        gte(bookings.startTime, now),
+        eq(bookings.status, 'confirmed')
       );
       orderDirection = asc; // Nearest session first
     } else if (tab === 'past') {

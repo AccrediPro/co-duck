@@ -15,6 +15,7 @@ import { createNotification } from '@/lib/notifications';
 import { sendEmail } from '@/lib/email';
 import { VerificationEmail } from '@/lib/emails';
 import { getUnsubscribeUrl } from '@/lib/unsubscribe';
+import { rateLimit, WRITE_LIMIT, rateLimitResponse } from '@/lib/rate-limit';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -37,6 +38,9 @@ const verifySchema = z.object({
  * @returns Updated coach profile
  */
 export async function PATCH(request: Request, { params }: RouteParams) {
+  const rl = rateLimit(request, WRITE_LIMIT, 'admin-coaches-verify');
+  if (!rl.success) return rateLimitResponse(rl);
+
   const auth = await requireAdmin();
   if (!auth.authorized) return auth.response!;
 

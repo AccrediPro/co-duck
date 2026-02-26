@@ -10,6 +10,7 @@ import { auth } from '@clerk/nextjs/server';
 import { db } from '@/db';
 import { transactions, users } from '@/db/schema';
 import { eq, and, gte, lte, sql, desc } from 'drizzle-orm';
+import { rateLimit, FREQUENT_LIMIT, rateLimitResponse } from '@/lib/rate-limit';
 
 /**
  * GET /api/earnings
@@ -23,6 +24,9 @@ import { eq, and, gte, lte, sql, desc } from 'drizzle-orm';
  * @returns Earnings summary with total, breakdown by client, and recent transactions
  */
 export async function GET(request: Request) {
+  const rl = rateLimit(request, FREQUENT_LIMIT, 'earnings');
+  if (!rl.success) return rateLimitResponse(rl);
+
   const { userId } = await auth();
 
   if (!userId) {

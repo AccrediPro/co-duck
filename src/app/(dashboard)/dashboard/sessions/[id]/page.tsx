@@ -22,6 +22,7 @@ import {
 import { SessionDetailActions } from './session-detail-actions';
 import { CoachNotesEditor } from './coach-notes-editor';
 import { CoachSessionActions } from './coach-session-actions';
+import { BookingResponseActions } from './booking-response-actions';
 import { PaymentSection } from './payment-section';
 import { MeetingLinkSection } from './meeting-link-section';
 
@@ -220,7 +221,7 @@ export default async function SessionDetailPage({ params }: PageProps) {
       case 'pending':
         return (
           <Badge variant="secondary" className="bg-amber-100 text-amber-800 hover:bg-amber-200">
-            Pending
+            Pending Approval
           </Badge>
         );
       case 'completed':
@@ -254,6 +255,7 @@ export default async function SessionDetailPage({ params }: PageProps) {
   const isUpcoming = new Date(session.startTime) > new Date();
   const canTakeAction =
     isUpcoming && session.status !== 'cancelled' && session.status !== 'completed';
+  const isPendingApproval = isCoachView && session.status === 'pending' && isUpcoming;
 
   return (
     <div className="space-y-6">
@@ -273,6 +275,26 @@ export default async function SessionDetailPage({ params }: PageProps) {
           Booking #{session.id} - Created {format(new Date(session.createdAt), 'MMM d, yyyy')}
         </p>
       </div>
+
+      {/* Pending Approval Banner - Coach View */}
+      {isPendingApproval && (
+        <Card className="border-amber-300 bg-amber-50 dark:border-amber-800 dark:bg-amber-950">
+          <CardContent className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h3 className="font-semibold text-amber-900 dark:text-amber-100">
+                Booking Request from {otherParty?.name || 'a client'}
+              </h3>
+              <p className="mt-1 text-sm text-amber-700 dark:text-amber-300">
+                This client has requested a session. Accept to confirm or reject to cancel and refund.
+              </p>
+            </div>
+            <BookingResponseActions
+              sessionId={session.id}
+              clientName={otherParty?.name || 'the client'}
+            />
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Main content */}
@@ -416,8 +438,24 @@ export default async function SessionDetailPage({ params }: PageProps) {
             </Card>
           )}
 
-          {/* Actions Card for Coach - Upcoming sessions only */}
-          {isCoachView && isUpcoming && session.status !== 'cancelled' && (
+          {/* Actions Card for Coach - Pending approval */}
+          {isPendingApproval && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Respond to Request</CardTitle>
+                <CardDescription>Accept or reject this booking request</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <BookingResponseActions
+                  sessionId={session.id}
+                  clientName={otherParty?.name || 'the client'}
+                />
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Actions Card for Coach - Confirmed/upcoming sessions only */}
+          {isCoachView && isUpcoming && !isPendingApproval && session.status !== 'cancelled' && (
             <Card>
               <CardHeader>
                 <CardTitle>Actions</CardTitle>
@@ -507,8 +545,24 @@ export default async function SessionDetailPage({ params }: PageProps) {
             </Card>
           )}
 
-          {/* Quick Actions Card for Coach */}
-          {isCoachView && isUpcoming && session.status !== 'cancelled' && (
+          {/* Quick Actions Card for Coach - Pending approval */}
+          {isPendingApproval && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Quick Actions</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-2">
+                <BookingResponseActions
+                  sessionId={session.id}
+                  clientName={otherParty?.name || 'the client'}
+                  variant="sidebar"
+                />
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Quick Actions Card for Coach - Confirmed sessions */}
+          {isCoachView && isUpcoming && !isPendingApproval && session.status !== 'cancelled' && (
             <Card>
               <CardHeader>
                 <CardTitle className="text-base">Quick Actions</CardTitle>

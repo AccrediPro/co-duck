@@ -10,6 +10,7 @@
 import { db } from '@/db';
 import { users, coachProfiles } from '@/db/schema';
 import { eq, and, gte, lte, ilike, or, sql, desc, asc } from 'drizzle-orm';
+import { rateLimit, FREQUENT_LIMIT, rateLimitResponse } from '@/lib/rate-limit';
 
 /**
  * GET /api/coaches
@@ -28,6 +29,9 @@ import { eq, and, gte, lte, ilike, or, sql, desc, asc } from 'drizzle-orm';
  * @returns {Object} Paginated coach list
  */
 export async function GET(request: Request) {
+  const rl = rateLimit(request, FREQUENT_LIMIT, 'coaches-list');
+  if (!rl.success) return rateLimitResponse(rl);
+
   try {
     const { searchParams } = new URL(request.url);
 

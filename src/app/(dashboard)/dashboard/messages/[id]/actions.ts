@@ -47,6 +47,7 @@ import {
   coachProfiles,
   actionItems,
 } from '@/db';
+import type { MessageMetadata } from '@/db/schema';
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -65,6 +66,13 @@ import {
  * @property isRead - Whether the message has been read by recipient
  * @property createdAt - Timestamp when message was created
  */
+export interface MessageAttachment {
+  url: string;
+  name: string | null;
+  type: string | null;
+  size: number | null;
+}
+
 export interface MessageWithSender {
   id: number;
   content: string;
@@ -75,6 +83,8 @@ export interface MessageWithSender {
   isOwn: boolean;
   isRead: boolean;
   createdAt: Date;
+  metadata?: MessageMetadata | null;
+  attachment?: MessageAttachment | null;
 }
 
 /**
@@ -267,6 +277,11 @@ export async function getMessages(
         senderId: messages.senderId,
         isRead: messages.isRead,
         createdAt: messages.createdAt,
+        metadata: messages.metadata,
+        attachmentUrl: messages.attachmentUrl,
+        attachmentName: messages.attachmentName,
+        attachmentType: messages.attachmentType,
+        attachmentSize: messages.attachmentSize,
       })
       .from(messages)
       .where(and(...conditions))
@@ -306,6 +321,15 @@ export async function getMessages(
         isOwn: msg.senderId === userId,
         isRead: msg.isRead,
         createdAt: msg.createdAt,
+        metadata: msg.metadata,
+        attachment: msg.attachmentUrl
+          ? {
+              url: msg.attachmentUrl,
+              name: msg.attachmentName,
+              type: msg.attachmentType,
+              size: msg.attachmentSize,
+            }
+          : null,
       };
     });
 
@@ -511,6 +535,8 @@ export async function sendMessage(
         isOwn: true,
         isRead: newMessage.isRead,
         createdAt: newMessage.createdAt,
+        metadata: newMessage.metadata,
+        attachment: null,
       },
     };
   } catch (error) {
@@ -845,6 +871,11 @@ export async function getNewMessages(
         senderId: messages.senderId,
         isRead: messages.isRead,
         createdAt: messages.createdAt,
+        metadata: messages.metadata,
+        attachmentUrl: messages.attachmentUrl,
+        attachmentName: messages.attachmentName,
+        attachmentType: messages.attachmentType,
+        attachmentSize: messages.attachmentSize,
       })
       .from(messages)
       .where(and(eq(messages.conversationId, conversationId), gt(messages.id, afterId)))
@@ -884,6 +915,15 @@ export async function getNewMessages(
         isOwn: msg.senderId === userId,
         isRead: msg.isRead,
         createdAt: msg.createdAt,
+        metadata: msg.metadata,
+        attachment: msg.attachmentUrl
+          ? {
+              url: msg.attachmentUrl,
+              name: msg.attachmentName,
+              type: msg.attachmentType,
+              size: msg.attachmentSize,
+            }
+          : null,
       };
     });
 

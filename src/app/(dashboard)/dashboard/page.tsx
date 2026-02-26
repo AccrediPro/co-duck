@@ -40,7 +40,12 @@ export default async function DashboardPage() {
     redirect('/sign-in');
   }
 
-  const clerkUser = await currentUser();
+  let clerkUser = null;
+  try {
+    clerkUser = await currentUser();
+  } catch (err) {
+    console.error('Failed to fetch Clerk user:', err);
+  }
   const { user, coachProfile } = await getUserWithProfile(userId);
 
   const role = user?.role || 'client';

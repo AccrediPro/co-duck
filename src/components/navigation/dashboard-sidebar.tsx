@@ -5,6 +5,8 @@ import { usePathname } from 'next/navigation';
 import {
   Home,
   User,
+  Users,
+  UserCheck,
   CalendarDays,
   Clock,
   Settings,
@@ -43,12 +45,14 @@ const commonLinks: NavLink[] = [
 const coachLinks: NavLink[] = [
   { href: '/dashboard/profile', label: 'Profile', icon: User, roles: ['coach'] },
   { href: '/dashboard/sessions', label: 'Sessions', icon: CalendarDays, roles: ['coach'] },
+  { href: '/dashboard/clients', label: 'My Clients', icon: Users, roles: ['coach'] },
   { href: '/dashboard/availability', label: 'Availability', icon: Clock, roles: ['coach'] },
   { href: '/dashboard/payments', label: 'Payments', icon: CreditCard, roles: ['coach'] },
 ];
 
 // Client-specific links
 const clientLinks: NavLink[] = [
+  { href: '/dashboard/my-coaches', label: 'My Coach', icon: UserCheck, roles: ['client'] },
   { href: '/dashboard/my-sessions', label: 'My Sessions', icon: CalendarDays, roles: ['client'] },
   { href: '/dashboard/action-items', label: 'Action Items', icon: CheckSquare, roles: ['client'] },
 ];

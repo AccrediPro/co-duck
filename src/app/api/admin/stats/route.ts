@@ -10,6 +10,7 @@ import { db } from '@/db';
 import { transactions, users, bookings, reviews } from '@/db/schema';
 import { eq, sql, gte, and } from 'drizzle-orm';
 import { requireAdmin } from '@/lib/admin-auth';
+import { rateLimit, FREQUENT_LIMIT, rateLimitResponse } from '@/lib/rate-limit';
 
 /**
  * GET /api/admin/stats
@@ -18,7 +19,10 @@ import { requireAdmin } from '@/lib/admin-auth';
  *
  * @returns Revenue, user counts, booking counts, review stats
  */
-export async function GET() {
+export async function GET(request: Request) {
+  const rl = rateLimit(request, FREQUENT_LIMIT, 'admin-stats');
+  if (!rl.success) return rateLimitResponse(rl);
+
   const auth = await requireAdmin();
   if (!auth.authorized) return auth.response!;
 

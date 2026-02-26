@@ -14,6 +14,7 @@ import { sendEmail } from '@/lib/email';
 import { ReviewRequestEmail } from '@/lib/emails';
 import { createNotification } from '@/lib/notifications';
 import { getUnsubscribeUrl } from '@/lib/unsubscribe';
+import { rateLimit, FREQUENT_LIMIT, WRITE_LIMIT, rateLimitResponse } from '@/lib/rate-limit';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -30,6 +31,9 @@ interface RouteParams {
  * @returns {Object} Booking details
  */
 export async function GET(request: Request, { params }: RouteParams) {
+  const rl = rateLimit(request, FREQUENT_LIMIT, 'bookings-get');
+  if (!rl.success) return rateLimitResponse(rl);
+
   const { userId } = await auth();
 
   if (!userId) {
@@ -128,6 +132,9 @@ export async function GET(request: Request, { params }: RouteParams) {
  * @returns {Object} Updated booking
  */
 export async function PATCH(request: Request, { params }: RouteParams) {
+  const rlp = rateLimit(request, WRITE_LIMIT, 'bookings-patch');
+  if (!rlp.success) return rateLimitResponse(rlp);
+
   const { userId } = await auth();
 
   if (!userId) {

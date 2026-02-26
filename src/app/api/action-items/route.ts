@@ -97,6 +97,7 @@ export async function GET(request: Request) {
         createdAt: item.createdAt,
         updatedAt: item.updatedAt,
         bookingId: item.bookingId,
+        goalId: item.goalId,
         coach: coach
           ? {
               id: coach.id,

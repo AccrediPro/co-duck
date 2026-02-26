@@ -21,6 +21,7 @@ export function CoachDashboardLayout({ data }: CoachDashboardLayoutProps) {
           distinctClients={data.sessionStats.distinctClients}
           sessionsThisMonth={data.sessionStats.sessionsThisMonth}
           totalSessions={data.sessionStats.totalSessions}
+          pendingBookingRequests={data.pendingBookingRequests}
         />
       </div>
 

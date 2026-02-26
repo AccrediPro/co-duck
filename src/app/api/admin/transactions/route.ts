@@ -10,6 +10,7 @@ import { db } from '@/db';
 import { transactions, users } from '@/db/schema';
 import { eq, desc, and, inArray, sql } from 'drizzle-orm';
 import { requireAdmin } from '@/lib/admin-auth';
+import { rateLimit, FREQUENT_LIMIT, rateLimitResponse } from '@/lib/rate-limit';
 
 /**
  * GET /api/admin/transactions
@@ -23,6 +24,9 @@ import { requireAdmin } from '@/lib/admin-auth';
  * @returns Paginated transactions with coach/client names
  */
 export async function GET(request: Request) {
+  const rl = rateLimit(request, FREQUENT_LIMIT, 'admin-transactions-list');
+  if (!rl.success) return rateLimitResponse(rl);
+
   const auth = await requireAdmin();
   if (!auth.authorized) return auth.response!;
 

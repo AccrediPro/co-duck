@@ -9,6 +9,7 @@
 import { db } from '@/db';
 import { users, coachProfiles, reviews } from '@/db/schema';
 import { eq, and, desc, sql } from 'drizzle-orm';
+import { rateLimit, FREQUENT_LIMIT, rateLimitResponse } from '@/lib/rate-limit';
 
 interface RouteParams {
   params: Promise<{ slug: string }>;
@@ -57,6 +58,9 @@ interface RouteParams {
  * }
  */
 export async function GET(request: Request, { params }: RouteParams) {
+  const rl = rateLimit(request, FREQUENT_LIMIT, 'coaches-reviews');
+  if (!rl.success) return rateLimitResponse(rl);
+
   try {
     const { slug } = await params;
 

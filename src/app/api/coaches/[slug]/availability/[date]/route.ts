@@ -9,6 +9,7 @@
 import { db } from '@/db';
 import { coachProfiles, coachAvailability, availabilityOverrides, bookings } from '@/db/schema';
 import { eq, and, gte, lt, inArray } from 'drizzle-orm';
+import { rateLimit, FREQUENT_LIMIT, rateLimitResponse } from '@/lib/rate-limit';
 
 interface RouteParams {
   params: Promise<{ slug: string; date: string }>;
@@ -40,6 +41,9 @@ interface RouteParams {
  * }
  */
 export async function GET(request: Request, { params }: RouteParams) {
+  const rl = rateLimit(request, FREQUENT_LIMIT, 'coaches-availability');
+  if (!rl.success) return rateLimitResponse(rl);
+
   try {
     const { slug, date } = await params;
     const { searchParams } = new URL(request.url);

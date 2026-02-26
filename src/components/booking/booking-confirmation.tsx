@@ -183,8 +183,8 @@ export function BookingConfirmation({
         setBookingResult(result.data);
         setBookingComplete(true);
         toast({
-          title: 'Booking Confirmed!',
-          description: 'Your coaching session has been booked successfully.',
+          title: 'Booking Request Submitted!',
+          description: 'Your session request is awaiting coach approval.',
         });
       } else {
         toast({
@@ -240,12 +240,22 @@ export function BookingConfirmation({
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
               <Check className="h-8 w-8 text-green-600" />
             </div>
-            <CardTitle className="text-2xl">Booking Confirmed!</CardTitle>
+            <CardTitle className="text-2xl">Booking Request Submitted!</CardTitle>
             <CardDescription>
-              Your coaching session with {bookingResult.coachName} has been booked successfully.
+              Your session request with {bookingResult.coachName} is now awaiting coach approval.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
+            {/* Pending approval notice */}
+            <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-amber-800 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-200">
+              <div className="flex items-center gap-2">
+                <Clock className="h-4 w-4" />
+                <span className="text-sm font-medium">
+                  Awaiting coach approval — your coach will confirm the session shortly.
+                </span>
+              </div>
+            </div>
+
             {/* Booking Details */}
             <div className="rounded-lg border bg-muted/30 p-4">
               <h3 className="mb-4 font-semibold">Session Details</h3>

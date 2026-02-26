@@ -10,6 +10,7 @@ import { auth } from '@clerk/nextjs/server';
 import { db } from '@/db';
 import { conversations, messages, users } from '@/db/schema';
 import { eq, or, desc, and, ne, sql, inArray } from 'drizzle-orm';
+import { rateLimit, FREQUENT_LIMIT, WRITE_LIMIT, rateLimitResponse } from '@/lib/rate-limit';
 
 /**
  * GET /api/conversations
@@ -22,6 +23,9 @@ import { eq, or, desc, and, ne, sql, inArray } from 'drizzle-orm';
  * @returns {Object} Paginated conversation list with last message and unread count
  */
 export async function GET(request: Request) {
+  const rl = rateLimit(request, FREQUENT_LIMIT, 'conversations-list');
+  if (!rl.success) return rateLimitResponse(rl);
+
   const { userId } = await auth();
 
   if (!userId) {
@@ -166,6 +170,9 @@ export async function GET(request: Request) {
  * @returns {Object} Conversation data
  */
 export async function POST(request: Request) {
+  const rlp = rateLimit(request, WRITE_LIMIT, 'conversations-create');
+  if (!rlp.success) return rateLimitResponse(rlp);
+
   const { userId } = await auth();
 
   if (!userId) {

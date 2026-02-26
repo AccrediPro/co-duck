@@ -168,6 +168,9 @@ export const FREQUENT_LIMIT: RateLimitConfig = { limit: 30, windowMs: 60_000 };
 /** 5 requests per minute — for sensitive operations (uploads, reviews) */
 export const SENSITIVE_LIMIT: RateLimitConfig = { limit: 5, windowMs: 60_000 };
 
+/** Alias for SENSITIVE_LIMIT — 5 requests per minute */
+export const STRICT_LIMIT: RateLimitConfig = SENSITIVE_LIMIT;
+
 /** 60 requests per minute — general default */
 export const DEFAULT_LIMIT: RateLimitConfig = { limit: 60, windowMs: 60_000 };
 
@@ -185,4 +188,104 @@ export function rateLimitResponse(result: RateLimitResult): Response {
     },
     { status: 429, headers: result.headers }
   );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Middleware rate limiting — endpoint category configs and helpers
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Rate limit tiers for middleware, keyed by API path prefix. */
+export const MIDDLEWARE_RATE_LIMITS: { prefix: string; config: RateLimitConfig }[] = [
+  { prefix: '/api/auth', config: { limit: 5, windowMs: 60_000 } },
+  { prefix: '/api/webhooks', config: { limit: 100, windowMs: 60_000 } },
+  { prefix: '/api/cron', config: { limit: 10, windowMs: 60_000 } },
+];
+
+/** Default limit for any /api/* route not matched above. */
+export const MIDDLEWARE_DEFAULT_LIMIT: RateLimitConfig = { limit: 30, windowMs: 60_000 };
+
+/**
+ * Resolve the rate limit config and prefix key for a given API pathname.
+ */
+export function resolveMiddlewareRateLimit(pathname: string): {
+  config: RateLimitConfig;
+  prefix: string;
+} {
+  for (const tier of MIDDLEWARE_RATE_LIMITS) {
+    if (pathname.startsWith(tier.prefix)) {
+      return { config: tier.config, prefix: `mw:${tier.prefix}` };
+    }
+  }
+  return { config: MIDDLEWARE_DEFAULT_LIMIT, prefix: 'mw:/api' };
+}
+
+/**
+ * Extract IP address from a request, with optional NextRequest.ip support.
+ * Pass `requestIp` from `NextRequest.ip` for best accuracy in middleware.
+ */
+export function extractIp(request: Request, requestIp?: string | null): string {
+  if (requestIp) return requestIp;
+  const forwarded = request.headers.get('x-forwarded-for');
+  return forwarded?.split(',')[0]?.trim() || request.headers.get('x-real-ip') || 'unknown';
+}
+
+/**
+ * Rate-limit a request using an explicit IP (for middleware use where NextRequest.ip is available).
+ */
+export function rateLimitByIp(
+  ip: string,
+  config: RateLimitConfig,
+  prefix: string
+): RateLimitResult {
+  const now = Date.now();
+  const key = `${prefix}:${ip}`;
+
+  cleanup(config.windowMs);
+
+  let entry = store.get(key);
+  if (!entry) {
+    entry = { timestamps: [] };
+    store.set(key, entry);
+  }
+
+  const windowStart = now - config.windowMs;
+  entry.timestamps = entry.timestamps.filter((t) => t > windowStart);
+
+  const remaining = Math.max(0, config.limit - entry.timestamps.length);
+  const resetAt =
+    entry.timestamps.length > 0
+      ? Math.ceil((entry.timestamps[0] + config.windowMs - now) / 1000)
+      : Math.ceil(config.windowMs / 1000);
+
+  const headers: Record<string, string> = {
+    'X-RateLimit-Limit': config.limit.toString(),
+    'X-RateLimit-Remaining': Math.max(0, remaining - 1).toString(),
+    'X-RateLimit-Reset': resetAt.toString(),
+  };
+
+  if (entry.timestamps.length >= config.limit) {
+    const retryAfterSeconds = Math.ceil((entry.timestamps[0] + config.windowMs - now) / 1000);
+
+    return {
+      success: false,
+      remaining: 0,
+      retryAfterSeconds,
+      message: `Too many requests. Try again in ${retryAfterSeconds} seconds.`,
+      headers: {
+        ...headers,
+        'Retry-After': retryAfterSeconds.toString(),
+        'X-RateLimit-Remaining': '0',
+      },
+    };
+  }
+
+  entry.timestamps.push(now);
+
+  return {
+    success: true,
+    remaining: remaining - 1,
+    retryAfterSeconds: 0,
+    message: '',
+    headers,
+  };
 }

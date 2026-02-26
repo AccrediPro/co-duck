@@ -8,6 +8,7 @@
 
 import { db } from '@/db';
 import { sql } from 'drizzle-orm';
+import { rateLimit, FREQUENT_LIMIT, rateLimitResponse } from '@/lib/rate-limit';
 
 /**
  * GET /api/health
@@ -15,7 +16,10 @@ import { sql } from 'drizzle-orm';
  * Returns service health status. No auth required.
  * Used by uptime monitors and deployment checks.
  */
-export async function GET() {
+export async function GET(request: Request) {
+  const rl = rateLimit(request, FREQUENT_LIMIT, 'health');
+  if (!rl.success) return rateLimitResponse(rl);
+
   const start = Date.now();
   let dbStatus: 'ok' | 'error' = 'error';
   let dbLatencyMs = 0;

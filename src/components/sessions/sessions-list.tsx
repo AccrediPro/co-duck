@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useEffect, useTransition } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { SessionCard } from './session-card';
-import { ChevronLeft, ChevronRight, Calendar, Clock, XCircle } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Calendar, CheckCircle, Clock, XCircle } from 'lucide-react';
 import type {
   SessionWithClient,
   SessionStatus,
@@ -41,6 +41,12 @@ export function SessionsList({
   const [totalCount, setTotalCount] = useState(initialTotalCount);
   const [activeTab, setActiveTab] = useState<SessionStatus>(initialTab);
   const [refundInfoCache, setRefundInfoCache] = useState<Record<number, RefundEligibilityInfo>>({});
+
+  // Sync local state when server-provided data changes (e.g. after router.refresh())
+  useEffect(() => {
+    setSessions(initialSessions);
+    setTotalCount(initialTotalCount);
+  }, [initialSessions, initialTotalCount]);
 
   const totalPages = Math.ceil(totalCount / perPage);
 
@@ -118,6 +124,74 @@ export function SessionsList({
     }
   };
 
+  const handleAccept = async (sessionId: number) => {
+    try {
+      const res = await fetch(`/api/bookings/${sessionId}/respond`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'accept' }),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        toast({
+          title: 'Booking accepted',
+          description: 'The session has been confirmed.',
+        });
+        setSessions((prev) => prev.filter((s) => s.id !== sessionId));
+        setTotalCount((prev) => prev - 1);
+        router.refresh();
+      } else {
+        toast({
+          title: 'Error',
+          description: data.error?.message || 'Failed to accept booking',
+          variant: 'destructive',
+        });
+      }
+    } catch {
+      toast({
+        title: 'Error',
+        description: 'Failed to accept booking. Please try again.',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleReject = async (sessionId: number) => {
+    try {
+      const res = await fetch(`/api/bookings/${sessionId}/respond`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'reject' }),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        toast({
+          title: 'Booking rejected',
+          description: 'The session request has been rejected and the client will be refunded.',
+        });
+        setSessions((prev) => prev.filter((s) => s.id !== sessionId));
+        setTotalCount((prev) => prev - 1);
+        router.refresh();
+      } else {
+        toast({
+          title: 'Error',
+          description: data.error?.message || 'Failed to reject booking',
+          variant: 'destructive',
+        });
+      }
+    } catch {
+      toast({
+        title: 'Error',
+        description: 'Failed to reject booking. Please try again.',
+        variant: 'destructive',
+      });
+    }
+  };
+
   // Load refund info for a session (for cancellation dialog)
   const loadRefundInfo = async (sessionId: number): Promise<RefundEligibilityInfo | undefined> => {
     // Check cache first
@@ -155,6 +229,11 @@ export function SessionsList({
         title: 'No upcoming sessions',
         description:
           "You don't have any upcoming sessions scheduled. Once clients book sessions with you, they'll appear here.",
+      },
+      confirmed: {
+        icon: CheckCircle,
+        title: 'No confirmed sessions',
+        description: 'Sessions you accept will appear here.',
       },
       past: {
         icon: Clock,
@@ -287,6 +366,8 @@ export function SessionsList({
               session={session}
               onMarkComplete={handleMarkComplete}
               onCancel={handleCancel}
+              onAccept={handleAccept}
+              onReject={handleReject}
               isPast={tab === 'past'}
               isCancelled={tab === 'cancelled'}
               refundInfo={refundInfoCache[session.id]}
@@ -301,9 +382,12 @@ export function SessionsList({
 
   return (
     <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-      <TabsList className="mb-6 grid w-full grid-cols-3 lg:w-[400px]">
+      <TabsList className="mb-6 grid w-full grid-cols-4 lg:w-[520px]">
         <TabsTrigger value="upcoming" disabled={isPending}>
           Upcoming
+        </TabsTrigger>
+        <TabsTrigger value="confirmed" disabled={isPending}>
+          Confirmed
         </TabsTrigger>
         <TabsTrigger value="past" disabled={isPending}>
           Past
@@ -315,6 +399,10 @@ export function SessionsList({
 
       <TabsContent value="upcoming">
         <SessionsContent tab="upcoming" />
+      </TabsContent>
+
+      <TabsContent value="confirmed">
+        <SessionsContent tab="confirmed" />
       </TabsContent>
 
       <TabsContent value="past">

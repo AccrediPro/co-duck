@@ -11,6 +11,7 @@ import { db } from '@/db';
 import { users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { z } from 'zod';
+import { rateLimit, FREQUENT_LIMIT, WRITE_LIMIT, rateLimitResponse } from '@/lib/rate-limit';
 
 const emailPreferencesSchema = z.object({
   bookings: z.boolean().optional(),
@@ -30,7 +31,10 @@ const updatePreferencesSchema = z.object({
  *
  * Returns the current user's timezone and email preferences.
  */
-export async function GET() {
+export async function GET(request: Request) {
+  const rl = rateLimit(request, FREQUENT_LIMIT, 'settings-preferences-get');
+  if (!rl.success) return rateLimitResponse(rl);
+
   const { userId } = await auth();
 
   if (!userId) {
@@ -83,6 +87,9 @@ export async function GET() {
  * @body {Object} [emailPreferences] - Email preference toggles
  */
 export async function PATCH(request: Request) {
+  const rlp = rateLimit(request, WRITE_LIMIT, 'settings-preferences-patch');
+  if (!rlp.success) return rateLimitResponse(rlp);
+
   const { userId } = await auth();
 
   if (!userId) {

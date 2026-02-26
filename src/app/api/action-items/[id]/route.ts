@@ -10,6 +10,7 @@ import { auth } from '@clerk/nextjs/server';
 import { db } from '@/db';
 import { actionItems, users } from '@/db/schema';
 import { eq, or, and } from 'drizzle-orm';
+import { rateLimit, FREQUENT_LIMIT, WRITE_LIMIT, rateLimitResponse } from '@/lib/rate-limit';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -25,6 +26,9 @@ interface RouteParams {
  * @returns {Object} Action item details
  */
 export async function GET(request: Request, { params }: RouteParams) {
+  const rl = rateLimit(request, FREQUENT_LIMIT, 'action-items-get');
+  if (!rl.success) return rateLimitResponse(rl);
+
   const { userId } = await auth();
 
   if (!userId) {
@@ -120,6 +124,9 @@ export async function GET(request: Request, { params }: RouteParams) {
  * @returns {Object} Updated action item
  */
 export async function PATCH(request: Request, { params }: RouteParams) {
+  const rlp = rateLimit(request, WRITE_LIMIT, 'action-items-patch');
+  if (!rlp.success) return rateLimitResponse(rlp);
+
   const { userId } = await auth();
 
   if (!userId) {
@@ -248,6 +255,9 @@ export async function PATCH(request: Request, { params }: RouteParams) {
  * @returns {Object} Success message
  */
 export async function DELETE(request: Request, { params }: RouteParams) {
+  const rld = rateLimit(request, WRITE_LIMIT, 'action-items-delete');
+  if (!rld.success) return rateLimitResponse(rld);
+
   const { userId } = await auth();
 
   if (!userId) {

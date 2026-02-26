@@ -120,7 +120,8 @@ export default async function MessagesPage() {
   // --------------------------------
 
   // Determine role-specific description text
-  const otherPartyLabel = userRecords[0].role === 'coach' ? 'clients' : 'coaches';
+  const userRole = userRecords[0].role;
+  const otherPartyLabel = userRole === 'coach' ? 'clients' : 'coaches';
 
   return (
     <div className="space-y-6">
@@ -130,7 +131,7 @@ export default async function MessagesPage() {
       </div>
 
       {/* Client component handles conversation selection and navigation */}
-      <ConversationsList initialConversations={result.conversations || []} />
+      <ConversationsList initialConversations={result.conversations || []} userRole={userRole} />
     </div>
   );
 }

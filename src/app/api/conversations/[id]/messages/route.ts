@@ -2,6 +2,7 @@
  * @fileoverview Conversation Messages API
  *
  * Get and send messages in a conversation.
+ * Supports text messages and file attachments (FormData).
  *
  * @module api/conversations/[id]/messages
  */
@@ -10,11 +11,14 @@ import { auth } from '@clerk/nextjs/server';
 import { db } from '@/db';
 import { conversations, messages, users } from '@/db/schema';
 import { eq, or, and, desc, inArray, lt } from 'drizzle-orm';
-import { rateLimit, FREQUENT_LIMIT, rateLimitResponse } from '@/lib/rate-limit';
+import { rateLimit, FREQUENT_LIMIT, WRITE_LIMIT, rateLimitResponse } from '@/lib/rate-limit';
 import { sendEmail } from '@/lib/email';
 import { NewMessageEmail } from '@/lib/emails';
 import { createNotification } from '@/lib/notifications';
 import { getUnsubscribeUrl } from '@/lib/unsubscribe';
+import { getSocketServer } from '@/lib/socket-server';
+import { uploadMessageAttachment } from '@/lib/file-upload';
+import { extractUrls, fetchLinkPreview } from '@/lib/link-preview';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -115,6 +119,15 @@ export async function GET(request: Request, { params }: RouteParams) {
             }
           : null,
         isOwnMessage: msg.senderId === userId,
+        attachment: msg.attachmentUrl
+          ? {
+              url: msg.attachmentUrl,
+              name: msg.attachmentName,
+              type: msg.attachmentType,
+              size: msg.attachmentSize,
+            }
+          : null,
+        metadata: msg.metadata ?? null,
       };
     });
 
@@ -141,16 +154,21 @@ export async function GET(request: Request, { params }: RouteParams) {
 /**
  * POST /api/conversations/:id/messages
  *
- * Sends a message in a conversation.
+ * Sends a message in a conversation. Supports two content types:
+ * - application/json: { content: string } for text-only messages
+ * - multipart/form-data: file (File) + content (string, optional) for attachments
  *
  * @param {string} id - Conversation ID
- * @body {string} content - Message content
  *
- * @returns {Object} Created message
+ * @returns {Object} Created message with optional attachment
  */
 export async function POST(request: Request, { params }: RouteParams) {
-  // Rate limit: 30 requests per minute
-  const rl = rateLimit(request, FREQUENT_LIMIT, 'messages-send');
+  const contentType = request.headers.get('content-type') || '';
+  const isFormData = contentType.includes('multipart/form-data');
+
+  // Stricter rate limit for file uploads
+  const limitConfig = isFormData ? WRITE_LIMIT : FREQUENT_LIMIT;
+  const rl = rateLimit(request, limitConfig, isFormData ? 'messages-upload' : 'messages-send');
   if (!rl.success) return rateLimitResponse(rl);
 
   const { userId } = await auth();
@@ -165,8 +183,6 @@ export async function POST(request: Request, { params }: RouteParams) {
   try {
     const { id } = await params;
     const conversationId = parseInt(id);
-    const body = await request.json();
-    const { content } = body;
 
     if (isNaN(conversationId)) {
       return Response.json(
@@ -175,11 +191,26 @@ export async function POST(request: Request, { params }: RouteParams) {
       );
     }
 
-    if (!content || typeof content !== 'string' || content.trim().length === 0) {
+    // Parse content and file based on content type
+    let content: string | null = null;
+    let file: File | null = null;
+
+    if (isFormData) {
+      const formData = await request.formData();
+      const rawContent = formData.get('content');
+      content = typeof rawContent === 'string' ? rawContent.trim() : null;
+      file = formData.get('file') as File | null;
+    } else {
+      const body = await request.json();
+      content = typeof body.content === 'string' ? body.content.trim() : null;
+    }
+
+    // Must have at least content or a file
+    if ((!content || content.length === 0) && !file) {
       return Response.json(
         {
           success: false,
-          error: { code: 'INVALID_CONTENT', message: 'Message content is required' },
+          error: { code: 'INVALID_CONTENT', message: 'Message content or file is required' },
         },
         { status: 400 }
       );
@@ -200,15 +231,39 @@ export async function POST(request: Request, { params }: RouteParams) {
       );
     }
 
+    // Upload attachment if present
+    let attachmentUrl: string | null = null;
+    let attachmentName: string | null = null;
+    let attachmentType: string | null = null;
+    let attachmentSize: number | null = null;
+
+    if (file) {
+      const uploadResult = await uploadMessageAttachment(file, conversationId, userId);
+      if ('error' in uploadResult) {
+        return Response.json(
+          { success: false, error: uploadResult.error },
+          { status: 400 }
+        );
+      }
+      attachmentUrl = uploadResult.data.url;
+      attachmentName = uploadResult.data.fileName;
+      attachmentType = uploadResult.data.fileType;
+      attachmentSize = uploadResult.data.fileSize;
+    }
+
     // Create message
     const [newMessage] = await db
       .insert(messages)
       .values({
         conversationId,
         senderId: userId,
-        content: content.trim(),
+        content: content || '',
         messageType: 'text',
         isRead: false,
+        attachmentUrl,
+        attachmentName,
+        attachmentType,
+        attachmentSize,
       })
       .returning();
 
@@ -227,11 +282,17 @@ export async function POST(request: Request, { params }: RouteParams) {
     const recipientId =
       conversation.coachId === userId ? conversation.clientId : conversation.coachId;
 
+    const notificationBody = attachmentName
+      ? `Sent a file: ${attachmentName}`
+      : content && content.length > 100
+        ? content.slice(0, 100) + '...'
+        : content || '';
+
     createNotification({
       userId: recipientId,
       type: 'new_message',
       title: `New message from ${sender?.name || 'Someone'}`,
-      body: content.trim().length > 100 ? content.trim().slice(0, 100) + '...' : content.trim(),
+      body: notificationBody,
       link: `/dashboard/messages/${conversationId}`,
     });
 
@@ -240,19 +301,88 @@ export async function POST(request: Request, { params }: RouteParams) {
       where: eq(users.id, recipientId),
     });
     if (recipient?.email && sender) {
+      const emailPreview = attachmentName
+        ? `Sent a file: ${attachmentName}`
+        : content || '';
+
       sendEmail({
         to: recipient.email,
         subject: `New message from ${sender.name || 'your coach'}`,
         react: NewMessageEmail({
           recipientName: recipient.name || 'there',
           senderName: sender.name || 'Someone',
-          messagePreview: content.trim(),
+          messagePreview: emailPreview,
           conversationId,
           unsubscribeUrl: getUnsubscribeUrl(recipientId, 'messages'),
         }),
       }).catch((err) => {
         console.error('Failed to send new message email:', err);
       });
+    }
+
+    // Build response and Socket.io payload
+    const attachment = newMessage.attachmentUrl
+      ? {
+          url: newMessage.attachmentUrl,
+          name: newMessage.attachmentName,
+          type: newMessage.attachmentType,
+          size: newMessage.attachmentSize,
+        }
+      : null;
+
+    // Emit via Socket.io for real-time delivery
+    const io = getSocketServer();
+    if (io) {
+      const room = `conversation:${conversationId}`;
+      const messagePayload = {
+        id: newMessage.id,
+        content: newMessage.content,
+        messageType: newMessage.messageType,
+        isRead: newMessage.isRead,
+        createdAt: newMessage.createdAt,
+        conversationId,
+        sender: sender
+          ? { id: sender.id, name: sender.name, avatarUrl: sender.avatarUrl }
+          : null,
+        senderId: userId,
+        attachment,
+        metadata: null,
+      };
+      io.to(room).emit('message:new', messagePayload);
+      io.to(room).emit('conversation:updated', {
+        conversationId,
+        lastMessageAt: newMessage.createdAt,
+        lastMessageContent: content || (attachmentName ? `Sent a file: ${attachmentName}` : ''),
+        lastMessageSenderId: userId,
+      });
+    }
+
+    // Async link preview: don't block the response
+    if (content) {
+      const urls = extractUrls(content);
+      if (urls.length > 0) {
+        fetchLinkPreview(urls[0])
+          .then(async (preview) => {
+            if (!preview) return;
+            const metadata = { linkPreview: preview };
+            await db
+              .update(messages)
+              .set({ metadata })
+              .where(eq(messages.id, newMessage.id));
+            // Notify connected clients of the updated metadata
+            if (io) {
+              const room = `conversation:${conversationId}`;
+              io.to(room).emit('message:updated', {
+                id: newMessage.id,
+                conversationId,
+                metadata,
+              });
+            }
+          })
+          .catch((err) => {
+            console.error('Failed to fetch link preview:', err);
+          });
+      }
     }
 
     return Response.json({
@@ -271,6 +401,8 @@ export async function POST(request: Request, { params }: RouteParams) {
             }
           : null,
         isOwnMessage: true,
+        attachment,
+        metadata: null,
       },
     });
   } catch (error) {

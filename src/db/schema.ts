@@ -63,7 +63,9 @@ import {
   date,
   serial,
   unique,
+  varchar,
 } from 'drizzle-orm/pg-core';
+import { relations } from 'drizzle-orm';
 
 // ============================================================================
 // ENUMS
@@ -168,6 +170,42 @@ export const verificationStatusEnum = pgEnum('verification_status', [
   'rejected',
 ]);
 
+/**
+ * Program Status Enum
+ *
+ * Tracks the lifecycle of a coaching program.
+ *
+ * @enum {string}
+ * @property {'active'} active - Program is currently in progress
+ * @property {'completed'} completed - Program has been finished
+ * @property {'archived'} archived - Program is archived (no longer active)
+ */
+export const programStatusEnum = pgEnum('program_status', ['active', 'completed', 'archived']);
+
+/**
+ * Goal Status Enum
+ *
+ * Tracks the progress of a coaching goal.
+ *
+ * @enum {string}
+ * @property {'pending'} pending - Goal not yet started
+ * @property {'in_progress'} in_progress - Goal is being worked on
+ * @property {'completed'} completed - Goal has been achieved
+ */
+export const goalStatusEnum = pgEnum('goal_status', ['pending', 'in_progress', 'completed']);
+
+/**
+ * Goal Priority Enum
+ *
+ * Defines the urgency level of a coaching goal.
+ *
+ * @enum {string}
+ * @property {'low'} low - Low priority
+ * @property {'medium'} medium - Medium priority (default)
+ * @property {'high'} high - High priority
+ */
+export const goalPriorityEnum = pgEnum('goal_priority', ['low', 'medium', 'high']);
+
 // ============================================================================
 // JSONB TYPE DEFINITIONS
 // ============================================================================
@@ -207,6 +245,28 @@ export interface SessionType {
   name: string;
   duration: number; // in minutes
   price: number; // in cents
+}
+
+/**
+ * Link Preview Data Interface
+ *
+ * Stores Open Graph metadata extracted from a URL found in a message.
+ */
+export interface LinkPreviewData {
+  url: string;
+  title?: string;
+  description?: string;
+  image?: string;
+  siteName?: string;
+}
+
+/**
+ * Message Metadata Interface
+ *
+ * Optional JSONB metadata stored on messages for rich content like link previews.
+ */
+export interface MessageMetadata {
+  linkPreview?: LinkPreviewData;
 }
 
 /**
@@ -1308,6 +1368,36 @@ export const messages = pgTable(
      */
     isRead: boolean('is_read').notNull().default(false),
 
+    /**
+     * URL to the uploaded attachment file in Supabase Storage
+     * @type {string | null}
+     */
+    attachmentUrl: text('attachment_url'),
+
+    /**
+     * Original file name of the attachment
+     * @type {string | null}
+     */
+    attachmentName: text('attachment_name'),
+
+    /**
+     * MIME type of the attachment (e.g., "image/png", "application/pdf")
+     * @type {string | null}
+     */
+    attachmentType: text('attachment_type'),
+
+    /**
+     * File size in bytes
+     * @type {number | null}
+     */
+    attachmentSize: integer('attachment_size'),
+
+    /**
+     * Optional metadata for the message (e.g., link previews)
+     * @type {MessageMetadata | null}
+     */
+    metadata: jsonb('metadata').$type<MessageMetadata>(),
+
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [
@@ -1457,6 +1547,16 @@ export const actionItems = pgTable(
      * Null for general tasks not tied to a session.
      */
     bookingId: integer('booking_id').references(() => bookings.id, { onDelete: 'set null' }),
+
+    /**
+     * Associated goal (optional)
+     * @type {number | null}
+     *
+     * @remarks
+     * Links action item to a specific coaching goal.
+     * Null for action items not tied to a goal.
+     */
+    goalId: integer('goal_id').references(() => goals.id, { onDelete: 'set null' }),
 
     /**
      * Task title/summary
@@ -1917,3 +2017,461 @@ export const groupSessionParticipants = pgTable(
 
 export type GroupSessionParticipant = typeof groupSessionParticipants.$inferSelect;
 export type NewGroupSessionParticipant = typeof groupSessionParticipants.$inferInsert;
+
+// ============================================================================
+// PROGRAMS TABLE
+// ============================================================================
+
+/**
+ * Programs Table
+ *
+ * Coaching programs that group goals, tasks, and materials for a coach-client pair.
+ *
+ * ## Purpose
+ * Represents a structured coaching engagement between a coach and client.
+ * Programs contain goals, action items, and attachments.
+ *
+ * ## Relationships
+ * - Belongs to users (as coach, many:1)
+ * - Belongs to users (as client, many:1)
+ * - Has many goals
+ * - Has many attachments
+ *
+ * @remarks
+ * Coach-client relationships are derived from bookings.
+ * Programs are created by coaches to organize ongoing work with clients.
+ */
+export const programs = pgTable(
+  'programs',
+  {
+    id: serial('id').primaryKey(),
+
+    /** Coach who created this program */
+    coachId: text('coach_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+
+    /** Client assigned to this program */
+    clientId: text('client_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+
+    /** Program title */
+    title: varchar('title', { length: 255 }).notNull(),
+
+    /** Detailed program description */
+    description: text('description'),
+
+    /** Current program status */
+    status: programStatusEnum('status').notNull().default('active'),
+
+    /** Program start date */
+    startDate: date('start_date'),
+
+    /** Program end date */
+    endDate: date('end_date'),
+
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
+  },
+  (table) => [
+    index('programs_coach_id_idx').on(table.coachId),
+    index('programs_client_id_idx').on(table.clientId),
+    index('programs_status_idx').on(table.status),
+    index('programs_coach_client_idx').on(table.coachId, table.clientId),
+  ]
+);
+
+/** Type for selecting a program record */
+export type Program = typeof programs.$inferSelect;
+
+/** Type for inserting a new program record */
+export type NewProgram = typeof programs.$inferInsert;
+
+// ============================================================================
+// GOALS TABLE
+// ============================================================================
+
+/**
+ * Goals Table
+ *
+ * Individual coaching goals within a program.
+ *
+ * ## Purpose
+ * Tracks specific objectives assigned by coaches to clients.
+ * Goals belong to a program and can have action items and attachments.
+ *
+ * ## Relationships
+ * - Belongs to programs (many:1)
+ * - Belongs to users (as coach, many:1)
+ * - Belongs to users (as client, many:1)
+ * - Has many action_items (via goalId)
+ * - Has many attachments
+ *
+ * @remarks
+ * Goals have priority levels and due dates for tracking progress.
+ */
+export const goals = pgTable(
+  'goals',
+  {
+    id: serial('id').primaryKey(),
+
+    /** Program this goal belongs to */
+    programId: integer('program_id')
+      .notNull()
+      .references(() => programs.id, { onDelete: 'cascade' }),
+
+    /** Coach who created this goal */
+    coachId: text('coach_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+
+    /** Client assigned to this goal */
+    clientId: text('client_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+
+    /** Goal title */
+    title: varchar('title', { length: 255 }).notNull(),
+
+    /** Detailed goal description */
+    description: text('description'),
+
+    /** Current goal status */
+    status: goalStatusEnum('status').notNull().default('pending'),
+
+    /** Goal priority level */
+    priority: goalPriorityEnum('priority').notNull().default('medium'),
+
+    /** Target completion date */
+    dueDate: date('due_date'),
+
+    /** When the goal was marked complete */
+    completedAt: timestamp('completed_at', { withTimezone: true }),
+
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
+  },
+  (table) => [
+    index('goals_program_id_idx').on(table.programId),
+    index('goals_coach_id_idx').on(table.coachId),
+    index('goals_client_id_idx').on(table.clientId),
+    index('goals_status_idx').on(table.status),
+  ]
+);
+
+/** Type for selecting a goal record */
+export type Goal = typeof goals.$inferSelect;
+
+/** Type for inserting a new goal record */
+export type NewGoal = typeof goals.$inferInsert;
+
+// ============================================================================
+// ATTACHMENTS TABLE
+// ============================================================================
+
+/**
+ * Attachments Table
+ *
+ * File attachments for programs, goals, and action items.
+ *
+ * ## Purpose
+ * Enables bidirectional file sharing between coaches and clients:
+ * - Coaches attach materials (PDFs, templates, worksheets)
+ * - Clients upload completed work (filled PDFs, documents)
+ *
+ * ## Relationships
+ * - Optionally belongs to programs (many:1)
+ * - Optionally belongs to goals (many:1)
+ * - Optionally belongs to action_items (many:1)
+ * - Belongs to users (as uploader, many:1)
+ *
+ * @remarks
+ * At least one of programId, goalId, or actionItemId should be set.
+ * Files are stored in Supabase Storage; fileUrl contains the storage path.
+ */
+export const attachments = pgTable(
+  'attachments',
+  {
+    id: serial('id').primaryKey(),
+
+    /** Associated program (optional) */
+    programId: integer('program_id').references(() => programs.id, { onDelete: 'cascade' }),
+
+    /** Associated goal (optional) */
+    goalId: integer('goal_id').references(() => goals.id, { onDelete: 'cascade' }),
+
+    /** Associated action item (optional) */
+    actionItemId: integer('action_item_id').references(() => actionItems.id, {
+      onDelete: 'cascade',
+    }),
+
+    /** User who uploaded this file */
+    uploadedBy: text('uploaded_by')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+
+    /** Original file name */
+    fileName: varchar('file_name', { length: 255 }).notNull(),
+
+    /** Storage URL or path */
+    fileUrl: text('file_url').notNull(),
+
+    /** MIME type (e.g., "application/pdf", "image/png") */
+    fileType: varchar('file_type', { length: 100 }).notNull(),
+
+    /** File size in bytes */
+    fileSize: integer('file_size').notNull(),
+
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('attachments_program_id_idx').on(table.programId),
+    index('attachments_goal_id_idx').on(table.goalId),
+    index('attachments_action_item_id_idx').on(table.actionItemId),
+    index('attachments_uploaded_by_idx').on(table.uploadedBy),
+  ]
+);
+
+/** Type for selecting an attachment record */
+export type Attachment = typeof attachments.$inferSelect;
+
+/** Type for inserting a new attachment record */
+export type NewAttachment = typeof attachments.$inferInsert;
+
+// ============================================================================
+// DRIZZLE RELATIONS
+// ============================================================================
+
+export const usersRelations = relations(users, ({ one, many }) => ({
+  coachProfile: one(coachProfiles, {
+    fields: [users.id],
+    references: [coachProfiles.userId],
+  }),
+  coachBookings: many(bookings, { relationName: 'coachBookings' }),
+  clientBookings: many(bookings, { relationName: 'clientBookings' }),
+  coachConversations: many(conversations, { relationName: 'coachConversations' }),
+  clientConversations: many(conversations, { relationName: 'clientConversations' }),
+  sentMessages: many(messages),
+  coachActionItems: many(actionItems, { relationName: 'coachActionItems' }),
+  clientActionItems: many(actionItems, { relationName: 'clientActionItems' }),
+  coachPrograms: many(programs, { relationName: 'coachPrograms' }),
+  clientPrograms: many(programs, { relationName: 'clientPrograms' }),
+  coachGoals: many(goals, { relationName: 'coachGoals' }),
+  clientGoals: many(goals, { relationName: 'clientGoals' }),
+  uploadedAttachments: many(attachments),
+  notifications: many(notifications),
+  coachReviews: many(reviews, { relationName: 'coachReviews' }),
+  clientReviews: many(reviews, { relationName: 'clientReviews' }),
+  coachGroupSessions: many(groupSessions),
+}));
+
+export const programsRelations = relations(programs, ({ one, many }) => ({
+  coach: one(users, {
+    fields: [programs.coachId],
+    references: [users.id],
+    relationName: 'coachPrograms',
+  }),
+  client: one(users, {
+    fields: [programs.clientId],
+    references: [users.id],
+    relationName: 'clientPrograms',
+  }),
+  goals: many(goals),
+  attachments: many(attachments),
+}));
+
+export const goalsRelations = relations(goals, ({ one, many }) => ({
+  program: one(programs, {
+    fields: [goals.programId],
+    references: [programs.id],
+  }),
+  coach: one(users, {
+    fields: [goals.coachId],
+    references: [users.id],
+    relationName: 'coachGoals',
+  }),
+  client: one(users, {
+    fields: [goals.clientId],
+    references: [users.id],
+    relationName: 'clientGoals',
+  }),
+  actionItems: many(actionItems),
+  attachments: many(attachments),
+}));
+
+export const attachmentsRelations = relations(attachments, ({ one }) => ({
+  program: one(programs, {
+    fields: [attachments.programId],
+    references: [programs.id],
+  }),
+  goal: one(goals, {
+    fields: [attachments.goalId],
+    references: [goals.id],
+  }),
+  actionItem: one(actionItems, {
+    fields: [attachments.actionItemId],
+    references: [actionItems.id],
+  }),
+  uploader: one(users, {
+    fields: [attachments.uploadedBy],
+    references: [users.id],
+  }),
+}));
+
+export const actionItemsRelations = relations(actionItems, ({ one, many }) => ({
+  coach: one(users, {
+    fields: [actionItems.coachId],
+    references: [users.id],
+    relationName: 'coachActionItems',
+  }),
+  client: one(users, {
+    fields: [actionItems.clientId],
+    references: [users.id],
+    relationName: 'clientActionItems',
+  }),
+  booking: one(bookings, {
+    fields: [actionItems.bookingId],
+    references: [bookings.id],
+  }),
+  goal: one(goals, {
+    fields: [actionItems.goalId],
+    references: [goals.id],
+  }),
+  attachments: many(attachments),
+}));
+
+export const bookingsRelations = relations(bookings, ({ one, many }) => ({
+  coach: one(users, {
+    fields: [bookings.coachId],
+    references: [users.id],
+    relationName: 'coachBookings',
+  }),
+  client: one(users, {
+    fields: [bookings.clientId],
+    references: [users.id],
+    relationName: 'clientBookings',
+  }),
+  transaction: one(transactions),
+  sessionNote: one(sessionNotes),
+  review: one(reviews),
+  actionItems: many(actionItems),
+}));
+
+export const transactionsRelations = relations(transactions, ({ one }) => ({
+  booking: one(bookings, {
+    fields: [transactions.bookingId],
+    references: [bookings.id],
+  }),
+}));
+
+export const conversationsRelations = relations(conversations, ({ one, many }) => ({
+  coach: one(users, {
+    fields: [conversations.coachId],
+    references: [users.id],
+    relationName: 'coachConversations',
+  }),
+  client: one(users, {
+    fields: [conversations.clientId],
+    references: [users.id],
+    relationName: 'clientConversations',
+  }),
+  messages: many(messages),
+}));
+
+export const messagesRelations = relations(messages, ({ one }) => ({
+  conversation: one(conversations, {
+    fields: [messages.conversationId],
+    references: [conversations.id],
+  }),
+  sender: one(users, {
+    fields: [messages.senderId],
+    references: [users.id],
+  }),
+}));
+
+export const sessionNotesRelations = relations(sessionNotes, ({ one }) => ({
+  booking: one(bookings, {
+    fields: [sessionNotes.bookingId],
+    references: [bookings.id],
+  }),
+  coach: one(users, {
+    fields: [sessionNotes.coachId],
+    references: [users.id],
+  }),
+}));
+
+export const reviewsRelations = relations(reviews, ({ one }) => ({
+  booking: one(bookings, {
+    fields: [reviews.bookingId],
+    references: [bookings.id],
+  }),
+  coach: one(users, {
+    fields: [reviews.coachId],
+    references: [users.id],
+    relationName: 'coachReviews',
+  }),
+  client: one(users, {
+    fields: [reviews.clientId],
+    references: [users.id],
+    relationName: 'clientReviews',
+  }),
+}));
+
+export const notificationsRelations = relations(notifications, ({ one }) => ({
+  user: one(users, {
+    fields: [notifications.userId],
+    references: [users.id],
+  }),
+}));
+
+export const coachProfilesRelations = relations(coachProfiles, ({ one, many }) => ({
+  user: one(users, {
+    fields: [coachProfiles.userId],
+    references: [users.id],
+  }),
+  availability: many(coachAvailability),
+  overrides: many(availabilityOverrides),
+}));
+
+export const coachAvailabilityRelations = relations(coachAvailability, ({ one }) => ({
+  coachProfile: one(coachProfiles, {
+    fields: [coachAvailability.coachId],
+    references: [coachProfiles.userId],
+  }),
+}));
+
+export const availabilityOverridesRelations = relations(availabilityOverrides, ({ one }) => ({
+  coachProfile: one(coachProfiles, {
+    fields: [availabilityOverrides.coachId],
+    references: [coachProfiles.userId],
+  }),
+}));
+
+export const groupSessionsRelations = relations(groupSessions, ({ one, many }) => ({
+  coach: one(users, {
+    fields: [groupSessions.coachId],
+    references: [users.id],
+  }),
+  participants: many(groupSessionParticipants),
+}));
+
+export const groupSessionParticipantsRelations = relations(
+  groupSessionParticipants,
+  ({ one }) => ({
+    groupSession: one(groupSessions, {
+      fields: [groupSessionParticipants.groupSessionId],
+      references: [groupSessions.id],
+    }),
+    client: one(users, {
+      fields: [groupSessionParticipants.clientId],
+      references: [users.id],
+    }),
+  })
+);

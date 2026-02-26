@@ -11,6 +11,7 @@ import { db } from '@/db';
 import { users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { verifyUnsubscribeToken, type EmailCategory } from '@/lib/unsubscribe';
+import { rateLimit, WRITE_LIMIT, rateLimitResponse } from '@/lib/rate-limit';
 
 const VALID_CATEGORIES: EmailCategory[] = [
   'bookings',
@@ -33,6 +34,9 @@ const VALID_CATEGORIES: EmailCategory[] = [
  * @returns HTML page confirming unsubscription
  */
 export async function GET(request: Request) {
+  const rl = rateLimit(request, WRITE_LIMIT, 'settings-unsubscribe');
+  if (!rl.success) return rateLimitResponse(rl);
+
   const { searchParams } = new URL(request.url);
   const userId = searchParams.get('userId');
   const category = searchParams.get('category') as EmailCategory | null;

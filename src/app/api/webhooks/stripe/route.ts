@@ -24,13 +24,13 @@ import { stripe } from '@/lib/stripe';
 import { db, bookings, transactions, users, coachProfiles } from '@/db';
 import { eq, and, gte } from 'drizzle-orm';
 import type Stripe from 'stripe';
-import { createBookingSystemMessage } from '@/lib/conversations';
+import { getOrCreateConversationInternal, sendSystemMessage } from '@/lib/conversations';
 import type { BookingSessionType } from '@/db/schema';
-import { syncBookingToCalendar } from '@/lib/google-calendar-sync';
 import { createNotification } from '@/lib/notifications';
 import { sendEmail } from '@/lib/email';
-import { PaymentReceiptEmail } from '@/lib/emails';
+import { PaymentReceiptEmail, BookingRequestCoachEmail, BookingRequestClientEmail } from '@/lib/emails';
 import { getUnsubscribeUrl } from '@/lib/unsubscribe';
+import { format } from 'date-fns';
 
 /**
  * Retrieves the Stripe webhook secret from environment variables.
@@ -230,12 +230,12 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
 
   const booking = existingBooking[0];
 
-  // Only update if booking is still pending
-  if (booking.status === 'pending') {
-    await db.update(bookings).set({ status: 'confirmed' }).where(eq(bookings.id, bookingIdNum));
-    console.log(`Stripe webhook: Booking ${bookingIdNum} updated to confirmed`);
+  // Booking approval flow: keep booking as 'pending' after payment.
+  // The coach must explicitly accept or reject the booking.
+  if (booking.status !== 'pending') {
+    console.log(`Stripe webhook: Booking ${bookingIdNum} already has status '${booking.status}', skipping`);
   } else {
-    console.log(`Stripe webhook: Booking ${bookingIdNum} already has status '${booking.status}'`);
+    console.log(`Stripe webhook: Booking ${bookingIdNum} paid — awaiting coach approval`);
   }
 
   // Check if transaction already exists (avoid duplicates from success page + webhook)
@@ -291,32 +291,29 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
 
   console.log(`Stripe webhook: Transaction created for booking ${bookingIdNum}`);
 
-  // Send payment receipt email to client (non-blocking)
+  // Send booking request emails (approval flow)
   const sessionType = booking.sessionType as BookingSessionType;
   const [clientUser, coachUser] = await Promise.all([
     db.query.users.findFirst({ where: eq(users.id, clientId) }),
     db.query.users.findFirst({ where: eq(users.id, coachId) }),
   ]);
 
+  const sessionName = sessionType?.name || 'Coaching session';
+  const formattedDate = format(booking.startTime, 'EEEE, MMMM d, yyyy');
+  const formattedTime = format(booking.startTime, 'h:mm a');
+  const priceFormatted = amountTotal / 100;
+
+  // Send payment receipt to client (still relevant — they paid)
   if (clientUser?.email && coachUser) {
     sendEmail({
       to: clientUser.email,
-      subject: `Payment receipt for ${sessionType?.name || 'Coaching session'} with ${coachUser.name || 'your coach'}`,
+      subject: `Payment receipt for ${sessionName} with ${coachUser.name || 'your coach'}`,
       react: PaymentReceiptEmail({
         clientName: clientUser.name || 'there',
         coachName: coachUser.name || 'Your Coach',
-        sessionType: sessionType?.name || 'Coaching Session',
-        sessionDate: booking.startTime.toLocaleDateString('en-US', {
-          weekday: 'long',
-          year: 'numeric',
-          month: 'long',
-          day: 'numeric',
-        }),
-        sessionTime: booking.startTime.toLocaleTimeString('en-US', {
-          hour: 'numeric',
-          minute: '2-digit',
-          hour12: true,
-        }),
+        sessionType: sessionName,
+        sessionDate: formattedDate,
+        sessionTime: formattedTime,
         duration: sessionType?.duration || 60,
         amountCents: amountTotal,
         currency,
@@ -327,35 +324,74 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
     }).catch((err) => console.error('Failed to send payment receipt email:', err));
   }
 
-  // Create system message in conversation for the booking
-  // Get session type from booking for the message
-  createBookingSystemMessage(coachId, clientId, sessionType, booking.startTime).catch((error) => {
-    console.error('Stripe webhook: Error creating booking system message:', error);
-    // Don't fail the webhook if message creation fails
-  });
+  // Send booking request email to coach
+  if (coachUser?.email && clientUser) {
+    sendEmail({
+      to: coachUser.email,
+      subject: `New booking request from ${clientUser.name || 'a client'}`,
+      react: BookingRequestCoachEmail({
+        coachName: coachUser.name || 'Coach',
+        clientName: clientUser.name || 'A client',
+        sessionType: sessionName,
+        date: formattedDate,
+        time: formattedTime,
+        duration: sessionType?.duration || 60,
+        price: priceFormatted,
+        bookingId: bookingIdNum,
+        unsubscribeUrl: getUnsubscribeUrl(coachId, 'bookings'),
+      }),
+    }).catch((err) => console.error('Failed to send booking request email to coach:', err));
+  }
 
-  // Notify both parties about the confirmed booking
-  const sessionName = sessionType?.name || 'Coaching session';
+  // Send booking submitted email to client
+  if (clientUser?.email && coachUser) {
+    sendEmail({
+      to: clientUser.email,
+      subject: `Booking request submitted — awaiting ${coachUser.name || 'coach'} approval`,
+      react: BookingRequestClientEmail({
+        clientName: clientUser.name || 'there',
+        coachName: coachUser.name || 'Your Coach',
+        sessionType: sessionName,
+        date: formattedDate,
+        time: formattedTime,
+        duration: sessionType?.duration || 60,
+        price: priceFormatted,
+        unsubscribeUrl: getUnsubscribeUrl(clientId, 'bookings'),
+      }),
+    }).catch((err) => console.error('Failed to send booking request email to client:', err));
+  }
+
+  // Create system message in conversation: booking request pending
+  const conversationResult = await getOrCreateConversationInternal(coachId, clientId);
+  if (conversationResult.success) {
+    sendSystemMessage(
+      conversationResult.conversationId,
+      `Booking request: ${sessionName} on ${formattedDate} at ${formattedTime} — awaiting coach approval`,
+      clientId
+    ).catch((error) => {
+      console.error('Stripe webhook: Error creating booking request system message:', error);
+    });
+  }
+
+  // Notify coach about new booking request
   createNotification({
     userId: coachId,
     type: 'booking_confirmed',
-    title: 'New booking confirmed',
-    body: `${sessionName} has been booked and paid.`,
+    title: 'New booking request',
+    body: `${clientUser?.name || 'A client'} has requested a ${sessionName}. Please accept or decline.`,
     link: `/dashboard/sessions/${bookingIdNum}`,
   });
+
+  // Notify client that request is pending
   createNotification({
     userId: clientId,
     type: 'booking_confirmed',
-    title: 'Booking confirmed',
-    body: `Your ${sessionName} has been confirmed.`,
+    title: 'Booking request submitted',
+    body: `Your ${sessionName} request has been submitted. ${coachUser?.name || 'Your coach'} will review it shortly.`,
     link: `/dashboard/my-sessions/${bookingIdNum}`,
   });
 
-  // Sync booking to Google Calendar for connected users
-  syncBookingToCalendar(bookingIdNum).catch((error) => {
-    console.error('Stripe webhook: Error syncing booking to calendar:', error);
-    // Don't fail the webhook if calendar sync fails
-  });
+  // NOTE: Calendar sync is deferred until coach accepts the booking
 }
 
 /**

@@ -56,6 +56,7 @@ export interface CoachDashboardData {
   unreadMessageCount: number;
   recentMessages: MessagePreview[];
   pendingActionItemsCount: number;
+  pendingBookingRequests: number;
   sessionStats: {
     distinctClients: number;
     sessionsThisMonth: number;
@@ -126,6 +127,7 @@ export async function getCoachDashboardData(): Promise<
       distinctClientsResult,
       sessionsThisMonthResult,
       totalSessionsResult,
+      pendingBookingRequestsResult,
     ] = await Promise.all([
       // Today's sessions
       db
@@ -260,6 +262,18 @@ export async function getCoachDashboardData(): Promise<
             or(eq(bookings.status, 'confirmed'), eq(bookings.status, 'completed'))
           )
         ),
+
+      // Pending booking requests (future bookings with 'pending' status)
+      db
+        .select({ count: sql<number>`count(*)` })
+        .from(bookings)
+        .where(
+          and(
+            eq(bookings.coachId, userId),
+            eq(bookings.status, 'pending'),
+            gte(bookings.startTime, now)
+          )
+        ),
     ]);
 
     const profile = profileResult[0];
@@ -293,6 +307,7 @@ export async function getCoachDashboardData(): Promise<
         unreadMessageCount: unreadCount,
         recentMessages: recentMessagesData,
         pendingActionItemsCount: Number(pendingItemsResult[0]?.count || 0),
+        pendingBookingRequests: Number(pendingBookingRequestsResult[0]?.count || 0),
         sessionStats: {
           distinctClients: Number(distinctClientsResult[0]?.count || 0),
           sessionsThisMonth: Number(sessionsThisMonthResult[0]?.count || 0),

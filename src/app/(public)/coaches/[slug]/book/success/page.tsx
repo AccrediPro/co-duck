@@ -17,13 +17,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   if (!result.success) {
     return {
-      title: 'Booking Confirmed | Coaching Platform',
+      title: 'Booking Request Submitted | Coaching Platform',
     };
   }
 
   return {
-    title: `Booking Confirmed with ${result.data.name} | Coaching Platform`,
-    description: `Your coaching session with ${result.data.name} has been confirmed and paid.`,
+    title: `Booking Request Submitted — ${result.data.name} | Coaching Platform`,
+    description: `Your coaching session request with ${result.data.name} has been submitted and is awaiting approval.`,
   };
 }
 

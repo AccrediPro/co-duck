@@ -177,9 +177,10 @@ export function PaymentSuccessContent({ coach, slug, booking, error }: PaymentSu
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
             <CheckCircle className="h-8 w-8 text-green-600" />
           </div>
-          <CardTitle className="text-2xl">Payment Successful!</CardTitle>
+          <CardTitle className="text-2xl">Booking Request Submitted!</CardTitle>
           <CardDescription>
-            Your coaching session with {booking.coachName} has been booked and paid.
+            Your payment is confirmed. Your session with {booking.coachName} is now awaiting coach
+            approval.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -190,6 +191,16 @@ export function PaymentSuccessContent({ coach, slug, booking, error }: PaymentSu
               <span className="text-sm font-medium">
                 Payment of {currencySymbol}
                 {formatPrice(booking.amountPaid)} {booking.currency} confirmed
+              </span>
+            </div>
+          </div>
+
+          {/* Pending approval notice */}
+          <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-amber-800 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-200">
+            <div className="flex items-center gap-2">
+              <Clock className="h-4 w-4" />
+              <span className="text-sm font-medium">
+                Awaiting coach approval — your coach will confirm the session shortly.
               </span>
             </div>
           </div>

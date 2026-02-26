@@ -10,6 +10,7 @@ import { db } from '@/db';
 import { reviews, users } from '@/db/schema';
 import { desc, inArray, sql } from 'drizzle-orm';
 import { requireAdmin } from '@/lib/admin-auth';
+import { rateLimit, FREQUENT_LIMIT, rateLimitResponse } from '@/lib/rate-limit';
 
 /**
  * GET /api/admin/reviews
@@ -22,6 +23,9 @@ import { requireAdmin } from '@/lib/admin-auth';
  * @returns Paginated reviews with user info
  */
 export async function GET(request: Request) {
+  const rl = rateLimit(request, FREQUENT_LIMIT, 'admin-reviews-list');
+  if (!rl.success) return rateLimitResponse(rl);
+
   const auth = await requireAdmin();
   if (!auth.authorized) return auth.response!;
 

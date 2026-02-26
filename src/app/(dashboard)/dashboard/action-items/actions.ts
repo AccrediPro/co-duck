@@ -677,6 +677,7 @@ export async function getMyActionItems(
       status: computeStatus({
         ...item,
         clientId: userId,
+        goalId: null,
         updatedAt: item.createdAt,
       }),
       bookingId: item.bookingId,

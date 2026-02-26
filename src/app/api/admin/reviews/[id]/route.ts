@@ -11,6 +11,7 @@ import { reviews } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { requireAdmin } from '@/lib/admin-auth';
 import { z } from 'zod';
+import { rateLimit, WRITE_LIMIT, rateLimitResponse } from '@/lib/rate-limit';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -31,6 +32,9 @@ const moderateSchema = z.object({
  * @returns Updated review
  */
 export async function PATCH(request: Request, { params }: RouteParams) {
+  const rl = rateLimit(request, WRITE_LIMIT, 'admin-reviews-moderate');
+  if (!rl.success) return rateLimitResponse(rl);
+
   const auth = await requireAdmin();
   if (!auth.authorized) return auth.response!;
 

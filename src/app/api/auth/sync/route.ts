@@ -11,6 +11,7 @@ import { auth, currentUser } from '@clerk/nextjs/server';
 import { db } from '@/db';
 import { users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
+import { rateLimit, WRITE_LIMIT, rateLimitResponse } from '@/lib/rate-limit';
 
 /**
  * POST /api/auth/sync
@@ -33,7 +34,10 @@ import { eq } from 'drizzle-orm';
  *   }
  * }
  */
-export async function POST() {
+export async function POST(request: Request) {
+  const rl = rateLimit(request, WRITE_LIMIT, 'auth-sync');
+  if (!rl.success) return rateLimitResponse(rl);
+
   const { userId } = await auth();
 
   if (!userId) {

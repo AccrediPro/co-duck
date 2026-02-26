@@ -11,15 +11,14 @@
  *
  * ## Key Responsibilities
  * - Retrieve booking from Stripe Checkout session ID
- * - Confirm pending bookings after successful payment
- * - Create transaction records for payment tracking
+ * - Create transaction records for payment tracking (booking stays pending)
  * - Generate ICS calendar files for download
  * - Trigger conversation system messages
  *
- * ## Payment Confirmation Flow
+ * ## Payment Flow
  * 1. Client redirected from Stripe with session_id query param
  * 2. This module retrieves checkout session from Stripe
- * 3. If payment succeeded, booking status updated to 'confirmed'
+ * 3. If payment succeeded, booking stays 'pending' (awaiting coach approval)
  * 4. Transaction record created for financial tracking
  * 5. System message sent in coach-client conversation
  *
@@ -69,7 +68,7 @@ export type GetBookingFromCheckoutSessionResult =
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * Retrieves and confirms a booking from a Stripe Checkout session.
+ * Retrieves a booking from a Stripe Checkout session.
  *
  * This function is called when the client is redirected back from Stripe
  * after completing payment. It performs the following:
@@ -78,7 +77,7 @@ export type GetBookingFromCheckoutSessionResult =
  * 2. Extracts booking ID from session metadata
  * 3. Fetches booking and coach details from database
  * 4. If payment succeeded and booking is pending:
- *    - Updates booking status to 'confirmed'
+ *    - Booking stays pending (awaiting coach approval)
  *    - Creates transaction record (if not exists)
  *    - Triggers conversation system message
  *
@@ -154,11 +153,9 @@ export async function getBookingFromCheckoutSession(
     const coach = coachResult[0];
     const sessionType = booking.sessionType as BookingSessionType;
 
-    // Check payment status and update booking if needed
+    // Check payment status and create transaction record if needed
+    // Booking stays pending — coach must explicitly accept
     if (checkoutSession.payment_status === 'paid' && booking.status === 'pending') {
-      // Update booking to confirmed
-      await db.update(bookings).set({ status: 'confirmed' }).where(eq(bookings.id, booking.id));
-
       // Get payment intent for transaction record
       const paymentIntent = checkoutSession.payment_intent;
       const paymentIntentId = typeof paymentIntent === 'string' ? paymentIntent : paymentIntent?.id;
@@ -201,8 +198,6 @@ export async function getBookingFromCheckoutSession(
         });
       }
 
-      // Update status to confirmed for return value
-      booking.status = 'confirmed';
     }
 
     return {

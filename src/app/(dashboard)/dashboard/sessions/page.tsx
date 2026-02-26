@@ -180,7 +180,7 @@ export default async function SessionsPage({ searchParams }: PageProps) {
 
   // Parse tab parameter with validation
   const tab = (params.tab as SessionStatus) || 'upcoming';
-  const validTabs: SessionStatus[] = ['upcoming', 'past', 'cancelled'];
+  const validTabs: SessionStatus[] = ['upcoming', 'confirmed', 'past', 'cancelled'];
   const validTab: SessionStatus = validTabs.includes(tab) ? tab : 'upcoming';
 
   // Parse pagination parameters

@@ -11,6 +11,7 @@ import { db } from '@/db';
 import { coachProfiles } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { stripe } from '@/lib/stripe';
+import { rateLimit, FREQUENT_LIMIT, rateLimitResponse } from '@/lib/rate-limit';
 
 /**
  * GET /api/earnings/payouts
@@ -22,6 +23,9 @@ import { stripe } from '@/lib/stripe';
  * @returns Payout list with balance and schedule info
  */
 export async function GET(request: Request) {
+  const rl = rateLimit(request, FREQUENT_LIMIT, 'earnings-payouts');
+  if (!rl.success) return rateLimitResponse(rl);
+
   const { userId } = await auth();
 
   if (!userId) {

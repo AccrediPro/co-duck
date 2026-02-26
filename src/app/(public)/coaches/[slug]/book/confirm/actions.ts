@@ -10,8 +10,8 @@
  * 3. `../success/actions.ts`: Handle post-payment confirmation and display
  *
  * ## Payment Flow
- * - **Free sessions**: Created with 'confirmed' status immediately
- * - **Paid sessions**: Created with 'pending' status, confirmed after Stripe payment
+ * - **Free sessions**: Created with 'pending' status, confirmed after coach approval
+ * - **Paid sessions**: Created with 'pending' status, confirmed after coach approval
  *
  * ## Stripe Integration
  * - Uses Stripe Connect for split payments (coach payout + platform fee)
@@ -74,8 +74,8 @@ export interface BookingResult {
 /**
  * Creates a new booking for a free session.
  *
- * For free sessions (price = 0), the booking is created with 'confirmed' status
- * immediately. A system message is also created in the coach-client conversation.
+ * For free sessions (price = 0), the booking is created with 'pending' status
+ * awaiting coach approval. A system message is also created in the coach-client conversation.
  *
  * ## Validation Checks
  * - User must be authenticated
@@ -157,7 +157,7 @@ export async function createBooking(
       return { success: false, error: 'Cannot book a session in the past' };
     }
 
-    // Create the booking with 'confirmed' status (for free sessions)
+    // Create the booking with 'pending' status (coach must approve)
     const newBooking = await db
       .insert(bookings)
       .values({
@@ -166,7 +166,7 @@ export async function createBooking(
         sessionType: input.sessionType,
         startTime,
         endTime,
-        status: 'confirmed',
+        status: 'pending',
         clientNotes: input.clientNotes || null,
       })
       .returning({ id: bookings.id });

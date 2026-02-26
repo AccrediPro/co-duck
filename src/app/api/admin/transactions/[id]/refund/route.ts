@@ -13,6 +13,7 @@ import { requireAdmin } from '@/lib/admin-auth';
 import { stripe } from '@/lib/stripe';
 import { z } from 'zod';
 import { createNotification } from '@/lib/notifications';
+import { rateLimit, WRITE_LIMIT, rateLimitResponse } from '@/lib/rate-limit';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -35,6 +36,9 @@ const refundSchema = z.object({
  * @returns Updated transaction
  */
 export async function POST(request: Request, { params }: RouteParams) {
+  const rl = rateLimit(request, WRITE_LIMIT, 'admin-refund');
+  if (!rl.success) return rateLimitResponse(rl);
+
   const auth = await requireAdmin();
   if (!auth.authorized) return auth.response!;
 

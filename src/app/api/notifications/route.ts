@@ -10,6 +10,7 @@ import { auth } from '@clerk/nextjs/server';
 import { db } from '@/db';
 import { notifications } from '@/db/schema';
 import { eq, and, desc, lt, sql } from 'drizzle-orm';
+import { rateLimit, FREQUENT_LIMIT, WRITE_LIMIT, rateLimitResponse } from '@/lib/rate-limit';
 
 /**
  * GET /api/notifications
@@ -23,6 +24,9 @@ import { eq, and, desc, lt, sql } from 'drizzle-orm';
  * @returns {Object} Paginated notifications with unread count
  */
 export async function GET(request: Request) {
+  const rl = rateLimit(request, FREQUENT_LIMIT, 'notifications-list');
+  if (!rl.success) return rateLimitResponse(rl);
+
   const { userId } = await auth();
 
   if (!userId) {
@@ -109,6 +113,9 @@ export async function GET(request: Request) {
  * @returns {Object} Updated notification
  */
 export async function PATCH(request: Request) {
+  const rlp = rateLimit(request, WRITE_LIMIT, 'notifications-patch');
+  if (!rlp.success) return rateLimitResponse(rlp);
+
   const { userId } = await auth();
 
   if (!userId) {
