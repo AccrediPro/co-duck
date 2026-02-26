@@ -12,8 +12,8 @@ import { db } from '@/db';
 import { conversations, messages, users } from '@/db/schema';
 import { eq, or, and, desc, inArray, lt } from 'drizzle-orm';
 import { rateLimit, FREQUENT_LIMIT, WRITE_LIMIT, rateLimitResponse } from '@/lib/rate-limit';
-import { sendEmail } from '@/lib/email';
 import { NewMessageEmail } from '@/lib/emails';
+import { sendEmailWithPreferences } from '@/lib/emails/send-with-preferences';
 import { createNotification } from '@/lib/notifications';
 import { getUnsubscribeUrl } from '@/lib/unsubscribe';
 import { getSocketServer } from '@/lib/socket-server';
@@ -296,7 +296,7 @@ export async function POST(request: Request, { params }: RouteParams) {
       link: `/dashboard/messages/${conversationId}`,
     });
 
-    // Send email notification to the other party (non-blocking)
+    // Send email notification to the other party (preference-checked, non-blocking)
     const recipient = await db.query.users.findFirst({
       where: eq(users.id, recipientId),
     });
@@ -305,17 +305,19 @@ export async function POST(request: Request, { params }: RouteParams) {
         ? `Sent a file: ${attachmentName}`
         : content || '';
 
-      sendEmail({
-        to: recipient.email,
-        subject: `New message from ${sender.name || 'your coach'}`,
-        react: NewMessageEmail({
+      sendEmailWithPreferences(
+        recipientId,
+        'messages',
+        recipient.email,
+        `New message from ${sender.name || 'your coach'}`,
+        NewMessageEmail({
           recipientName: recipient.name || 'there',
           senderName: sender.name || 'Someone',
           messagePreview: emailPreview,
           conversationId,
           unsubscribeUrl: getUnsubscribeUrl(recipientId, 'messages'),
-        }),
-      }).catch((err) => {
+        })
+      ).catch((err) => {
         console.error('Failed to send new message email:', err);
       });
     }

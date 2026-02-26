@@ -8,10 +8,11 @@
 
 import { auth } from '@clerk/nextjs/server';
 import { db } from '@/db';
-import { reviews } from '@/db/schema';
+import { reviews, users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { rateLimit, WRITE_LIMIT, rateLimitResponse } from '@/lib/rate-limit';
+import { createNotification } from '@/lib/notifications';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -102,6 +103,20 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       .set({ coachResponse: parsed.data.coachResponse })
       .where(eq(reviews.id, reviewId))
       .returning();
+
+    // Notify client that coach responded to their review
+    const coachUser = await db.query.users.findFirst({
+      where: eq(users.id, userId),
+      columns: { name: true },
+    });
+
+    createNotification({
+      userId: review.clientId,
+      type: 'review_response',
+      title: 'Coach responded to your review',
+      body: `${coachUser?.name || 'Your coach'} responded to your review.`,
+      link: `/dashboard/my-sessions/${review.bookingId}`,
+    });
 
     return Response.json({
       success: true,

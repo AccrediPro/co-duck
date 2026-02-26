@@ -16,8 +16,8 @@ import { z } from 'zod';
 import { db } from '@/db';
 import { bookings, users, transactions } from '@/db/schema';
 import { eq, and } from 'drizzle-orm';
-import { sendEmail } from '@/lib/email';
 import { BookingConfirmationEmail, CancellationEmail } from '@/lib/emails';
+import { sendEmailWithPreferences } from '@/lib/emails/send-with-preferences';
 import { rateLimit, WRITE_LIMIT, rateLimitResponse } from '@/lib/rate-limit';
 import { getUnsubscribeUrl } from '@/lib/unsubscribe';
 import { stripe } from '@/lib/stripe';
@@ -221,12 +221,14 @@ async function handleAccept({
 
   console.log(`Booking ${bookingId} accepted by coach`);
 
-  // Send confirmation email to client
+  // Send confirmation email to client (preference-checked, non-blocking)
   if (clientUser?.email && coachUser) {
-    sendEmail({
-      to: clientUser.email,
-      subject: `Booking confirmed! ${sessionName} with ${coachUser.name || 'your coach'}`,
-      react: BookingConfirmationEmail({
+    sendEmailWithPreferences(
+      booking.clientId,
+      'bookings',
+      clientUser.email,
+      `Booking confirmed! ${sessionName} with ${coachUser.name || 'your coach'}`,
+      BookingConfirmationEmail({
         coachName: coachUser.name || 'Your Coach',
         sessionType: sessionName,
         date: formattedDate,
@@ -234,8 +236,8 @@ async function handleAccept({
         duration: sessionType?.duration || 60,
         price: (sessionType?.price || 0) / 100,
         unsubscribeUrl: getUnsubscribeUrl(booking.clientId, 'bookings'),
-      }),
-    }).catch((err) => console.error('Failed to send booking confirmation email:', err));
+      })
+    ).catch((err) => console.error('Failed to send booking confirmation email:', err));
   }
 
   // System message in conversation
@@ -335,12 +337,14 @@ async function handleReject({
     }
   }
 
-  // Send rejection/cancellation email to client
+  // Send rejection/cancellation email to client (preference-checked, non-blocking)
   if (clientUser?.email && coachUser) {
-    sendEmail({
-      to: clientUser.email,
-      subject: `Booking request declined: ${sessionName} with ${coachUser.name || 'coach'}`,
-      react: CancellationEmail({
+    sendEmailWithPreferences(
+      booking.clientId,
+      'bookings',
+      clientUser.email,
+      `Booking request declined: ${sessionName} with ${coachUser.name || 'coach'}`,
+      CancellationEmail({
         coachName: coachUser.name || 'Your Coach',
         sessionType: sessionName,
         date: formattedDate,
@@ -352,8 +356,8 @@ async function handleReject({
         cancelledBy: 'coach',
         reason: reason || 'The coach was unable to accommodate this booking request.',
         unsubscribeUrl: getUnsubscribeUrl(booking.clientId, 'bookings'),
-      }),
-    }).catch((err) => console.error('Failed to send rejection email:', err));
+      })
+    ).catch((err) => console.error('Failed to send rejection email:', err));
   }
 
   // System message in conversation

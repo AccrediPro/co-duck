@@ -12,6 +12,9 @@ import { bookings, reviews, coachProfiles, users } from '@/db/schema';
 import { eq, sql } from 'drizzle-orm';
 import { rateLimit, SENSITIVE_LIMIT, rateLimitResponse } from '@/lib/rate-limit';
 import { createNotification } from '@/lib/notifications';
+import { NewReviewEmail } from '@/lib/emails';
+import { sendEmailWithPreferences } from '@/lib/emails/send-with-preferences';
+import { getUnsubscribeUrl } from '@/lib/unsubscribe';
 
 /**
  * POST /api/reviews
@@ -188,6 +191,28 @@ export async function POST(request: Request) {
       body: title || `${reviewer?.name || 'A client'} left a review.`,
       link: `/dashboard/sessions/${booking.id}`,
     });
+
+    // Send review notification email to coach (preference-checked, non-blocking)
+    const coachUser = await db.query.users.findFirst({
+      where: eq(users.id, booking.coachId),
+    });
+    if (coachUser?.email && reviewer) {
+      sendEmailWithPreferences(
+        booking.coachId,
+        'reviews',
+        coachUser.email,
+        `New ${ratingNum}-star review from ${reviewer.name || 'a client'}`,
+        NewReviewEmail({
+          coachName: coachUser.name || 'Coach',
+          clientName: reviewer.name || 'A client',
+          rating: ratingNum,
+          reviewTitle: title || undefined,
+          reviewContent: content || undefined,
+          bookingId: booking.id,
+          unsubscribeUrl: getUnsubscribeUrl(booking.coachId, 'reviews'),
+        })
+      ).catch((err) => console.error('Failed to send new review email:', err));
+    }
 
     return Response.json({
       success: true,

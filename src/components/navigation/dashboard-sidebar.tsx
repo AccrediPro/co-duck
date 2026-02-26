@@ -23,6 +23,7 @@ import { Sheet, SheetContent, SheetTrigger, SheetTitle } from '@/components/ui/s
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { LucideIcon } from 'lucide-react';
+import { NotificationBell } from '@/components/notifications/notification-bell';
 
 type UserRole = 'admin' | 'coach' | 'client';
 
@@ -102,11 +103,12 @@ export function DashboardSidebar({
 
   const NavContent = () => (
     <>
-      {/* Logo */}
-      <div className="flex h-16 items-center px-6">
+      {/* Logo + Notification Bell */}
+      <div className="flex h-16 items-center justify-between px-6">
         <Link href="/" className="text-xl font-bold">
           CoachHub
         </Link>
+        <NotificationBell />
       </div>
 
       <Separator />
@@ -188,6 +190,7 @@ export function DashboardMobileHeader({
       </Link>
 
       <div className="flex items-center gap-2">
+        <NotificationBell />
         {/* Unread badge indicator on mobile header */}
         {unreadMessageCount > 0 && (
           <Link href="/dashboard/messages" className="relative">

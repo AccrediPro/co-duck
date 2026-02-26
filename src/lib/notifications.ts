@@ -10,6 +10,7 @@
 import { db } from '@/db';
 import { notifications } from '@/db/schema';
 import type { NewNotification } from '@/db/schema';
+import { emitNotification } from '@/lib/socket-server';
 
 type NotificationType = NewNotification['type'];
 
@@ -24,15 +25,26 @@ interface CreateNotificationParams {
 /**
  * Creates an in-app notification for a user.
  * Non-blocking — errors are logged but don't throw.
+ * Also emits the notification via Socket.io for real-time delivery.
  */
 export async function createNotification(params: CreateNotificationParams): Promise<void> {
   try {
-    await db.insert(notifications).values({
+    const [inserted] = await db.insert(notifications).values({
       userId: params.userId,
       type: params.type,
       title: params.title,
       body: params.body || null,
       link: params.link || null,
+    }).returning();
+
+    emitNotification(params.userId, {
+      id: inserted.id,
+      type: inserted.type,
+      title: inserted.title,
+      body: inserted.body,
+      link: inserted.link,
+      isRead: inserted.isRead,
+      createdAt: inserted.createdAt,
     });
   } catch (error) {
     console.error('Failed to create notification:', error);
@@ -41,6 +53,7 @@ export async function createNotification(params: CreateNotificationParams): Prom
 
 /**
  * Creates notifications for multiple users with the same content.
+ * Also emits each notification via Socket.io for real-time delivery.
  */
 export async function createNotifications(
   userIds: string[],
@@ -48,7 +61,7 @@ export async function createNotifications(
 ): Promise<void> {
   if (userIds.length === 0) return;
   try {
-    await db.insert(notifications).values(
+    const inserted = await db.insert(notifications).values(
       userIds.map((userId) => ({
         userId,
         type: params.type,
@@ -56,7 +69,19 @@ export async function createNotifications(
         body: params.body || null,
         link: params.link || null,
       }))
-    );
+    ).returning();
+
+    for (const row of inserted) {
+      emitNotification(row.userId, {
+        id: row.id,
+        type: row.type,
+        title: row.title,
+        body: row.body,
+        link: row.link,
+        isRead: row.isRead,
+        createdAt: row.createdAt,
+      });
+    }
   } catch (error) {
     console.error('Failed to create notifications:', error);
   }

@@ -17,6 +17,7 @@ interface SendEmailOptions {
   subject: string;
   react: ReactElement;
   from?: string;
+  headers?: Record<string, string>;
 }
 
 interface SendEmailResult {
@@ -35,6 +36,7 @@ export async function sendEmail({
   subject,
   react,
   from = 'CoachHub <noreply@coachhub.com>',
+  headers,
 }: SendEmailOptions): Promise<SendEmailResult> {
   if (!resend) {
     console.warn('[Email] Cannot send email - Resend client not initialized');
@@ -50,6 +52,7 @@ export async function sendEmail({
       to: Array.isArray(to) ? to : [to],
       subject,
       react,
+      ...(headers && { headers }),
     });
 
     if (error) {

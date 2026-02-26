@@ -5,8 +5,9 @@ import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { LogOut, User, Mail, Shield, Bell, Palette } from 'lucide-react';
+import { LogOut, User, Mail, Shield, Palette } from 'lucide-react';
 import { GoogleCalendarSettings } from '@/components/settings/google-calendar-settings';
+import { EmailPreferencesSettings } from '@/components/settings/email-preferences';
 
 export default function SettingsPage() {
   const { user } = useUser();
@@ -72,19 +73,8 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
 
-        {/* Notifications - Placeholder */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Bell className="h-5 w-5" />
-              Notifications
-            </CardTitle>
-            <CardDescription>Manage your notification preferences</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">Notification settings coming soon.</p>
-          </CardContent>
-        </Card>
+        {/* Email Notifications */}
+        <EmailPreferencesSettings />
 
         {/* Calendar Integration */}
         <GoogleCalendarSettings />

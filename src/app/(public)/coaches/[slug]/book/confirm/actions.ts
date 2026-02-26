@@ -30,6 +30,7 @@ import { headers } from 'next/headers';
 import { stripe } from '@/lib/stripe';
 import type { BookingSessionType } from '@/db/schema';
 import { createBookingSystemMessage } from '@/lib/conversations';
+import { createNotification } from '@/lib/notifications';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Type Definitions
@@ -183,6 +184,16 @@ export async function createBooking(
         // Don't fail the booking if message creation fails
       }
     );
+
+    // Notify coach about new booking request
+    const clientName = userResult[0].name || 'A client';
+    createNotification({
+      userId: input.coachId,
+      type: 'booking_confirmed',
+      title: 'New booking request',
+      body: `${clientName} has requested a ${input.sessionType.name}.`,
+      link: `/dashboard/sessions/${newBooking[0].id}`,
+    });
 
     return {
       success: true,

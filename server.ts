@@ -77,6 +77,9 @@ app.prepare().then(async () => {
     }
     connectedUsers.get(userId)!.add(socket.id);
 
+    // Join personal room for targeted notifications
+    socket.join(`user:${userId}`);
+
     // ── Room Management ───────────────────────────────────────────────
 
     socket.on('conversation:join', async (data: { conversationId: number }) => {
@@ -186,13 +189,25 @@ app.prepare().then(async () => {
         const recipientId =
           conversation.coachId === userId ? conversation.clientId : conversation.coachId;
 
-        // Create notification for recipient
+        // Create notification for recipient and emit via Socket.io
         await db.insert(notifications).values({
           userId: recipientId,
           type: 'new_message',
           title: `New message from ${sender?.name || 'Someone'}`,
           body: content.trim().length > 100 ? content.trim().slice(0, 100) + '...' : content.trim(),
           link: `/dashboard/messages/${conversationId}`,
+        }).returning().then(([inserted]) => {
+          if (inserted) {
+            io.to(`user:${recipientId}`).emit('notification:new', {
+              id: inserted.id,
+              type: inserted.type,
+              title: inserted.title,
+              body: inserted.body,
+              link: inserted.link,
+              isRead: inserted.isRead,
+              createdAt: inserted.createdAt,
+            });
+          }
         }).catch((err: unknown) => {
           console.error('[socket.io] Failed to create notification:', err);
         });

@@ -12,8 +12,8 @@ import { actionItems, users } from '@/db/schema';
 import { eq, or, desc, and, inArray } from 'drizzle-orm';
 import { rateLimit, WRITE_LIMIT, rateLimitResponse } from '@/lib/rate-limit';
 import { createNotification } from '@/lib/notifications';
-import { sendEmail } from '@/lib/email';
 import { ActionItemEmail } from '@/lib/emails';
+import { sendEmailWithPreferences } from '@/lib/emails/send-with-preferences';
 import { getUnsubscribeUrl } from '@/lib/unsubscribe';
 
 /**
@@ -248,12 +248,14 @@ export async function POST(request: Request) {
       link: '/dashboard/action-items',
     });
 
-    // Send action item email to client (non-blocking)
+    // Send action item email to client (preference-checked, non-blocking)
     if (client.email) {
-      sendEmail({
-        to: client.email,
-        subject: `New action item from ${currentUser.name || 'your coach'}: ${title}`,
-        react: ActionItemEmail({
+      sendEmailWithPreferences(
+        clientId,
+        'bookings',
+        client.email,
+        `New action item from ${currentUser.name || 'your coach'}: ${title}`,
+        ActionItemEmail({
           clientName: client.name || 'there',
           coachName: currentUser.name || 'Your Coach',
           title,
@@ -267,8 +269,8 @@ export async function POST(request: Request) {
               })
             : undefined,
           unsubscribeUrl: getUnsubscribeUrl(clientId, 'bookings'),
-        }),
-      }).catch((err) => console.error('Failed to send action item email:', err));
+        })
+      ).catch((err) => console.error('Failed to send action item email:', err));
     }
 
     return Response.json({

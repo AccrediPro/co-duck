@@ -11,3 +11,4 @@ export { ActionItemEmail } from './templates/ActionItemEmail';
 export { PaymentReceiptEmail } from './templates/PaymentReceiptEmail';
 export { BookingRequestCoachEmail } from './templates/BookingRequestCoachEmail';
 export { BookingRequestClientEmail } from './templates/BookingRequestClientEmail';
+export { NewReviewEmail } from './templates/NewReviewEmail';
