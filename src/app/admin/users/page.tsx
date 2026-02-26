@@ -286,6 +286,12 @@ function UserRow({
           </Badge>
         </div>
         <div className="text-sm text-muted-foreground">{formatDate(user.createdAt)}</div>
+        <Link
+          href={`/admin/users/${user.id}`}
+          className="text-sm text-emerald-600 hover:underline"
+        >
+          View
+        </Link>
         <RoleChangeDropdown userId={user.id} currentRole={user.role} onRoleChange={onRoleChange} />
       </div>
     </div>

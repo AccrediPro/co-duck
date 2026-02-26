@@ -13,6 +13,8 @@ import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { rateLimit, WRITE_LIMIT, rateLimitResponse } from '@/lib/rate-limit';
 import { createNotification } from '@/lib/notifications';
+import { sendEmailWithPreferences } from '@/lib/emails/send-with-preferences';
+import { ReviewResponseEmail } from '@/lib/emails';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -110,13 +112,36 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       columns: { name: true },
     });
 
+    const clientUser = await db.query.users.findFirst({
+      where: eq(users.id, review.clientId),
+      columns: { name: true, email: true },
+    });
+
+    const coachName = coachUser?.name || 'Your coach';
+
     createNotification({
       userId: review.clientId,
       type: 'review_response',
       title: 'Coach responded to your review',
-      body: `${coachUser?.name || 'Your coach'} responded to your review.`,
+      body: `${coachName} responded to your review.`,
       link: `/dashboard/my-sessions/${review.bookingId}`,
     });
+
+    // Send email notification (fire-and-forget)
+    if (clientUser?.email) {
+      sendEmailWithPreferences(
+        review.clientId,
+        'reviews',
+        clientUser.email,
+        `${coachName} responded to your review`,
+        ReviewResponseEmail({
+          clientName: clientUser.name || 'there',
+          coachName,
+          responseText: parsed.data.coachResponse,
+          bookingId: review.bookingId,
+        })
+      ).catch((err) => console.error('[Email] Review response email failed:', err));
+    }
 
     return Response.json({
       success: true,

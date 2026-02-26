@@ -53,7 +53,7 @@ const ReviewCard = React.forwardRef<HTMLDivElement, ReviewCardProps>(
             {reviewContent && <p className="text-sm text-muted-foreground">{reviewContent}</p>}
             {coachResponse && (
               <div className="mt-4 rounded-lg bg-muted p-3">
-                <p className="mb-1 text-xs font-medium text-muted-foreground">Coach Response</p>
+                <p className="mb-1 text-xs font-medium text-muted-foreground">Coach&apos;s Response</p>
                 <p className="text-sm">{coachResponse}</p>
               </div>
             )}

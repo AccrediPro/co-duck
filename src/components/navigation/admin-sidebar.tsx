@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, Users, UserCheck, Menu, Shield } from 'lucide-react';
+import { LayoutDashboard, Users, UserCheck, Menu, Shield, Star } from 'lucide-react';
 import { UserButton } from '@clerk/nextjs';
 import { useState } from 'react';
 
@@ -22,6 +22,7 @@ const adminLinks: NavLink[] = [
   { href: '/admin', label: 'Overview', icon: LayoutDashboard },
   { href: '/admin/users', label: 'Users', icon: Users },
   { href: '/admin/coaches', label: 'Coaches', icon: UserCheck },
+  { href: '/admin/reviews', label: 'Reviews', icon: Star },
 ];
 
 interface AdminSidebarProps {

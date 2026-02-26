@@ -310,7 +310,14 @@ function CoachRow({
         <Badge variant={coach.isPublished ? 'default' : 'outline'}>
           {coach.isPublished ? 'Published' : 'Draft'}
         </Badge>
-        {/* Profile link */}
+        {/* Detail link */}
+        <Link
+          href={`/admin/coaches/${coach.userId}`}
+          className="text-sm text-blue-600 hover:underline"
+        >
+          View Details
+        </Link>
+        {/* Public profile link */}
         <Link
           href={`/coaches/${coach.slug}`}
           className="text-sm text-emerald-600 hover:underline"

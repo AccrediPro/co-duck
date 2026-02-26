@@ -2,8 +2,39 @@
 
 import { auth } from '@clerk/nextjs/server';
 import { db, googleCalendarTokens } from '@/db';
+import { users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { isGoogleCalendarConfigured } from '@/lib/google-calendar';
+
+/**
+ * Update the current user's display name in the database.
+ */
+export async function updateDisplayName(
+  name: string
+): Promise<{ success: true; name: string } | { success: false; error: string }> {
+  try {
+    const { userId } = await auth();
+    if (!userId) {
+      return { success: false, error: 'You must be signed in' };
+    }
+
+    const trimmed = name.trim();
+    if (!trimmed || trimmed.length > 100) {
+      return { success: false, error: 'Name must be between 1 and 100 characters' };
+    }
+
+    const [updated] = await db
+      .update(users)
+      .set({ name: trimmed })
+      .where(eq(users.id, userId))
+      .returning({ name: users.name });
+
+    return { success: true, name: updated.name || trimmed };
+  } catch (error) {
+    console.error('Error updating display name:', error);
+    return { success: false, error: 'Failed to update display name' };
+  }
+}
 
 export interface GoogleCalendarStatus {
   isConfigured: boolean;

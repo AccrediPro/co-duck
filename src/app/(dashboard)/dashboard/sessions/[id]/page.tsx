@@ -3,7 +3,7 @@ import { redirect, notFound } from 'next/navigation';
 import { eq, and, or, lt, sql } from 'drizzle-orm';
 import { format } from 'date-fns';
 import Link from 'next/link';
-import { db, bookings, users, coachProfiles, transactions, sessionNotes } from '@/db';
+import { db, bookings, users, coachProfiles, transactions, sessionNotes, reviews } from '@/db';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -25,6 +25,7 @@ import { CoachSessionActions } from './coach-session-actions';
 import { BookingResponseActions } from './booking-response-actions';
 import { PaymentSection } from './payment-section';
 import { MeetingLinkSection } from './meeting-link-section';
+import { SessionReviewSection } from './session-review-section';
 
 export const metadata = {
   title: 'Session Details | Coaching Platform',
@@ -183,6 +184,53 @@ export default async function SessionDetailPage({ params }: PageProps) {
       .limit(1);
 
     sessionNoteContent = noteData.length > 0 ? noteData[0].content : null;
+  }
+
+  // Fetch review for this booking
+  const reviewData = await db
+    .select({
+      id: reviews.id,
+      rating: reviews.rating,
+      title: reviews.title,
+      content: reviews.content,
+      coachResponse: reviews.coachResponse,
+      createdAt: reviews.createdAt,
+      clientId: reviews.clientId,
+    })
+    .from(reviews)
+    .where(eq(reviews.bookingId, sessionId))
+    .limit(1);
+
+  let reviewForDisplay: {
+    id: number;
+    rating: number;
+    title: string | null;
+    content: string | null;
+    coachResponse: string | null;
+    createdAt: string;
+    clientName: string;
+  } | null = null;
+
+  if (reviewData.length > 0) {
+    const r = reviewData[0];
+    let clientName = 'Client';
+    const clientInfo = await db
+      .select({ name: users.name })
+      .from(users)
+      .where(eq(users.id, r.clientId))
+      .limit(1);
+    if (clientInfo.length > 0 && clientInfo[0].name) {
+      clientName = clientInfo[0].name;
+    }
+    reviewForDisplay = {
+      id: r.id,
+      rating: r.rating,
+      title: r.title,
+      content: r.content,
+      coachResponse: r.coachResponse,
+      createdAt: r.createdAt.toISOString(),
+      clientName,
+    };
   }
 
   // Determine payment status
@@ -392,6 +440,14 @@ export default async function SessionDetailPage({ params }: PageProps) {
           {/* Editable Coach Notes - Only visible to coach */}
           {isCoachView && (
             <CoachNotesEditor sessionId={session.id} initialNotes={sessionNoteContent} />
+          )}
+
+          {/* Review Section */}
+          {reviewForDisplay && (
+            <SessionReviewSection
+              review={reviewForDisplay}
+              isCoachView={isCoachView}
+            />
           )}
 
           {/* Cancellation Info */}

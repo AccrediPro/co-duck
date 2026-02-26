@@ -6,9 +6,11 @@
  *
  * ## Statistics Displayed
  * - Total users (all roles)
- * - Total coaches (users with coach role)
- * - Total bookings (all statuses)
- * - Total revenue (from succeeded transactions)
+ * - New users this month
+ * - Active coaches (published + verified)
+ * - Total reviews with average rating
+ * - Total sessions with status breakdown
+ * - Active conversations (last 30 days)
  *
  * ## Recent Activity
  * - List of recent bookings with client, coach, and session details
@@ -16,11 +18,19 @@
  * @module app/admin/page
  */
 
-import { sql } from 'drizzle-orm';
+import { sql, and, eq, gte } from 'drizzle-orm';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { db, users, coachProfiles, bookings, transactions } from '@/db';
-import { Users, UserCheck, Calendar, DollarSign, Clock } from 'lucide-react';
+import { db, users, coachProfiles, bookings, reviews, conversations } from '@/db';
+import {
+  Users,
+  UserCheck,
+  Calendar,
+  Star,
+  MessageSquare,
+  UserPlus,
+  Clock,
+} from 'lucide-react';
 
 // ============================================================================
 // DATA FETCHING
@@ -31,51 +41,115 @@ import { Users, UserCheck, Calendar, DollarSign, Clock } from 'lucide-react';
  *
  * Runs parallel queries to get:
  * - Total user count
- * - Total coach count (published profiles)
- * - Total booking count
- * - Total revenue (sum of succeeded transactions)
+ * - New users this month
+ * - Active coach count (published + verified)
+ * - Total booking count with status breakdown
+ * - Review count and average rating
+ * - Active conversations (last 30 days)
  *
  * @returns Object containing all platform statistics
  */
 async function getPlatformStats() {
   try {
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+
     // Run all queries in parallel for efficiency
-    const [userCountResult, coachCountResult, bookingCountResult, revenueResult] =
-      await Promise.all([
-        // Total users
-        db.select({ count: sql<number>`count(*)` }).from(users),
+    const [
+      userCountResult,
+      newUsersThisMonthResult,
+      activeCoachesResult,
+      bookingCountResult,
+      bookingsByStatusResult,
+      reviewStatsResult,
+      activeConversationsResult,
+    ] = await Promise.all([
+      // Total users
+      db.select({ count: sql<number>`count(*)` }).from(users),
 
-        // Total coaches (with published profiles)
-        db
-          .select({ count: sql<number>`count(*)` })
-          .from(coachProfiles)
-          .where(sql`${coachProfiles.isPublished} = true`),
+      // New users this month
+      db
+        .select({ count: sql<number>`count(*)` })
+        .from(users)
+        .where(gte(users.createdAt, startOfMonth)),
 
-        // Total bookings
-        db.select({ count: sql<number>`count(*)` }).from(bookings),
+      // Active coaches (published + verified)
+      db
+        .select({ count: sql<number>`count(*)` })
+        .from(coachProfiles)
+        .where(
+          and(
+            eq(coachProfiles.isPublished, true),
+            eq(coachProfiles.verificationStatus, 'verified')
+          )
+        ),
 
-        // Total revenue (sum of succeeded transactions)
-        db
-          .select({
-            total: sql<number>`COALESCE(SUM(${transactions.amountCents}), 0)`,
-          })
-          .from(transactions)
-          .where(sql`${transactions.status} = 'succeeded'`),
-      ]);
+      // Total bookings
+      db.select({ count: sql<number>`count(*)` }).from(bookings),
+
+      // Bookings grouped by status
+      db
+        .select({
+          status: bookings.status,
+          count: sql<number>`count(*)`,
+        })
+        .from(bookings)
+        .groupBy(bookings.status),
+
+      // Review stats: count + average rating
+      db
+        .select({
+          count: sql<number>`count(*)`,
+          averageRating: sql<number>`COALESCE(ROUND(AVG(${reviews.rating})::numeric, 1), 0)`,
+        })
+        .from(reviews),
+
+      // Active conversations (with messages in last 30 days)
+      db
+        .select({ count: sql<number>`count(*)` })
+        .from(conversations)
+        .where(gte(conversations.lastMessageAt, thirtyDaysAgo)),
+    ]);
+
+    const statusBreakdown: Record<string, number> = {};
+    for (const row of bookingsByStatusResult) {
+      statusBreakdown[row.status] = Number(row.count) || 0;
+    }
 
     return {
       totalUsers: Number(userCountResult[0]?.count) || 0,
-      totalCoaches: Number(coachCountResult[0]?.count) || 0,
+      newUsersThisMonth: Number(newUsersThisMonthResult[0]?.count) || 0,
+      activeCoaches: Number(activeCoachesResult[0]?.count) || 0,
       totalBookings: Number(bookingCountResult[0]?.count) || 0,
-      totalRevenue: Number(revenueResult[0]?.total) || 0,
+      bookingsByStatus: {
+        pending: statusBreakdown['pending'] ?? 0,
+        confirmed: statusBreakdown['confirmed'] ?? 0,
+        completed: statusBreakdown['completed'] ?? 0,
+        cancelled: statusBreakdown['cancelled'] ?? 0,
+        no_show: statusBreakdown['no_show'] ?? 0,
+      },
+      totalReviews: Number(reviewStatsResult[0]?.count) || 0,
+      averageRating: Number(reviewStatsResult[0]?.averageRating) || 0,
+      activeConversations: Number(activeConversationsResult[0]?.count) || 0,
     };
   } catch (error) {
     console.error('[Admin] Error fetching platform stats:', error);
     return {
       totalUsers: 0,
-      totalCoaches: 0,
+      newUsersThisMonth: 0,
+      activeCoaches: 0,
       totalBookings: 0,
-      totalRevenue: 0,
+      bookingsByStatus: {
+        pending: 0,
+        confirmed: 0,
+        completed: 0,
+        cancelled: 0,
+        no_show: 0,
+      },
+      totalReviews: 0,
+      averageRating: 0,
+      activeConversations: 0,
     };
   }
 }
@@ -130,19 +204,6 @@ async function getRecentBookings(limit: number = 10) {
 // ============================================================================
 // HELPER FUNCTIONS
 // ============================================================================
-
-/**
- * Formats cents to a currency string.
- *
- * @param cents - Amount in cents
- * @returns Formatted currency string (e.g., "$1,234.56")
- */
-function formatCurrency(cents: number): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-  }).format(cents / 100);
-}
 
 /**
  * Formats a date to a readable string.
@@ -204,7 +265,7 @@ export default async function AdminOverviewPage() {
         <p className="text-muted-foreground">Platform statistics and recent activity</p>
       </div>
 
-      {/* Stats Grid */}
+      {/* Stats Grid — Row 1 */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {/* Total Users */}
         <Card>
@@ -218,39 +279,96 @@ export default async function AdminOverviewPage() {
           </CardContent>
         </Card>
 
-        {/* Total Coaches */}
+        {/* New Users This Month */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">New Users This Month</CardTitle>
+            <UserPlus className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.newUsersThisMonth.toLocaleString()}</div>
+            <p className="text-xs text-muted-foreground">Signed up this month</p>
+          </CardContent>
+        </Card>
+
+        {/* Active Coaches */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Active Coaches</CardTitle>
             <UserCheck className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalCoaches.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground">Published profiles</p>
+            <div className="text-2xl font-bold">{stats.activeCoaches.toLocaleString()}</div>
+            <p className="text-xs text-muted-foreground">Published &amp; verified</p>
           </CardContent>
         </Card>
 
-        {/* Total Bookings */}
+        {/* Total Reviews */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Bookings</CardTitle>
+            <CardTitle className="text-sm font-medium">Reviews</CardTitle>
+            <Star className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.totalReviews.toLocaleString()}</div>
+            <p className="text-xs text-muted-foreground">
+              {stats.averageRating > 0
+                ? `${stats.averageRating.toFixed(1)} avg rating`
+                : 'No ratings yet'}
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Stats Grid — Row 2: Sessions & Conversations */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {/* Total Sessions */}
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Sessions</CardTitle>
             <Calendar className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalBookings.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground">Sessions booked</p>
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {stats.bookingsByStatus.confirmed > 0 && (
+                <Badge variant="default" className="text-xs">
+                  {stats.bookingsByStatus.confirmed} confirmed
+                </Badge>
+              )}
+              {stats.bookingsByStatus.completed > 0 && (
+                <Badge variant="secondary" className="text-xs">
+                  {stats.bookingsByStatus.completed} completed
+                </Badge>
+              )}
+              {stats.bookingsByStatus.pending > 0 && (
+                <Badge variant="outline" className="text-xs">
+                  {stats.bookingsByStatus.pending} pending
+                </Badge>
+              )}
+              {stats.bookingsByStatus.cancelled > 0 && (
+                <Badge variant="destructive" className="text-xs">
+                  {stats.bookingsByStatus.cancelled} cancelled
+                </Badge>
+              )}
+              {stats.bookingsByStatus.no_show > 0 && (
+                <Badge variant="destructive" className="text-xs">
+                  {stats.bookingsByStatus.no_show} no-show
+                </Badge>
+              )}
+            </div>
           </CardContent>
         </Card>
 
-        {/* Total Revenue */}
+        {/* Active Conversations */}
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium">Active Conversations</CardTitle>
+            <MessageSquare className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatCurrency(stats.totalRevenue)}</div>
-            <p className="text-xs text-muted-foreground">From completed transactions</p>
+            <div className="text-2xl font-bold">{stats.activeConversations.toLocaleString()}</div>
+            <p className="text-xs text-muted-foreground">With messages in the last 30 days</p>
           </CardContent>
         </Card>
       </div>

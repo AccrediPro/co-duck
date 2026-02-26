@@ -1,13 +1,13 @@
 /**
  * @fileoverview Admin Platform Stats API
  *
- * Revenue dashboard data for admins.
+ * Platform statistics dashboard data for admins.
  *
  * @module api/admin/stats
  */
 
 import { db } from '@/db';
-import { transactions, users, bookings, reviews } from '@/db/schema';
+import { users, bookings, reviews, coachProfiles, conversations } from '@/db/schema';
 import { eq, sql, gte, and } from 'drizzle-orm';
 import { requireAdmin } from '@/lib/admin-auth';
 import { rateLimit, FREQUENT_LIMIT, rateLimitResponse } from '@/lib/rate-limit';
@@ -17,7 +17,7 @@ import { rateLimit, FREQUENT_LIMIT, rateLimitResponse } from '@/lib/rate-limit';
  *
  * Returns platform-wide statistics for the admin dashboard.
  *
- * @returns Revenue, user counts, booking counts, review stats
+ * @returns User counts, coach counts, booking breakdown, review stats, conversation stats
  */
 export async function GET(request: Request) {
   const rl = rateLimit(request, FREQUENT_LIMIT, 'admin-stats');
@@ -28,84 +28,96 @@ export async function GET(request: Request) {
 
   try {
     const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
 
     const [
-      revenueResult,
-      revenueThisMonthResult,
       userCountResult,
-      coachCountResult,
+      newUsersThisMonthResult,
+      activeCoachesResult,
       bookingCountResult,
-      completedBookingsResult,
-      reviewCountResult,
+      bookingsByStatusResult,
+      reviewStatsResult,
+      activeConversationsResult,
     ] = await Promise.all([
-      // Total revenue (succeeded transactions)
-      db
-        .select({
-          totalRevenue: sql<number>`COALESCE(SUM(${transactions.amountCents}), 0)::int`,
-          totalPlatformFees: sql<number>`COALESCE(SUM(${transactions.platformFeeCents}), 0)::int`,
-          transactionCount: sql<number>`count(*)::int`,
-        })
-        .from(transactions)
-        .where(eq(transactions.status, 'succeeded')),
-
-      // Revenue last 30 days
-      db
-        .select({
-          revenue: sql<number>`COALESCE(SUM(${transactions.amountCents}), 0)::int`,
-          platformFees: sql<number>`COALESCE(SUM(${transactions.platformFeeCents}), 0)::int`,
-          count: sql<number>`count(*)::int`,
-        })
-        .from(transactions)
-        .where(
-          and(eq(transactions.status, 'succeeded'), gte(transactions.createdAt, thirtyDaysAgo))
-        ),
-
       // Total users
       db.select({ count: sql<number>`count(*)::int` }).from(users),
 
-      // Total coaches
+      // New users this month
       db
         .select({ count: sql<number>`count(*)::int` })
         .from(users)
-        .where(eq(users.role, 'coach')),
+        .where(gte(users.createdAt, startOfMonth)),
+
+      // Active coaches (published + verified)
+      db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(coachProfiles)
+        .where(
+          and(
+            eq(coachProfiles.isPublished, true),
+            eq(coachProfiles.verificationStatus, 'verified')
+          )
+        ),
 
       // Total bookings
       db.select({ count: sql<number>`count(*)::int` }).from(bookings),
 
-      // Completed bookings
+      // Bookings grouped by status
+      db
+        .select({
+          status: bookings.status,
+          count: sql<number>`count(*)::int`,
+        })
+        .from(bookings)
+        .groupBy(bookings.status),
+
+      // Review stats: count + average rating
+      db
+        .select({
+          count: sql<number>`count(*)::int`,
+          averageRating: sql<number>`COALESCE(ROUND(AVG(${reviews.rating})::numeric, 1), 0)::float`,
+        })
+        .from(reviews),
+
+      // Active conversations (with messages in last 30 days)
       db
         .select({ count: sql<number>`count(*)::int` })
-        .from(bookings)
-        .where(eq(bookings.status, 'completed')),
-
-      // Total reviews
-      db.select({ count: sql<number>`count(*)::int` }).from(reviews),
+        .from(conversations)
+        .where(gte(conversations.lastMessageAt, thirtyDaysAgo)),
     ]);
+
+    const statusBreakdown: Record<string, number> = {};
+    for (const row of bookingsByStatusResult) {
+      statusBreakdown[row.status] = row.count;
+    }
 
     return Response.json({
       success: true,
       data: {
-        revenue: {
-          totalCents: revenueResult[0]?.totalRevenue ?? 0,
-          platformFeesCents: revenueResult[0]?.totalPlatformFees ?? 0,
-          transactionCount: revenueResult[0]?.transactionCount ?? 0,
-        },
-        revenueThisMonth: {
-          totalCents: revenueThisMonthResult[0]?.revenue ?? 0,
-          platformFeesCents: revenueThisMonthResult[0]?.platformFees ?? 0,
-          count: revenueThisMonthResult[0]?.count ?? 0,
-        },
         users: {
           total: userCountResult[0]?.count ?? 0,
-          coaches: coachCountResult[0]?.count ?? 0,
+          newThisMonth: newUsersThisMonthResult[0]?.count ?? 0,
+        },
+        coaches: {
+          active: activeCoachesResult[0]?.count ?? 0,
         },
         bookings: {
           total: bookingCountResult[0]?.count ?? 0,
-          completed: completedBookingsResult[0]?.count ?? 0,
+          byStatus: {
+            pending: statusBreakdown['pending'] ?? 0,
+            confirmed: statusBreakdown['confirmed'] ?? 0,
+            completed: statusBreakdown['completed'] ?? 0,
+            cancelled: statusBreakdown['cancelled'] ?? 0,
+            no_show: statusBreakdown['no_show'] ?? 0,
+          },
         },
         reviews: {
-          total: reviewCountResult[0]?.count ?? 0,
+          total: reviewStatsResult[0]?.count ?? 0,
+          averageRating: reviewStatsResult[0]?.averageRating ?? 0,
+        },
+        conversations: {
+          activeLast30Days: activeConversationsResult[0]?.count ?? 0,
         },
       },
     });
