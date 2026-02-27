@@ -24,6 +24,7 @@ import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import { LucideIcon } from 'lucide-react';
 import { NotificationBell } from '@/components/notifications/notification-bell';
+import { useUnreadMessageCount } from '@/hooks/useUnreadMessageCount';
 
 type UserRole = 'admin' | 'coach' | 'client';
 
@@ -42,9 +43,11 @@ const commonLinks: NavLink[] = [
   { href: '/dashboard/settings', label: 'Settings', icon: Settings },
 ];
 
+// Profile link visible to all roles
+const profileLink: NavLink = { href: '/dashboard/profile', label: 'Profile', icon: User };
+
 // Coach-specific links
 const coachLinks: NavLink[] = [
-  { href: '/dashboard/profile', label: 'Profile', icon: User, roles: ['coach'] },
   { href: '/dashboard/sessions', label: 'Sessions', icon: CalendarDays, roles: ['coach'] },
   { href: '/dashboard/clients', label: 'My Clients', icon: Users, roles: ['coach'] },
   { href: '/dashboard/availability', label: 'Availability', icon: Clock, roles: ['coach'] },
@@ -61,6 +64,9 @@ const clientLinks: NavLink[] = [
 // Get navigation links based on user role
 function getNavLinksForRole(role: UserRole): NavLink[] {
   const links: NavLink[] = [commonLinks[0]]; // Overview first
+
+  // Profile link visible to all roles
+  links.push(profileLink);
 
   if (role === 'coach') {
     links.push(...coachLinks);
@@ -89,10 +95,11 @@ export function DashboardSidebar({
   userName,
   userEmail,
   userRole = 'client',
-  unreadMessageCount = 0,
+  unreadMessageCount: initialUnreadCount = 0,
 }: DashboardSidebarProps) {
   const pathname = usePathname();
   const navLinks = getNavLinksForRole(userRole);
+  const unreadMessageCount = useUnreadMessageCount(initialUnreadCount);
 
   const isActiveLink = (href: string) => {
     if (href === '/dashboard') {
@@ -105,8 +112,8 @@ export function DashboardSidebar({
     <>
       {/* Logo + Notification Bell */}
       <div className="flex h-16 items-center justify-between px-6">
-        <Link href="/" className="text-xl font-bold">
-          CoachHub
+        <Link href="/" className="min-w-0 flex-1 whitespace-normal leading-tight min-h-[44px] flex items-center text-xl font-bold">
+          AccrediPro CoachHub
         </Link>
         <NotificationBell />
       </div>
@@ -123,7 +130,7 @@ export function DashboardSidebar({
               key={link.href}
               href={link.href}
               className={cn(
-                'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+                'flex min-h-[44px] items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
                 isActiveLink(link.href)
                   ? 'bg-primary text-primary-foreground'
                   : 'text-muted-foreground hover:bg-muted hover:text-foreground'
@@ -170,11 +177,12 @@ export function DashboardMobileHeader({
   userName,
   userEmail,
   userRole = 'client',
-  unreadMessageCount = 0,
+  unreadMessageCount: initialUnreadCount = 0,
 }: DashboardSidebarProps) {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navLinks = getNavLinksForRole(userRole);
+  const unreadMessageCount = useUnreadMessageCount(initialUnreadCount);
 
   const isActiveLink = (href: string) => {
     if (href === '/dashboard') {
@@ -185,39 +193,46 @@ export function DashboardMobileHeader({
 
   return (
     <header className="sticky top-0 z-50 flex h-16 items-center justify-between border-b bg-background px-4 md:hidden">
-      <Link href="/" className="text-xl font-bold">
-        CoachHub
+      <Link href="/" className="flex min-h-[44px] items-center whitespace-normal leading-tight text-xl font-bold">
+        AccrediPro CoachHub
       </Link>
 
       <div className="flex items-center gap-2">
         <NotificationBell />
         {/* Unread badge indicator on mobile header */}
         {unreadMessageCount > 0 && (
-          <Link href="/dashboard/messages" className="relative">
+          <Link href="/dashboard/messages" className="relative flex min-h-[44px] min-w-[44px] items-center justify-center">
             <MessageSquare className="h-5 w-5 text-muted-foreground" />
             <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-medium text-destructive-foreground">
               {unreadMessageCount > 99 ? '99+' : unreadMessageCount}
             </span>
           </Link>
         )}
-        <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+        <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen} modal={false}>
           <SheetTrigger asChild>
-            <Button variant="ghost" size="icon">
+            <Button
+              variant="ghost"
+              className="h-11 w-11 p-0"
+              aria-label="Open navigation menu"
+            >
               <Menu className="h-6 w-6" />
-              <span className="sr-only">Toggle menu</span>
             </Button>
           </SheetTrigger>
-          <SheetContent side="left" className="w-64 p-0">
+          <SheetContent
+            side="left"
+            className="w-64 p-0 [&>button]:right-3 [&>button]:top-3 [&>button]:h-11 [&>button]:w-11 [&>button]:opacity-100"
+            onInteractOutside={() => setMobileMenuOpen(false)}
+          >
             <SheetTitle className="sr-only">Dashboard Navigation</SheetTitle>
             <div className="flex h-full flex-col">
               {/* Logo */}
               <div className="flex h-16 items-center px-6">
                 <Link
                   href="/"
-                  className="text-xl font-bold"
+                  className="flex min-h-[44px] items-center whitespace-normal leading-tight text-xl font-bold"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  CoachHub
+                  AccrediPro CoachHub
                 </Link>
               </div>
 
@@ -234,7 +249,7 @@ export function DashboardMobileHeader({
                       href={link.href}
                       onClick={() => setMobileMenuOpen(false)}
                       className={cn(
-                        'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+                        'flex min-h-[44px] items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
                         isActiveLink(link.href)
                           ? 'bg-primary text-primary-foreground'
                           : 'text-muted-foreground hover:bg-muted hover:text-foreground'

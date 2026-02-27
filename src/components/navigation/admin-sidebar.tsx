@@ -130,14 +130,18 @@ export function AdminMobileHeader({ userName, userEmail }: AdminSidebarProps) {
         <span>Admin</span>
       </Link>
 
-      <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+      <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen} modal={false}>
         <SheetTrigger asChild>
           <Button variant="ghost" size="icon">
             <Menu className="h-6 w-6" />
             <span className="sr-only">Toggle menu</span>
           </Button>
         </SheetTrigger>
-        <SheetContent side="left" className="w-64 p-0">
+        <SheetContent
+          side="left"
+          className="w-64 p-0"
+          onInteractOutside={() => setMobileMenuOpen(false)}
+        >
           <SheetTitle className="sr-only">Admin Navigation</SheetTitle>
           <div className="flex h-full flex-col bg-gradient-to-b from-amber-50/50 to-background">
             {/* Logo */}
