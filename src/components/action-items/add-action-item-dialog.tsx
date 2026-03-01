@@ -26,6 +26,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { DatePicker } from '@/components/ui/date-picker';
 import { useToast } from '@/hooks/use-toast';
 import { createActionItem } from '@/app/(dashboard)/dashboard/action-items/actions';
 
@@ -165,7 +166,11 @@ export function AddActionItemDialog({
                 <FormItem>
                   <FormLabel>Due Date</FormLabel>
                   <FormControl>
-                    <Input type="date" {...field} />
+                    <DatePicker
+                      value={field.value ? new Date(field.value) : undefined}
+                      onChange={(date) => field.onChange(date ? date.toISOString() : '')}
+                      placeholder="Due date"
+                    />
                   </FormControl>
                   <FormDescription>Optional deadline for this task</FormDescription>
                   <FormMessage />

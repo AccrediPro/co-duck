@@ -25,6 +25,7 @@ import {
   Loader2,
   User,
 } from 'lucide-react';
+import { formatDateLong, formatTimeInTz } from '@/lib/date-utils';
 
 interface PaymentSuccessContentProps {
   coach: CoachBookingData;
@@ -52,44 +53,6 @@ export function PaymentSuccessContent({ coach, slug, booking, error }: PaymentSu
       .join('')
       .toUpperCase()
       .slice(0, 2);
-  };
-
-  // Format date for display
-  const formatDate = (date: Date, tz: string) => {
-    try {
-      return date.toLocaleDateString('en-US', {
-        weekday: 'long',
-        month: 'long',
-        day: 'numeric',
-        year: 'numeric',
-        timeZone: tz,
-      });
-    } catch {
-      return date.toLocaleDateString('en-US', {
-        weekday: 'long',
-        month: 'long',
-        day: 'numeric',
-        year: 'numeric',
-      });
-    }
-  };
-
-  // Format time for display
-  const formatTime = (date: Date, tz: string) => {
-    try {
-      return date.toLocaleTimeString('en-US', {
-        hour: 'numeric',
-        minute: '2-digit',
-        hour12: true,
-        timeZone: tz,
-      });
-    } catch {
-      return date.toLocaleTimeString('en-US', {
-        hour: 'numeric',
-        minute: '2-digit',
-        hour12: true,
-      });
-    }
   };
 
   // Handle calendar download
@@ -133,8 +96,8 @@ export function PaymentSuccessContent({ coach, slug, booking, error }: PaymentSu
       <div className="mx-auto max-w-2xl">
         <Card>
           <CardHeader className="text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-amber-100">
-              <AlertCircle className="h-8 w-8 text-amber-600" />
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gold/15">
+              <AlertCircle className="h-8 w-8 text-gold-dark" />
             </div>
             <CardTitle className="text-2xl">Payment Processing</CardTitle>
             <CardDescription>
@@ -142,7 +105,7 @@ export function PaymentSuccessContent({ coach, slug, booking, error }: PaymentSu
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-amber-800 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-200">
+            <div className="rounded-lg border border-gold/30 bg-gold/10 p-4 text-gold-dark">
               <p className="text-sm">
                 {error ||
                   'We are processing your booking. This usually takes just a few seconds. Please check your email for confirmation or visit your dashboard to see your upcoming sessions.'}
@@ -174,8 +137,8 @@ export function PaymentSuccessContent({ coach, slug, booking, error }: PaymentSu
     <div className="mx-auto max-w-2xl">
       <Card>
         <CardHeader className="text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
-            <CheckCircle className="h-8 w-8 text-green-600" />
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[hsl(var(--brand-accent-light))]">
+            <CheckCircle className="h-8 w-8 text-[hsl(var(--brand-warm))]" />
           </div>
           <CardTitle className="text-2xl">Booking Request Submitted!</CardTitle>
           <CardDescription>
@@ -185,7 +148,7 @@ export function PaymentSuccessContent({ coach, slug, booking, error }: PaymentSu
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Payment confirmation */}
-          <div className="rounded-lg border border-green-200 bg-green-50 p-4 text-green-800 dark:border-green-900 dark:bg-green-950 dark:text-green-200">
+          <div className="rounded-lg border border-[hsl(var(--brand-border))] bg-[hsl(var(--brand-surface))] p-4 text-[hsl(var(--brand-accent-dark))] dark:border-[hsl(var(--brand-accent-darker))] dark:bg-[hsl(var(--brand-accent-deep))] dark:text-[hsl(var(--brand-border))]">
             <div className="flex items-center gap-2">
               <Check className="h-4 w-4" />
               <span className="text-sm font-medium">
@@ -196,7 +159,7 @@ export function PaymentSuccessContent({ coach, slug, booking, error }: PaymentSu
           </div>
 
           {/* Pending approval notice */}
-          <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-amber-800 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-200">
+          <div className="rounded-lg border border-gold/30 bg-gold/10 p-4 text-gold-dark">
             <div className="flex items-center gap-2">
               <Clock className="h-4 w-4" />
               <span className="text-sm font-medium">
@@ -225,13 +188,13 @@ export function PaymentSuccessContent({ coach, slug, booking, error }: PaymentSu
               <div className="grid gap-3 sm:grid-cols-2">
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm">{formatDate(booking.startTime, displayTimezone)}</span>
+                  <span className="text-sm">{formatDateLong(booking.startTime)}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Clock className="h-4 w-4 text-muted-foreground" />
                   <span className="text-sm">
-                    {formatTime(booking.startTime, displayTimezone)} -{' '}
-                    {formatTime(booking.endTime, displayTimezone)}
+                    {formatTimeInTz(booking.startTime, displayTimezone)} -{' '}
+                    {formatTimeInTz(booking.endTime, displayTimezone)}
                   </span>
                 </div>
               </div>

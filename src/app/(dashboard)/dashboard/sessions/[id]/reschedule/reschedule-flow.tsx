@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { format } from 'date-fns';
+import { formatDateLong, formatDate, formatTimeInTz } from '@/lib/date-utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -224,30 +224,7 @@ export function RescheduleFlow({ booking }: RescheduleFlowProps) {
 
   // Format selected date for display
   const formatSelectedDate = (date: Date) => {
-    return date.toLocaleDateString('en-US', {
-      weekday: 'long',
-      month: 'long',
-      day: 'numeric',
-      year: 'numeric',
-    });
-  };
-
-  // Format time for display in timezone
-  const formatTimeInTz = (date: Date, tz: string) => {
-    try {
-      return date.toLocaleTimeString('en-US', {
-        hour: 'numeric',
-        minute: '2-digit',
-        hour12: true,
-        timeZone: tz,
-      });
-    } catch {
-      return date.toLocaleTimeString('en-US', {
-        hour: 'numeric',
-        minute: '2-digit',
-        hour12: true,
-      });
-    }
+    return formatDateLong(date);
   };
 
   // Get timezone label
@@ -417,13 +394,13 @@ export function RescheduleFlow({ booking }: RescheduleFlowProps) {
                           selectedSlot?.startTime === slot.startTime
                             ? 'border-primary bg-primary text-primary-foreground'
                             : slot.isOriginalSlot
-                              ? 'border-amber-400 bg-amber-50 text-amber-800 dark:border-amber-600 dark:bg-amber-950 dark:text-amber-200'
+                              ? 'border-gold/50 bg-gold/5 text-burgundy-dark dark:border-gold-dark dark:bg-gold-dark/10 dark:text-gold'
                               : 'border-border'
                         }`}
                       >
                         {slot.displayTime}
                         {slot.isOriginalSlot && (
-                          <span className="absolute -top-2 right-1 rounded bg-amber-500 px-1 text-[10px] font-bold text-white">
+                          <span className="absolute -top-2 right-1 rounded bg-gold px-1 text-[10px] font-bold text-white">
                             Current
                           </span>
                         )}
@@ -467,7 +444,7 @@ export function RescheduleFlow({ booking }: RescheduleFlowProps) {
                     <div className="flex items-center gap-2">
                       <CalendarIcon className="h-4 w-4 text-muted-foreground" />
                       <span className="text-muted-foreground line-through">
-                        {format(new Date(booking.originalStartTime), 'EEEE, MMMM d, yyyy')}
+                        {formatDateLong(booking.originalStartTime)}
                       </span>
                     </div>
                     <div className="mt-1 flex items-center gap-2">
@@ -582,7 +559,7 @@ export function RescheduleFlow({ booking }: RescheduleFlowProps) {
                 <div className="rounded-lg border border-dashed bg-muted/30 p-3">
                   <div className="flex items-center gap-2 text-sm">
                     <CalendarIcon className="h-4 w-4 text-muted-foreground" />
-                    <span>{format(new Date(booking.originalStartTime), 'MMM d, yyyy')}</span>
+                    <span>{formatDate(booking.originalStartTime)}</span>
                   </div>
                   <div className="mt-1 flex items-center gap-2 text-sm">
                     <Clock className="h-4 w-4 text-muted-foreground" />
@@ -601,7 +578,7 @@ export function RescheduleFlow({ booking }: RescheduleFlowProps) {
                   <div className="space-y-2">
                     <div className="flex items-center gap-2 text-sm">
                       <CalendarIcon className="h-4 w-4 text-primary" />
-                      <span>{format(selectedDate, 'MMM d, yyyy')}</span>
+                      <span>{formatDate(selectedDate)}</span>
                     </div>
                     {selectedSlot && (
                       <div className="flex items-center gap-2 text-sm">
@@ -620,8 +597,8 @@ export function RescheduleFlow({ booking }: RescheduleFlowProps) {
               )}
 
               {/* Policy notice */}
-              <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-900 dark:bg-amber-950">
-                <p className="text-xs text-amber-800 dark:text-amber-200">
+              <div className="rounded-lg border border-gold/30 bg-gold/5 p-3 dark:border-gold-dark dark:bg-gold-dark/10">
+                <p className="text-xs text-burgundy-dark dark:text-gold">
                   Reschedules must be made at least {booking.advanceNoticeHours} hours before the
                   session.
                 </p>

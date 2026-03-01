@@ -28,9 +28,11 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { VerificationStatusDropdown } from '@/components/admin/verification-status-dropdown';
-import { db, users, coachProfiles } from '@/db';
-import { UserCheck, Search, ChevronLeft, ChevronRight, Star, CheckCircle } from 'lucide-react';
+import { InviteCoachDialog } from '@/components/admin/invite-coach-dialog';
+import { db, users, coachProfiles, coachInvites } from '@/db';
+import { UserCheck, Search, ChevronLeft, ChevronRight, Star, CheckCircle, Mail, Clock } from 'lucide-react';
 import Link from 'next/link';
+import { formatDate } from '@/lib/date-utils';
 
 // ============================================================================
 // CONSTANTS
@@ -290,7 +292,7 @@ function CoachRow({
           <div className="flex items-center gap-2">
             <p className="truncate font-medium">{coach.userName || 'No name'}</p>
             {coach.verificationStatus === 'verified' && (
-              <CheckCircle className="h-4 w-4 text-green-500" />
+              <CheckCircle className="h-4 w-4 text-[hsl(var(--brand-accent))]" />
             )}
           </div>
           <p className="truncate text-sm text-muted-foreground">{coach.userEmail}</p>
@@ -302,7 +304,7 @@ function CoachRow({
       <div className="flex flex-wrap items-center gap-4 sm:gap-6">
         {/* Rating display */}
         <div className="flex items-center gap-1 text-sm">
-          <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+          <Star className="h-4 w-4 fill-gold text-gold" />
           <span>{coach.averageRating || '-'}</span>
           <span className="text-muted-foreground">({coach.reviewCount})</span>
         </div>
@@ -313,14 +315,14 @@ function CoachRow({
         {/* Detail link */}
         <Link
           href={`/admin/coaches/${coach.userId}`}
-          className="text-sm text-blue-600 hover:underline"
+          className="text-sm text-burgundy hover:underline"
         >
           View Details
         </Link>
         {/* Public profile link */}
         <Link
           href={`/coaches/${coach.slug}`}
-          className="text-sm text-emerald-600 hover:underline"
+          className="text-sm text-[hsl(var(--brand-warm))] hover:underline"
           target="_blank"
         >
           View Profile
@@ -435,6 +437,26 @@ async function getCoachStats() {
 }
 
 // ============================================================================
+// PENDING INVITES
+// ============================================================================
+
+async function getPendingInvites() {
+  try {
+    return await db
+      .select({
+        id: coachInvites.id,
+        email: coachInvites.email,
+        createdAt: coachInvites.createdAt,
+      })
+      .from(coachInvites)
+      .where(eq(coachInvites.status, 'pending'))
+      .orderBy(desc(coachInvites.createdAt));
+  } catch {
+    return [];
+  }
+}
+
+// ============================================================================
 // PAGE COMPONENT
 // ============================================================================
 
@@ -457,7 +479,7 @@ export default async function AdminCoachesPage({
   const status = params.status || 'all';
   const page = Math.max(1, parseInt(params.page || '1', 10));
 
-  const [{ coaches: coachList, totalCount, totalPages, currentPage }, stats] = await Promise.all([
+  const [{ coaches: coachList, totalCount, totalPages, currentPage }, stats, pendingInvites] = await Promise.all([
     getCoaches({
       search,
       status,
@@ -465,16 +487,25 @@ export default async function AdminCoachesPage({
       limit: COACHES_PER_PAGE,
     }),
     getCoachStats(),
+    getPendingInvites(),
   ]);
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto max-w-3xl">
       {/* Page Header */}
-      <div>
-        <h1 className="text-3xl font-bold">Coach Verification</h1>
-        <p className="text-muted-foreground">Review and verify coach profiles</p>
-      </div>
+      <Card className="mb-6">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-2xl font-bold">Coach Management</CardTitle>
+              <CardDescription>Review and verify coach accounts</CardDescription>
+            </div>
+            <InviteCoachDialog />
+          </div>
+        </CardHeader>
+      </Card>
 
+      <div className="space-y-6">
       {/* Stats Cards */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
@@ -490,7 +521,7 @@ export default async function AdminCoachesPage({
             <CardDescription>Pending Review</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-yellow-600">{stats.pending}</div>
+            <div className="text-2xl font-bold text-gold-dark">{stats.pending}</div>
           </CardContent>
         </Card>
         <Card>
@@ -498,7 +529,7 @@ export default async function AdminCoachesPage({
             <CardDescription>Verified</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">{stats.verified}</div>
+            <div className="text-2xl font-bold text-[hsl(var(--brand-warm))]">{stats.verified}</div>
           </CardContent>
         </Card>
         <Card>
@@ -523,6 +554,49 @@ export default async function AdminCoachesPage({
           <SearchFilters currentSearch={search} currentStatus={status} />
         </CardContent>
       </Card>
+
+      {/* Pending Invites */}
+      {pendingInvites.length > 0 && (
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-lg">Pending Invites</CardTitle>
+                <CardDescription>
+                  {pendingInvites.length} invite{pendingInvites.length !== 1 ? 's' : ''} awaiting signup
+                </CardDescription>
+              </div>
+              <Mail className="h-5 w-5 text-muted-foreground" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-0">
+              {pendingInvites.map((invite) => (
+                <div
+                  key={invite.id}
+                  className="flex items-center justify-between border-b py-3 last:border-0"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
+                      <Mail className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                    <div>
+                      <p className="font-medium">{invite.email}</p>
+                      <p className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <Clock className="h-3 w-3" />
+                        Invited {formatDate(invite.createdAt)}
+                      </p>
+                    </div>
+                  </div>
+                  <Badge variant="outline" className="text-gold-dark border-gold/30 bg-gold/5">
+                    Invited
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Coaches Table */}
       <Card>
@@ -566,6 +640,7 @@ export default async function AdminCoachesPage({
           />
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }

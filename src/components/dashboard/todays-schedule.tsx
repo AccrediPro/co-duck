@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, ExternalLink } from 'lucide-react';
+import { formatTime } from '@/lib/date-utils';
 import type { DashboardSession } from '@/app/(dashboard)/dashboard/actions';
 
 interface TodaysScheduleProps {
@@ -37,16 +38,12 @@ export function TodaysSchedule({ sessions }: TodaysScheduleProps) {
                 <div
                   key={session.id}
                   className={`flex items-center gap-4 rounded-lg border p-3 ${
-                    isNow ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950' : ''
+                    isNow ? 'border-[hsl(var(--brand-accent))] bg-[hsl(var(--brand-surface))] dark:bg-[hsl(var(--brand-accent-deep))]' : ''
                   } ${isPast ? 'opacity-60' : ''}`}
                 >
                   <div className="text-center">
                     <p className="text-sm font-semibold">
-                      {new Date(session.startTime).toLocaleTimeString('en-US', {
-                        hour: 'numeric',
-                        minute: '2-digit',
-                        hour12: true,
-                      })}
+                      {formatTime(session.startTime)}
                     </p>
                     <p className="text-xs text-muted-foreground">
                       {session.sessionType.duration}min
@@ -62,7 +59,7 @@ export function TodaysSchedule({ sessions }: TodaysScheduleProps) {
                       {session.sessionType.name}
                     </p>
                   </div>
-                  {isNow && <Badge className="bg-emerald-600">Now</Badge>}
+                  {isNow && <Badge className="bg-[hsl(var(--brand-warm))]">Now</Badge>}
                   {session.meetingLink && !isPast && (
                     <Button size="sm" variant="outline" asChild>
                       <a href={session.meetingLink} target="_blank" rel="noopener noreferrer">

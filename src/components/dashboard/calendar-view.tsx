@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
+import { formatTime } from '@/lib/date-utils';
 import { getSessionsForMonth } from '@/app/(dashboard)/dashboard/actions';
 import type { CalendarSession } from '@/app/(dashboard)/dashboard/actions';
 
@@ -128,7 +129,7 @@ export function CalendarView() {
                   {daySessions.length > 0 && (
                     <span
                       className={`absolute bottom-1 h-1 w-1 rounded-full ${
-                        isSelected ? 'bg-primary-foreground' : 'bg-emerald-500'
+                        isSelected ? 'bg-primary-foreground' : 'bg-[hsl(var(--brand-accent))]'
                       }`}
                     />
                   )}
@@ -151,11 +152,7 @@ export function CalendarView() {
                   {selectedSessions.map((s) => (
                     <div key={s.id} className="flex items-center gap-2 text-sm">
                       <span className="text-muted-foreground">
-                        {new Date(s.startTime).toLocaleTimeString('en-US', {
-                          hour: 'numeric',
-                          minute: '2-digit',
-                          hour12: true,
-                        })}
+                        {formatTime(s.startTime)}
                       </span>
                       <span className="font-medium">{s.otherUserName || 'User'}</span>
                       <Badge variant="outline" className="text-xs">

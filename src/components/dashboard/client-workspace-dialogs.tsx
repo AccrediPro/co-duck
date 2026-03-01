@@ -21,6 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { DatePicker } from '@/components/ui/date-picker';
 import { useToast } from '@/hooks/use-toast';
 
 // ─── Create Program Dialog ──────────────────────────────────────────────────
@@ -47,14 +48,14 @@ export function CreateProgramDialog({ open, onOpenChange, clientId, onCreated }:
   const [loading, setLoading] = useState(false);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  const [startDate, setStartDate] = useState<Date | undefined>(new Date());
+  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
 
   const resetForm = () => {
     setTitle('');
     setDescription('');
-    setStartDate('');
-    setEndDate('');
+    setStartDate(new Date());
+    setEndDate(undefined);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -70,8 +71,8 @@ export function CreateProgramDialog({ open, onOpenChange, clientId, onCreated }:
           clientId,
           title: title.trim(),
           description: description.trim() || null,
-          startDate: startDate || null,
-          endDate: endDate || null,
+          startDate: startDate ? startDate.toISOString() : null,
+          endDate: endDate ? endDate.toISOString() : null,
         }),
       });
       const json = await res.json();
@@ -133,21 +134,19 @@ export function CreateProgramDialog({ open, onOpenChange, clientId, onCreated }:
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="prog-start">Start Date</Label>
-                <Input
-                  id="prog-start"
-                  type="date"
+                <Label>Start Date</Label>
+                <DatePicker
                   value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
+                  onChange={setStartDate}
+                  placeholder="Start date"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="prog-end">End Date</Label>
-                <Input
-                  id="prog-end"
-                  type="date"
+                <Label>End Date</Label>
+                <DatePicker
                   value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
+                  onChange={setEndDate}
+                  placeholder="End date"
                 />
               </div>
             </div>
@@ -193,7 +192,7 @@ export function CreateGoalDialog({ open, onOpenChange, programs, selectedProgram
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState<string>('medium');
-  const [dueDate, setDueDate] = useState('');
+  const [dueDate, setDueDate] = useState<Date | undefined>(undefined);
 
   // Sync selected program when it changes externally
   const effectiveProgramId = programId || selectedProgramId?.toString() || '';
@@ -202,7 +201,7 @@ export function CreateGoalDialog({ open, onOpenChange, programs, selectedProgram
     setTitle('');
     setDescription('');
     setPriority('medium');
-    setDueDate('');
+    setDueDate(undefined);
     setProgramId('');
   };
 
@@ -220,7 +219,7 @@ export function CreateGoalDialog({ open, onOpenChange, programs, selectedProgram
           title: title.trim(),
           description: description.trim() || null,
           priority,
-          dueDate: dueDate || null,
+          dueDate: dueDate ? dueDate.toISOString() : null,
         }),
       });
       const json = await res.json();
@@ -309,12 +308,11 @@ export function CreateGoalDialog({ open, onOpenChange, programs, selectedProgram
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="goal-due">Due Date</Label>
-                <Input
-                  id="goal-due"
-                  type="date"
+                <Label>Due Date</Label>
+                <DatePicker
                   value={dueDate}
-                  onChange={(e) => setDueDate(e.target.value)}
+                  onChange={setDueDate}
+                  placeholder="Due date"
                 />
               </div>
             </div>
@@ -348,12 +346,12 @@ export function CreateTaskDialog({ open, onOpenChange, clientId, onCreated }: Cr
   const [loading, setLoading] = useState(false);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
-  const [dueDate, setDueDate] = useState('');
+  const [dueDate, setDueDate] = useState<Date | undefined>(undefined);
 
   const resetForm = () => {
     setTitle('');
     setDescription('');
-    setDueDate('');
+    setDueDate(undefined);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -369,7 +367,7 @@ export function CreateTaskDialog({ open, onOpenChange, clientId, onCreated }: Cr
           clientId,
           title: title.trim(),
           description: description.trim() || null,
-          dueDate: dueDate || null,
+          dueDate: dueDate ? dueDate.toISOString() : null,
         }),
       });
       const json = await res.json();
@@ -426,12 +424,11 @@ export function CreateTaskDialog({ open, onOpenChange, clientId, onCreated }: Cr
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="task-due">Due Date</Label>
-              <Input
-                id="task-due"
-                type="date"
+              <Label>Due Date</Label>
+              <DatePicker
                 value={dueDate}
-                onChange={(e) => setDueDate(e.target.value)}
+                onChange={setDueDate}
+                placeholder="Due date"
               />
             </div>
           </div>

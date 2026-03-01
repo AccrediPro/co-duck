@@ -24,6 +24,7 @@
 import { db, users, coachProfiles, coachAvailability, bookings, availabilityOverrides } from '@/db';
 import { eq, and, gte, lte, or } from 'drizzle-orm';
 import type { SessionType } from '@/db/schema';
+import { formatTimeInTz } from '@/lib/date-utils';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Type Definitions
@@ -49,16 +50,15 @@ export interface CoachBookingData {
 /**
  * Availability settings for a single day of the week.
  * Used to represent the coach's recurring weekly schedule.
+ * Supports multiple time ranges per day (e.g., 8am-12pm + 3pm-6pm).
  */
 export interface DayAvailability {
   /** Day of week (0 = Sunday, 1 = Monday, ..., 6 = Saturday) */
   dayOfWeek: number;
-  /** Start time in HH:MM format (24-hour, e.g., "09:00") */
-  startTime: string;
-  /** End time in HH:MM format (24-hour, e.g., "17:00") */
-  endTime: string;
   /** Whether the coach accepts bookings on this day */
   isAvailable: boolean;
+  /** Available time ranges for this day, sorted by startTime */
+  timeRanges: { startTime: string; endTime: string }[];
 }
 
 /**
@@ -179,24 +179,30 @@ export async function getCoachWeeklyAvailability(
       .from(coachAvailability)
       .where(eq(coachAvailability.coachId, coachId));
 
-    // Build full week array with defaults for missing days
+    // Group records by dayOfWeek, build timeRanges arrays
     const weekAvailability: DayAvailability[] = [];
     for (let i = 0; i < 7; i++) {
-      const record = availability.find((a) => a.dayOfWeek === i);
-      if (record) {
-        weekAvailability.push({
-          dayOfWeek: record.dayOfWeek,
-          startTime: record.startTime.substring(0, 5), // Remove seconds
-          endTime: record.endTime.substring(0, 5),
-          isAvailable: record.isAvailable,
-        });
-      } else {
-        // Default to unavailable
+      const records = availability.filter((a) => a.dayOfWeek === i);
+      const availableRecords = records.filter((r) => r.isAvailable);
+
+      if (availableRecords.length > 0) {
+        const timeRanges = availableRecords
+          .map((r) => ({
+            startTime: r.startTime.substring(0, 5),
+            endTime: r.endTime.substring(0, 5),
+          }))
+          .sort((a, b) => a.startTime.localeCompare(b.startTime));
+
         weekAvailability.push({
           dayOfWeek: i,
-          startTime: '09:00',
-          endTime: '17:00',
+          isAvailable: true,
+          timeRanges,
+        });
+      } else {
+        weekAvailability.push({
+          dayOfWeek: i,
           isAvailable: false,
+          timeRanges: [],
         });
       }
     }
@@ -285,38 +291,38 @@ export async function getAvailableSlots(
       )
       .limit(1);
 
-    let dayStartTime: string;
-    let dayEndTime: string;
-    let isAvailable: boolean;
+    // Build array of time ranges for this day
+    let ranges: { startTime: string; endTime: string }[];
 
     if (overrides.length > 0) {
-      // Use override
       const override = overrides[0];
-      isAvailable = override.isAvailable;
-      dayStartTime = override.startTime?.substring(0, 5) || '09:00';
-      dayEndTime = override.endTime?.substring(0, 5) || '17:00';
+      if (!override.isAvailable) {
+        return { success: true, data: [] };
+      }
+      ranges = [{
+        startTime: override.startTime?.substring(0, 5) || '09:00',
+        endTime: override.endTime?.substring(0, 5) || '17:00',
+      }];
     } else {
-      // Get regular weekly availability
+      // Get all weekly availability records for this day (multiple rows possible)
       const weeklyAvail = await db
         .select()
         .from(coachAvailability)
         .where(
           and(eq(coachAvailability.coachId, coachId), eq(coachAvailability.dayOfWeek, dayOfWeek))
-        )
-        .limit(1);
+        );
 
-      if (weeklyAvail.length === 0) {
-        return { success: true, data: [] }; // No availability set
+      const availableRecords = weeklyAvail.filter((r) => r.isAvailable);
+      if (availableRecords.length === 0) {
+        return { success: true, data: [] };
       }
 
-      const avail = weeklyAvail[0];
-      isAvailable = avail.isAvailable;
-      dayStartTime = avail.startTime.substring(0, 5);
-      dayEndTime = avail.endTime.substring(0, 5);
-    }
-
-    if (!isAvailable) {
-      return { success: true, data: [] }; // Coach not available on this day
+      ranges = availableRecords
+        .map((r) => ({
+          startTime: r.startTime.substring(0, 5),
+          endTime: r.endTime.substring(0, 5),
+        }))
+        .sort((a, b) => a.startTime.localeCompare(b.startTime));
     }
 
     // Get existing bookings for this date
@@ -340,57 +346,55 @@ export async function getAvailableSlots(
         )
       );
 
-    // Generate time slots
-    const slots: TimeSlot[] = [];
-    const [startHour, startMin] = dayStartTime.split(':').map(Number);
-    const [endHour, endMin] = dayEndTime.split(':').map(Number);
-
-    // Create date objects in coach's timezone
-    // We'll work in UTC and convert for display
-    const slotStartBase = new Date(targetDate);
-    slotStartBase.setHours(startHour, startMin, 0, 0);
-
-    const slotEnd = new Date(targetDate);
-    slotEnd.setHours(endHour, endMin, 0, 0);
-
     // Calculate minimum start time based on advance notice
     const now = new Date();
     const minStartTime = new Date(now.getTime() + profile.advanceNoticeHours * 60 * 60 * 1000);
 
-    let currentSlot = new Date(slotStartBase);
+    // Generate time slots for each range
+    const slots: TimeSlot[] = [];
 
-    while (currentSlot.getTime() + sessionDuration * 60 * 1000 <= slotEnd.getTime()) {
-      const slotEndTime = new Date(currentSlot.getTime() + sessionDuration * 60 * 1000);
+    for (const range of ranges) {
+      const [startHour, startMin] = range.startTime.split(':').map(Number);
+      const [endHour, endMin] = range.endTime.split(':').map(Number);
 
-      // Check if slot is in the future with advance notice
-      if (currentSlot >= minStartTime) {
-        // Check if slot conflicts with existing bookings (including buffer)
-        const slotWithBuffer = {
-          start: new Date(currentSlot.getTime() - profile.bufferMinutes * 60 * 1000),
-          end: new Date(slotEndTime.getTime() + profile.bufferMinutes * 60 * 1000),
-        };
+      const slotStartBase = new Date(targetDate);
+      slotStartBase.setHours(startHour, startMin, 0, 0);
 
-        const hasConflict = existingBookings.some((booking) => {
-          const bookingStart = new Date(booking.startTime);
-          const bookingEnd = new Date(booking.endTime);
-          // Check overlap (accounting for buffer)
-          return slotWithBuffer.start < bookingEnd && slotWithBuffer.end > bookingStart;
-        });
+      const slotEnd = new Date(targetDate);
+      slotEnd.setHours(endHour, endMin, 0, 0);
 
-        if (!hasConflict) {
-          // Format display time in client's timezone
-          const displayTime = formatTimeInTimezone(currentSlot, clientTimezone);
+      let currentSlot = new Date(slotStartBase);
 
-          slots.push({
-            startTime: currentSlot.toISOString(),
-            endTime: slotEndTime.toISOString(),
-            displayTime,
+      while (currentSlot.getTime() + sessionDuration * 60 * 1000 <= slotEnd.getTime()) {
+        const slotEndTime = new Date(currentSlot.getTime() + sessionDuration * 60 * 1000);
+
+        // Check if slot is in the future with advance notice
+        if (currentSlot >= minStartTime) {
+          // Check if slot conflicts with existing bookings (including buffer)
+          const slotWithBuffer = {
+            start: new Date(currentSlot.getTime() - profile.bufferMinutes * 60 * 1000),
+            end: new Date(slotEndTime.getTime() + profile.bufferMinutes * 60 * 1000),
+          };
+
+          const hasConflict = existingBookings.some((booking) => {
+            const bookingStart = new Date(booking.startTime);
+            const bookingEnd = new Date(booking.endTime);
+            return slotWithBuffer.start < bookingEnd && slotWithBuffer.end > bookingStart;
           });
-        }
-      }
 
-      // Move to next slot (30 minute increments)
-      currentSlot = new Date(currentSlot.getTime() + 30 * 60 * 1000);
+          if (!hasConflict) {
+            const displayTime = formatTimeInTz(currentSlot, clientTimezone);
+            slots.push({
+              startTime: currentSlot.toISOString(),
+              endTime: slotEndTime.toISOString(),
+              displayTime,
+            });
+          }
+        }
+
+        // Move to next slot (30 minute increments)
+        currentSlot = new Date(currentSlot.getTime() + 30 * 60 * 1000);
+      }
     }
 
     return { success: true, data: slots };
@@ -403,34 +407,6 @@ export async function getAvailableSlots(
 // ─────────────────────────────────────────────────────────────────────────────
 // Helper Functions
 // ─────────────────────────────────────────────────────────────────────────────
-
-/**
- * Formats a Date object as a localized time string in a specific timezone.
- *
- * @param date - The Date object to format
- * @param timezone - IANA timezone identifier (e.g., "America/New_York")
- * @returns Formatted time string (e.g., "2:30 PM")
- *
- * @remarks
- * Falls back to local time formatting if the provided timezone is invalid.
- */
-function formatTimeInTimezone(date: Date, timezone: string): string {
-  try {
-    return date.toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true,
-      timeZone: timezone,
-    });
-  } catch {
-    // Fallback if timezone is invalid
-    return date.toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true,
-    });
-  }
-}
 
 /**
  * Gets all bookable dates for a given month.

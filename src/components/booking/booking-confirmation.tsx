@@ -32,6 +32,7 @@ import {
   Loader2,
   User,
 } from 'lucide-react';
+import { formatDateLong, formatTimeInTz } from '@/lib/date-utils';
 
 interface BookingConfirmationProps {
   coach: CoachBookingData;
@@ -82,44 +83,6 @@ export function BookingConfirmation({
       .join('')
       .toUpperCase()
       .slice(0, 2);
-  };
-
-  // Format date for display
-  const formatDate = (date: Date, tz: string) => {
-    try {
-      return date.toLocaleDateString('en-US', {
-        weekday: 'long',
-        month: 'long',
-        day: 'numeric',
-        year: 'numeric',
-        timeZone: tz,
-      });
-    } catch {
-      return date.toLocaleDateString('en-US', {
-        weekday: 'long',
-        month: 'long',
-        day: 'numeric',
-        year: 'numeric',
-      });
-    }
-  };
-
-  // Format time for display
-  const formatTime = (date: Date, tz: string) => {
-    try {
-      return date.toLocaleTimeString('en-US', {
-        hour: 'numeric',
-        minute: '2-digit',
-        hour12: true,
-        timeZone: tz,
-      });
-    } catch {
-      return date.toLocaleTimeString('en-US', {
-        hour: 'numeric',
-        minute: '2-digit',
-        hour12: true,
-      });
-    }
   };
 
   // Check if this is a paid session
@@ -237,8 +200,8 @@ export function BookingConfirmation({
       <div className="mx-auto max-w-2xl">
         <Card>
           <CardHeader className="text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
-              <Check className="h-8 w-8 text-green-600" />
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-[hsl(var(--brand-accent-light))]">
+              <Check className="h-8 w-8 text-[hsl(var(--brand-warm))]" />
             </div>
             <CardTitle className="text-2xl">Booking Request Submitted!</CardTitle>
             <CardDescription>
@@ -247,7 +210,7 @@ export function BookingConfirmation({
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Pending approval notice */}
-            <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-amber-800 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-200">
+            <div className="rounded-lg border border-gold/30 bg-gold/10 p-4 text-gold-dark">
               <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4" />
                 <span className="text-sm font-medium">
@@ -280,14 +243,14 @@ export function BookingConfirmation({
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4 text-muted-foreground" />
                     <span className="text-sm">
-                      {formatDate(bookingResult.startTime, clientTimezone)}
+                      {formatDateLong(bookingResult.startTime)}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Clock className="h-4 w-4 text-muted-foreground" />
                     <span className="text-sm">
-                      {formatTime(bookingResult.startTime, clientTimezone)} -{' '}
-                      {formatTime(bookingResult.endTime, clientTimezone)}
+                      {formatTimeInTz(bookingResult.startTime, clientTimezone)} -{' '}
+                      {formatTimeInTz(bookingResult.endTime, clientTimezone)}
                     </span>
                   </div>
                 </div>
@@ -410,12 +373,12 @@ export function BookingConfirmation({
               <div className="grid gap-2 sm:grid-cols-2">
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm">{formatDate(startDate, clientTimezone)}</span>
+                  <span className="text-sm">{formatDateLong(startDate)}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Clock className="h-4 w-4 text-muted-foreground" />
                   <span className="text-sm">
-                    {formatTime(startDate, clientTimezone)} - {formatTime(endDate, clientTimezone)}
+                    {formatTimeInTz(startDate, clientTimezone)} - {formatTimeInTz(endDate, clientTimezone)}
                   </span>
                 </div>
               </div>
@@ -461,7 +424,7 @@ export function BookingConfirmation({
 
           {/* Auth warning */}
           {!isAuthenticated && (
-            <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-amber-800 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-200">
+            <div className="rounded-lg border border-gold/30 bg-gold/10 p-4 text-gold-dark">
               <p className="text-sm">
                 You&apos;ll need to sign in to complete your booking. Don&apos;t worry - you&apos;ll
                 be brought right back here after signing in.

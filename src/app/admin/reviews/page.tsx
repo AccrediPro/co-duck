@@ -16,6 +16,7 @@ import { ReviewVisibilityToggle } from '@/components/admin/review-visibility-tog
 import { db, reviews, users } from '@/db';
 import { Star, ChevronLeft, ChevronRight, MessageSquare } from 'lucide-react';
 import Link from 'next/link';
+import { formatDate } from '@/lib/date-utils';
 
 const REVIEWS_PER_PAGE = 20;
 
@@ -142,14 +143,6 @@ async function getReviewStats() {
 // HELPER FUNCTIONS
 // ============================================================================
 
-function formatDate(date: Date): string {
-  return new Intl.DateTimeFormat('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  }).format(new Date(date));
-}
-
 function truncateText(text: string, maxLength: number): string {
   if (text.length <= maxLength) return text;
   return text.slice(0, maxLength).trimEnd() + '...';
@@ -162,7 +155,7 @@ function StarRating({ rating }: { rating: number }) {
         <Star
           key={i}
           className={`h-3.5 w-3.5 ${
-            i < rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'
+            i < rating ? 'fill-gold text-gold' : 'text-gray-300'
           }`}
         />
       ))}
@@ -354,12 +347,16 @@ export default async function AdminReviewsPage({
   ]);
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Review Moderation</h1>
-        <p className="text-muted-foreground">Monitor and moderate client reviews</p>
-      </div>
+    <div className="mx-auto max-w-3xl">
+      {/* Page Header */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold">Reviews</CardTitle>
+          <CardDescription>Moderate and manage platform reviews</CardDescription>
+        </CardHeader>
+      </Card>
 
+      <div className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="pb-2">
@@ -374,7 +371,7 @@ export default async function AdminReviewsPage({
             <CardDescription>Public</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">{stats.public}</div>
+            <div className="text-2xl font-bold text-sage">{stats.public}</div>
           </CardContent>
         </Card>
         <Card>
@@ -392,7 +389,7 @@ export default async function AdminReviewsPage({
           <CardContent>
             <div className="flex items-center gap-2">
               <span className="text-2xl font-bold">{stats.averageRating}</span>
-              <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
+              <Star className="h-5 w-5 fill-gold text-gold" />
             </div>
           </CardContent>
         </Card>
@@ -449,6 +446,7 @@ export default async function AdminReviewsPage({
           />
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }

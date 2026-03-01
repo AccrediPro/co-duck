@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Calendar, ArrowRight, ExternalLink } from 'lucide-react';
+import { formatDateShort, formatTime } from '@/lib/date-utils';
 import type { DashboardSession } from '@/app/(dashboard)/dashboard/actions';
 
 interface ClientUpcomingSessionsProps {
@@ -19,18 +20,18 @@ function getRelativeTime(date: Date): string {
   if (diffHours < 24) return `in ${diffHours}h`;
   if (diffDays === 1) return 'tomorrow';
   if (diffDays < 7) return `in ${diffDays} days`;
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  return formatDateShort(date);
 }
 
 export function ClientUpcomingSessions({ sessions }: ClientUpcomingSessionsProps) {
   return (
     <Card className="col-span-2">
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2 text-burgundy-dark">
           <Calendar className="h-5 w-5" />
           Upcoming Sessions
         </CardTitle>
-        <Button variant="ghost" size="sm" asChild>
+        <Button variant="ghost" size="sm" asChild className="text-burgundy hover:text-burgundy-light">
           <Link href="/dashboard/my-sessions">
             View All
             <ArrowRight className="ml-1 h-4 w-4" />
@@ -41,7 +42,7 @@ export function ClientUpcomingSessions({ sessions }: ClientUpcomingSessionsProps
         {sessions.length === 0 ? (
           <div className="py-6 text-center">
             <p className="mb-3 text-sm text-muted-foreground">No upcoming sessions scheduled.</p>
-            <Button size="sm" asChild>
+            <Button size="sm" asChild className="bg-burgundy text-white hover:bg-burgundy-light">
               <Link href="/coaches">Find a Coach</Link>
             </Button>
           </div>
@@ -55,22 +56,15 @@ export function ClientUpcomingSessions({ sessions }: ClientUpcomingSessionsProps
                 <div
                   key={session.id}
                   className={`flex items-center gap-4 rounded-lg border p-3 ${
-                    isNow ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950' : ''
+                    isNow ? 'border-burgundy bg-burgundy/5 dark:bg-burgundy/10' : ''
                   }`}
                 >
                   <div className="min-w-[60px] text-center">
                     <p className="text-xs text-muted-foreground">
-                      {new Date(session.startTime).toLocaleDateString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                      })}
+                      {formatDateShort(session.startTime)}
                     </p>
                     <p className="text-sm font-semibold">
-                      {new Date(session.startTime).toLocaleTimeString('en-US', {
-                        hour: 'numeric',
-                        minute: '2-digit',
-                        hour12: true,
-                      })}
+                      {formatTime(session.startTime)}
                     </p>
                   </div>
                   <Avatar className="h-8 w-8">

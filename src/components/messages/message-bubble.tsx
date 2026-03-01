@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import { ExternalLink, FileText, Download } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { formatDateShort, formatTime } from '@/lib/date-utils';
 import type { MessageWithSender, MessageAttachment } from '@/app/(dashboard)/dashboard/messages/[id]/actions';
 import type { LinkPreviewData } from '@/db/schema';
 
@@ -20,21 +21,14 @@ function formatMessageTime(date: Date): string {
   const isToday = messageDate.toDateString() === today.toDateString();
   const isYesterday = messageDate.toDateString() === yesterday.toDateString();
 
-  const time = messageDate.toLocaleTimeString('en-US', {
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true,
-  });
+  const time = formatTime(messageDate);
 
   if (isToday) {
     return time;
   } else if (isYesterday) {
     return `Yesterday ${time}`;
   } else {
-    const dateStr = messageDate.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-    });
+    const dateStr = formatDateShort(messageDate);
     return `${dateStr} ${time}`;
   }
 }

@@ -32,6 +32,7 @@
 
 import { db, coachProfiles, coachAvailability, bookings, availabilityOverrides } from '@/db';
 import { eq, and, gte, lte, or } from 'drizzle-orm';
+import { formatDate, formatTimeInTz } from '@/lib/date-utils';
 
 // ============================================================================
 // Type Definitions
@@ -55,13 +56,22 @@ export interface AvailabilityDisplayData {
 }
 
 /**
+ * A single time range within a day (e.g., 9am-12pm).
+ * @internal
+ */
+interface TimeRange {
+  startTime: string;
+  endTime: string;
+}
+
+/**
  * Internal type for day availability details.
+ * Supports multiple time ranges per day (e.g., 8am-12pm + 3pm-6pm).
  * @internal
  */
 interface DayAvailabilityInfo {
   dayOfWeek: number;
-  startTime: string;
-  endTime: string;
+  timeRanges: TimeRange[];
   isAvailable: boolean;
 }
 
@@ -167,16 +177,32 @@ export async function getCoachAvailabilityForProfile(
       };
     }
 
-    // Build availability map
+    // Build availability map — group multiple records per dayOfWeek into timeRanges
     const availabilityMap = new Map<number, DayAvailabilityInfo>();
     for (const avail of weeklyAvail) {
-      availabilityMap.set(avail.dayOfWeek, {
-        dayOfWeek: avail.dayOfWeek,
-        startTime: avail.startTime.substring(0, 5),
-        endTime: avail.endTime.substring(0, 5),
-        isAvailable: avail.isAvailable,
-      });
+      const existing = availabilityMap.get(avail.dayOfWeek);
+      if (existing) {
+        if (avail.isAvailable) {
+          existing.isAvailable = true;
+          existing.timeRanges.push({
+            startTime: avail.startTime.substring(0, 5),
+            endTime: avail.endTime.substring(0, 5),
+          });
+        }
+      } else {
+        availabilityMap.set(avail.dayOfWeek, {
+          dayOfWeek: avail.dayOfWeek,
+          timeRanges: avail.isAvailable
+            ? [{ startTime: avail.startTime.substring(0, 5), endTime: avail.endTime.substring(0, 5) }]
+            : [],
+          isAvailable: avail.isAvailable,
+        });
+      }
     }
+    // Sort ranges within each day by startTime
+    Array.from(availabilityMap.values()).forEach((info) => {
+      info.timeRanges.sort((a, b) => a.startTime.localeCompare(b.startTime));
+    });
 
     // Get minimum session duration for slot calculation
     const minDuration =
@@ -287,24 +313,26 @@ async function findNextAvailableSlot(
       )
       .limit(1);
 
-    let dayStartTime: string | null = null;
-    let dayEndTime: string | null = null;
+    // Build time ranges for this day
+    let dayRanges: TimeRange[] = [];
 
     if (overrides.length > 0) {
-      // Override found - use its settings instead of weekly schedule
+      // Override found - use its settings instead of weekly schedule (single range)
       const override = overrides[0];
       if (!override.isAvailable) continue; // Coach blocked this date entirely
-      dayStartTime = override.startTime?.substring(0, 5) || null;
-      dayEndTime = override.endTime?.substring(0, 5) || null;
+      const start = override.startTime?.substring(0, 5);
+      const end = override.endTime?.substring(0, 5);
+      if (start && end) {
+        dayRanges = [{ startTime: start, endTime: end }];
+      }
     } else {
-      // No override - fall back to weekly recurring schedule
+      // No override - fall back to weekly recurring schedule (may have multiple ranges)
       const dayAvail = availabilityMap.get(dayOfWeek);
-      if (!dayAvail || !dayAvail.isAvailable) continue;
-      dayStartTime = dayAvail.startTime;
-      dayEndTime = dayAvail.endTime;
+      if (!dayAvail || !dayAvail.isAvailable || dayAvail.timeRanges.length === 0) continue;
+      dayRanges = dayAvail.timeRanges;
     }
 
-    if (!dayStartTime || !dayEndTime) continue;
+    if (dayRanges.length === 0) continue;
 
     // Get existing bookings for this date
     const startOfDay = new Date(checkDate);
@@ -326,51 +354,47 @@ async function findNextAvailableSlot(
         )
       );
 
-    // Find first available slot
-    const [startHour, startMin] = dayStartTime.split(':').map(Number);
-    const [endHour, endMin] = dayEndTime.split(':').map(Number);
+    // Search all ranges for the first available slot
+    for (const range of dayRanges) {
+      const [startHour, startMin] = range.startTime.split(':').map(Number);
+      const [endHour, endMin] = range.endTime.split(':').map(Number);
 
-    const slotStartBase = new Date(checkDate);
-    slotStartBase.setHours(startHour, startMin, 0, 0);
+      const slotStartBase = new Date(checkDate);
+      slotStartBase.setHours(startHour, startMin, 0, 0);
 
-    const slotEndLimit = new Date(checkDate);
-    slotEndLimit.setHours(endHour, endMin, 0, 0);
+      const slotEndLimit = new Date(checkDate);
+      slotEndLimit.setHours(endHour, endMin, 0, 0);
 
-    let currentSlot = new Date(slotStartBase);
+      let currentSlot = new Date(slotStartBase);
 
-    while (currentSlot.getTime() + sessionDuration * 60 * 1000 <= slotEndLimit.getTime()) {
-      const slotEndTime = new Date(currentSlot.getTime() + sessionDuration * 60 * 1000);
+      while (currentSlot.getTime() + sessionDuration * 60 * 1000 <= slotEndLimit.getTime()) {
+        const slotEndTime = new Date(currentSlot.getTime() + sessionDuration * 60 * 1000);
 
-      // Only consider slots that meet the advance notice requirement
-      if (currentSlot >= minStartTime) {
-        // BUFFER TIME: Expand the slot window by buffer minutes on both sides.
-        // This ensures the coach has prep/break time between sessions.
-        // Example: 15-min buffer means a 10am slot blocks 9:45am-10:15am for conflicts.
-        const slotWithBuffer = {
-          start: new Date(currentSlot.getTime() - profile.bufferMinutes * 60 * 1000),
-          end: new Date(slotEndTime.getTime() + profile.bufferMinutes * 60 * 1000),
-        };
-
-        // CONFLICT DETECTION: Check if any existing booking overlaps with our buffered window.
-        // Uses standard interval overlap formula: A overlaps B if A.start < B.end AND A.end > B.start
-        const hasConflict = existingBookings.some((booking) => {
-          const bookingStart = new Date(booking.startTime);
-          const bookingEnd = new Date(booking.endTime);
-          return slotWithBuffer.start < bookingEnd && slotWithBuffer.end > bookingStart;
-        });
-
-        if (!hasConflict) {
-          // Found available slot
-          const display = formatNextAvailableDisplay(currentSlot, now, timezone);
-          return {
-            isoString: currentSlot.toISOString(),
-            display,
+        // Only consider slots that meet the advance notice requirement
+        if (currentSlot >= minStartTime) {
+          const slotWithBuffer = {
+            start: new Date(currentSlot.getTime() - profile.bufferMinutes * 60 * 1000),
+            end: new Date(slotEndTime.getTime() + profile.bufferMinutes * 60 * 1000),
           };
-        }
-      }
 
-      // Move to next slot (30 minute increments)
-      currentSlot = new Date(currentSlot.getTime() + 30 * 60 * 1000);
+          const hasConflict = existingBookings.some((booking) => {
+            const bookingStart = new Date(booking.startTime);
+            const bookingEnd = new Date(booking.endTime);
+            return slotWithBuffer.start < bookingEnd && slotWithBuffer.end > bookingStart;
+          });
+
+          if (!hasConflict) {
+            const display = formatNextAvailableDisplay(currentSlot, now, timezone);
+            return {
+              isoString: currentSlot.toISOString(),
+              display,
+            };
+          }
+        }
+
+        // Move to next slot (30 minute increments)
+        currentSlot = new Date(currentSlot.getTime() + 30 * 60 * 1000);
+      }
     }
   }
 
@@ -404,13 +428,7 @@ function formatNextAvailableDisplay(slotDate: Date, now: Date, timezone: string)
   const slotDay = new Date(slotDate);
   slotDay.setHours(0, 0, 0, 0);
 
-  // Format time
-  const timeStr = slotDate.toLocaleTimeString('en-US', {
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true,
-    timeZone: timezone,
-  });
+  const timeStr = formatTimeInTz(slotDate, timezone);
 
   if (slotDay.getTime() === today.getTime()) {
     return `Today at ${timeStr}`;
@@ -422,11 +440,7 @@ function formatNextAvailableDisplay(slotDate: Date, now: Date, timezone: string)
       const dayName = DAY_FULL_NAMES[slotDate.getDay()];
       return `${dayName} at ${timeStr}`;
     } else {
-      const dateStr = slotDate.toLocaleDateString('en-US', {
-        month: 'short',
-        day: 'numeric',
-        timeZone: timezone,
-      });
+      const dateStr = formatDate(slotDate);
       return `${dateStr} at ${timeStr}`;
     }
   }
@@ -457,19 +471,20 @@ function formatNextAvailableDisplay(slotDate: Date, now: Date, timezone: string)
  * @internal
  */
 // Generate a human-readable weekly availability summary
+// Supports multiple time ranges per day:
+//   Single range:    "Mon-Fri, 9am-5pm"
+//   Multiple ranges: "Mon-Fri, 9am-12pm & 2pm-6pm"
+//   Mixed:           "Mon-Wed, 9am-12pm & 2pm-6pm | Thu-Fri, 9am-5pm"
 function generateWeeklyAvailabilitySummary(
   availabilityMap: Map<number, DayAvailabilityInfo>
 ): string | null {
-  const availableDays: { day: number; start: string; end: string }[] = [];
+  // Build list of available days with their range signatures
+  const availableDays: { day: number; ranges: TimeRange[] }[] = [];
 
   for (let i = 0; i < 7; i++) {
     const avail = availabilityMap.get(i);
-    if (avail && avail.isAvailable) {
-      availableDays.push({
-        day: i,
-        start: avail.startTime,
-        end: avail.endTime,
-      });
+    if (avail && avail.isAvailable && avail.timeRanges.length > 0) {
+      availableDays.push({ day: i, ranges: avail.timeRanges });
     }
   }
 
@@ -477,20 +492,23 @@ function generateWeeklyAvailabilitySummary(
     return null;
   }
 
-  // Group consecutive days with same times
-  const groups: { days: number[]; start: string; end: string }[] = [];
+  // Create a signature string for each day's ranges to enable grouping
+  const rangeSignature = (ranges: TimeRange[]): string =>
+    ranges.map((r) => `${r.startTime}-${r.endTime}`).join(',');
+
+  // Group consecutive days with identical range sets
+  const groups: { days: number[]; ranges: TimeRange[] }[] = [];
 
   for (const avail of availableDays) {
     const lastGroup = groups[groups.length - 1];
     if (
       lastGroup &&
-      lastGroup.start === avail.start &&
-      lastGroup.end === avail.end &&
+      rangeSignature(lastGroup.ranges) === rangeSignature(avail.ranges) &&
       avail.day === lastGroup.days[lastGroup.days.length - 1] + 1
     ) {
       lastGroup.days.push(avail.day);
     } else {
-      groups.push({ days: [avail.day], start: avail.start, end: avail.end });
+      groups.push({ days: [avail.day], ranges: avail.ranges });
     }
   }
 
@@ -501,10 +519,11 @@ function generateWeeklyAvailabilitySummary(
         ? DAY_NAMES[group.days[0]]
         : `${DAY_NAMES[group.days[0]]}-${DAY_NAMES[group.days[group.days.length - 1]]}`;
 
-    const startFormatted = formatTimeShort(group.start);
-    const endFormatted = formatTimeShort(group.end);
+    const rangesStr = group.ranges
+      .map((r) => `${formatTimeShort(r.startTime)}-${formatTimeShort(r.endTime)}`)
+      .join(' & ');
 
-    return `${daysStr}, ${startFormatted}-${endFormatted}`;
+    return `${daysStr}, ${rangesStr}`;
   });
 
   return parts.join(' | ');
