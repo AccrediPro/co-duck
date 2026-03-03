@@ -29,10 +29,12 @@ interface CreateNotificationParams {
  */
 export async function createNotification(params: CreateNotificationParams): Promise<void> {
   try {
+    const message = params.body || params.title;
     const [inserted] = await db.insert(notifications).values({
       userId: params.userId,
       type: params.type,
       title: params.title,
+      message,
       body: params.body || null,
       link: params.link || null,
     }).returning();
@@ -61,11 +63,13 @@ export async function createNotifications(
 ): Promise<void> {
   if (userIds.length === 0) return;
   try {
+    const message = params.body || params.title;
     const inserted = await db.insert(notifications).values(
       userIds.map((userId) => ({
         userId,
         type: params.type,
         title: params.title,
+        message,
         body: params.body || null,
         link: params.link || null,
       }))

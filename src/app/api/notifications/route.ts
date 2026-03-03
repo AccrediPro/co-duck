@@ -9,19 +9,19 @@
 import { auth } from '@clerk/nextjs/server';
 import { db } from '@/db';
 import { notifications } from '@/db/schema';
-import { eq, and, desc, lt, sql } from 'drizzle-orm';
+import { eq, and, desc, sql } from 'drizzle-orm';
 import { rateLimit, FREQUENT_LIMIT, WRITE_LIMIT, rateLimitResponse } from '@/lib/rate-limit';
 
 /**
  * GET /api/notifications
  *
- * Returns notifications for the current user (paginated, newest first).
+ * Returns paginated notifications for the authenticated user, newest first.
  *
- * @query {number} [limit=30] - Notifications to fetch (max 100)
- * @query {string} [before] - Cursor for pagination (notification ID)
- * @query {string} [unread] - If "true", only return unread notifications
+ * @query {number} [page=1] - Page number
+ * @query {number} [limit=20] - Items per page (max 50)
+ * @query {boolean} [unreadOnly=false] - If "true", return only unread notifications
  *
- * @returns {Object} Paginated notifications with unread count
+ * @returns Paginated notifications with unread count
  */
 export async function GET(request: Request) {
   const rl = rateLimit(request, FREQUENT_LIMIT, 'notifications-list');
@@ -38,46 +38,40 @@ export async function GET(request: Request) {
 
   try {
     const { searchParams } = new URL(request.url);
-    const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '30')));
-    const before = searchParams.get('before');
-    const unreadOnly = searchParams.get('unread') === 'true';
+    const page = Math.max(1, parseInt(searchParams.get('page') || '1'));
+    const limit = Math.min(50, Math.max(1, parseInt(searchParams.get('limit') || '20')));
+    const unreadOnly = searchParams.get('unreadOnly') === 'true';
+    const offset = (page - 1) * limit;
 
-    // Build conditions
-    const conditions = [eq(notifications.userId, userId)];
+    const listCondition = unreadOnly
+      ? and(eq(notifications.userId, userId), eq(notifications.isRead, false))
+      : eq(notifications.userId, userId);
 
-    if (unreadOnly) {
-      conditions.push(eq(notifications.isRead, false));
-    }
-
-    if (before) {
-      const beforeId = parseInt(before);
-      if (!isNaN(beforeId)) {
-        conditions.push(lt(notifications.id, beforeId));
-      }
-    }
-
-    // Fetch notifications + unread count in parallel
-    const [notificationList, unreadResult] = await Promise.all([
+    const [countResult, unreadResult, rows] = await Promise.all([
       db
-        .select()
+        .select({ count: sql<number>`count(*)::int` })
         .from(notifications)
-        .where(and(...conditions))
-        .orderBy(desc(notifications.createdAt))
-        .limit(limit + 1),
+        .where(listCondition),
       db
         .select({ count: sql<number>`count(*)::int` })
         .from(notifications)
         .where(and(eq(notifications.userId, userId), eq(notifications.isRead, false))),
+      db
+        .select()
+        .from(notifications)
+        .where(listCondition)
+        .orderBy(desc(notifications.createdAt))
+        .limit(limit)
+        .offset(offset),
     ]);
 
-    const hasMore = notificationList.length > limit;
-    const paginated = hasMore ? notificationList.slice(0, -1) : notificationList;
+    const total = countResult[0]?.count ?? 0;
     const unreadCount = unreadResult[0]?.count ?? 0;
 
     return Response.json({
       success: true,
       data: {
-        notifications: paginated.map((n) => ({
+        notifications: rows.map((n) => ({
           id: n.id,
           type: n.type,
           title: n.title,
@@ -87,8 +81,12 @@ export async function GET(request: Request) {
           createdAt: n.createdAt,
         })),
         unreadCount,
-        hasMore,
-        nextCursor: hasMore ? paginated[paginated.length - 1]?.id.toString() : null,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+        },
       },
     });
   } catch (error) {
@@ -106,15 +104,16 @@ export async function GET(request: Request) {
 /**
  * PATCH /api/notifications
  *
- * Mark a specific notification as read.
+ * Marks a specific notification as read (by ID in request body).
+ * Kept for backward compatibility — mobile should prefer PATCH /api/notifications/:id.
  *
  * @body {number} id - Notification ID to mark as read
  *
- * @returns {Object} Updated notification
+ * @returns Updated notification (id, isRead)
  */
 export async function PATCH(request: Request) {
-  const rlp = rateLimit(request, WRITE_LIMIT, 'notifications-patch');
-  if (!rlp.success) return rateLimitResponse(rlp);
+  const rl = rateLimit(request, WRITE_LIMIT, 'notifications-patch');
+  if (!rl.success) return rateLimitResponse(rl);
 
   const { userId } = await auth();
 
@@ -136,7 +135,6 @@ export async function PATCH(request: Request) {
       );
     }
 
-    // Mark as read (only if it belongs to the user)
     const [updated] = await db
       .update(notifications)
       .set({ isRead: true })

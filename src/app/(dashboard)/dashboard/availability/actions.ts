@@ -5,15 +5,61 @@ import { db, coachProfiles, coachAvailability } from '@/db';
 import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 
-// Day schedule schema
-const dayScheduleSchema = z.object({
-  dayOfWeek: z.number().min(0).max(6),
-  isAvailable: z.boolean(),
-  startTime: z.string().regex(/^\d{2}:\d{2}$/, 'Time must be in HH:MM format'),
-  endTime: z.string().regex(/^\d{2}:\d{2}$/, 'Time must be in HH:MM format'),
-});
+// --- Types ---
 
-// Full availability settings schema
+export type TimeRange = {
+  startTime: string; // HH:MM
+  endTime: string; // HH:MM
+};
+
+export type DaySchedule = {
+  dayOfWeek: number; // 0-6 (Sunday-Saturday)
+  isAvailable: boolean;
+  timeRanges: TimeRange[];
+};
+
+export type AvailabilitySettings = {
+  schedule: DaySchedule[];
+  bufferMinutes: number;
+  advanceNoticeHours: number;
+  maxAdvanceDays: number;
+};
+
+// --- Validation helpers ---
+
+function hasOverlappingRanges(ranges: TimeRange[]): boolean {
+  if (ranges.length < 2) return false;
+  const sorted = [...ranges].sort((a, b) => a.startTime.localeCompare(b.startTime));
+  for (let i = 1; i < sorted.length; i++) {
+    if (sorted[i].startTime < sorted[i - 1].endTime) return true;
+  }
+  return false;
+}
+
+// --- Zod schemas ---
+
+const timeRangeSchema = z
+  .object({
+    startTime: z.string().regex(/^\d{2}:\d{2}$/, 'Time must be in HH:MM format'),
+    endTime: z.string().regex(/^\d{2}:\d{2}$/, 'Time must be in HH:MM format'),
+  })
+  .refine((r) => r.endTime > r.startTime, {
+    message: 'End time must be after start time',
+  });
+
+const dayScheduleSchema = z
+  .object({
+    dayOfWeek: z.number().min(0).max(6),
+    isAvailable: z.boolean(),
+    timeRanges: z.array(timeRangeSchema),
+  })
+  .refine((day) => !day.isAvailable || day.timeRanges.length >= 1, {
+    message: 'Available days must have at least one time range',
+  })
+  .refine((day) => !hasOverlappingRanges(day.timeRanges), {
+    message: 'Time ranges must not overlap',
+  });
+
 const availabilitySettingsSchema = z.object({
   schedule: z.array(dayScheduleSchema).length(7, 'Schedule must have 7 days'),
   bufferMinutes: z.number().min(0).max(120),
@@ -21,8 +67,7 @@ const availabilitySettingsSchema = z.object({
   maxAdvanceDays: z.number().min(1).max(365),
 });
 
-export type DaySchedule = z.infer<typeof dayScheduleSchema>;
-export type AvailabilitySettings = z.infer<typeof availabilitySettingsSchema>;
+// --- Server actions ---
 
 export type SaveAvailabilityResult = { success: true } | { success: false; error: string };
 
@@ -68,15 +113,28 @@ export async function saveAvailabilitySettings(
     // Delete existing availability records
     await db.delete(coachAvailability).where(eq(coachAvailability.coachId, userId));
 
-    // Insert new availability records
+    // Insert new availability records — one row per time range
     for (const day of data.schedule) {
-      await db.insert(coachAvailability).values({
-        coachId: userId,
-        dayOfWeek: day.dayOfWeek,
-        isAvailable: day.isAvailable,
-        startTime: day.startTime + ':00', // Add seconds for time column
-        endTime: day.endTime + ':00',
-      });
+      if (day.isAvailable && day.timeRanges.length > 0) {
+        for (const range of day.timeRanges) {
+          await db.insert(coachAvailability).values({
+            coachId: userId,
+            dayOfWeek: day.dayOfWeek,
+            isAvailable: true,
+            startTime: range.startTime + ':00',
+            endTime: range.endTime + ':00',
+          });
+        }
+      } else {
+        // Preserve disabled state with a default row
+        await db.insert(coachAvailability).values({
+          coachId: userId,
+          dayOfWeek: day.dayOfWeek,
+          isAvailable: false,
+          startTime: '09:00:00',
+          endTime: '17:00:00',
+        });
+      }
     }
 
     return { success: true };
@@ -125,24 +183,27 @@ export async function getAvailabilitySettings(): Promise<GetAvailabilityResult> 
       .from(coachAvailability)
       .where(eq(coachAvailability.coachId, userId));
 
-    // Build schedule array (default to unavailable for days without records)
+    // Build schedule array — group records by dayOfWeek
     const schedule: DaySchedule[] = [];
     for (let i = 0; i < 7; i++) {
-      const record = availabilityRecords.find((r) => r.dayOfWeek === i);
-      if (record) {
-        schedule.push({
-          dayOfWeek: record.dayOfWeek,
-          isAvailable: record.isAvailable,
-          startTime: record.startTime.substring(0, 5), // Remove seconds
-          endTime: record.endTime.substring(0, 5),
-        });
+      const dayRecords = availabilityRecords.filter((r) => r.dayOfWeek === i);
+      const availableRecords = dayRecords.filter((r) => r.isAvailable);
+
+      if (availableRecords.length > 0) {
+        const timeRanges: TimeRange[] = availableRecords
+          .map((r) => ({
+            startTime: r.startTime.substring(0, 5),
+            endTime: r.endTime.substring(0, 5),
+          }))
+          .sort((a, b) => a.startTime.localeCompare(b.startTime));
+
+        schedule.push({ dayOfWeek: i, isAvailable: true, timeRanges });
       } else {
-        // Default schedule for days without records
+        // No records or only isAvailable=false records — default unavailable
         schedule.push({
           dayOfWeek: i,
           isAvailable: false,
-          startTime: '09:00',
-          endTime: '17:00',
+          timeRanges: [{ startTime: '09:00', endTime: '17:00' }],
         });
       }
     }

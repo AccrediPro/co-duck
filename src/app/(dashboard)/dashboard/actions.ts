@@ -1,7 +1,7 @@
 'use server';
 
 import { auth } from '@clerk/nextjs/server';
-import { eq, and, or, gte, lte, desc, asc, sql, ne } from 'drizzle-orm';
+import { eq, and, or, gte, lte, desc, asc, sql, ne, inArray } from 'drizzle-orm';
 import {
   db,
   bookings,
@@ -514,21 +514,19 @@ async function getUnreadCountForUser(userId: string): Promise<number> {
 
   if (convIds.length === 0) return 0;
 
-  let total = 0;
-  for (const conv of convIds) {
-    const result = await db
-      .select({ count: sql<number>`count(*)` })
-      .from(messages)
-      .where(
-        and(
-          eq(messages.conversationId, conv.id),
-          ne(messages.senderId, userId),
-          eq(messages.isRead, false)
-        )
-      );
-    total += Number(result[0]?.count || 0);
-  }
-  return total;
+  const ids = convIds.map((c) => c.id);
+  const result = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(messages)
+    .where(
+      and(
+        inArray(messages.conversationId, ids),
+        ne(messages.senderId, userId),
+        eq(messages.isRead, false)
+      )
+    );
+
+  return Number(result[0]?.count || 0);
 }
 
 async function getRecentMessagesForUser(userId: string, limit: number): Promise<MessagePreview[]> {
@@ -544,44 +542,58 @@ async function getRecentMessagesForUser(userId: string, limit: number): Promise<
     .orderBy(desc(conversations.lastMessageAt))
     .limit(limit);
 
-  const previews: MessagePreview[] = [];
-  for (const conv of convs) {
-    const isCoach = conv.coachId === userId;
-    const otherUserId = isCoach ? conv.clientId : conv.coachId;
+  if (convs.length === 0) return [];
 
-    const [otherUser, lastMsg, unread] = await Promise.all([
-      db
-        .select({ name: users.name, avatarUrl: users.avatarUrl })
-        .from(users)
-        .where(eq(users.id, otherUserId))
-        .limit(1),
-      db
-        .select({ content: messages.content })
-        .from(messages)
-        .where(eq(messages.conversationId, conv.id))
-        .orderBy(desc(messages.createdAt))
-        .limit(1),
-      db
-        .select({ count: sql<number>`count(*)` })
-        .from(messages)
-        .where(
-          and(
-            eq(messages.conversationId, conv.id),
-            ne(messages.senderId, userId),
-            eq(messages.isRead, false)
-          )
-        ),
-    ]);
+  const convIds = convs.map((c) => c.id);
+  const otherUserIds = Array.from(new Set(convs.map((c) => (c.coachId === userId ? c.clientId : c.coachId))));
 
-    previews.push({
+  const [usersData, lastMessages, unreadCounts] = await Promise.all([
+    db
+      .select({ id: users.id, name: users.name, avatarUrl: users.avatarUrl })
+      .from(users)
+      .where(inArray(users.id, otherUserIds)),
+    db
+      .select({
+        conversationId: messages.conversationId,
+        content: messages.content,
+        rn: sql<number>`ROW_NUMBER() OVER (PARTITION BY ${messages.conversationId} ORDER BY ${messages.createdAt} DESC)`.as('rn'),
+      })
+      .from(messages)
+      .where(inArray(messages.conversationId, convIds))
+      .then((rows) => rows.filter((r) => r.rn === 1)),
+    db
+      .select({
+        conversationId: messages.conversationId,
+        count: sql<number>`count(*)`,
+      })
+      .from(messages)
+      .where(
+        and(
+          inArray(messages.conversationId, convIds),
+          ne(messages.senderId, userId),
+          eq(messages.isRead, false)
+        )
+      )
+      .groupBy(messages.conversationId),
+  ]);
+
+  const userMap = new Map(usersData.map((u) => [u.id, u]));
+  const lastMsgMap = new Map(
+    lastMessages.map((r) => [r.conversationId, r.content])
+  );
+  const unreadMap = new Map(unreadCounts.map((r) => [r.conversationId, Number(r.count)]));
+
+  return convs.map((conv) => {
+    const otherUserId = conv.coachId === userId ? conv.clientId : conv.coachId;
+    const other = userMap.get(otherUserId);
+    return {
       conversationId: conv.id,
       otherUserId,
-      otherUserName: otherUser[0]?.name || null,
-      otherUserAvatar: otherUser[0]?.avatarUrl || null,
-      lastMessageContent: lastMsg[0]?.content || null,
+      otherUserName: other?.name || null,
+      otherUserAvatar: other?.avatarUrl || null,
+      lastMessageContent: lastMsgMap.get(conv.id) || null,
       lastMessageAt: conv.lastMessageAt,
-      unreadCount: Number(unread[0]?.count || 0),
-    });
-  }
-  return previews;
+      unreadCount: unreadMap.get(conv.id) || 0,
+    };
+  });
 }

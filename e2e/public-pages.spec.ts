@@ -21,8 +21,8 @@ test.describe('Pagine pubbliche', () => {
     await expect(page.getByRole('link', { name: /find a coach/i }).first()).toBeVisible();
     await expect(page.getByRole('link', { name: /become a coach/i }).first()).toBeVisible();
 
-    // Verifica sezione "Why Choose CoachHub?"
-    await expect(page.getByRole('heading', { name: 'Why Choose CoachHub?' })).toBeVisible();
+    // Verifica sezione "Why Choose AccrediPro CoachHub?"
+    await expect(page.getByRole('heading', { name: 'Why Choose AccrediPro CoachHub?' })).toBeVisible();
 
     // Verifica sezione "How It Works"
     await expect(page.getByRole('heading', { name: 'How It Works', exact: true })).toBeVisible();

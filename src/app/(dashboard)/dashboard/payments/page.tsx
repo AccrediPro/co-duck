@@ -38,28 +38,24 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
   // If not a coach, show appropriate message
   if (user.role !== 'coach') {
     return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold">Payments</h1>
-          <p className="text-muted-foreground">Manage your payment settings</p>
-        </div>
-
-        <Card>
+      <div className="mx-auto max-w-3xl">
+        <Card className="mb-6">
           <CardHeader>
-            <CardTitle>Become a Coach</CardTitle>
-            <CardDescription>
-              You need to be registered as a coach to set up payment processing.
-            </CardDescription>
+            <CardTitle className="text-2xl font-bold">Payments</CardTitle>
+            <CardDescription>Track your earnings and manage payouts</CardDescription>
           </CardHeader>
-          <CardContent>
-            <Button asChild>
-              <Link href="/onboarding/coach">
-                <User className="mr-2 h-4 w-4" />
-                Start Coach Onboarding
-              </Link>
-            </Button>
-          </CardContent>
         </Card>
+
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Coach Access Required</CardTitle>
+              <CardDescription>
+                You need a coach account to set up payment processing. Please contact an administrator to get started.
+              </CardDescription>
+            </CardHeader>
+          </Card>
+        </div>
       </div>
     );
   }
@@ -73,28 +69,32 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
 
   if (profiles.length === 0) {
     return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold">Payments</h1>
-          <p className="text-muted-foreground">Manage your payment settings</p>
-        </div>
-
-        <Card>
+      <div className="mx-auto max-w-3xl">
+        <Card className="mb-6">
           <CardHeader>
-            <CardTitle>Complete Your Onboarding</CardTitle>
-            <CardDescription>
-              You need to complete the coach onboarding before you can set up payment processing.
-            </CardDescription>
+            <CardTitle className="text-2xl font-bold">Payments</CardTitle>
+            <CardDescription>Track your earnings and manage payouts</CardDescription>
           </CardHeader>
-          <CardContent>
-            <Button asChild>
-              <Link href="/onboarding/coach">
-                <User className="mr-2 h-4 w-4" />
-                Complete Onboarding
-              </Link>
-            </Button>
-          </CardContent>
         </Card>
+
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Complete Your Onboarding</CardTitle>
+              <CardDescription>
+                You need to complete the coach onboarding before you can set up payment processing.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button asChild>
+                <Link href="/onboarding/coach">
+                  <User className="mr-2 h-4 w-4" />
+                  Complete Onboarding
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     );
   }
@@ -112,23 +112,27 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
 
   if (!result.success) {
     return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold">Payments</h1>
-          <p className="text-muted-foreground">Manage your payment settings</p>
-        </div>
-
-        <Card>
+      <div className="mx-auto max-w-3xl">
+        <Card className="mb-6">
           <CardHeader>
-            <CardTitle>Error Loading Payment Settings</CardTitle>
-            <CardDescription>{result.error}</CardDescription>
+            <CardTitle className="text-2xl font-bold">Payments</CardTitle>
+            <CardDescription>Track your earnings and manage payouts</CardDescription>
           </CardHeader>
-          <CardContent>
-            <Button asChild>
-              <Link href="/dashboard">Return to Dashboard</Link>
-            </Button>
-          </CardContent>
         </Card>
+
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Error Loading Payment Settings</CardTitle>
+              <CardDescription>{result.error}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button asChild>
+                <Link href="/dashboard">Return to Dashboard</Link>
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     );
   }
@@ -143,21 +147,21 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Payments</h1>
-        <p className="text-muted-foreground">
-          {result.data.stripeOnboardingComplete
-            ? 'View your earnings and manage payment settings.'
-            : 'Set up and manage your payment processing to receive payments from clients.'}
-        </p>
-      </div>
+    <div className="mx-auto max-w-3xl">
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold">Payments</CardTitle>
+          <CardDescription>Track your earnings and manage payouts</CardDescription>
+        </CardHeader>
+      </Card>
 
-      <PaymentsContent
-        initialData={result.data}
-        setupStatus={setupStatus}
-        earningsData={earningsData}
-      />
+      <div className="space-y-6">
+        <PaymentsContent
+          initialData={result.data}
+          setupStatus={setupStatus}
+          earningsData={earningsData}
+        />
+      </div>
     </div>
   );
 }

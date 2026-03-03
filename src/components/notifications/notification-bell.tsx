@@ -20,6 +20,7 @@ import {
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
+import { formatDateShort } from '@/lib/date-utils';
 import { useSocket } from '@/hooks/useSocket';
 
 type NotificationType =
@@ -79,13 +80,10 @@ function formatRelativeTime(dateStr: string): string {
   if (diffHr < 24) return `${diffHr}h ago`;
   if (diffDay < 7) return `${diffDay}d ago`;
 
-  return new Date(dateStr).toLocaleDateString(undefined, {
-    month: 'short',
-    day: 'numeric',
-  });
+  return formatDateShort(dateStr);
 }
 
-const POLL_INTERVAL = 30_000;
+const POLL_INTERVAL = 600_000; // 10min safety net — real-time updates via Socket.io
 
 export function NotificationBell() {
   const router = useRouter();
@@ -98,6 +96,7 @@ export function NotificationBell() {
   const [markingAllRead, setMarkingAllRead] = useState(false);
   const [pulse, setPulse] = useState(false);
   const hasFetchedRef = useRef(false);
+  const lastDisconnectRef = useRef<number | null>(null);
 
   const fetchNotifications = useCallback(async () => {
     try {
@@ -137,7 +136,7 @@ export function NotificationBell() {
     }
   }, [open, fetchNotifications]);
 
-  // Poll for unread count every 30s (fallback when socket is disconnected)
+  // Poll for unread count every 10min (safety net fallback)
   useEffect(() => {
     // Initial count fetch
     if (!hasFetchedRef.current) {
@@ -161,7 +160,7 @@ export function NotificationBell() {
       link: string | null;
       isRead: boolean;
       createdAt: string;
-    }) {
+    }, ack?: (response: { received: boolean }) => void) {
       // Prepend to list (avoid duplicates)
       setNotifications((prev) => {
         if (prev.some((n) => n.id === data.id)) return prev;
@@ -172,6 +171,9 @@ export function NotificationBell() {
       // Pulse animation on bell
       setPulse(true);
       setTimeout(() => setPulse(false), 2000);
+
+      // Acknowledge receipt to server
+      if (typeof ack === 'function') ack({ received: true });
     }
 
     socket.on('notification:new', handleNewNotification);
@@ -179,6 +181,44 @@ export function NotificationBell() {
       socket.off('notification:new', handleNewNotification);
     };
   }, [socket, isConnected]);
+
+  // Refetch notifications when tab regains focus (catches anything missed while backgrounded)
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        fetchUnreadCount();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [fetchUnreadCount]);
+
+  // Reconnect catchup: fetch notifications when socket reconnects after a disconnect
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleDisconnect = () => {
+      lastDisconnectRef.current = Date.now();
+    };
+
+    const handleConnect = () => {
+      // Only fetch if we previously disconnected (reconnect scenario)
+      if (lastDisconnectRef.current !== null) {
+        fetchUnreadCount();
+        lastDisconnectRef.current = null;
+      }
+    };
+
+    socket.on('disconnect', handleDisconnect);
+    socket.on('connect', handleConnect);
+    return () => {
+      socket.off('disconnect', handleDisconnect);
+      socket.off('connect', handleConnect);
+    };
+  }, [socket, fetchUnreadCount]);
 
   const markAsRead = useCallback(
     async (notification: Notification) => {
@@ -238,7 +278,7 @@ export function NotificationBell() {
         <Button
           variant="ghost"
           size="icon"
-          className="relative"
+          className="relative min-h-[44px] min-w-[44px]"
           aria-label={
             unreadCount > 0
               ? `Notifications, ${unreadCount} unread`
@@ -343,7 +383,7 @@ export function NotificationBell() {
                     </p>
                   </div>
                   {!notification.isRead && (
-                    <div className="mt-2 h-2 w-2 shrink-0 rounded-full bg-blue-500" aria-hidden="true" />
+                    <div className="mt-2 h-2 w-2 shrink-0 rounded-full bg-burgundy" aria-hidden="true" />
                   )}
                 </button>
               );

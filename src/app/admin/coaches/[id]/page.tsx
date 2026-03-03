@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 
 import { db, users, coachProfiles } from '@/db';
+import { formatDate } from '@/lib/date-utils';
 import type { SessionType } from '@/db/schema';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -32,14 +33,6 @@ function getInitials(name: string | null, email: string): string {
     return parts[0]?.[0]?.toUpperCase() || email[0].toUpperCase();
   }
   return email[0].toUpperCase();
-}
-
-function formatDate(date: Date): string {
-  return new Intl.DateTimeFormat('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  }).format(date);
 }
 
 function formatCents(cents: number): string {
@@ -98,17 +91,26 @@ export default async function AdminCoachDetailPage({ params }: PageProps) {
   const sessionTypes = (coach.sessionTypes || []) as SessionType[];
 
   return (
-    <div className="space-y-6">
-      {/* Back button + header */}
-      <div className="flex items-center gap-4">
-        <Button asChild variant="ghost" size="sm">
-          <Link href="/admin/coaches">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Coaches
-          </Link>
-        </Button>
-      </div>
+    <div className="mx-auto max-w-3xl">
+      {/* Page Header */}
+      <Card className="mb-6">
+        <CardHeader>
+          <div className="flex items-center gap-3">
+            <Button asChild variant="ghost" size="sm" className="-ml-2">
+              <Link href="/admin/coaches">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back
+              </Link>
+            </Button>
+            <div>
+              <CardTitle className="text-2xl font-bold">{coach.userName || 'Unknown Coach'}</CardTitle>
+              <CardDescription>Coach details and verification</CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+      </Card>
 
+      <div className="space-y-6">
       {/* Coach identity card */}
       <Card>
         <CardContent className="pt-6">
@@ -148,7 +150,7 @@ export default async function AdminCoachDetailPage({ params }: PageProps) {
               </div>
               <div className="flex flex-wrap items-center gap-4 text-sm">
                 <span className="flex items-center gap-1">
-                  <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                  <Star className="h-4 w-4 fill-gold text-gold" />
                   {coach.averageRating || '—'} ({coach.reviewCount} review{coach.reviewCount !== 1 ? 's' : ''})
                 </span>
                 {coach.hourlyRate != null && (
@@ -164,7 +166,7 @@ export default async function AdminCoachDetailPage({ params }: PageProps) {
                 <Link
                   href={`/coaches/${coach.slug}`}
                   target="_blank"
-                  className="inline-flex items-center gap-1 text-sm text-emerald-600 hover:underline"
+                  className="inline-flex items-center gap-1 text-sm text-[hsl(var(--brand-warm))] hover:underline"
                 >
                   View public profile
                   <ExternalLink className="h-3 w-3" />
@@ -282,6 +284,7 @@ export default async function AdminCoachDetailPage({ params }: PageProps) {
             </CardContent>
           </Card>
         </div>
+      </div>
       </div>
     </div>
   );

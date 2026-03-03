@@ -206,6 +206,18 @@ export const goalStatusEnum = pgEnum('goal_status', ['pending', 'in_progress', '
  */
 export const goalPriorityEnum = pgEnum('goal_priority', ['low', 'medium', 'high']);
 
+/**
+ * iConnect Post Type Enum
+ *
+ * Distinguishes between types of posts in the iConnect feed.
+ *
+ * @enum {string}
+ * @property {'text'} text - Text-only post
+ * @property {'image'} image - Image post (may include text caption)
+ * @property {'task'} task - Task post with checklist items
+ */
+export const iconnectPostTypeEnum = pgEnum('iconnect_post_type', ['text', 'image', 'task']);
+
 // ============================================================================
 // JSONB TYPE DEFINITIONS
 // ============================================================================
@@ -363,6 +375,36 @@ export const users = pgTable('users', {
    * @type {{ bookings?: boolean, messages?: boolean, reviews?: boolean, reminders?: boolean, marketing?: boolean } | null}
    */
   emailPreferences: jsonb('email_preferences'),
+
+  /**
+   * Client's background or what they're looking for in coaching
+   * @type {string | null}
+   */
+  bio: text('bio'),
+
+  /**
+   * Client's date of birth
+   * @type {string | null} Format: "YYYY-MM-DD"
+   */
+  dateOfBirth: date('date_of_birth'),
+
+  /**
+   * Client's city / location
+   * @type {string | null}
+   */
+  city: text('city'),
+
+  /**
+   * Client's occupation or job title
+   * @type {string | null}
+   */
+  occupation: text('occupation'),
+
+  /**
+   * Client's coaching objectives / goals
+   * @type {string | null}
+   */
+  goals: text('goals'),
 
   /**
    * User role determining platform access level
@@ -1407,6 +1449,8 @@ export const messages = pgTable(
     index('messages_sender_id_idx').on(table.senderId),
     // Index for chronological ordering
     index('messages_created_at_idx').on(table.createdAt),
+    // Composite index for unread count queries per conversation
+    index('messages_conversation_id_is_read_idx').on(table.conversationId, table.isRead),
   ]
 );
 
@@ -1835,11 +1879,14 @@ export const notifications = pgTable(
     /** Short title displayed in notification list */
     title: text('title').notNull(),
 
+    /** Main notification message (required by DB constraint) */
+    message: text('message').notNull(),
+
     /** Longer description/body text */
     body: text('body'),
 
     /** Deep link path within the app (e.g., "/dashboard/sessions/42") */
-    link: text('link'),
+    link: text('link_url'),
 
     /** Whether the user has read/seen this notification */
     isRead: boolean('is_read').notNull().default(false),
@@ -2246,6 +2293,191 @@ export type Attachment = typeof attachments.$inferSelect;
 export type NewAttachment = typeof attachments.$inferInsert;
 
 // ============================================================================
+// ICONNECT POSTS TABLE
+// ============================================================================
+
+/**
+ * iConnect Posts Table
+ *
+ * Posts in the 1:1 iConnect feed/bulletin board between a coach and client.
+ *
+ * ## Purpose
+ * Enables a shared feed within an existing conversation where coaches and
+ * clients can post text, images, or task checklists.
+ *
+ * ## Relationships
+ * - Belongs to conversations (many:1)
+ * - Belongs to users (as sender, many:1)
+ * - Has many iconnectTaskItems (for task-type posts)
+ */
+export const iconnectPosts = pgTable(
+  'iconnect_posts',
+  {
+    id: serial('id').primaryKey(),
+
+    /** The conversation this post belongs to */
+    conversationId: integer('conversation_id')
+      .notNull()
+      .references(() => conversations.id, { onDelete: 'cascade' }),
+
+    /** The user who created this post */
+    senderUserId: text('sender_user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+
+    /** Type of post */
+    type: iconnectPostTypeEnum('type').notNull(),
+
+    /** Post text content (nullable for image-only posts) */
+    content: text('content'),
+
+    /** URL to uploaded image (nullable) */
+    imageUrl: text('image_url'),
+
+    /** Whether the recipient has read this post */
+    isRead: boolean('is_read').notNull().default(false),
+
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
+  },
+  (table) => [
+    index('iconnect_posts_conversation_id_idx').on(table.conversationId),
+    index('iconnect_posts_sender_user_id_idx').on(table.senderUserId),
+    index('iconnect_posts_created_at_idx').on(table.createdAt),
+  ]
+);
+
+/** Type for selecting an iConnect post record */
+export type IconnectPost = typeof iconnectPosts.$inferSelect;
+
+/** Type for inserting a new iConnect post record */
+export type NewIconnectPost = typeof iconnectPosts.$inferInsert;
+
+// ============================================================================
+// ICONNECT TASK ITEMS TABLE
+// ============================================================================
+
+/**
+ * iConnect Task Items Table
+ *
+ * Checklist items within a task-type iConnect post.
+ *
+ * ## Purpose
+ * Stores individual checklist items for iConnect posts of type 'task'.
+ * Each item can be independently toggled complete/incomplete.
+ *
+ * ## Relationships
+ * - Belongs to iconnectPosts (many:1)
+ */
+export const iconnectTaskItems = pgTable(
+  'iconnect_task_items',
+  {
+    id: serial('id').primaryKey(),
+
+    /** The task post this item belongs to */
+    postId: integer('post_id')
+      .notNull()
+      .references(() => iconnectPosts.id, { onDelete: 'cascade' }),
+
+    /** Task item label/description */
+    label: text('label').notNull(),
+
+    /** Whether this item has been completed */
+    completed: boolean('completed').notNull().default(false),
+
+    /** When this item was marked complete */
+    completedAt: timestamp('completed_at', { withTimezone: true }),
+  },
+  (table) => [
+    index('iconnect_task_items_post_id_idx').on(table.postId),
+  ]
+);
+
+/** Type for selecting an iConnect task item record */
+export type IconnectTaskItem = typeof iconnectTaskItems.$inferSelect;
+
+/** Type for inserting a new iConnect task item record */
+export type NewIconnectTaskItem = typeof iconnectTaskItems.$inferInsert;
+
+// ============================================================================
+// ICONNECT COMMENTS TABLE
+// ============================================================================
+
+/**
+ * iConnect Comments Table
+ *
+ * Comments on iConnect posts within a coach-client conversation.
+ *
+ * ## Purpose
+ * Allows coaches and clients to comment on iConnect posts,
+ * enabling threaded discussion on shared feed items.
+ *
+ * ## Relationships
+ * - Belongs to iconnectPosts (many:1)
+ * - Belongs to users (as sender, many:1)
+ */
+export const iconnectComments = pgTable(
+  'iconnect_comments',
+  {
+    id: serial('id').primaryKey(),
+
+    /** The post this comment belongs to */
+    postId: integer('post_id')
+      .notNull()
+      .references(() => iconnectPosts.id, { onDelete: 'cascade' }),
+
+    /** The user who wrote this comment */
+    senderUserId: text('sender_user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+
+    /** Comment text content */
+    content: text('content').notNull(),
+
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
+  },
+  (table) => [
+    index('iconnect_comments_post_id_idx').on(table.postId),
+  ]
+);
+
+/** Type for selecting an iConnect comment record */
+export type IconnectComment = typeof iconnectComments.$inferSelect;
+
+/** Type for inserting a new iConnect comment record */
+export type NewIconnectComment = typeof iconnectComments.$inferInsert;
+
+// ============================================================================
+// COACH INVITES TABLE
+// ============================================================================
+
+export const coachInviteStatusEnum = pgEnum('coach_invite_status', ['pending', 'claimed']);
+
+export const coachInvites = pgTable('coach_invites', {
+  id: serial('id').primaryKey(),
+  email: text('email').notNull().unique(),
+  status: coachInviteStatusEnum('status').notNull().default('pending'),
+  invitedBy: text('invited_by')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  claimedAt: timestamp('claimed_at', { withTimezone: true }),
+});
+
+/** Type for selecting a coach invite record */
+export type CoachInvite = typeof coachInvites.$inferSelect;
+
+/** Type for inserting a new coach invite record */
+export type NewCoachInvite = typeof coachInvites.$inferInsert;
+
+// ============================================================================
 // DRIZZLE RELATIONS
 // ============================================================================
 
@@ -2270,6 +2502,8 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   coachReviews: many(reviews, { relationName: 'coachReviews' }),
   clientReviews: many(reviews, { relationName: 'clientReviews' }),
   coachGroupSessions: many(groupSessions),
+  iconnectPosts: many(iconnectPosts),
+  iconnectComments: many(iconnectComments),
 }));
 
 export const programsRelations = relations(programs, ({ one, many }) => ({
@@ -2383,6 +2617,7 @@ export const conversationsRelations = relations(conversations, ({ one, many }) =
     relationName: 'clientConversations',
   }),
   messages: many(messages),
+  iconnectPosts: many(iconnectPosts),
 }));
 
 export const messagesRelations = relations(messages, ({ one }) => ({
@@ -2475,3 +2710,41 @@ export const groupSessionParticipantsRelations = relations(
     }),
   })
 );
+
+export const iconnectPostsRelations = relations(iconnectPosts, ({ one, many }) => ({
+  conversation: one(conversations, {
+    fields: [iconnectPosts.conversationId],
+    references: [conversations.id],
+  }),
+  sender: one(users, {
+    fields: [iconnectPosts.senderUserId],
+    references: [users.id],
+  }),
+  taskItems: many(iconnectTaskItems),
+  comments: many(iconnectComments),
+}));
+
+export const iconnectTaskItemsRelations = relations(iconnectTaskItems, ({ one }) => ({
+  post: one(iconnectPosts, {
+    fields: [iconnectTaskItems.postId],
+    references: [iconnectPosts.id],
+  }),
+}));
+
+export const iconnectCommentsRelations = relations(iconnectComments, ({ one }) => ({
+  post: one(iconnectPosts, {
+    fields: [iconnectComments.postId],
+    references: [iconnectPosts.id],
+  }),
+  sender: one(users, {
+    fields: [iconnectComments.senderUserId],
+    references: [users.id],
+  }),
+}));
+
+export const coachInvitesRelations = relations(coachInvites, ({ one }) => ({
+  inviter: one(users, {
+    fields: [coachInvites.invitedBy],
+    references: [users.id],
+  }),
+}));

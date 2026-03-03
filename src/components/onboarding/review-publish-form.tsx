@@ -263,9 +263,9 @@ export function ReviewPublishForm({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             {completionPercentage === 100 ? (
-              <CheckCircle2 className="h-5 w-5 text-green-500" />
+              <CheckCircle2 className="h-5 w-5 text-sage" />
             ) : (
-              <AlertCircle className="h-5 w-5 text-amber-500" />
+              <AlertCircle className="h-5 w-5 text-gold" />
             )}
             Profile Completion: {completionPercentage}%
           </CardTitle>
@@ -280,7 +280,7 @@ export function ReviewPublishForm({
             <ul className="space-y-1 text-sm text-muted-foreground">
               {missingItems.map((item, index) => (
                 <li key={index} className="flex items-center gap-2">
-                  <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-gold" />
                   {item}
                 </li>
               ))}
@@ -311,7 +311,7 @@ export function ReviewPublishForm({
               </AvatarFallback>
             </Avatar>
             <div className="flex-1">
-              <h3 className="text-xl font-semibold">{profile.displayName || 'No name set'}</h3>
+              <h3 className="text-xl font-semibold text-burgundy-dark">{profile.displayName || 'No name set'}</h3>
               <p className="text-muted-foreground">{profile.headline || 'No headline set'}</p>
               {profile.timezone && (
                 <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
@@ -369,7 +369,7 @@ export function ReviewPublishForm({
                         {session.duration} minutes
                       </p>
                     </div>
-                    <div className="flex items-center gap-1 text-lg font-semibold">
+                    <div className="flex items-center gap-1 text-lg font-semibold text-burgundy-dark">
                       <DollarSign className="h-4 w-4" />
                       {currencySymbol}
                       {formatPrice(session.price)}
@@ -411,7 +411,7 @@ export function ReviewPublishForm({
                 'Save as Draft'
               )}
             </Button>
-            <Button onClick={handlePublish} disabled={isPublishing || isSavingDraft}>
+            <Button onClick={handlePublish} disabled={isPublishing || isSavingDraft} className="bg-burgundy text-white hover:bg-burgundy-light">
               {isPublishing ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />

@@ -29,6 +29,7 @@ import {
 } from '@/components/ui/select';
 import { RoleChangeDropdown } from '@/components/admin/role-change-dropdown';
 import { db, users } from '@/db';
+import { formatDate } from '@/lib/date-utils';
 import { Users, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 
@@ -160,20 +161,6 @@ async function getUsers(options: { search?: string; role?: string; page: number;
 // ============================================================================
 
 /**
- * Formats a date to a readable string.
- *
- * @param date - Date to format
- * @returns Formatted date string (e.g., "Jan 15, 2026")
- */
-function formatDate(date: Date): string {
-  return new Intl.DateTimeFormat('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  }).format(new Date(date));
-}
-
-/**
  * Returns badge variant based on user role.
  *
  * @param role - User role
@@ -288,7 +275,7 @@ function UserRow({
         <div className="text-sm text-muted-foreground">{formatDate(user.createdAt)}</div>
         <Link
           href={`/admin/users/${user.id}`}
-          className="text-sm text-emerald-600 hover:underline"
+          className="text-sm text-[hsl(var(--brand-warm))] hover:underline"
         >
           View
         </Link>
@@ -395,13 +382,16 @@ export default async function AdminUsersPage({
   });
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto max-w-3xl">
       {/* Page Header */}
-      <div>
-        <h1 className="text-3xl font-bold">User Management</h1>
-        <p className="text-muted-foreground">View and manage platform users</p>
-      </div>
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold">User Management</CardTitle>
+          <CardDescription>Manage platform users</CardDescription>
+        </CardHeader>
+      </Card>
 
+      <div className="space-y-6">
       {/* Search and Filters */}
       <Card>
         <CardHeader>
@@ -451,6 +441,7 @@ export default async function AdminUsersPage({
           />
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }

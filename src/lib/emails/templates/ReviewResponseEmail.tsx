@@ -17,7 +17,7 @@ export function ReviewResponseEmail({
   bookingId,
   unsubscribeUrl,
 }: ReviewResponseEmailProps) {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://coachhub.com';
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://accredipro-coachhub.com';
 
   return (
     <EmailLayout

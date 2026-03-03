@@ -25,7 +25,7 @@ const sections = [
     id: 'acceptance',
     icon: FileText,
     title: '1. Acceptance of Terms',
-    content: `By accessing or using the CoachHub platform ("Service"), you agree to be bound by these Terms of Service ("Terms"). If you do not agree to all the terms and conditions, you may not access or use the Service.
+    content: `By accessing or using the AccrediPro CoachHub platform ("Service"), you agree to be bound by these Terms of Service ("Terms"). If you do not agree to all the terms and conditions, you may not access or use the Service.
 
 These Terms apply to all visitors, users, coaches, and clients who access or use the Service. By using the Service, you represent that you are at least 18 years of age and have the legal capacity to enter into these Terms.
 
@@ -35,7 +35,7 @@ We may update these Terms from time to time. We will notify you of any changes b
     id: 'services',
     icon: Users,
     title: '2. Description of Services',
-    content: `CoachHub provides a platform connecting individuals seeking coaching services ("Clients") with professional coaches ("Coaches"). Our services include:
+    content: `AccrediPro CoachHub provides a platform connecting individuals seeking coaching services ("Clients") with professional coaches ("Coaches"). Our services include:
 
 • **Coach Discovery**: Browse and search for coaches by specialty, availability, and pricing
 • **Session Booking**: Schedule one-on-one and group coaching sessions
@@ -63,17 +63,17 @@ We do not provide coaching services directly. Coaches on our platform are indepe
     id: 'coaches',
     icon: Scale,
     title: '4. Coach Terms',
-    content: `If you register as a Coach on CoachHub, you agree to the following additional terms:
+    content: `If you register as a Coach on AccrediPro CoachHub, you agree to the following additional terms:
 
 **Qualifications**: You represent that you have the appropriate qualifications, training, and experience to provide coaching services in your stated areas of expertise.
 
-**Independent Contractor**: You acknowledge that you are an independent contractor and not an employee, agent, or representative of CoachHub.
+**Independent Contractor**: You acknowledge that you are an independent contractor and not an employee, agent, or representative of AccrediPro CoachHub.
 
 **Service Quality**: You agree to provide professional, ethical, and high-quality coaching services to clients.
 
 **Availability**: You are responsible for keeping your calendar updated and honoring scheduled sessions.
 
-**Fees and Payments**: You set your own rates. CoachHub charges a platform fee (currently 15%) on each transaction. Payments are processed through our secure payment system.
+**Fees and Payments**: You set your own rates. AccrediPro CoachHub charges a platform fee (currently 15%) on each transaction. Payments are processed through our secure payment system.
 
 **Cancellation Policy**: You must establish and communicate a clear cancellation policy to clients.`,
   },
@@ -81,7 +81,7 @@ We do not provide coaching services directly. Coaches on our platform are indepe
     id: 'clients',
     icon: Users,
     title: '5. Client Terms',
-    content: `If you use CoachHub as a Client, you agree to the following:
+    content: `If you use AccrediPro CoachHub as a Client, you agree to the following:
 
 **Booking Sessions**: When you book a session, you enter into a direct agreement with the Coach for the services described.
 
@@ -99,11 +99,11 @@ We do not provide coaching services directly. Coaches on our platform are indepe
     title: '6. Payments and Fees',
     content: `**Payment Processing**: All payments are processed through Stripe, our secure payment provider. By using our Service, you also agree to Stripe's terms of service.
 
-**Platform Fees**: CoachHub charges a platform fee on each transaction. Current fee structure:
+**Platform Fees**: AccrediPro CoachHub charges a platform fee on each transaction. Current fee structure:
 • Coach platform fee: 15% of session price
 • Client payment processing: Included in session price
 
-**Refunds**: Refunds are handled according to each Coach's cancellation policy. In cases of dispute, CoachHub may mediate and determine appropriate refunds.
+**Refunds**: Refunds are handled according to each Coach's cancellation policy. In cases of dispute, AccrediPro CoachHub may mediate and determine appropriate refunds.
 
 **Payouts**: Coaches receive payouts according to our payout schedule, typically within 7-14 business days after session completion.
 
@@ -132,13 +132,13 @@ We do not provide coaching services directly. Coaches on our platform are indepe
     id: 'intellectual',
     icon: FileText,
     title: '8. Intellectual Property',
-    content: `**CoachHub Property**: The Service and its original content, features, and functionality are owned by CoachHub and are protected by international copyright, trademark, patent, trade secret, and other intellectual property laws.
+    content: `**AccrediPro CoachHub Property**: The Service and its original content, features, and functionality are owned by AccrediPro CoachHub and are protected by international copyright, trademark, patent, trade secret, and other intellectual property laws.
 
-**User Content**: You retain ownership of any content you submit to the Service. By submitting content, you grant CoachHub a worldwide, non-exclusive, royalty-free license to use, copy, modify, and display such content in connection with the Service.
+**User Content**: You retain ownership of any content you submit to the Service. By submitting content, you grant AccrediPro CoachHub a worldwide, non-exclusive, royalty-free license to use, copy, modify, and display such content in connection with the Service.
 
 **Coach Materials**: Coaches retain ownership of their coaching materials, methodologies, and content shared during sessions.
 
-**Feedback**: Any feedback, suggestions, or ideas you provide about the Service may be used by CoachHub without any obligation to you.`,
+**Feedback**: Any feedback, suggestions, or ideas you provide about the Service may be used by AccrediPro CoachHub without any obligation to you.`,
   },
   {
     id: 'liability',
@@ -146,7 +146,7 @@ We do not provide coaching services directly. Coaches on our platform are indepe
     title: '9. Limitation of Liability',
     content: `**Disclaimer**: THE SERVICE IS PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTIES OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
-**Limitation**: TO THE MAXIMUM EXTENT PERMITTED BY LAW, COACHHUB SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, OR ANY LOSS OF PROFITS OR REVENUES.
+**Limitation**: TO THE MAXIMUM EXTENT PERMITTED BY LAW, ACCREDIPRO COACHHUB SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, OR ANY LOSS OF PROFITS OR REVENUES.
 
 **Cap on Liability**: OUR TOTAL LIABILITY FOR ANY CLAIMS ARISING OUT OF OR RELATING TO THESE TERMS OR THE SERVICE SHALL NOT EXCEED THE AMOUNT YOU PAID TO US IN THE TWELVE (12) MONTHS PRECEDING THE CLAIM.
 
@@ -156,7 +156,7 @@ We do not provide coaching services directly. Coaches on our platform are indepe
     id: 'disputes',
     icon: Scale,
     title: '10. Dispute Resolution',
-    content: `**Informal Resolution**: Before filing any formal dispute, you agree to try to resolve the dispute informally by contacting us at support@coachhub.com.
+    content: `**Informal Resolution**: Before filing any formal dispute, you agree to try to resolve the dispute informally by contacting us at support@accredipro-coachhub.com.
 
 **Arbitration**: Any disputes that cannot be resolved informally shall be resolved through binding arbitration in accordance with the rules of the American Arbitration Association.
 
@@ -184,15 +184,15 @@ We do not provide coaching services directly. Coaches on our platform are indepe
     title: '12. Contact Information',
     content: `If you have any questions about these Terms of Service, please contact us:
 
-**Email**: legal@coachhub.com
+**Email**: legal@accredipro-coachhub.com
 
 **Mailing Address**:
-CoachHub Legal Team
+AccrediPro CoachHub Legal Team
 123 Innovation Drive
 San Francisco, CA 94105
 United States
 
-**Support**: For general support inquiries, please visit our Contact page or email support@coachhub.com.`,
+**Support**: For general support inquiries, please visit our Contact page or email support@accredipro-coachhub.com.`,
   },
 ];
 
@@ -278,19 +278,19 @@ export default function TermsPage() {
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-background to-primary/10">
+      <section className="relative overflow-hidden bg-gradient-to-br from-burgundy-dark to-burgundy">
         <div className="container mx-auto px-4 py-16 md:py-20">
           <div className="mx-auto max-w-3xl text-center">
-            <div className="mb-4 inline-flex items-center rounded-full bg-primary/10 px-4 py-2 text-sm font-medium text-primary">
+            <div className="mb-4 inline-flex items-center rounded-full bg-gold/20 px-4 py-2 text-sm font-medium text-white">
               <Scale className="mr-2 h-4 w-4" />
               Legal Document
             </div>
-            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">Terms of Service</h1>
-            <p className="mx-auto mt-4 max-w-xl text-muted-foreground">
+            <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">Terms of Service</h1>
+            <p className="mx-auto mt-4 max-w-xl text-white/70">
               Last updated: January 31, 2026
             </p>
-            <p className="mx-auto mt-2 text-sm text-muted-foreground">
-              Please read these terms carefully before using CoachHub.
+            <p className="mx-auto mt-2 text-sm text-white/70">
+              Please read these terms carefully before using AccrediPro CoachHub.
             </p>
             <div className="mt-6 flex justify-center gap-4">
               <Button variant="outline" onClick={handlePrint}>
@@ -303,7 +303,7 @@ export default function TermsPage() {
             </div>
           </div>
         </div>
-        <div className="absolute -left-20 -top-20 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
+        <div className="absolute -left-20 -top-20 h-72 w-72 rounded-full bg-gold/10 blur-3xl" />
       </section>
 
       {/* Main Content */}
@@ -323,7 +323,7 @@ export default function TermsPage() {
                       onClick={() => scrollToSection(item.id)}
                       className={`block w-full rounded-lg px-3 py-2 text-left text-sm transition-colors hover:bg-muted ${
                         activeSection === item.id
-                          ? 'bg-primary/10 font-medium text-primary'
+                          ? 'bg-burgundy/10 font-medium text-burgundy'
                           : 'text-muted-foreground'
                       }`}
                     >
@@ -355,10 +355,10 @@ export default function TermsPage() {
               </div>
 
               {/* Introduction */}
-              <div className="mb-8 rounded-lg border bg-muted/30 p-6">
+              <div className="mb-8 rounded-lg border bg-cream p-6">
                 <p className="text-muted-foreground">
-                  Welcome to CoachHub. These Terms of Service govern your use of our platform and
-                  services. By accessing or using CoachHub, you agree to be bound by these terms.
+                  Welcome to AccrediPro CoachHub. These Terms of Service govern your use of our platform and
+                  services. By accessing or using AccrediPro CoachHub, you agree to be bound by these terms.
                   Please read them carefully.
                 </p>
               </div>
@@ -374,8 +374,8 @@ export default function TermsPage() {
                   >
                     <AccordionTrigger className="hover:no-underline">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                          <section.icon className="h-5 w-5 text-primary" />
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-burgundy/10">
+                          <section.icon className="h-5 w-5 text-burgundy" />
                         </div>
                         <span className="text-left font-semibold">{section.title}</span>
                       </div>
@@ -394,9 +394,9 @@ export default function TermsPage() {
               </Accordion>
 
               {/* Footer Note */}
-              <div className="mt-12 rounded-lg border bg-muted/30 p-6 text-center">
+              <div className="mt-12 rounded-lg border bg-cream p-6 text-center">
                 <p className="text-sm text-muted-foreground">
-                  By using CoachHub, you acknowledge that you have read, understood, and agree to be
+                  By using AccrediPro CoachHub, you acknowledge that you have read, understood, and agree to be
                   bound by these Terms of Service.
                 </p>
                 <div className="mt-4 flex justify-center gap-4">
@@ -417,7 +417,7 @@ export default function TermsPage() {
       {showBackToTop && (
         <button
           onClick={scrollToTop}
-          className="fixed bottom-8 right-8 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform hover:scale-110"
+          className="fixed bottom-8 right-8 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-burgundy text-white shadow-lg transition-transform hover:scale-110"
           aria-label="Back to top"
         >
           <ArrowUp className="h-5 w-5" />

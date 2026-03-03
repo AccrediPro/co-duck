@@ -17,7 +17,7 @@ export function NewMessageEmail({
   conversationId,
   unsubscribeUrl,
 }: NewMessageEmailProps) {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://coachhub.com';
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://accredipro-coachhub.com';
   const truncated =
     messagePreview.length > 150 ? messagePreview.slice(0, 150) + '...' : messagePreview;
 

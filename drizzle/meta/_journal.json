@@ -120,6 +120,41 @@
       "when": 1772097658566,
       "tag": "0016_opposite_kang",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1772108474041,
+      "tag": "0017_flashy_thunderball",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1772272021457,
+      "tag": "0018_nebulous_toad",
+      "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1772286052233,
+      "tag": "0019_optimal_toxin",
+      "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "7",
+      "when": 1772296735477,
+      "tag": "0020_ancient_proemial_gods",
+      "breakpoints": true
+    },
+    {
+      "idx": 21,
+      "version": "7",
+      "when": 1772314712373,
+      "tag": "0021_far_arachne",
+      "breakpoints": true
     }
   ]
 }

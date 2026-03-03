@@ -55,10 +55,20 @@ describe('GET /api/action-items', () => {
       },
     ];
 
+    // count query (first in Promise.all)
+    const countSelectChain = {
+      from: vi.fn().mockReturnThis(),
+      where: vi.fn().mockResolvedValue([{ count: items.length }]),
+    };
+    mockDbSelect.mockReturnValueOnce(countSelectChain);
+
+    // paginated items query (second in Promise.all)
     const selectChain = {
       from: vi.fn().mockReturnThis(),
       where: vi.fn().mockReturnThis(),
-      orderBy: vi.fn().mockResolvedValue(items),
+      orderBy: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockReturnThis(),
+      offset: vi.fn().mockResolvedValue(items),
     };
     mockDbSelect.mockReturnValueOnce(selectChain);
 

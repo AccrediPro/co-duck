@@ -89,7 +89,7 @@ const StarRating = React.forwardRef<HTMLDivElement, StarRatingProps>(
           half={half}
           className={cn(
             sizeClasses[size],
-            filled || almostFilled || half ? 'text-yellow-400' : 'text-gray-300'
+            filled || almostFilled || half ? 'text-gold' : 'text-gray-300'
           )}
         />
       );
@@ -195,7 +195,7 @@ const StarRatingInput = React.forwardRef<HTMLDivElement, StarRatingInputProps>(
             filled={filled}
             className={cn(
               sizeClasses[size],
-              filled ? 'text-yellow-400' : 'text-gray-300',
+              filled ? 'text-gold' : 'text-gray-300',
               !disabled && 'transition-colors'
             )}
           />

@@ -9,12 +9,13 @@
 import { auth } from '@clerk/nextjs/server';
 import { db } from '@/db';
 import { actionItems, users } from '@/db/schema';
-import { eq, or, desc, and, inArray } from 'drizzle-orm';
+import { eq, or, desc, and, inArray, sql } from 'drizzle-orm';
 import { rateLimit, WRITE_LIMIT, rateLimitResponse } from '@/lib/rate-limit';
 import { createNotification } from '@/lib/notifications';
 import { ActionItemEmail } from '@/lib/emails';
 import { sendEmailWithPreferences } from '@/lib/emails/send-with-preferences';
 import { getUnsubscribeUrl } from '@/lib/unsubscribe';
+import { formatDateLong } from '@/lib/date-utils';
 
 /**
  * GET /api/action-items
@@ -65,15 +66,22 @@ export async function GET(request: Request) {
       conditions.push(eq(actionItems.isCompleted, true));
     }
 
-    // Get action items
-    const allItems = await db
-      .select()
-      .from(actionItems)
-      .where(and(...conditions))
-      .orderBy(desc(actionItems.createdAt));
+    // Get total count and paginated items in parallel
+    const [countResult, paginatedItems] = await Promise.all([
+      db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(actionItems)
+        .where(and(...conditions)),
+      db
+        .select()
+        .from(actionItems)
+        .where(and(...conditions))
+        .orderBy(desc(actionItems.createdAt))
+        .limit(limit)
+        .offset(offset),
+    ]);
 
-    const total = allItems.length;
-    const paginatedItems = allItems.slice(offset, offset + limit);
+    const total = countResult[0]?.count ?? 0;
 
     // Get user info
     const userIds = Array.from(new Set(paginatedItems.flatMap((i) => [i.coachId, i.clientId])));
@@ -261,12 +269,7 @@ export async function POST(request: Request) {
           title,
           description: description || undefined,
           dueDate: parsedDueDate
-            ? new Date(parsedDueDate).toLocaleDateString('en-US', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-              })
+            ? formatDateLong(parsedDueDate)
             : undefined,
           unsubscribeUrl: getUnsubscribeUrl(clientId, 'bookings'),
         })

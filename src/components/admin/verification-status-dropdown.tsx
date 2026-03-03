@@ -26,7 +26,7 @@ function getStatusConfig(status: string) {
         label: 'Verified',
         icon: CheckCircle,
         variant: 'default' as const,
-        color: 'text-green-500',
+        color: 'text-[hsl(var(--brand-accent))]',
       };
     case 'rejected':
       return {
@@ -40,7 +40,7 @@ function getStatusConfig(status: string) {
         label: 'Pending',
         icon: Clock,
         variant: 'secondary' as const,
-        color: 'text-yellow-500',
+        color: 'text-gold',
       };
   }
 }
@@ -92,13 +92,13 @@ export function VerificationStatusDropdown({
       <SelectContent>
         <SelectItem value="pending">
           <span className="flex items-center gap-2">
-            <Clock className="h-4 w-4 text-yellow-500" />
+            <Clock className="h-4 w-4 text-gold" />
             Pending
           </span>
         </SelectItem>
         <SelectItem value="verified">
           <span className="flex items-center gap-2">
-            <CheckCircle className="h-4 w-4 text-green-500" />
+            <CheckCircle className="h-4 w-4 text-[hsl(var(--brand-accent))]" />
             Verified
           </span>
         </SelectItem>

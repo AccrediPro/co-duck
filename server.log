@@ -1,0 +1,556 @@
+
+> coaching-platform@0.1.0 start
+> NODE_ENV=production tsx --tsconfig tsconfig.server.json server.ts
+
+[@sentry/nextjs] DEPRECATION WARNING: automaticVercelMonitors is deprecated and will be removed in a future version. Use webpack.automaticVercelMonitors instead.
+> Ready on http://localhost:3001
+> Socket.io server on ws://localhost:3001/api/socketio
+[socket.io] User connected: user_38yRviAVZ4bTytsRTHZsvNDdads (socket: wzJEgql5LIMj6HwDAAAB)
+[socket.io] User disconnected: user_38yRviAVZ4bTytsRTHZsvNDdads (socket: wzJEgql5LIMj6HwDAAAB, reason: client namespace disconnect)
+[socket.io] User connected: user_38yRviAVZ4bTytsRTHZsvNDdads (socket: yjBS2uYOFju7hYt2AAAD)
+Error fetching group sessions: P [Error]: Failed query: select count(*)::int from "group_sessions" where (("group_sessions"."status" = $1 or "group_sessions"."status" = $2) and "group_sessions"."start_time" >= $3)
+params: published,full,2026-03-03T11:37:20.455Z
+    at eS.queryWithCache (webpack://coaching-platform/node_modules/drizzle-orm/pg-core/session.js:41:1)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async <anonymous> (webpack://coaching-platform/node_modules/drizzle-orm/postgres-js/session.js:37:1)
+    at async Promise.all (index 1)
+    at async f (webpack://coaching-platform/src/app/api/group-sessions/route.ts:77:43)
+    at async <anonymous> (webpack://coaching-platform/node_modules/@sentry/nextjs/build/cjs/common/wrapRouteHandlerWithSentry.js:59:1)
+    at async <anonymous> (webpack://next/dist/esm/server/future/route-modules/app-route/module.js:195:37)
+    at async e_.execute (webpack://next/dist/esm/server/future/route-modules/app-route/module.js:124:26)
+    at async e_.handle (webpack://next/dist/esm/server/future/route-modules/app-route/module.js:270:30)
+    at async doRender (/Users/dave/Desktop/programma x corsi 2.0 /python project/co-duck/node_modules/next/src/server/base-server.ts:2251:30) {
+  query: 'select count(*)::int from "group_sessions" where (("group_sessions"."status" = $1 or "group_sessions"."status" = $2) and "group_sessions"."start_time" >= $3)',
+  params: [ 'published', 'full', '2026-03-03T11:37:20.455Z' ],
+  cause: u: relation "group_sessions" does not exist
+      at J (webpack://coaching-platform/node_modules/postgres/src/connection.js:815:29)
+      at <anonymous> (webpack://coaching-platform/node_modules/postgres/src/connection.js:488:1)
+      at Socket.eI (webpack://coaching-platform/node_modules/postgres/src/connection.js:490:1)
+      at Socket.emit (node:events:518:28)
+      at addChunk (node:internal/streams/readable:561:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+      at Readable.push (node:internal/streams/readable:392:5)
+      at TCP.onStreamRead (node:internal/stream_base_commons:189:23)
+      at TCP.callbackTrampoline (node:internal/async_hooks:130:17) {
+    severity_local: 'ERROR',
+    severity: 'ERROR',
+    code: '42P01',
+    position: '27',
+    file: 'parse_relation.c',
+    line: '1449',
+    routine: 'parserOpenTable'
+  }
+}
+Error fetching group sessions: P [Error]: Failed query: select count(*)::int from "group_sessions" where (("group_sessions"."status" = $1 or "group_sessions"."status" = $2) and "group_sessions"."start_time" >= $3)
+params: published,full,2026-03-03T11:37:22.857Z
+    at eS.queryWithCache (webpack://coaching-platform/node_modules/drizzle-orm/pg-core/session.js:41:1)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async <anonymous> (webpack://coaching-platform/node_modules/drizzle-orm/postgres-js/session.js:37:1)
+    at async Promise.all (index 1)
+    at async f (webpack://coaching-platform/src/app/api/group-sessions/route.ts:77:43)
+    at async <anonymous> (webpack://coaching-platform/node_modules/@sentry/nextjs/build/cjs/common/wrapRouteHandlerWithSentry.js:59:1)
+    at async <anonymous> (webpack://next/dist/esm/server/future/route-modules/app-route/module.js:195:37)
+    at async e_.execute (webpack://next/dist/esm/server/future/route-modules/app-route/module.js:124:26)
+    at async e_.handle (webpack://next/dist/esm/server/future/route-modules/app-route/module.js:270:30)
+    at async doRender (/Users/dave/Desktop/programma x corsi 2.0 /python project/co-duck/node_modules/next/src/server/base-server.ts:2251:30) {
+  query: 'select count(*)::int from "group_sessions" where (("group_sessions"."status" = $1 or "group_sessions"."status" = $2) and "group_sessions"."start_time" >= $3)',
+  params: [ 'published', 'full', '2026-03-03T11:37:22.857Z' ],
+  cause: u: relation "group_sessions" does not exist
+      at J (webpack://coaching-platform/node_modules/postgres/src/connection.js:815:29)
+      at <anonymous> (webpack://coaching-platform/node_modules/postgres/src/connection.js:488:1)
+      at Socket.eI (webpack://coaching-platform/node_modules/postgres/src/connection.js:490:1)
+      at Socket.emit (node:events:518:28)
+      at addChunk (node:internal/streams/readable:561:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+      at Readable.push (node:internal/streams/readable:392:5)
+      at TCP.onStreamRead (node:internal/stream_base_commons:189:23)
+      at TCP.callbackTrampoline (node:internal/async_hooks:130:17) {
+    severity_local: 'ERROR',
+    severity: 'ERROR',
+    code: '42P01',
+    position: '27',
+    file: 'parse_relation.c',
+    line: '1449',
+    routine: 'parserOpenTable'
+  }
+}
+Error fetching group sessions: P [Error]: Failed query: select "id", "coach_id", "title", "description", "max_participants", "participant_count", "price_cents", "currency", "start_time", "end_time", "duration", "meeting_link", "status", "tags", "created_at", "updated_at" from "group_sessions" where (("group_sessions"."status" = $1 or "group_sessions"."status" = $2) and "group_sessions"."start_time" >= $3) order by "group_sessions"."start_time" desc limit $4
+params: published,full,2026-03-03T11:37:25.259Z,20
+    at eS.queryWithCache (webpack://coaching-platform/node_modules/drizzle-orm/pg-core/session.js:41:1)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async <anonymous> (webpack://coaching-platform/node_modules/drizzle-orm/postgres-js/session.js:37:1)
+    at async Promise.all (index 0)
+    at async f (webpack://coaching-platform/src/app/api/group-sessions/route.ts:77:43)
+    at async <anonymous> (webpack://coaching-platform/node_modules/@sentry/nextjs/build/cjs/common/wrapRouteHandlerWithSentry.js:59:1)
+    at async <anonymous> (webpack://next/dist/esm/server/future/route-modules/app-route/module.js:195:37)
+    at async e_.execute (webpack://next/dist/esm/server/future/route-modules/app-route/module.js:124:26)
+    at async e_.handle (webpack://next/dist/esm/server/future/route-modules/app-route/module.js:270:30)
+    at async doRender (/Users/dave/Desktop/programma x corsi 2.0 /python project/co-duck/node_modules/next/src/server/base-server.ts:2251:30) {
+  query: 'select "id", "coach_id", "title", "description", "max_participants", "participant_count", "price_cents", "currency", "start_time", "end_time", "duration", "meeting_link", "status", "tags", "created_at", "updated_at" from "group_sessions" where (("group_sessions"."status" = $1 or "group_sessions"."status" = $2) and "group_sessions"."start_time" >= $3) order by "group_sessions"."start_time" desc limit $4',
+  params: [ 'published', 'full', '2026-03-03T11:37:25.259Z', 20 ],
+  cause: u: relation "group_sessions" does not exist
+      at J (webpack://coaching-platform/node_modules/postgres/src/connection.js:815:29)
+      at <anonymous> (webpack://coaching-platform/node_modules/postgres/src/connection.js:488:1)
+      at Socket.eI (webpack://coaching-platform/node_modules/postgres/src/connection.js:490:1)
+      at Socket.emit (node:events:518:28)
+      at addChunk (node:internal/streams/readable:561:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+      at Readable.push (node:internal/streams/readable:392:5)
+      at TCP.onStreamRead (node:internal/stream_base_commons:189:23)
+      at TCP.callbackTrampoline (node:internal/async_hooks:130:17) {
+    severity_local: 'ERROR',
+    severity: 'ERROR',
+    code: '42P01',
+    position: '222',
+    file: 'parse_relation.c',
+    line: '1449',
+    routine: 'parserOpenTable'
+  }
+}
+[socket.io] User disconnected: user_38yRviAVZ4bTytsRTHZsvNDdads (socket: yjBS2uYOFju7hYt2AAAD, reason: client namespace disconnect)
+[socket.io] User connected: user_38yRviAVZ4bTytsRTHZsvNDdads (socket: uHd6ad7TYYoWWe7MAAAF)
+[socket.io] User disconnected: user_38yRviAVZ4bTytsRTHZsvNDdads (socket: uHd6ad7TYYoWWe7MAAAF, reason: client namespace disconnect)
+[socket.io] User connected: user_38yRviAVZ4bTytsRTHZsvNDdads (socket: qS24bdemdu8DfWbNAAAH)
+[socket.io] user_38yRviAVZ4bTytsRTHZsvNDdads joined room conversation:4
+[socket.io] User disconnected: user_38yRviAVZ4bTytsRTHZsvNDdads (socket: qS24bdemdu8DfWbNAAAH, reason: client namespace disconnect)
+[socket.io] User connected: user_38yRviAVZ4bTytsRTHZsvNDdads (socket: v0SbDFeoEBC1QKVqAAAJ)
+[socket.io] User disconnected: user_38yRviAVZ4bTytsRTHZsvNDdads (socket: v0SbDFeoEBC1QKVqAAAJ, reason: client namespace disconnect)
+[socket.io] User connected: user_38yRviAVZ4bTytsRTHZsvNDdads (socket: MKqf1xAY9cf7VLXZAAAL)
+[socket.io] user_38yRviAVZ4bTytsRTHZsvNDdads joined room conversation:4
+[Email] Exception while sending email: t is not a function
+[socket.io] User disconnected: user_38yRviAVZ4bTytsRTHZsvNDdads (socket: MKqf1xAY9cf7VLXZAAAL, reason: client namespace disconnect)
+[socket.io] User connected: user_38yRviAVZ4bTytsRTHZsvNDdads (socket: g4h5Ck76jw04Z-g8AAAO)
+[socket.io] User disconnected: user_38yRviAVZ4bTytsRTHZsvNDdads (socket: g4h5Ck76jw04Z-g8AAAO, reason: client namespace disconnect)
+[socket.io] User connected: user_38yRviAVZ4bTytsRTHZsvNDdads (socket: Ws8QVnkTFtJ_fRDZAAAQ)
+Error fetching group sessions: P [Error]: Failed query: select count(*)::int from "group_sessions" where (("group_sessions"."status" = $1 or "group_sessions"."status" = $2) and "group_sessions"."start_time" >= $3)
+params: published,full,2026-03-03T11:38:17.658Z
+    at eS.queryWithCache (webpack://coaching-platform/node_modules/drizzle-orm/pg-core/session.js:41:1)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async <anonymous> (webpack://coaching-platform/node_modules/drizzle-orm/postgres-js/session.js:37:1)
+    at async Promise.all (index 1)
+    at async f (webpack://coaching-platform/src/app/api/group-sessions/route.ts:77:43)
+    at async <anonymous> (webpack://coaching-platform/node_modules/@sentry/nextjs/build/cjs/common/wrapRouteHandlerWithSentry.js:59:1)
+    at async <anonymous> (webpack://next/dist/esm/server/future/route-modules/app-route/module.js:195:37)
+    at async e_.execute (webpack://next/dist/esm/server/future/route-modules/app-route/module.js:124:26)
+    at async e_.handle (webpack://next/dist/esm/server/future/route-modules/app-route/module.js:270:30)
+    at async doRender (/Users/dave/Desktop/programma x corsi 2.0 /python project/co-duck/node_modules/next/src/server/base-server.ts:2251:30) {
+  query: 'select count(*)::int from "group_sessions" where (("group_sessions"."status" = $1 or "group_sessions"."status" = $2) and "group_sessions"."start_time" >= $3)',
+  params: [ 'published', 'full', '2026-03-03T11:38:17.658Z' ],
+  cause: u: relation "group_sessions" does not exist
+      at J (webpack://coaching-platform/node_modules/postgres/src/connection.js:815:29)
+      at <anonymous> (webpack://coaching-platform/node_modules/postgres/src/connection.js:488:1)
+      at Socket.eI (webpack://coaching-platform/node_modules/postgres/src/connection.js:490:1)
+      at Socket.emit (node:events:518:28)
+      at addChunk (node:internal/streams/readable:561:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+      at Readable.push (node:internal/streams/readable:392:5)
+      at TCP.onStreamRead (node:internal/stream_base_commons:189:23)
+      at TCP.callbackTrampoline (node:internal/async_hooks:130:17) {
+    severity_local: 'ERROR',
+    severity: 'ERROR',
+    code: '42P01',
+    position: '27',
+    file: 'parse_relation.c',
+    line: '1449',
+    routine: 'parserOpenTable'
+  }
+}
+Error fetching group sessions: P [Error]: Failed query: select "id", "coach_id", "title", "description", "max_participants", "participant_count", "price_cents", "currency", "start_time", "end_time", "duration", "meeting_link", "status", "tags", "created_at", "updated_at" from "group_sessions" where (("group_sessions"."status" = $1 or "group_sessions"."status" = $2) and "group_sessions"."start_time" >= $3) order by "group_sessions"."start_time" desc limit $4
+params: published,full,2026-03-03T11:38:19.054Z,20
+    at eS.queryWithCache (webpack://coaching-platform/node_modules/drizzle-orm/pg-core/session.js:41:1)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async <anonymous> (webpack://coaching-platform/node_modules/drizzle-orm/postgres-js/session.js:37:1)
+    at async Promise.all (index 0)
+    at async f (webpack://coaching-platform/src/app/api/group-sessions/route.ts:77:43)
+    at async <anonymous> (webpack://coaching-platform/node_modules/@sentry/nextjs/build/cjs/common/wrapRouteHandlerWithSentry.js:59:1)
+    at async <anonymous> (webpack://next/dist/esm/server/future/route-modules/app-route/module.js:195:37)
+    at async e_.execute (webpack://next/dist/esm/server/future/route-modules/app-route/module.js:124:26)
+    at async e_.handle (webpack://next/dist/esm/server/future/route-modules/app-route/module.js:270:30)
+    at async doRender (/Users/dave/Desktop/programma x corsi 2.0 /python project/co-duck/node_modules/next/src/server/base-server.ts:2251:30) {
+  query: 'select "id", "coach_id", "title", "description", "max_participants", "participant_count", "price_cents", "currency", "start_time", "end_time", "duration", "meeting_link", "status", "tags", "created_at", "updated_at" from "group_sessions" where (("group_sessions"."status" = $1 or "group_sessions"."status" = $2) and "group_sessions"."start_time" >= $3) order by "group_sessions"."start_time" desc limit $4',
+  params: [ 'published', 'full', '2026-03-03T11:38:19.054Z', 20 ],
+  cause: u: relation "group_sessions" does not exist
+      at J (webpack://coaching-platform/node_modules/postgres/src/connection.js:815:29)
+      at <anonymous> (webpack://coaching-platform/node_modules/postgres/src/connection.js:488:1)
+      at Socket.eI (webpack://coaching-platform/node_modules/postgres/src/connection.js:490:1)
+      at Socket.emit (node:events:518:28)
+      at addChunk (node:internal/streams/readable:561:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+      at Readable.push (node:internal/streams/readable:392:5)
+      at TCP.onStreamRead (node:internal/stream_base_commons:189:23)
+      at TCP.callbackTrampoline (node:internal/async_hooks:130:17) {
+    severity_local: 'ERROR',
+    severity: 'ERROR',
+    code: '42P01',
+    position: '222',
+    file: 'parse_relation.c',
+    line: '1449',
+    routine: 'parserOpenTable'
+  }
+}
+Error fetching group sessions: P [Error]: Failed query: select "id", "coach_id", "title", "description", "max_participants", "participant_count", "price_cents", "currency", "start_time", "end_time", "duration", "meeting_link", "status", "tags", "created_at", "updated_at" from "group_sessions" where (("group_sessions"."status" = $1 or "group_sessions"."status" = $2) and "group_sessions"."start_time" >= $3) order by "group_sessions"."start_time" desc limit $4
+params: published,full,2026-03-03T11:38:21.467Z,20
+    at eS.queryWithCache (webpack://coaching-platform/node_modules/drizzle-orm/pg-core/session.js:41:1)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async <anonymous> (webpack://coaching-platform/node_modules/drizzle-orm/postgres-js/session.js:37:1)
+    at async Promise.all (index 0)
+    at async f (webpack://coaching-platform/src/app/api/group-sessions/route.ts:77:43)
+    at async <anonymous> (webpack://coaching-platform/node_modules/@sentry/nextjs/build/cjs/common/wrapRouteHandlerWithSentry.js:59:1)
+    at async <anonymous> (webpack://next/dist/esm/server/future/route-modules/app-route/module.js:195:37)
+    at async e_.execute (webpack://next/dist/esm/server/future/route-modules/app-route/module.js:124:26)
+    at async e_.handle (webpack://next/dist/esm/server/future/route-modules/app-route/module.js:270:30)
+    at async doRender (/Users/dave/Desktop/programma x corsi 2.0 /python project/co-duck/node_modules/next/src/server/base-server.ts:2251:30) {
+  query: 'select "id", "coach_id", "title", "description", "max_participants", "participant_count", "price_cents", "currency", "start_time", "end_time", "duration", "meeting_link", "status", "tags", "created_at", "updated_at" from "group_sessions" where (("group_sessions"."status" = $1 or "group_sessions"."status" = $2) and "group_sessions"."start_time" >= $3) order by "group_sessions"."start_time" desc limit $4',
+  params: [ 'published', 'full', '2026-03-03T11:38:21.467Z', 20 ],
+  cause: u: relation "group_sessions" does not exist
+      at J (webpack://coaching-platform/node_modules/postgres/src/connection.js:815:29)
+      at <anonymous> (webpack://coaching-platform/node_modules/postgres/src/connection.js:488:1)
+      at Socket.eI (webpack://coaching-platform/node_modules/postgres/src/connection.js:490:1)
+      at Socket.emit (node:events:518:28)
+      at addChunk (node:internal/streams/readable:561:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+      at Readable.push (node:internal/streams/readable:392:5)
+      at TCP.onStreamRead (node:internal/stream_base_commons:189:23)
+      at TCP.callbackTrampoline (node:internal/async_hooks:130:17) {
+    severity_local: 'ERROR',
+    severity: 'ERROR',
+    code: '42P01',
+    position: '222',
+    file: 'parse_relation.c',
+    line: '1449',
+    routine: 'parserOpenTable'
+  }
+}
+[socket.io] User disconnected: user_38yRviAVZ4bTytsRTHZsvNDdads (socket: Ws8QVnkTFtJ_fRDZAAAQ, reason: client namespace disconnect)
+[socket.io] User connected: user_38yRviAVZ4bTytsRTHZsvNDdads (socket: 7pyhcQdYZwztt5-5AAAS)
+[socket.io] User disconnected: user_38yRviAVZ4bTytsRTHZsvNDdads (socket: 7pyhcQdYZwztt5-5AAAS, reason: client namespace disconnect)
+Error fetching group sessions: P [Error]: Failed query: select count(*)::int from "group_sessions" where (("group_sessions"."status" = $1 or "group_sessions"."status" = $2) and "group_sessions"."start_time" >= $3)
+params: published,full,2026-03-03T11:38:24.864Z
+    at eS.queryWithCache (webpack://coaching-platform/node_modules/drizzle-orm/pg-core/session.js:41:1)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async <anonymous> (webpack://coaching-platform/node_modules/drizzle-orm/postgres-js/session.js:37:1)
+    at async Promise.all (index 1)
+    at async f (webpack://coaching-platform/src/app/api/group-sessions/route.ts:77:43)
+    at async <anonymous> (webpack://coaching-platform/node_modules/@sentry/nextjs/build/cjs/common/wrapRouteHandlerWithSentry.js:59:1)
+    at async <anonymous> (webpack://next/dist/esm/server/future/route-modules/app-route/module.js:195:37)
+    at async e_.execute (webpack://next/dist/esm/server/future/route-modules/app-route/module.js:124:26)
+    at async e_.handle (webpack://next/dist/esm/server/future/route-modules/app-route/module.js:270:30)
+    at async doRender (/Users/dave/Desktop/programma x corsi 2.0 /python project/co-duck/node_modules/next/src/server/base-server.ts:2251:30) {
+  query: 'select count(*)::int from "group_sessions" where (("group_sessions"."status" = $1 or "group_sessions"."status" = $2) and "group_sessions"."start_time" >= $3)',
+  params: [ 'published', 'full', '2026-03-03T11:38:24.864Z' ],
+  cause: u: relation "group_sessions" does not exist
+      at J (webpack://coaching-platform/node_modules/postgres/src/connection.js:815:29)
+      at <anonymous> (webpack://coaching-platform/node_modules/postgres/src/connection.js:488:1)
+      at Socket.eI (webpack://coaching-platform/node_modules/postgres/src/connection.js:490:1)
+      at Socket.emit (node:events:518:28)
+      at addChunk (node:internal/streams/readable:561:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+      at Readable.push (node:internal/streams/readable:392:5)
+      at TCP.onStreamRead (node:internal/stream_base_commons:189:23)
+      at TCP.callbackTrampoline (node:internal/async_hooks:130:17) {
+    severity_local: 'ERROR',
+    severity: 'ERROR',
+    code: '42P01',
+    position: '27',
+    file: 'parse_relation.c',
+    line: '1449',
+    routine: 'parserOpenTable'
+  }
+}
+[socket.io] User connected: user_38yRtKDqtcSmuEMITVklDAQeJmF (socket: o4-JoR5phwol7FgLAAAU)
+Error fetching group sessions: P [Error]: Failed query: select "id", "coach_id", "title", "description", "max_participants", "participant_count", "price_cents", "currency", "start_time", "end_time", "duration", "meeting_link", "status", "tags", "created_at", "updated_at" from "group_sessions" where (("group_sessions"."status" = $1 or "group_sessions"."status" = $2) and "group_sessions"."start_time" >= $3) order by "group_sessions"."start_time" desc limit $4
+params: published,full,2026-03-03T11:38:45.255Z,20
+    at eS.queryWithCache (webpack://coaching-platform/node_modules/drizzle-orm/pg-core/session.js:41:1)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async <anonymous> (webpack://coaching-platform/node_modules/drizzle-orm/postgres-js/session.js:37:1)
+    at async Promise.all (index 0)
+    at async f (webpack://coaching-platform/src/app/api/group-sessions/route.ts:77:43)
+    at async <anonymous> (webpack://coaching-platform/node_modules/@sentry/nextjs/build/cjs/common/wrapRouteHandlerWithSentry.js:59:1)
+    at async <anonymous> (webpack://next/dist/esm/server/future/route-modules/app-route/module.js:195:37)
+    at async e_.execute (webpack://next/dist/esm/server/future/route-modules/app-route/module.js:124:26)
+    at async e_.handle (webpack://next/dist/esm/server/future/route-modules/app-route/module.js:270:30)
+    at async doRender (/Users/dave/Desktop/programma x corsi 2.0 /python project/co-duck/node_modules/next/src/server/base-server.ts:2251:30) {
+  query: 'select "id", "coach_id", "title", "description", "max_participants", "participant_count", "price_cents", "currency", "start_time", "end_time", "duration", "meeting_link", "status", "tags", "created_at", "updated_at" from "group_sessions" where (("group_sessions"."status" = $1 or "group_sessions"."status" = $2) and "group_sessions"."start_time" >= $3) order by "group_sessions"."start_time" desc limit $4',
+  params: [ 'published', 'full', '2026-03-03T11:38:45.255Z', 20 ],
+  cause: u: relation "group_sessions" does not exist
+      at J (webpack://coaching-platform/node_modules/postgres/src/connection.js:815:29)
+      at <anonymous> (webpack://coaching-platform/node_modules/postgres/src/connection.js:488:1)
+      at Socket.eI (webpack://coaching-platform/node_modules/postgres/src/connection.js:490:1)
+      at Socket.emit (node:events:518:28)
+      at addChunk (node:internal/streams/readable:561:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+      at Readable.push (node:internal/streams/readable:392:5)
+      at TCP.onStreamRead (node:internal/stream_base_commons:189:23)
+      at TCP.callbackTrampoline (node:internal/async_hooks:130:17) {
+    severity_local: 'ERROR',
+    severity: 'ERROR',
+    code: '42P01',
+    position: '222',
+    file: 'parse_relation.c',
+    line: '1449',
+    routine: 'parserOpenTable'
+  }
+}
+Error fetching group sessions: P [Error]: Failed query: select count(*)::int from "group_sessions" where (("group_sessions"."status" = $1 or "group_sessions"."status" = $2) and "group_sessions"."start_time" >= $3)
+params: published,full,2026-03-03T11:38:46.653Z
+    at eS.queryWithCache (webpack://coaching-platform/node_modules/drizzle-orm/pg-core/session.js:41:1)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async <anonymous> (webpack://coaching-platform/node_modules/drizzle-orm/postgres-js/session.js:37:1)
+    at async Promise.all (index 1)
+    at async f (webpack://coaching-platform/src/app/api/group-sessions/route.ts:77:43)
+    at async <anonymous> (webpack://coaching-platform/node_modules/@sentry/nextjs/build/cjs/common/wrapRouteHandlerWithSentry.js:59:1)
+    at async <anonymous> (webpack://next/dist/esm/server/future/route-modules/app-route/module.js:195:37)
+    at async e_.execute (webpack://next/dist/esm/server/future/route-modules/app-route/module.js:124:26)
+    at async e_.handle (webpack://next/dist/esm/server/future/route-modules/app-route/module.js:270:30)
+    at async doRender (/Users/dave/Desktop/programma x corsi 2.0 /python project/co-duck/node_modules/next/src/server/base-server.ts:2251:30) {
+  query: 'select count(*)::int from "group_sessions" where (("group_sessions"."status" = $1 or "group_sessions"."status" = $2) and "group_sessions"."start_time" >= $3)',
+  params: [ 'published', 'full', '2026-03-03T11:38:46.653Z' ],
+  cause: u: relation "group_sessions" does not exist
+      at J (webpack://coaching-platform/node_modules/postgres/src/connection.js:815:29)
+      at <anonymous> (webpack://coaching-platform/node_modules/postgres/src/connection.js:488:1)
+      at Socket.eI (webpack://coaching-platform/node_modules/postgres/src/connection.js:490:1)
+      at Socket.emit (node:events:518:28)
+      at addChunk (node:internal/streams/readable:561:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+      at Readable.push (node:internal/streams/readable:392:5)
+      at TCP.onStreamRead (node:internal/stream_base_commons:189:23)
+      at TCP.callbackTrampoline (node:internal/async_hooks:130:17) {
+    severity_local: 'ERROR',
+    severity: 'ERROR',
+    code: '42P01',
+    position: '27',
+    file: 'parse_relation.c',
+    line: '1449',
+    routine: 'parserOpenTable'
+  }
+}
+Error fetching group sessions: P [Error]: Failed query: select "id", "coach_id", "title", "description", "max_participants", "participant_count", "price_cents", "currency", "start_time", "end_time", "duration", "meeting_link", "status", "tags", "created_at", "updated_at" from "group_sessions" where (("group_sessions"."status" = $1 or "group_sessions"."status" = $2) and "group_sessions"."start_time" >= $3) order by "group_sessions"."start_time" desc limit $4
+params: published,full,2026-03-03T11:38:49.046Z,20
+    at eS.queryWithCache (webpack://coaching-platform/node_modules/drizzle-orm/pg-core/session.js:41:1)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async <anonymous> (webpack://coaching-platform/node_modules/drizzle-orm/postgres-js/session.js:37:1)
+    at async Promise.all (index 0)
+    at async f (webpack://coaching-platform/src/app/api/group-sessions/route.ts:77:43)
+    at async <anonymous> (webpack://coaching-platform/node_modules/@sentry/nextjs/build/cjs/common/wrapRouteHandlerWithSentry.js:59:1)
+    at async <anonymous> (webpack://next/dist/esm/server/future/route-modules/app-route/module.js:195:37)
+    at async e_.execute (webpack://next/dist/esm/server/future/route-modules/app-route/module.js:124:26)
+    at async e_.handle (webpack://next/dist/esm/server/future/route-modules/app-route/module.js:270:30)
+    at async doRender (/Users/dave/Desktop/programma x corsi 2.0 /python project/co-duck/node_modules/next/src/server/base-server.ts:2251:30) {
+  query: 'select "id", "coach_id", "title", "description", "max_participants", "participant_count", "price_cents", "currency", "start_time", "end_time", "duration", "meeting_link", "status", "tags", "created_at", "updated_at" from "group_sessions" where (("group_sessions"."status" = $1 or "group_sessions"."status" = $2) and "group_sessions"."start_time" >= $3) order by "group_sessions"."start_time" desc limit $4',
+  params: [ 'published', 'full', '2026-03-03T11:38:49.046Z', 20 ],
+  cause: u: relation "group_sessions" does not exist
+      at J (webpack://coaching-platform/node_modules/postgres/src/connection.js:815:29)
+      at <anonymous> (webpack://coaching-platform/node_modules/postgres/src/connection.js:488:1)
+      at Socket.eI (webpack://coaching-platform/node_modules/postgres/src/connection.js:490:1)
+      at Socket.emit (node:events:518:28)
+      at addChunk (node:internal/streams/readable:561:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+      at Readable.push (node:internal/streams/readable:392:5)
+      at TCP.onStreamRead (node:internal/stream_base_commons:189:23)
+      at TCP.callbackTrampoline (node:internal/async_hooks:130:17) {
+    severity_local: 'ERROR',
+    severity: 'ERROR',
+    code: '42P01',
+    position: '222',
+    file: 'parse_relation.c',
+    line: '1449',
+    routine: 'parserOpenTable'
+  }
+}
+[socket.io] User disconnected: user_38yRtKDqtcSmuEMITVklDAQeJmF (socket: o4-JoR5phwol7FgLAAAU, reason: client namespace disconnect)
+[socket.io] User connected: user_38yRtKDqtcSmuEMITVklDAQeJmF (socket: BUKVnaKaVGMOU4VPAAAW)
+[socket.io] User disconnected: user_38yRtKDqtcSmuEMITVklDAQeJmF (socket: BUKVnaKaVGMOU4VPAAAW, reason: client namespace disconnect)
+Error fetching group sessions: P [Error]: Failed query: select count(*)::int from "group_sessions" where (("group_sessions"."status" = $1 or "group_sessions"."status" = $2) and "group_sessions"."start_time" >= $3)
+params: published,full,2026-03-03T11:38:51.742Z
+    at eS.queryWithCache (webpack://coaching-platform/node_modules/drizzle-orm/pg-core/session.js:41:1)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async <anonymous> (webpack://coaching-platform/node_modules/drizzle-orm/postgres-js/session.js:37:1)
+    at async Promise.all (index 1)
+    at async f (webpack://coaching-platform/src/app/api/group-sessions/route.ts:77:43)
+    at async <anonymous> (webpack://coaching-platform/node_modules/@sentry/nextjs/build/cjs/common/wrapRouteHandlerWithSentry.js:59:1)
+    at async <anonymous> (webpack://next/dist/esm/server/future/route-modules/app-route/module.js:195:37)
+    at async e_.execute (webpack://next/dist/esm/server/future/route-modules/app-route/module.js:124:26)
+    at async e_.handle (webpack://next/dist/esm/server/future/route-modules/app-route/module.js:270:30)
+    at async doRender (/Users/dave/Desktop/programma x corsi 2.0 /python project/co-duck/node_modules/next/src/server/base-server.ts:2251:30) {
+  query: 'select count(*)::int from "group_sessions" where (("group_sessions"."status" = $1 or "group_sessions"."status" = $2) and "group_sessions"."start_time" >= $3)',
+  params: [ 'published', 'full', '2026-03-03T11:38:51.742Z' ],
+  cause: u: relation "group_sessions" does not exist
+      at J (webpack://coaching-platform/node_modules/postgres/src/connection.js:815:29)
+      at <anonymous> (webpack://coaching-platform/node_modules/postgres/src/connection.js:488:1)
+      at Socket.eI (webpack://coaching-platform/node_modules/postgres/src/connection.js:490:1)
+      at Socket.emit (node:events:518:28)
+      at addChunk (node:internal/streams/readable:561:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+      at Readable.push (node:internal/streams/readable:392:5)
+      at TCP.onStreamRead (node:internal/stream_base_commons:189:23)
+      at TCP.callbackTrampoline (node:internal/async_hooks:130:17) {
+    severity_local: 'ERROR',
+    severity: 'ERROR',
+    code: '42P01',
+    position: '27',
+    file: 'parse_relation.c',
+    line: '1449',
+    routine: 'parserOpenTable'
+  }
+}
+[socket.io] User connected: user_38yRtKDqtcSmuEMITVklDAQeJmF (socket: NOaa2nPynScpW8SuAAAY)
+Error fetching group sessions: P [Error]: Failed query: select "id", "coach_id", "title", "description", "max_participants", "participant_count", "price_cents", "currency", "start_time", "end_time", "duration", "meeting_link", "status", "tags", "created_at", "updated_at" from "group_sessions" where (("group_sessions"."status" = $1 or "group_sessions"."status" = $2) and "group_sessions"."start_time" >= $3) order by "group_sessions"."start_time" desc limit $4
+params: published,full,2026-03-03T11:39:03.682Z,20
+    at eS.queryWithCache (webpack://coaching-platform/node_modules/drizzle-orm/pg-core/session.js:41:1)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async <anonymous> (webpack://coaching-platform/node_modules/drizzle-orm/postgres-js/session.js:37:1)
+    at async Promise.all (index 0)
+    at async f (webpack://coaching-platform/src/app/api/group-sessions/route.ts:77:43)
+    at async <anonymous> (webpack://coaching-platform/node_modules/@sentry/nextjs/build/cjs/common/wrapRouteHandlerWithSentry.js:59:1)
+    at async <anonymous> (webpack://next/dist/esm/server/future/route-modules/app-route/module.js:195:37)
+    at async e_.execute (webpack://next/dist/esm/server/future/route-modules/app-route/module.js:124:26)
+    at async e_.handle (webpack://next/dist/esm/server/future/route-modules/app-route/module.js:270:30)
+    at async doRender (/Users/dave/Desktop/programma x corsi 2.0 /python project/co-duck/node_modules/next/src/server/base-server.ts:2251:30) {
+  query: 'select "id", "coach_id", "title", "description", "max_participants", "participant_count", "price_cents", "currency", "start_time", "end_time", "duration", "meeting_link", "status", "tags", "created_at", "updated_at" from "group_sessions" where (("group_sessions"."status" = $1 or "group_sessions"."status" = $2) and "group_sessions"."start_time" >= $3) order by "group_sessions"."start_time" desc limit $4',
+  params: [ 'published', 'full', '2026-03-03T11:39:03.682Z', 20 ],
+  cause: u: relation "group_sessions" does not exist
+      at J (webpack://coaching-platform/node_modules/postgres/src/connection.js:815:29)
+      at <anonymous> (webpack://coaching-platform/node_modules/postgres/src/connection.js:488:1)
+      at Socket.eI (webpack://coaching-platform/node_modules/postgres/src/connection.js:490:1)
+      at Socket.emit (node:events:518:28)
+      at addChunk (node:internal/streams/readable:561:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+      at Readable.push (node:internal/streams/readable:392:5)
+      at TCP.onStreamRead (node:internal/stream_base_commons:189:23)
+      at TCP.callbackTrampoline (node:internal/async_hooks:130:17) {
+    severity_local: 'ERROR',
+    severity: 'ERROR',
+    code: '42P01',
+    position: '222',
+    file: 'parse_relation.c',
+    line: '1449',
+    routine: 'parserOpenTable'
+  }
+}
+Error fetching group sessions: P [Error]: Failed query: select "id", "coach_id", "title", "description", "max_participants", "participant_count", "price_cents", "currency", "start_time", "end_time", "duration", "meeting_link", "status", "tags", "created_at", "updated_at" from "group_sessions" where (("group_sessions"."status" = $1 or "group_sessions"."status" = $2) and "group_sessions"."start_time" >= $3) order by "group_sessions"."start_time" desc limit $4
+params: published,full,2026-03-03T11:39:05.089Z,20
+    at eS.queryWithCache (webpack://coaching-platform/node_modules/drizzle-orm/pg-core/session.js:41:1)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async <anonymous> (webpack://coaching-platform/node_modules/drizzle-orm/postgres-js/session.js:37:1)
+    at async Promise.all (index 0)
+    at async f (webpack://coaching-platform/src/app/api/group-sessions/route.ts:77:43)
+    at async <anonymous> (webpack://coaching-platform/node_modules/@sentry/nextjs/build/cjs/common/wrapRouteHandlerWithSentry.js:59:1)
+    at async <anonymous> (webpack://next/dist/esm/server/future/route-modules/app-route/module.js:195:37)
+    at async e_.execute (webpack://next/dist/esm/server/future/route-modules/app-route/module.js:124:26)
+    at async e_.handle (webpack://next/dist/esm/server/future/route-modules/app-route/module.js:270:30)
+    at async doRender (/Users/dave/Desktop/programma x corsi 2.0 /python project/co-duck/node_modules/next/src/server/base-server.ts:2251:30) {
+  query: 'select "id", "coach_id", "title", "description", "max_participants", "participant_count", "price_cents", "currency", "start_time", "end_time", "duration", "meeting_link", "status", "tags", "created_at", "updated_at" from "group_sessions" where (("group_sessions"."status" = $1 or "group_sessions"."status" = $2) and "group_sessions"."start_time" >= $3) order by "group_sessions"."start_time" desc limit $4',
+  params: [ 'published', 'full', '2026-03-03T11:39:05.089Z', 20 ],
+  cause: u: relation "group_sessions" does not exist
+      at J (webpack://coaching-platform/node_modules/postgres/src/connection.js:815:29)
+      at <anonymous> (webpack://coaching-platform/node_modules/postgres/src/connection.js:488:1)
+      at Socket.eI (webpack://coaching-platform/node_modules/postgres/src/connection.js:490:1)
+      at Socket.emit (node:events:518:28)
+      at addChunk (node:internal/streams/readable:561:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+      at Readable.push (node:internal/streams/readable:392:5)
+      at TCP.onStreamRead (node:internal/stream_base_commons:189:23)
+      at TCP.callbackTrampoline (node:internal/async_hooks:130:17) {
+    severity_local: 'ERROR',
+    severity: 'ERROR',
+    code: '42P01',
+    position: '222',
+    file: 'parse_relation.c',
+    line: '1449',
+    routine: 'parserOpenTable'
+  }
+}
+[socket.io] User disconnected: user_38yRtKDqtcSmuEMITVklDAQeJmF (socket: NOaa2nPynScpW8SuAAAY, reason: client namespace disconnect)
+[socket.io] User connected: user_38yRtKDqtcSmuEMITVklDAQeJmF (socket: X1P8VZjxVzQJSkK2AAAa)
+[socket.io] User disconnected: user_38yRtKDqtcSmuEMITVklDAQeJmF (socket: X1P8VZjxVzQJSkK2AAAa, reason: client namespace disconnect)
+[socket.io] User connected: user_38yRtKDqtcSmuEMITVklDAQeJmF (socket: GuDM2o-Hv5_73ND5AAAc)
+[socket.io] user_38yRtKDqtcSmuEMITVklDAQeJmF joined room conversation:4
+[socket.io] User disconnected: user_38yRtKDqtcSmuEMITVklDAQeJmF (socket: GuDM2o-Hv5_73ND5AAAc, reason: client namespace disconnect)
+[socket.io] User connected: user_38yRtKDqtcSmuEMITVklDAQeJmF (socket: Gd-29HJ6j4Pc0PZgAAAe)
+[socket.io] User disconnected: user_38yRtKDqtcSmuEMITVklDAQeJmF (socket: Gd-29HJ6j4Pc0PZgAAAe, reason: client namespace disconnect)
+[socket.io] User connected: user_38yRtKDqtcSmuEMITVklDAQeJmF (socket: vROGCd-dLCS24A2aAAAh)
+Error fetching group sessions: P [Error]: Failed query: select count(*)::int from "group_sessions" where (("group_sessions"."status" = $1 or "group_sessions"."status" = $2) and "group_sessions"."start_time" >= $3)
+params: published,full,2026-03-03T11:39:54.931Z
+    at eS.queryWithCache (webpack://coaching-platform/node_modules/drizzle-orm/pg-core/session.js:41:1)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async <anonymous> (webpack://coaching-platform/node_modules/drizzle-orm/postgres-js/session.js:37:1)
+    at async Promise.all (index 1)
+    at async f (webpack://coaching-platform/src/app/api/group-sessions/route.ts:77:43)
+    at async <anonymous> (webpack://coaching-platform/node_modules/@sentry/nextjs/build/cjs/common/wrapRouteHandlerWithSentry.js:59:1)
+    at async <anonymous> (webpack://next/dist/esm/server/future/route-modules/app-route/module.js:195:37)
+    at async e_.execute (webpack://next/dist/esm/server/future/route-modules/app-route/module.js:124:26)
+    at async e_.handle (webpack://next/dist/esm/server/future/route-modules/app-route/module.js:270:30)
+    at async doRender (/Users/dave/Desktop/programma x corsi 2.0 /python project/co-duck/node_modules/next/src/server/base-server.ts:2251:30) {
+  query: 'select count(*)::int from "group_sessions" where (("group_sessions"."status" = $1 or "group_sessions"."status" = $2) and "group_sessions"."start_time" >= $3)',
+  params: [ 'published', 'full', '2026-03-03T11:39:54.931Z' ],
+  cause: u: relation "group_sessions" does not exist
+      at J (webpack://coaching-platform/node_modules/postgres/src/connection.js:815:29)
+      at <anonymous> (webpack://coaching-platform/node_modules/postgres/src/connection.js:488:1)
+      at Socket.eI (webpack://coaching-platform/node_modules/postgres/src/connection.js:490:1)
+      at Socket.emit (node:events:518:28)
+      at addChunk (node:internal/streams/readable:561:12)
+      at readableAddChunkPushByteMode (node:internal/streams/readable:512:3)
+      at Readable.push (node:internal/streams/readable:392:5)
+      at TCP.onStreamRead (node:internal/stream_base_commons:189:23)
+      at TCP.callbackTrampoline (node:internal/async_hooks:130:17) {
+    severity_local: 'ERROR',
+    severity: 'ERROR',
+    code: '42P01',
+    position: '27',
+    file: 'parse_relation.c',
+    line: '1449',
+    routine: 'parserOpenTable'
+  }
+}
+[socket.io] User disconnected: user_38yRtKDqtcSmuEMITVklDAQeJmF (socket: vROGCd-dLCS24A2aAAAh, reason: client namespace disconnect)
+[socket.io] User connected: user_38yRtKDqtcSmuEMITVklDAQeJmF (socket: HCtkQU3E-y3bWmmZAAAj)
+[socket.io] User disconnected: user_38yRtKDqtcSmuEMITVklDAQeJmF (socket: HCtkQU3E-y3bWmmZAAAj, reason: client namespace disconnect)
+[socket.io] User connected: user_38yRtKDqtcSmuEMITVklDAQeJmF (socket: Mlr-A1vd4LHv3f7nAAAl)
+[socket.io] User disconnected: user_38yRtKDqtcSmuEMITVklDAQeJmF (socket: Mlr-A1vd4LHv3f7nAAAl, reason: client namespace disconnect)
+[socket.io] User connected: user_38yRtKDqtcSmuEMITVklDAQeJmF (socket: xQ5Nyuc8yqbPyviEAAAn)
+[socket.io] User disconnected: user_38yRtKDqtcSmuEMITVklDAQeJmF (socket: xQ5Nyuc8yqbPyviEAAAn, reason: client namespace disconnect)
+[socket.io] User connected: user_38yRtKDqtcSmuEMITVklDAQeJmF (socket: s-vKOBNGQnsBqHgIAAAp)
+[socket.io] User disconnected: user_38yRtKDqtcSmuEMITVklDAQeJmF (socket: s-vKOBNGQnsBqHgIAAAp, reason: client namespace disconnect)
+[socket.io] User connected: user_38yRtKDqtcSmuEMITVklDAQeJmF (socket: vOUqGRphX0OWiydRAAAr)
+[socket.io] User disconnected: user_38yRtKDqtcSmuEMITVklDAQeJmF (socket: vOUqGRphX0OWiydRAAAr, reason: client namespace disconnect)
+[socket.io] User connected: user_38yRtKDqtcSmuEMITVklDAQeJmF (socket: w0QVvdyt9eXawGC2AAAt)
+[socket.io] User disconnected: user_38yRtKDqtcSmuEMITVklDAQeJmF (socket: w0QVvdyt9eXawGC2AAAt, reason: client namespace disconnect)
+[socket.io] User connected: user_38yRtKDqtcSmuEMITVklDAQeJmF (socket: kNumvD5vmJTtInQWAAAv)
+[socket.io] User disconnected: user_38yRtKDqtcSmuEMITVklDAQeJmF (socket: kNumvD5vmJTtInQWAAAv, reason: client namespace disconnect)
+[socket.io] User connected: user_38yRtKDqtcSmuEMITVklDAQeJmF (socket: IT5rR_tt4xCNBMfQAAAx)
+[socket.io] User disconnected: user_38yRtKDqtcSmuEMITVklDAQeJmF (socket: IT5rR_tt4xCNBMfQAAAx, reason: client namespace disconnect)
+[socket.io] User connected: user_38yRtKDqtcSmuEMITVklDAQeJmF (socket: vD5wOFr99K-SSt2fAAAz)
+[socket.io] User disconnected: user_38yRtKDqtcSmuEMITVklDAQeJmF (socket: vD5wOFr99K-SSt2fAAAz, reason: client namespace disconnect)
+[socket.io] User connected: user_38yRtKDqtcSmuEMITVklDAQeJmF (socket: GNmInLnrJWfO7yyMAAA1)
+[socket.io] User disconnected: user_38yRtKDqtcSmuEMITVklDAQeJmF (socket: GNmInLnrJWfO7yyMAAA1, reason: client namespace disconnect)
+[socket.io] User connected: user_38yRtKDqtcSmuEMITVklDAQeJmF (socket: kXq0h-ZB9-S23IMVAAA3)
+[socket.io] User disconnected: user_38yRtKDqtcSmuEMITVklDAQeJmF (socket: kXq0h-ZB9-S23IMVAAA3, reason: client namespace disconnect)
+[socket.io] User connected: user_38yRtKDqtcSmuEMITVklDAQeJmF (socket: qRVxo8oWLzammfIaAAA5)
+[socket.io] User disconnected: user_38yRtKDqtcSmuEMITVklDAQeJmF (socket: qRVxo8oWLzammfIaAAA5, reason: client namespace disconnect)
+[socket.io] User connected: user_38yRtKDqtcSmuEMITVklDAQeJmF (socket: bJNXzjbKKrC28GECAAA7)
+[socket.io] User disconnected: user_38yRtKDqtcSmuEMITVklDAQeJmF (socket: bJNXzjbKKrC28GECAAA7, reason: client namespace disconnect)
+[socket.io] User connected: user_38yRtKDqtcSmuEMITVklDAQeJmF (socket: oVx3Y9HW5PrlkzUSAAA9)
+[socket.io] User disconnected: user_38yRtKDqtcSmuEMITVklDAQeJmF (socket: oVx3Y9HW5PrlkzUSAAA9, reason: client namespace disconnect)
+[socket.io] User connected: user_38yRtKDqtcSmuEMITVklDAQeJmF (socket: 31YrNrRYlbE3UyEhAAA_)
+[socket.io] User reconnected: user_38yRtKDqtcSmuEMITVklDAQeJmF (socket: HY5dsu3KznUTvb5NAABB)
+[socket.io] user_38yRtKDqtcSmuEMITVklDAQeJmF joined room conversation:4
+[socket.io] user_38yRtKDqtcSmuEMITVklDAQeJmF left room conversation:4
+[socket.io] User disconnected: user_38yRtKDqtcSmuEMITVklDAQeJmF (socket: 31YrNrRYlbE3UyEhAAA_, reason: client namespace disconnect)
+[socket.io] User reconnected: user_38yRtKDqtcSmuEMITVklDAQeJmF (socket: ce0SOYR5jFg8GOVpAABD)
+[socket.io] User disconnected: user_38yRtKDqtcSmuEMITVklDAQeJmF (socket: ce0SOYR5jFg8GOVpAABD, reason: client namespace disconnect)
+[socket.io] User reconnected: user_38yRtKDqtcSmuEMITVklDAQeJmF (socket: QZU0l2wMb7fkpgT0AABF)
+[socket.io] User disconnected: user_38yRtKDqtcSmuEMITVklDAQeJmF (socket: QZU0l2wMb7fkpgT0AABF, reason: client namespace disconnect)
+[socket.io] User reconnected: user_38yRtKDqtcSmuEMITVklDAQeJmF (socket: yxiO1T_K5w2lvnjDAABH)
+[socket.io] User disconnected: user_38yRtKDqtcSmuEMITVklDAQeJmF (socket: yxiO1T_K5w2lvnjDAABH, reason: client namespace disconnect)
+[socket.io] User reconnected: user_38yRtKDqtcSmuEMITVklDAQeJmF (socket: f0VY9ni7oAFO12hzAABJ)
+[socket.io] User disconnected: user_38yRtKDqtcSmuEMITVklDAQeJmF (socket: f0VY9ni7oAFO12hzAABJ, reason: transport close)
+[socket.io] Auth error: _TokenVerificationError: JWT is expired. Expiry date: Tue, 03 Mar 2026 11:52:16 GMT, Current date: Tue, 03 Mar 2026 12:12:31 GMT.
+    at assertExpirationClaim (/Users/dave/Desktop/programma x corsi 2.0 /python project/co-duck/node_modules/@clerk/backend/src/jwt/assertions.ts:113:11)
+    at verifyJwt (/Users/dave/Desktop/programma x corsi 2.0 /python project/co-duck/node_modules/@clerk/backend/src/jwt/verifyJwt.ts:155:5)
+    at verifyToken (/Users/dave/Desktop/programma x corsi 2.0 /python project/co-duck/node_modules/@clerk/backend/src/tokens/verify.ts:134:18)
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async <anonymous> (/Users/dave/Desktop/programma x corsi 2.0 /python project/co-duck/node_modules/@clerk/backend/src/jwt/legacyReturn.ts:6:30)
+    at async Array.<anonymous> (/Users/dave/Desktop/programma x corsi 2.0 /python project/co-duck/server.ts:51:23) {
+  reason: 'token-expired',
+  action: undefined
+}

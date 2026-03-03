@@ -22,6 +22,7 @@ import { sql, and, eq, gte } from 'drizzle-orm';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { db, users, coachProfiles, bookings, reviews, conversations } from '@/db';
+import { formatDateTime } from '@/lib/date-utils';
 import {
   Users,
   UserCheck,
@@ -206,22 +207,6 @@ async function getRecentBookings(limit: number = 10) {
 // ============================================================================
 
 /**
- * Formats a date to a readable string.
- *
- * @param date - Date to format
- * @returns Formatted date string (e.g., "Jan 15, 2026 at 2:30 PM")
- */
-function formatDate(date: Date): string {
-  return new Intl.DateTimeFormat('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-    hour: 'numeric',
-    minute: '2-digit',
-  }).format(new Date(date));
-}
-
-/**
  * Returns badge variant based on booking status.
  *
  * @param status - Booking status
@@ -258,13 +243,16 @@ export default async function AdminOverviewPage() {
   const [stats, recentBookings] = await Promise.all([getPlatformStats(), getRecentBookings(10)]);
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto max-w-5xl">
       {/* Page Header */}
-      <div>
-        <h1 className="text-3xl font-bold">Admin Overview</h1>
-        <p className="text-muted-foreground">Platform statistics and recent activity</p>
-      </div>
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold">Admin Dashboard</CardTitle>
+          <CardDescription>Platform overview and management</CardDescription>
+        </CardHeader>
+      </Card>
 
+      <div className="space-y-6">
       {/* Stats Grid — Row 1 */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {/* Total Users */}
@@ -413,8 +401,8 @@ export default async function AdminOverviewPage() {
                     </p>
                   </div>
                   <div className="text-sm text-muted-foreground sm:text-right">
-                    <p>{formatDate(booking.startTime)}</p>
-                    <p className="text-xs">Booked {formatDate(booking.createdAt)}</p>
+                    <p>{formatDateTime(booking.startTime)}</p>
+                    <p className="text-xs">Booked {formatDateTime(booking.createdAt)}</p>
                   </div>
                 </div>
               ))}
@@ -422,6 +410,7 @@ export default async function AdminOverviewPage() {
           )}
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }

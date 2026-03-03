@@ -224,7 +224,7 @@ export default async function CoachesPage({ searchParams }: PageProps) {
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold">Find a Coach</h1>
+        <h1 className="text-3xl font-bold text-burgundy-dark">Find a Coach</h1>
         <p className="mt-2 text-muted-foreground">
           Browse our community of expert coaches ready to help you succeed.
         </p>

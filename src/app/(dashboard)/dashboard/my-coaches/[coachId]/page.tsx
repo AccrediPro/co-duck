@@ -1,6 +1,6 @@
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { CoachWorkspace } from '@/components/dashboard/coach-workspace';
 
 interface PageProps {
@@ -43,29 +43,37 @@ export default async function CoachDetailPage({ params }: PageProps) {
 
   if (!coach) {
     return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold">Coach Not Found</h1>
-          <p className="text-muted-foreground">
-            This coach doesn&apos;t exist or you don&apos;t have an active relationship.
-          </p>
-        </div>
-        <Card>
-          <CardContent className="py-12 text-center">
-            <p className="text-muted-foreground">
-              You need at least one confirmed booking with this coach to access their workspace.
-            </p>
-            <a
-              href="/dashboard/my-coaches"
-              className="mt-4 inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-            >
-              Back to My Coaches
-            </a>
-          </CardContent>
+      <div className="mx-auto max-w-3xl">
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="text-2xl font-bold text-burgundy-dark">Coach Not Found</CardTitle>
+            <CardDescription>
+              This coach doesn&apos;t exist or you don&apos;t have an active relationship.
+            </CardDescription>
+          </CardHeader>
         </Card>
+        <div className="space-y-6">
+          <Card>
+            <CardContent className="py-12 text-center">
+              <p className="text-muted-foreground">
+                You need at least one confirmed booking with this coach to access their workspace.
+              </p>
+              <a
+                href="/dashboard/my-coaches"
+                className="mt-4 inline-flex items-center justify-center rounded-md bg-burgundy px-4 py-2 text-sm font-medium text-white hover:bg-burgundy-light"
+              >
+                Back to My Coaches
+              </a>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     );
   }
 
-  return <CoachWorkspace coach={coach} initialPrograms={programs} />;
+  return (
+    <div className="mx-auto max-w-3xl">
+      <CoachWorkspace coach={coach} initialPrograms={programs} />
+    </div>
+  );
 }

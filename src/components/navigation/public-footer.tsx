@@ -8,7 +8,7 @@ const footerLinks = {
   product: [
     { href: '/coaches', label: 'Find Coaches' },
     { href: '/specialties', label: 'Specialties' },
-    { href: '/sign-up', label: 'Become a Coach' },
+    { href: '/sign-up', label: 'Get Started' },
   ],
   company: [
     { href: '/about', label: 'About Us' },
@@ -46,23 +46,23 @@ export function PublicFooter() {
               </p>
             </div>
             {subscribed ? (
-              <div className="flex items-center gap-2 text-sm text-green-600">
+              <div className="flex items-center gap-2 text-sm text-[hsl(var(--brand-warm))]">
                 <Mail className="h-4 w-4" />
                 <span>Thanks for subscribing!</span>
               </div>
             ) : (
-              <form onSubmit={handleNewsletterSubmit} className="flex w-full max-w-md gap-2">
+              <form onSubmit={handleNewsletterSubmit} className="flex w-full max-w-md flex-col gap-2 sm:flex-row">
                 <input
                   type="email"
                   placeholder="Enter your email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  className="h-11 w-full min-w-0 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:flex-1"
                   required
                 />
                 <button
                   type="submit"
-                  className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:w-auto"
                 >
                   Subscribe
                   <ArrowRight className="h-4 w-4" />
@@ -76,7 +76,7 @@ export function PublicFooter() {
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
             <Link href="/" className="text-xl font-bold">
-              CoachHub
+              AccrediPro CoachHub
             </Link>
             <p className="mt-2 text-sm text-muted-foreground">
               Connect with expert coaches for personalized guidance on your journey.
@@ -140,10 +140,10 @@ export function PublicFooter() {
             <ul className="space-y-2">
               <li>
                 <a
-                  href="mailto:support@coachhub.com"
+                  href="mailto:support@accredipro-coachhub.com"
                   className="text-sm text-muted-foreground transition-colors hover:text-foreground"
                 >
-                  support@coachhub.com
+                  support@accredipro-coachhub.com
                 </a>
               </li>
               <li>
@@ -161,7 +161,7 @@ export function PublicFooter() {
         {/* Copyright */}
         <div className="mt-8 flex flex-col items-center justify-between gap-4 border-t pt-8 md:flex-row">
           <p className="text-sm text-muted-foreground">
-            &copy; {new Date().getFullYear()} CoachHub. All rights reserved.
+            &copy; {new Date().getFullYear()} AccrediPro CoachHub. All rights reserved.
           </p>
           <div className="flex gap-4 text-sm text-muted-foreground">
             <Link href="/privacy" className="transition-colors hover:text-foreground">

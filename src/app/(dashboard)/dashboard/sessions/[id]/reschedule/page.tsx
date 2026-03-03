@@ -1,7 +1,7 @@
 import { auth } from '@clerk/nextjs/server';
 import { redirect, notFound } from 'next/navigation';
 import Link from 'next/link';
-import { format } from 'date-fns';
+import { formatDateLong, formatTime } from '@/lib/date-utils';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Clock, AlertTriangle } from 'lucide-react';
@@ -37,27 +37,33 @@ export default async function ReschedulePage({ params }: PageProps) {
   if (!result.success) {
     // Show error state
     return (
-      <div className="space-y-6">
-        <div>
-          <Button variant="ghost" size="sm" asChild className="mb-4">
-            <Link href={`/dashboard/sessions/${sessionId}`}>
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Session
-            </Link>
-          </Button>
-          <h1 className="text-3xl font-bold">Reschedule Session</h1>
-        </div>
+      <div className="mx-auto max-w-3xl">
+        <Button variant="ghost" size="sm" asChild className="mb-4">
+          <Link href={`/dashboard/sessions/${sessionId}`}>
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Session
+          </Link>
+        </Button>
 
-        <Card>
-          <CardContent className="py-12 text-center">
-            <AlertTriangle className="mx-auto mb-4 h-12 w-12 text-amber-500" />
-            <h2 className="text-xl font-semibold">Cannot Reschedule</h2>
-            <p className="mt-2 text-muted-foreground">{result.error}</p>
-            <Button className="mt-6" asChild>
-              <Link href={`/dashboard/sessions/${sessionId}`}>Return to Session Details</Link>
-            </Button>
-          </CardContent>
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="text-2xl font-bold">Reschedule Session</CardTitle>
+            <CardDescription>Choose a new date and time</CardDescription>
+          </CardHeader>
         </Card>
+
+        <div className="space-y-6">
+          <Card>
+            <CardContent className="py-12 text-center">
+              <AlertTriangle className="mx-auto mb-4 h-12 w-12 text-gold" />
+              <h2 className="text-xl font-semibold">Cannot Reschedule</h2>
+              <p className="mt-2 text-muted-foreground">{result.error}</p>
+              <Button className="mt-6" asChild>
+                <Link href={`/dashboard/sessions/${sessionId}`}>Return to Session Details</Link>
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     );
   }
@@ -65,49 +71,54 @@ export default async function ReschedulePage({ params }: PageProps) {
   const booking = result.data;
 
   return (
-    <div className="space-y-6">
-      <div>
-        <Button variant="ghost" size="sm" asChild className="mb-4">
-          <Link href={`/dashboard/sessions/${booking.id}`}>
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Session
-          </Link>
-        </Button>
-        <h1 className="text-3xl font-bold">Reschedule Session</h1>
-        <p className="text-muted-foreground">
-          Choose a new time for your session with {booking.coachName}
-        </p>
-      </div>
+    <div className="mx-auto max-w-3xl">
+      <Button variant="ghost" size="sm" asChild className="mb-4">
+        <Link href={`/dashboard/sessions/${booking.id}`}>
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Back to Session
+        </Link>
+      </Button>
 
-      {/* Current Booking Info */}
-      <Card className="border-amber-200 bg-amber-50 dark:border-amber-900 dark:bg-amber-950">
-        <CardHeader className="pb-2">
-          <CardTitle className="flex items-center gap-2 text-base text-amber-800 dark:text-amber-200">
-            <Clock className="h-4 w-4" />
-            Current Booking
-          </CardTitle>
-          <CardDescription className="text-amber-700 dark:text-amber-300">
-            Your current session is scheduled for:
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold">Reschedule Session</CardTitle>
+          <CardDescription>
+            Choose a new time for your session with {booking.coachName}
           </CardDescription>
         </CardHeader>
-        <CardContent className="pt-0">
-          <div className="rounded-lg bg-amber-100/50 p-3 dark:bg-amber-900/30">
-            <p className="font-medium text-amber-900 dark:text-amber-100">
-              {booking.sessionType.name}
-            </p>
-            <p className="text-sm text-amber-800 dark:text-amber-200">
-              {format(new Date(booking.originalStartTime), 'EEEE, MMMM d, yyyy')}
-            </p>
-            <p className="text-sm text-amber-800 dark:text-amber-200">
-              {format(new Date(booking.originalStartTime), 'h:mm a')} -{' '}
-              {format(new Date(booking.originalEndTime), 'h:mm a')}
-            </p>
-          </div>
-        </CardContent>
       </Card>
 
-      {/* Reschedule Flow */}
-      <RescheduleFlow booking={booking} />
+      <div className="space-y-6">
+        {/* Current Booking Info */}
+        <Card className="border-gold/30 bg-gold/5 dark:border-gold-dark dark:bg-gold-dark/10">
+          <CardHeader className="pb-2">
+            <CardTitle className="flex items-center gap-2 text-base text-burgundy-dark dark:text-gold">
+              <Clock className="h-4 w-4" />
+              Current Booking
+            </CardTitle>
+            <CardDescription className="text-burgundy dark:text-gold/80">
+              Your current session is scheduled for:
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="rounded-lg bg-gold/10 p-3 dark:bg-gold-dark/20">
+              <p className="font-medium text-burgundy-dark dark:text-gold">
+                {booking.sessionType.name}
+              </p>
+              <p className="text-sm text-burgundy dark:text-gold/80">
+                {formatDateLong(new Date(booking.originalStartTime))}
+              </p>
+              <p className="text-sm text-burgundy dark:text-gold/80">
+                {formatTime(new Date(booking.originalStartTime))} -{' '}
+                {formatTime(new Date(booking.originalEndTime))}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Reschedule Flow */}
+        <RescheduleFlow booking={booking} />
+      </div>
     </div>
   );
 }

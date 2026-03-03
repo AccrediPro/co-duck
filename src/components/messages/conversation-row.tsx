@@ -19,6 +19,7 @@
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
+import { formatDateShort } from '@/lib/date-utils';
 import type { ConversationWithDetails } from '@/app/(dashboard)/dashboard/messages/actions';
 
 // ============================================================================
@@ -107,10 +108,7 @@ function formatRelativeTime(date: Date | null): string {
     return `${diffWeeks}w ago`;
   } else {
     // Format as date
-    return new Date(date).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-    });
+    return formatDateShort(new Date(date));
   }
 }
 
@@ -158,7 +156,7 @@ export function ConversationRow({ conversation, onClick }: ConversationRowProps)
         </Avatar>
         {/* Unread indicator dot */}
         {hasUnread && (
-          <div className="absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full border-2 border-background bg-emerald-500" />
+          <div className="absolute -right-0.5 -top-0.5 h-3 w-3 rounded-full border-2 border-background bg-[hsl(var(--brand-accent))]" />
         )}
       </div>
 

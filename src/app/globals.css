@@ -10,57 +10,83 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 150 10% 10%;
-    --card: 0 0% 100%;
-    --card-foreground: 150 10% 10%;
+    --background: 40 60% 91%;
+    --foreground: 354 41% 26%;
+    --card: 40 50% 97%;
+    --card-foreground: 354 41% 26%;
     --popover: 0 0% 100%;
-    --popover-foreground: 150 10% 10%;
-    --primary: 152 69% 31%;
+    --popover-foreground: 354 41% 26%;
+    --primary: 354 42% 32%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 150 20% 96%;
-    --secondary-foreground: 150 10% 10%;
-    --muted: 150 15% 95%;
-    --muted-foreground: 150 10% 40%;
-    --accent: 150 20% 94%;
-    --accent-foreground: 150 10% 10%;
+    --secondary: 43 65% 52%;
+    --secondary-foreground: 354 41% 16%;
+    --muted: 38 40% 87%;
+    --muted-foreground: 30 15% 40%;
+    --accent: 43 65% 52%;
+    --accent-foreground: 354 41% 16%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 150 15% 88%;
-    --input: 150 15% 88%;
-    --ring: 152 69% 31%;
-    --chart-1: 152 69% 40%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 142 50% 30%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 120 40% 50%;
+    --border: 36 30% 82%;
+    --input: 36 30% 82%;
+    --ring: 354 42% 32%;
+    --chart-1: 354 42% 32%;
+    --chart-2: 354 41% 39%;
+    --chart-3: 354 41% 26%;
+    --chart-4: 43 65% 52%;
+    --chart-5: 79 22% 50%;
     --radius: 0.5rem;
+    --success: 79 22% 50%;
+
+    /* Brand accent palette */
+    --brand-warm: 354 42% 32%;               /* #722f37 */
+    --brand-accent: 354 41% 39%;             /* #8b3a42 */
+    --brand-accent-light: 40 60% 91%;        /* #f5eddc */
+    --brand-accent-dark: 354 41% 26%;        /* #5d262d */
+    --brand-accent-darker: 354 41% 20%;      /* #4d2026 */
+    --brand-accent-muted: 354 30% 45%;       /* #956168 */
+    --brand-accent-hover: 354 41% 39%;       /* #8b3a42 */
+    --brand-surface: 40 50% 97%;             /* #faf7f0 */
+    --brand-border: 36 30% 82%;              /* #ddd4c4 */
+    --brand-accent-deep: 354 41% 16%;        /* #3b1a1e */
   }
   .dark {
-    --background: 150 15% 5%;
-    --foreground: 150 10% 98%;
-    --card: 150 15% 7%;
-    --card-foreground: 150 10% 98%;
-    --popover: 150 15% 7%;
-    --popover-foreground: 150 10% 98%;
-    --primary: 152 69% 40%;
+    --background: 354 30% 6%;
+    --foreground: 40 30% 92%;
+    --card: 354 25% 9%;
+    --card-foreground: 40 30% 92%;
+    --popover: 354 25% 9%;
+    --popover-foreground: 40 30% 92%;
+    --primary: 354 42% 40%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 150 15% 15%;
-    --secondary-foreground: 150 10% 98%;
-    --muted: 150 15% 15%;
-    --muted-foreground: 150 10% 60%;
-    --accent: 150 15% 15%;
-    --accent-foreground: 150 10% 98%;
+    --secondary: 43 55% 45%;
+    --secondary-foreground: 40 30% 92%;
+    --muted: 354 15% 15%;
+    --muted-foreground: 354 10% 60%;
+    --accent: 43 55% 45%;
+    --accent-foreground: 40 30% 92%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 150 15% 18%;
-    --input: 150 15% 18%;
-    --ring: 152 69% 40%;
-    --chart-1: 152 69% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 142 50% 40%;
-    --chart-4: 120 50% 55%;
-    --chart-5: 170 60% 45%;
+    --border: 354 15% 18%;
+    --input: 354 15% 18%;
+    --ring: 354 42% 40%;
+    --chart-1: 354 42% 45%;
+    --chart-2: 354 35% 50%;
+    --chart-3: 354 41% 30%;
+    --chart-4: 43 65% 52%;
+    --chart-5: 79 22% 50%;
+    --success: 79 22% 50%;
+
+    /* Brand accent palette (dark mode) */
+    --brand-warm: 354 42% 32%;
+    --brand-accent: 354 41% 39%;
+    --brand-accent-light: 40 30% 20%;
+    --brand-accent-dark: 354 41% 26%;
+    --brand-accent-darker: 354 41% 20%;
+    --brand-accent-muted: 354 30% 45%;
+    --brand-accent-hover: 354 41% 39%;
+    --brand-surface: 354 20% 10%;
+    --brand-border: 354 15% 25%;
+    --brand-accent-deep: 354 41% 16%;
   }
 }
 
@@ -68,7 +94,8 @@
   * {
     @apply border-border;
   }
+  html,
   body {
-    @apply bg-background text-foreground;
+    @apply overflow-x-hidden bg-background text-foreground;
   }
 }

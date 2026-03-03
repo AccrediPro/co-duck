@@ -34,6 +34,7 @@ import {
   type CoachBookingData,
   type TimeSlot,
 } from '@/app/(public)/coaches/[slug]/book/actions';
+import { formatDateLong } from '@/lib/date-utils';
 
 interface BookingFlowProps {
   coach: CoachBookingData;
@@ -195,12 +196,7 @@ export function BookingFlow({ coach, slug }: BookingFlowProps) {
 
   // Format selected date for display
   const formatSelectedDate = (date: Date) => {
-    return date.toLocaleDateString('en-US', {
-      weekday: 'long',
-      month: 'long',
-      day: 'numeric',
-      year: 'numeric',
-    });
+    return formatDateLong(date);
   };
 
   // Get timezone label

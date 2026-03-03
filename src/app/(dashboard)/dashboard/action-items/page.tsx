@@ -32,16 +32,22 @@ export default async function ActionItemsPage({ searchParams }: PageProps) {
 
   if (!result.success) {
     return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold">Action Items</h1>
-          <p className="text-muted-foreground">Tasks and action items assigned by your coaches</p>
-        </div>
-        <Card>
-          <CardContent className="py-12 text-center">
-            <p className="text-muted-foreground">{result.error || 'Failed to load action items'}</p>
-          </CardContent>
+      <div className="mx-auto max-w-3xl">
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="text-2xl font-bold">Action Items</CardTitle>
+            <CardDescription>Tasks and action items from your coaching sessions</CardDescription>
+          </CardHeader>
         </Card>
+        <div className="space-y-6">
+          <Card>
+            <CardContent className="py-12 text-center">
+              <p className="text-muted-foreground">
+                {result.error || 'Failed to load action items'}
+              </p>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     );
   }
@@ -56,42 +62,50 @@ export default async function ActionItemsPage({ searchParams }: PageProps) {
   // Check if user has any action items at all
   if (allItems.length === 0 && filter === 'all') {
     return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold">Action Items</h1>
-          <p className="text-muted-foreground">Tasks and action items assigned by your coaches</p>
-        </div>
-
-        <Card>
-          <CardHeader className="text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-              <CheckSquare className="h-8 w-8 text-primary" />
-            </div>
-            <CardTitle>No Action Items Yet</CardTitle>
-            <CardDescription className="mx-auto max-w-md">
-              Your coaches haven&apos;t assigned any action items yet. When they do, you&apos;ll see
-              them here and can track your progress.
-            </CardDescription>
+      <div className="mx-auto max-w-3xl">
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="text-2xl font-bold">Action Items</CardTitle>
+            <CardDescription>Tasks and action items from your coaching sessions</CardDescription>
           </CardHeader>
         </Card>
+
+        <div className="space-y-6">
+          <Card>
+            <CardHeader className="text-center">
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+                <CheckSquare className="h-8 w-8 text-primary" />
+              </div>
+              <CardTitle>No Action Items Yet</CardTitle>
+              <CardDescription className="mx-auto max-w-md">
+                Your coaches haven&apos;t assigned any action items yet. When they do, you&apos;ll
+                see them here and can track your progress.
+              </CardDescription>
+            </CardHeader>
+          </Card>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Action Items</h1>
-        <p className="text-muted-foreground">Tasks and action items assigned by your coaches</p>
-      </div>
+    <div className="mx-auto max-w-3xl">
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold">Action Items</CardTitle>
+          <CardDescription>Tasks and action items from your coaching sessions</CardDescription>
+        </CardHeader>
+      </Card>
 
-      <ClientActionItemsList
-        initialFilter={filter}
-        initialItems={actionItems}
-        allCount={allItems.length}
-        pendingCount={pendingItems.length}
-        completedCount={completedItems.length}
-      />
+      <div className="space-y-6">
+        <ClientActionItemsList
+          initialFilter={filter}
+          initialItems={actionItems}
+          allCount={allItems.length}
+          pendingCount={pendingItems.length}
+          completedCount={completedItems.length}
+        />
+      </div>
     </div>
   );
 }

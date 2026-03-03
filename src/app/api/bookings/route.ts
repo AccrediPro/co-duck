@@ -9,11 +9,12 @@
 import { auth } from '@clerk/nextjs/server';
 import { db } from '@/db';
 import { bookings, users, coachProfiles } from '@/db/schema';
-import { eq, or, desc, and, gte, lt, inArray } from 'drizzle-orm';
+import { eq, or, desc, and, gte, lt, inArray, sql } from 'drizzle-orm';
 import { sendEmail } from '@/lib/email';
 import { BookingConfirmationEmail } from '@/lib/emails';
 import { rateLimit, WRITE_LIMIT, rateLimitResponse } from '@/lib/rate-limit';
 import { getUnsubscribeUrl } from '@/lib/unsubscribe';
+import { formatDateLong, formatTime } from '@/lib/date-utils';
 
 /**
  * GET /api/bookings
@@ -73,24 +74,31 @@ export async function GET(request: Request) {
       conditions.push(gte(bookings.startTime, new Date()));
     }
 
-    // Get all bookings matching conditions
-    const allBookings = await db
-      .select()
-      .from(bookings)
-      .where(and(...conditions))
-      .orderBy(desc(bookings.startTime));
+    const offset = (page - 1) * limit;
 
-    // Get user info for coaches and clients
-    const userIds = Array.from(new Set(allBookings.flatMap((b) => [b.coachId, b.clientId])));
+    // Get total count and paginated bookings in parallel
+    const [countResult, paginatedBookings] = await Promise.all([
+      db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(bookings)
+        .where(and(...conditions)),
+      db
+        .select()
+        .from(bookings)
+        .where(and(...conditions))
+        .orderBy(desc(bookings.startTime))
+        .limit(limit)
+        .offset(offset),
+    ]);
+
+    const total = countResult[0]?.count ?? 0;
+
+    // Get user info only for the paginated bookings
+    const userIds = Array.from(new Set(paginatedBookings.flatMap((b) => [b.coachId, b.clientId])));
     const usersData = userIds.length
       ? await db.select().from(users).where(inArray(users.id, userIds))
       : [];
     const usersMap = new Map(usersData.map((u) => [u.id, u]));
-
-    // Paginate
-    const total = allBookings.length;
-    const offset = (page - 1) * limit;
-    const paginatedBookings = allBookings.slice(offset, offset + limit);
 
     // Format response
     const formattedBookings = paginatedBookings.map((booking) => {
@@ -299,17 +307,8 @@ export async function POST(request: Request) {
         const emailData = {
           coachName: coachUser.name || 'Your Coach',
           sessionType: sessionType.name,
-          date: startDateTime.toLocaleDateString('en-US', {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-          }),
-          time: startDateTime.toLocaleTimeString('en-US', {
-            hour: 'numeric',
-            minute: '2-digit',
-            hour12: true,
-          }),
+          date: formatDateLong(startDateTime),
+          time: formatTime(startDateTime),
           duration: sessionType.duration,
           price: sessionType.price / 100, // Convert cents to dollars
           meetingLink: newBooking.meetingLink || undefined,

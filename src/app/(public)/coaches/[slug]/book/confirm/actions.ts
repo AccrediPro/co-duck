@@ -31,6 +31,7 @@ import { stripe } from '@/lib/stripe';
 import type { BookingSessionType } from '@/db/schema';
 import { createBookingSystemMessage } from '@/lib/conversations';
 import { createNotification } from '@/lib/notifications';
+import { formatDateLong, formatTime } from '@/lib/date-utils';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Type Definitions
@@ -391,19 +392,8 @@ export async function createCheckoutSession(
     const platformFeeAmount = Math.round(input.sessionType.price * 0.1);
 
     // Format date/time for display
-    const sessionDate = startTime.toLocaleDateString('en-US', {
-      weekday: 'long',
-      month: 'long',
-      day: 'numeric',
-      year: 'numeric',
-      timeZone: input.clientTimezone,
-    });
-    const sessionTime = startTime.toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true,
-      timeZone: input.clientTimezone,
-    });
+    const sessionDate = formatDateLong(startTime);
+    const sessionTime = formatTime(startTime);
 
     // Create Stripe Checkout Session
     const checkoutSession = await stripe.checkout.sessions.create({

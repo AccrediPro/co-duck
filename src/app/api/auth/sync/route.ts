@@ -12,6 +12,7 @@ import { db } from '@/db';
 import { users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { rateLimit, WRITE_LIMIT, rateLimitResponse } from '@/lib/rate-limit';
+import { claimCoachInvite } from '@/lib/claim-invite';
 
 /**
  * POST /api/auth/sync
@@ -84,6 +85,13 @@ export async function POST(request: Request) {
         })
         .where(eq(users.id, userId));
 
+      // Check if this existing user has a pending coach invite
+      let role = existingUser.role;
+      if (role === 'client') {
+        const claimed = await claimCoachInvite(userId, email, name);
+        if (claimed) role = 'coach';
+      }
+
       return Response.json({
         success: true,
         data: {
@@ -91,7 +99,7 @@ export async function POST(request: Request) {
           email,
           name,
           avatarUrl: clerkUser.imageUrl || null,
-          role: existingUser.role,
+          role,
           isNew: false,
         },
       });
@@ -109,6 +117,11 @@ export async function POST(request: Request) {
       })
       .returning();
 
+    // Check if this new user has a pending coach invite
+    let role = newUser.role;
+    const claimed = await claimCoachInvite(userId, email, name);
+    if (claimed) role = 'coach';
+
     return Response.json({
       success: true,
       data: {
@@ -116,7 +129,7 @@ export async function POST(request: Request) {
         email: newUser.email,
         name: newUser.name,
         avatarUrl: newUser.avatarUrl,
-        role: newUser.role,
+        role,
         isNew: true,
       },
     });

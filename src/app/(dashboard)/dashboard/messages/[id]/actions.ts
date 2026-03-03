@@ -45,7 +45,8 @@ import {
   bookings,
   transactions,
   coachProfiles,
-  actionItems,
+  programs,
+  goals,
 } from '@/db';
 import type { MessageMetadata } from '@/db/schema';
 
@@ -559,36 +560,37 @@ export interface GetNewMessagesResult {
 // ============================================================================
 
 /**
- * Action item with computed status for the context panel.
- *
- * @property status - Computed based on isCompleted and dueDate:
- *   - 'completed': isCompleted is true
- *   - 'overdue': Not completed and dueDate is in the past
- *   - 'pending': Not completed and not overdue
+ * Goal data for the client progress panel.
  */
-export interface ActionItemForContext {
+export interface GoalForContext {
   id: number;
   title: string;
-  description: string | null;
+  status: 'pending' | 'in_progress' | 'completed';
+  priority: 'low' | 'medium' | 'high';
   dueDate: string | null;
-  isCompleted: boolean;
-  completedAt: Date | null;
-  createdAt: Date;
-  status: 'pending' | 'overdue' | 'completed';
-  bookingId: number | null;
+}
+
+/**
+ * Program with nested goals for the client progress panel.
+ */
+export interface ProgramForContext {
+  id: number;
+  title: string;
+  status: 'active' | 'completed' | 'archived';
+  goals: GoalForContext[];
 }
 
 /**
  * Client context data for the coach's chat sidebar panel.
  *
  * Provides coaches with helpful information about the client they're chatting with,
- * including session history, spending, and upcoming appointments.
+ * including session history, spending, upcoming appointments, and program progress.
  *
  * @property pastSessionsCount - Number of completed/past sessions with this client
  * @property totalSpentCents - Total amount paid by client (in cents)
  * @property upcomingSessions - Next 3 upcoming sessions
  * @property coachSlug - For "Book Session" quick link
- * @property actionItems - Last 10 action items for this client
+ * @property programs - Active programs with goals for progress tracking
  */
 export interface ClientContext {
   clientId: string;
@@ -603,7 +605,7 @@ export interface ClientContext {
     startTime: Date;
   }[];
   coachSlug: string;
-  actionItems: ActionItemForContext[];
+  programs: ProgramForContext[];
 }
 
 /**
@@ -747,42 +749,68 @@ export async function getClientContext(conversationId: number): Promise<GetClien
       startTime: session.startTime,
     }));
 
-    // Get action items for this client (pending/overdue first, then completed)
-    const actionItemsRecords = await db
-      .select()
-      .from(actionItems)
-      .where(and(eq(actionItems.coachId, userId), eq(actionItems.clientId, clientId)))
-      .orderBy(asc(actionItems.isCompleted), desc(actionItems.createdAt))
-      .limit(10); // Show last 10 items
+    // Get active programs with their goals for this coach-client pair
+    const programRecords = await db
+      .select({
+        id: programs.id,
+        title: programs.title,
+        status: programs.status,
+      })
+      .from(programs)
+      .where(
+        and(
+          eq(programs.coachId, userId),
+          eq(programs.clientId, clientId),
+          eq(programs.status, 'active')
+        )
+      )
+      .orderBy(desc(programs.createdAt));
 
-    // Helper to compute action item status
-    const computeStatus = (item: {
-      isCompleted: boolean;
+    // Get goals for all active programs
+    const programIds = programRecords.map((p) => p.id);
+    let goalRecords: {
+      id: number;
+      programId: number;
+      title: string;
+      status: 'pending' | 'in_progress' | 'completed';
+      priority: 'low' | 'medium' | 'high';
       dueDate: string | null;
-    }): 'pending' | 'overdue' | 'completed' => {
-      if (item.isCompleted) {
-        return 'completed';
-      }
-      if (item.dueDate) {
-        const due = new Date(item.dueDate);
-        due.setHours(23, 59, 59, 999);
-        if (due < new Date()) {
-          return 'overdue';
-        }
-      }
-      return 'pending';
-    };
+    }[] = [];
 
-    const clientActionItems: ActionItemForContext[] = actionItemsRecords.map((item) => ({
-      id: item.id,
-      title: item.title,
-      description: item.description,
-      dueDate: item.dueDate,
-      isCompleted: item.isCompleted,
-      completedAt: item.completedAt,
-      createdAt: item.createdAt,
-      status: computeStatus(item),
-      bookingId: item.bookingId,
+    if (programIds.length > 0) {
+      goalRecords = await db
+        .select({
+          id: goals.id,
+          programId: goals.programId,
+          title: goals.title,
+          status: goals.status,
+          priority: goals.priority,
+          dueDate: goals.dueDate,
+        })
+        .from(goals)
+        .where(or(...programIds.map((pid) => eq(goals.programId, pid))))
+        .orderBy(asc(goals.createdAt));
+    }
+
+    // Group goals by program
+    const goalsByProgram = new Map<number, GoalForContext[]>();
+    for (const goal of goalRecords) {
+      const list = goalsByProgram.get(goal.programId) || [];
+      list.push({
+        id: goal.id,
+        title: goal.title,
+        status: goal.status,
+        priority: goal.priority,
+        dueDate: goal.dueDate,
+      });
+      goalsByProgram.set(goal.programId, list);
+    }
+
+    const clientPrograms: ProgramForContext[] = programRecords.map((p) => ({
+      id: p.id,
+      title: p.title,
+      status: p.status,
+      goals: goalsByProgram.get(p.id) || [],
     }));
 
     return {
@@ -796,7 +824,7 @@ export async function getClientContext(conversationId: number): Promise<GetClien
         currency,
         upcomingSessions,
         coachSlug,
-        actionItems: clientActionItems,
+        programs: clientPrograms,
       },
     };
   } catch (error) {

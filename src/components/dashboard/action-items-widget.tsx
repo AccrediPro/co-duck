@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { CheckSquare, ArrowRight, Circle } from 'lucide-react';
+import { formatDateShort } from '@/lib/date-utils';
 
 interface ActionItemPreview {
   id: number;
@@ -50,11 +51,7 @@ export function ActionItemsWidget({ count, recentItems }: ActionItemsWidgetProps
                     {item.coachName && <span>From {item.coachName}</span>}
                     {item.dueDate && (
                       <span>
-                        Due{' '}
-                        {new Date(item.dueDate).toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                        })}
+                        Due {formatDateShort(item.dueDate)}
                       </span>
                     )}
                   </div>

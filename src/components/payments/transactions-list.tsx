@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { ChevronLeft, ChevronRight, Receipt, ExternalLink, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { formatDate as formatDateUS } from '@/lib/date-utils';
 import type { TransactionWithClient } from '@/app/(dashboard)/dashboard/payments/actions';
 import {
   getCoachEarnings,
@@ -32,11 +33,7 @@ function formatCurrency(amountCents: number, currency: string): string {
 }
 
 function formatDate(date: Date): string {
-  return new Date(date).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  });
+  return formatDateUS(date);
 }
 
 function getInitials(name: string | null, email: string | null): string {
@@ -58,13 +55,13 @@ function getStatusBadge(status: TransactionWithClient['status']) {
   switch (status) {
     case 'succeeded':
       return (
-        <Badge variant="default" className="bg-green-500 hover:bg-green-600">
+        <Badge variant="default" className="bg-[hsl(var(--brand-accent))] hover:bg-[hsl(var(--brand-warm))]">
           Completed
         </Badge>
       );
     case 'pending':
       return (
-        <Badge variant="secondary" className="bg-amber-500/10 text-amber-600">
+        <Badge variant="secondary" className="bg-gold/10 text-gold-dark">
           Pending
         </Badge>
       );

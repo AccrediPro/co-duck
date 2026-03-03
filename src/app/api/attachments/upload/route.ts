@@ -19,8 +19,14 @@ const ALLOWED_TYPES = [
 
 function getSupabaseAdmin() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!url || !key) return null;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) {
+    console.error(
+      'Missing SUPABASE_SERVICE_ROLE_KEY. File uploads require the service role key. ' +
+      'Get it from Supabase Dashboard → Settings → API → Service Role Key.'
+    );
+    return null;
+  }
   return createClient(url, key);
 }
 
@@ -92,7 +98,13 @@ export async function POST(request: NextRequest) {
     const supabase = getSupabaseAdmin();
     if (!supabase) {
       return Response.json(
-        { success: false, error: { code: 'STORAGE_ERROR', message: 'Storage not configured' } },
+        {
+          success: false,
+          error: {
+            code: 'STORAGE_NOT_CONFIGURED',
+            message: 'File storage is not configured. SUPABASE_SERVICE_ROLE_KEY is missing from environment variables.',
+          },
+        },
         { status: 500 }
       );
     }
@@ -178,11 +190,24 @@ export async function POST(request: NextRequest) {
     const { data: buckets } = await supabase.storage.listBuckets();
     const bucketExists = buckets?.some((b) => b.name === BUCKET_NAME);
     if (!bucketExists) {
-      await supabase.storage.createBucket(BUCKET_NAME, {
+      const { error: bucketError } = await supabase.storage.createBucket(BUCKET_NAME, {
         public: true,
         fileSizeLimit: MAX_FILE_SIZE,
         allowedMimeTypes: ALLOWED_TYPES,
       });
+      if (bucketError) {
+        console.error('Failed to create storage bucket:', bucketError);
+        return Response.json(
+          {
+            success: false,
+            error: {
+              code: 'BUCKET_CREATION_FAILED',
+              message: 'Failed to initialize file storage. Please contact support.',
+            },
+          },
+          { status: 500 }
+        );
+      }
     }
 
     // Build storage path: {coachId}/{clientId}/{timestamp}-{sanitizedFileName}

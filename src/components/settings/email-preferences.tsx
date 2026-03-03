@@ -167,13 +167,15 @@ export function EmailPreferencesSettings() {
                 {savingKey === pref.key && (
                   <Loader2 className="h-3 w-3 animate-spin text-muted-foreground" />
                 )}
-                <Switch
-                  id={`email-pref-${pref.key}`}
-                  checked={preferences[pref.key]}
-                  onCheckedChange={() => handleToggle(pref.key)}
-                  disabled={savingKey !== null}
-                  aria-label={`${pref.label} email notifications`}
-                />
+                <div className="flex min-h-[44px] min-w-[44px] items-center justify-center">
+                  <Switch
+                    id={`email-pref-${pref.key}`}
+                    checked={preferences[pref.key]}
+                    onCheckedChange={() => handleToggle(pref.key)}
+                    disabled={savingKey !== null}
+                    aria-label={`${pref.label} email notifications`}
+                  />
+                </div>
               </div>
             </div>
             {index < PREFERENCE_CONFIG.length - 1 && <Separator className="mt-4" />}

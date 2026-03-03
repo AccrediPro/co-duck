@@ -21,7 +21,7 @@ export function RevenueStats({ thisMonth, total, pending, currency }: RevenueSta
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">This Month</CardTitle>
-          <TrendingUp className="h-4 w-4 text-emerald-500" />
+          <TrendingUp className="h-4 w-4 text-[hsl(var(--brand-accent))]" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{formatCurrency(thisMonth, currency)}</div>
@@ -31,7 +31,7 @@ export function RevenueStats({ thisMonth, total, pending, currency }: RevenueSta
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Total Earnings</CardTitle>
-          <DollarSign className="h-4 w-4 text-emerald-500" />
+          <DollarSign className="h-4 w-4 text-[hsl(var(--brand-accent))]" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{formatCurrency(total, currency)}</div>
@@ -41,7 +41,7 @@ export function RevenueStats({ thisMonth, total, pending, currency }: RevenueSta
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Pending</CardTitle>
-          <Clock className="h-4 w-4 text-amber-500" />
+          <Clock className="h-4 w-4 text-gold" />
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{formatCurrency(pending, currency)}</div>

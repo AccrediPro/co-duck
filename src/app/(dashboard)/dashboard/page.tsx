@@ -53,41 +53,45 @@ export default async function DashboardPage() {
   const displayName = clerkUser?.firstName || user?.name || 'User';
 
   return (
-    <div className="space-y-6">
-      {/* Welcome Header */}
-      <div>
-        <h1 className="text-3xl font-bold">Dashboard</h1>
-        <p className="text-muted-foreground">
-          Welcome back, {displayName}!
-          {isCoach && (
-            <Badge variant="secondary" className="ml-2">
-              Coach
-            </Badge>
-          )}
-          {role === 'client' && (
-            <Badge variant="outline" className="ml-2">
-              Client
-            </Badge>
-          )}
-          {role === 'admin' && (
-            <Badge variant="default" className="ml-2">
-              Admin
-            </Badge>
-          )}
-        </p>
+    <div className="mx-auto max-w-5xl">
+      {/* Page Header Card */}
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold">Dashboard</CardTitle>
+          <CardDescription>
+            Welcome back, {displayName}!
+            {isCoach && (
+              <Badge variant="secondary" className="ml-2">
+                Coach
+              </Badge>
+            )}
+            {role === 'client' && (
+              <Badge variant="outline" className="ml-2">
+                Client
+              </Badge>
+            )}
+            {role === 'admin' && (
+              <Badge variant="default" className="ml-2">
+                Admin
+              </Badge>
+            )}
+          </CardDescription>
+        </CardHeader>
+      </Card>
+
+      <div className="space-y-6">
+        {/* Coach Dashboard */}
+        {isCoach && coachProfile && <CoachDashboardContent />}
+
+        {/* Coach without profile - Onboarding prompt */}
+        {isCoach && !coachProfile && <CoachOnboardingPrompt />}
+
+        {/* Client Dashboard */}
+        {role === 'client' && <ClientDashboardContent />}
+
+        {/* Admin Dashboard */}
+        {role === 'admin' && <AdminDashboard />}
       </div>
-
-      {/* Coach Dashboard */}
-      {isCoach && coachProfile && <CoachDashboardContent />}
-
-      {/* Coach without profile - Onboarding prompt */}
-      {isCoach && !coachProfile && <CoachOnboardingPrompt />}
-
-      {/* Client Dashboard */}
-      {role === 'client' && <ClientDashboardContent />}
-
-      {/* Admin Dashboard */}
-      {role === 'admin' && <AdminDashboard />}
     </div>
   );
 }
@@ -180,10 +184,10 @@ function AdminDashboard() {
           </CardContent>
         </Card>
       </div>
-      <Card className="border-amber-200 bg-amber-50 dark:border-amber-900 dark:bg-amber-950">
+      <Card className="border-gold/30 bg-gold/5 dark:border-gold-dark dark:bg-gold-dark/10">
         <CardHeader>
-          <CardTitle className="text-amber-800 dark:text-amber-200">Admin Dashboard</CardTitle>
-          <CardDescription className="text-amber-700 dark:text-amber-300">
+          <CardTitle className="text-burgundy-dark dark:text-gold">Admin Dashboard</CardTitle>
+          <CardDescription className="text-burgundy dark:text-gold/80">
             Full admin features including user management, analytics, and platform settings are
             coming soon.
           </CardDescription>

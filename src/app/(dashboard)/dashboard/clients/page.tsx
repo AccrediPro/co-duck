@@ -37,35 +37,43 @@ export default async function ClientsPage() {
 
   if (!data.clients || data.clients.length === 0) {
     return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold">My Clients</h1>
-          <p className="text-muted-foreground">Manage your clients and their coaching journeys</p>
-        </div>
-
-        <Card>
-          <CardHeader className="text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-              <Users className="h-8 w-8 text-primary" />
-            </div>
-            <CardTitle>No clients yet</CardTitle>
-            <CardDescription className="mx-auto max-w-md">
-              You don&apos;t have any clients yet. Clients will appear here after their first confirmed session.
-            </CardDescription>
+      <div className="mx-auto max-w-3xl">
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="text-2xl font-bold">My Clients</CardTitle>
+            <CardDescription>Manage your coaching relationships</CardDescription>
           </CardHeader>
         </Card>
+
+        <div className="space-y-6">
+          <Card>
+            <CardHeader className="text-center">
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+                <Users className="h-8 w-8 text-primary" />
+              </div>
+              <CardTitle>No clients yet</CardTitle>
+              <CardDescription className="mx-auto max-w-md">
+                You don&apos;t have any clients yet. Clients will appear here after their first confirmed session.
+              </CardDescription>
+            </CardHeader>
+          </Card>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">My Clients</h1>
-        <p className="text-muted-foreground">Manage your clients and their coaching journeys</p>
-      </div>
+    <div className="mx-auto max-w-3xl">
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold">My Clients</CardTitle>
+          <CardDescription>Manage your coaching relationships</CardDescription>
+        </CardHeader>
+      </Card>
 
-      <ClientsList initialClients={data.clients} />
+      <div className="space-y-6">
+        <ClientsList initialClients={data.clients} />
+      </div>
     </div>
   );
 }

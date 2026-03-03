@@ -17,7 +17,7 @@
  * This page has multiple access checks:
  * - Must be authenticated → redirects to /sign-in
  * - Must have user record → redirects to /dashboard
- * - Must have coach role → shows "Become a Coach" message
+ * - Must have coach role → shows "Coach Access Required" message
  * - Must have coach profile → shows "Complete Onboarding" message
  *
  * ## URL Parameters
@@ -110,28 +110,24 @@ export default async function SessionsPage({ searchParams }: PageProps) {
   // Second check: user must have coach role
   if (user.role !== 'coach') {
     return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold">Sessions</h1>
-          <p className="text-muted-foreground">Manage your coaching sessions</p>
-        </div>
-
-        <Card>
+      <div className="mx-auto max-w-3xl">
+        <Card className="mb-6">
           <CardHeader>
-            <CardTitle>Become a Coach</CardTitle>
-            <CardDescription>
-              You need to be registered as a coach to view your sessions.
-            </CardDescription>
+            <CardTitle className="text-2xl font-bold">Sessions</CardTitle>
+            <CardDescription>View and manage your coaching sessions</CardDescription>
           </CardHeader>
-          <CardContent>
-            <Button asChild>
-              <Link href="/onboarding/coach">
-                <User className="mr-2 h-4 w-4" />
-                Start Coach Onboarding
-              </Link>
-            </Button>
-          </CardContent>
         </Card>
+
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Coach Access Required</CardTitle>
+              <CardDescription>
+                You need a coach account to view your sessions. Please contact an administrator to get started.
+              </CardDescription>
+            </CardHeader>
+          </Card>
+        </div>
       </div>
     );
   }
@@ -145,28 +141,32 @@ export default async function SessionsPage({ searchParams }: PageProps) {
 
   if (profiles.length === 0) {
     return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold">Sessions</h1>
-          <p className="text-muted-foreground">Manage your coaching sessions</p>
-        </div>
-
-        <Card>
+      <div className="mx-auto max-w-3xl">
+        <Card className="mb-6">
           <CardHeader>
-            <CardTitle>Complete Your Onboarding</CardTitle>
-            <CardDescription>
-              You need to complete the coach onboarding before you can manage sessions.
-            </CardDescription>
+            <CardTitle className="text-2xl font-bold">Sessions</CardTitle>
+            <CardDescription>View and manage your coaching sessions</CardDescription>
           </CardHeader>
-          <CardContent>
-            <Button asChild>
-              <Link href="/onboarding/coach">
-                <User className="mr-2 h-4 w-4" />
-                Complete Onboarding
-              </Link>
-            </Button>
-          </CardContent>
         </Card>
+
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Complete Your Onboarding</CardTitle>
+              <CardDescription>
+                You need to complete the coach onboarding before you can manage sessions.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button asChild>
+                <Link href="/onboarding/coach">
+                  <User className="mr-2 h-4 w-4" />
+                  Complete Onboarding
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     );
   }
@@ -196,23 +196,27 @@ export default async function SessionsPage({ searchParams }: PageProps) {
 
   if (!result.success) {
     return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold">Sessions</h1>
-          <p className="text-muted-foreground">Manage your coaching sessions</p>
-        </div>
-
-        <Card>
+      <div className="mx-auto max-w-3xl">
+        <Card className="mb-6">
           <CardHeader>
-            <CardTitle>Error Loading Sessions</CardTitle>
-            <CardDescription>{result.error}</CardDescription>
+            <CardTitle className="text-2xl font-bold">Sessions</CardTitle>
+            <CardDescription>View and manage your coaching sessions</CardDescription>
           </CardHeader>
-          <CardContent>
-            <Button asChild>
-              <Link href="/dashboard">Return to Dashboard</Link>
-            </Button>
-          </CardContent>
         </Card>
+
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Error Loading Sessions</CardTitle>
+              <CardDescription>{result.error}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button asChild>
+                <Link href="/dashboard">Return to Dashboard</Link>
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     );
   }
@@ -224,22 +228,24 @@ export default async function SessionsPage({ searchParams }: PageProps) {
   // Pass SSR-fetched data to client component
   // SessionsList handles tab switching, pagination clicks, and session actions
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Sessions</h1>
-        <p className="text-muted-foreground">
-          View and manage your coaching sessions. Mark sessions as complete or cancel upcoming ones.
-        </p>
-      </div>
+    <div className="mx-auto max-w-3xl">
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold">Sessions</CardTitle>
+          <CardDescription>View and manage your coaching sessions</CardDescription>
+        </CardHeader>
+      </Card>
 
-      {/* Client component receives initial data and handles interactivity */}
-      <SessionsList
-        initialTab={validTab}
-        initialSessions={result.sessions || []}
-        initialTotalCount={result.totalCount || 0}
-        currentPage={page}
-        perPage={perPage}
-      />
+      <div className="space-y-6">
+        {/* Client component receives initial data and handles interactivity */}
+        <SessionsList
+          initialTab={validTab}
+          initialSessions={result.sessions || []}
+          initialTotalCount={result.totalCount || 0}
+          currentPage={page}
+          perPage={perPage}
+        />
+      </div>
     </div>
   );
 }

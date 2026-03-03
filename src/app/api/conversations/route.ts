@@ -41,15 +41,23 @@ export async function GET(request: Request) {
     const limit = Math.min(50, Math.max(1, parseInt(searchParams.get('limit') || '20')));
     const offset = (page - 1) * limit;
 
-    // Get user's conversations
-    const allConversations = await db
-      .select()
-      .from(conversations)
-      .where(or(eq(conversations.coachId, userId), eq(conversations.clientId, userId)))
-      .orderBy(desc(conversations.lastMessageAt));
+    // Get total count and paginated conversations in parallel
+    const whereClause = or(eq(conversations.coachId, userId), eq(conversations.clientId, userId));
+    const [countResult, paginatedConversations] = await Promise.all([
+      db
+        .select({ count: sql<number>`count(*)::int` })
+        .from(conversations)
+        .where(whereClause),
+      db
+        .select()
+        .from(conversations)
+        .where(whereClause)
+        .orderBy(desc(conversations.lastMessageAt))
+        .limit(limit)
+        .offset(offset),
+    ]);
 
-    const total = allConversations.length;
-    const paginatedConversations = allConversations.slice(offset, offset + limit);
+    const total = countResult[0]?.count ?? 0;
 
     if (paginatedConversations.length === 0) {
       return Response.json({

@@ -14,6 +14,7 @@ import { sendEmail } from '@/lib/email';
 import { CancellationEmail } from '@/lib/emails';
 import { rateLimit, WRITE_LIMIT, rateLimitResponse } from '@/lib/rate-limit';
 import { getUnsubscribeUrl } from '@/lib/unsubscribe';
+import { formatDateLong, formatTime } from '@/lib/date-utils';
 import { calculateRefundEligibility } from '@/lib/refunds';
 import { stripe } from '@/lib/stripe';
 import { createNotification } from '@/lib/notifications';
@@ -181,17 +182,8 @@ export async function POST(request: Request, { params }: RouteParams) {
         const emailData = {
           coachName: coachUser.name || 'Coach',
           sessionType: sessionType.name,
-          date: startTime.toLocaleDateString('en-US', {
-            weekday: 'long',
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-          }),
-          time: startTime.toLocaleTimeString('en-US', {
-            hour: 'numeric',
-            minute: '2-digit',
-            hour12: true,
-          }),
+          date: formatDateLong(startTime),
+          time: formatTime(startTime),
           duration: sessionType.duration,
           price: sessionType.price / 100, // Convert cents to dollars
           refundAmount: refundAmountCents / 100,

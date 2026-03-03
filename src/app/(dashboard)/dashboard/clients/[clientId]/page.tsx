@@ -1,5 +1,6 @@
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
+import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ClientWorkspace } from '@/components/dashboard/client-workspace';
 
 export const metadata = {
@@ -63,23 +64,25 @@ export default async function ClientDetailPage({ params }: PageProps) {
 
   if (!data.client) {
     return (
-      <div className="flex h-[50vh] items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-xl font-semibold">Client not found</h2>
-          <p className="mt-1 text-muted-foreground">
-            This client does not exist or you do not have access.
-          </p>
-        </div>
+      <div className="mx-auto max-w-3xl">
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="text-2xl font-bold">Client Not Found</CardTitle>
+            <CardDescription>This client does not exist or you do not have access.</CardDescription>
+          </CardHeader>
+        </Card>
       </div>
     );
   }
 
   return (
-    <ClientWorkspace
-      client={data.client}
-      initialPrograms={data.programs}
-      initialActionItems={data.actionItems}
-      clientId={clientId}
-    />
+    <div className="mx-auto max-w-3xl">
+      <ClientWorkspace
+        client={data.client}
+        initialPrograms={data.programs}
+        initialActionItems={data.actionItems}
+        clientId={clientId}
+      />
+    </div>
   );
 }

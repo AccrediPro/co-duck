@@ -19,7 +19,7 @@ export function ActionItemEmail({
   dueDate,
   unsubscribeUrl,
 }: ActionItemEmailProps) {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://coachhub.com';
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://accredipro-coachhub.com';
 
   return (
     <EmailLayout
@@ -69,18 +69,18 @@ const taskSection = {
   padding: '16px 24px',
   backgroundColor: '#f0fdf4',
   borderRadius: '8px',
-  borderLeft: '4px solid #22c55e',
+  borderLeft: '4px solid #694044',
 };
 
 const taskTitle = {
-  color: '#166534',
+  color: '#4d2d30',
   fontSize: '16px',
   fontWeight: '600' as const,
   margin: '0 0 8px',
 };
 
 const taskDescription = {
-  color: '#15803d',
+  color: '#5a363a',
   fontSize: '14px',
   lineHeight: '22px',
   margin: '0 0 8px',

@@ -21,6 +21,7 @@ import { eq } from 'drizzle-orm';
 import { stripe } from '@/lib/stripe';
 import type { BookingSessionType } from '@/db/schema';
 import { rateLimit, WRITE_LIMIT, rateLimitResponse } from '@/lib/rate-limit';
+import { formatDateLong, formatTime } from '@/lib/date-utils';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -168,19 +169,8 @@ export async function POST(request: Request, { params }: RouteParams) {
     const platformFeeAmount = Math.round(sessionType.price * 0.1);
 
     // Format date/time for Stripe description
-    const sessionDate = booking.startTime.toLocaleDateString('en-US', {
-      weekday: 'long',
-      month: 'long',
-      day: 'numeric',
-      year: 'numeric',
-      timeZone: clientTimezone,
-    });
-    const sessionTime = booking.startTime.toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true,
-      timeZone: clientTimezone,
-    });
+    const sessionDate = formatDateLong(booking.startTime);
+    const sessionTime = formatTime(booking.startTime);
 
     // Build success/cancel URLs
     // For mobile, these redirect back to the app; for web, to the success page

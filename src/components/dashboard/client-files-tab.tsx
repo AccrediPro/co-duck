@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { format } from 'date-fns';
+import { formatDate } from '@/lib/date-utils';
 import {
   Upload,
   FileText,
@@ -48,7 +48,7 @@ interface ClientFilesTabProps {
 
 function getFileIcon(fileType: string) {
   if (fileType === 'application/pdf') return <FileText className="h-5 w-5 text-red-500" />;
-  if (fileType.startsWith('image/')) return <ImageIcon className="h-5 w-5 text-blue-500" />;
+  if (fileType.startsWith('image/')) return <ImageIcon className="h-5 w-5 text-burgundy" />;
   return <FileIcon className="h-5 w-5 text-gray-500" />;
 }
 
@@ -246,7 +246,7 @@ export function ClientFilesTab({ programs }: ClientFilesTabProps) {
                         </Badge>
                       )}
                       <span>
-                        {format(new Date(attachment.createdAt), 'MMM d, yyyy')}
+                        {formatDate(attachment.createdAt)}
                       </span>
                     </div>
                   </div>

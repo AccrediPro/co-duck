@@ -21,8 +21,8 @@ export default function MessagesError({
   return (
     <div className="flex min-h-[60vh] flex-col items-center justify-center px-4">
       <div className="mx-auto max-w-md text-center">
-        <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-950/30">
-          <AlertTriangle className="h-10 w-10 text-blue-600 dark:text-blue-400" aria-hidden="true" />
+        <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-burgundy/10 dark:bg-burgundy-dark/20">
+          <AlertTriangle className="h-10 w-10 text-burgundy dark:text-burgundy-light" aria-hidden="true" />
         </div>
 
         <h2 className="mb-2 text-xl font-semibold">Unable to load messages</h2>

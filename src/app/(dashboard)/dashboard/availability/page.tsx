@@ -33,28 +33,24 @@ export default async function AvailabilityPage() {
   // If not a coach, show appropriate message
   if (user.role !== 'coach') {
     return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold">Availability Settings</h1>
-          <p className="text-muted-foreground">Manage your coaching schedule</p>
-        </div>
-
-        <Card>
+      <div className="mx-auto max-w-3xl">
+        <Card className="mb-6">
           <CardHeader>
-            <CardTitle>Become a Coach</CardTitle>
-            <CardDescription>
-              You need to be registered as a coach to set your availability.
-            </CardDescription>
+            <CardTitle className="text-2xl font-bold">Availability</CardTitle>
+            <CardDescription>Set your weekly coaching schedule</CardDescription>
           </CardHeader>
-          <CardContent>
-            <Button asChild>
-              <Link href="/onboarding/coach">
-                <User className="mr-2 h-4 w-4" />
-                Start Coach Onboarding
-              </Link>
-            </Button>
-          </CardContent>
         </Card>
+
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Coach Access Required</CardTitle>
+              <CardDescription>
+                You need a coach account to set your availability. Please contact an administrator to get started.
+              </CardDescription>
+            </CardHeader>
+          </Card>
+        </div>
       </div>
     );
   }
@@ -68,28 +64,32 @@ export default async function AvailabilityPage() {
 
   if (profiles.length === 0) {
     return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold">Availability Settings</h1>
-          <p className="text-muted-foreground">Manage your coaching schedule</p>
-        </div>
-
-        <Card>
+      <div className="mx-auto max-w-3xl">
+        <Card className="mb-6">
           <CardHeader>
-            <CardTitle>Complete Your Onboarding</CardTitle>
-            <CardDescription>
-              You need to complete the coach onboarding before you can set your availability.
-            </CardDescription>
+            <CardTitle className="text-2xl font-bold">Availability</CardTitle>
+            <CardDescription>Set your weekly coaching schedule</CardDescription>
           </CardHeader>
-          <CardContent>
-            <Button asChild>
-              <Link href="/onboarding/coach">
-                <User className="mr-2 h-4 w-4" />
-                Complete Onboarding
-              </Link>
-            </Button>
-          </CardContent>
         </Card>
+
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Complete Your Onboarding</CardTitle>
+              <CardDescription>
+                You need to complete the coach onboarding before you can set your availability.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button asChild>
+                <Link href="/onboarding/coach">
+                  <User className="mr-2 h-4 w-4" />
+                  Complete Onboarding
+                </Link>
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     );
   }
@@ -99,38 +99,43 @@ export default async function AvailabilityPage() {
 
   if (!result.success) {
     return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold">Availability Settings</h1>
-          <p className="text-muted-foreground">Manage your coaching schedule</p>
-        </div>
-
-        <Card>
+      <div className="mx-auto max-w-3xl">
+        <Card className="mb-6">
           <CardHeader>
-            <CardTitle>Error Loading Availability</CardTitle>
-            <CardDescription>{result.error}</CardDescription>
+            <CardTitle className="text-2xl font-bold">Availability</CardTitle>
+            <CardDescription>Set your weekly coaching schedule</CardDescription>
           </CardHeader>
-          <CardContent>
-            <Button asChild>
-              <Link href="/dashboard">Return to Dashboard</Link>
-            </Button>
-          </CardContent>
         </Card>
+
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Error Loading Availability</CardTitle>
+              <CardDescription>{result.error}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button asChild>
+                <Link href="/dashboard">Return to Dashboard</Link>
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Availability Settings</h1>
-        <p className="text-muted-foreground">
-          Set your weekly schedule and booking preferences. Clients will only be able to book during
-          your available hours.
-        </p>
-      </div>
+    <div className="mx-auto max-w-3xl">
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold">Availability</CardTitle>
+          <CardDescription>Set your weekly coaching schedule</CardDescription>
+        </CardHeader>
+      </Card>
 
-      <AvailabilityForm initialData={result.data} />
+      <div className="space-y-6">
+        <AvailabilityForm initialData={result.data} />
+      </div>
     </div>
   );
 }

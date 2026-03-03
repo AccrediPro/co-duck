@@ -22,7 +22,7 @@ import { eq } from 'drizzle-orm';
 import { COACH_SPECIALTIES } from '@/lib/validators/coach-onboarding';
 
 export const metadata: Metadata = {
-  title: 'Coaching Specialties | CoachHub',
+  title: 'Coaching Specialties | AccrediPro CoachHub',
   description:
     'Explore our coaching specialties. Find expert coaches in life coaching, career coaching, wellness, leadership, and more.',
 };
@@ -105,23 +105,23 @@ export default async function SpecialtiesPage() {
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-background to-primary/10">
+      <section className="relative overflow-hidden bg-gradient-to-br from-burgundy-dark to-burgundy">
         <div className="container mx-auto px-4 py-16 md:py-24">
           <div className="mx-auto max-w-3xl text-center">
-            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
+            <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">
               Explore Coaching{' '}
-              <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+              <span className="text-gold">
                 Specialties
               </span>
             </h1>
-            <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
+            <p className="mx-auto mt-6 max-w-2xl text-lg text-white/80">
               Find the perfect coach for your unique goals. Browse our specialties and connect with
               experts who can guide your journey to success.
             </p>
           </div>
         </div>
-        <div className="absolute -left-20 -top-20 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
-        <div className="absolute -bottom-20 -right-20 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
+        <div className="absolute -left-20 -top-20 h-72 w-72 rounded-full bg-gold/10 blur-3xl" />
+        <div className="absolute -bottom-20 -right-20 h-72 w-72 rounded-full bg-burgundy-light/20 blur-3xl" />
       </section>
 
       {/* Specialties Grid */}
@@ -141,12 +141,12 @@ export default async function SpecialtiesPage() {
                   href={`/coaches?specialties=${encodeURIComponent(specialty)}`}
                   className="group"
                 >
-                  <Card className="h-full transition-all duration-200 hover:border-primary/50 hover:shadow-lg">
+                  <Card className="h-full transition-all duration-200 hover:border-burgundy/30 hover:shadow-lg">
                     <CardContent className="flex flex-col p-6">
-                      <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-primary/10 transition-colors group-hover:bg-primary/20">
-                        <Icon className="h-6 w-6 text-primary" />
+                      <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-burgundy/10 transition-colors group-hover:bg-burgundy/20">
+                        <Icon className="h-6 w-6 text-burgundy" />
                       </div>
-                      <h3 className="mb-2 text-lg font-semibold transition-colors group-hover:text-primary">
+                      <h3 className="mb-2 text-lg font-semibold transition-colors group-hover:text-burgundy">
                         {specialty}
                       </h3>
                       <p className="mb-4 line-clamp-2 flex-1 text-sm text-muted-foreground">
@@ -159,7 +159,7 @@ export default async function SpecialtiesPage() {
                             {count} coach{count !== 1 ? 'es' : ''}
                           </span>
                         </div>
-                        <ArrowRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-1 group-hover:text-primary" />
+                        <ArrowRight className="h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-1 group-hover:text-burgundy" />
                       </div>
                     </CardContent>
                   </Card>
@@ -171,22 +171,22 @@ export default async function SpecialtiesPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="border-t bg-muted/30 py-16">
+      <section className="bg-gradient-to-br from-burgundy-dark to-burgundy py-16">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-2xl font-bold tracking-tight md:text-3xl">
+          <h2 className="text-2xl font-bold tracking-tight text-white md:text-3xl">
             Not sure which specialty is right for you?
           </h2>
-          <p className="mx-auto mt-4 max-w-xl text-muted-foreground">
+          <p className="mx-auto mt-4 max-w-xl text-white/80">
             Browse all our coaches and find someone who resonates with your goals and aspirations.
           </p>
           <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
-            <Button size="lg" className="h-12 px-8" asChild>
+            <Button size="lg" className="h-12 bg-gold px-8 text-burgundy-dark hover:bg-gold-dark" asChild>
               <Link href="/coaches">
                 Browse All Coaches
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
-            <Button size="lg" variant="outline" className="h-12 px-8" asChild>
+            <Button size="lg" variant="outline" className="h-12 border-white/30 px-8 text-white hover:bg-white/10 hover:text-white" asChild>
               <Link href="/contact">Get Recommendations</Link>
             </Button>
           </div>

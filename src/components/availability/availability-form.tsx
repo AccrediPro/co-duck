@@ -5,10 +5,28 @@ import { useToast } from '@/hooks/use-toast';
 import {
   saveAvailabilitySettings,
   type DaySchedule,
+  type TimeRange,
   type AvailabilitySettings,
 } from '@/app/(dashboard)/dashboard/availability/actions';
 
-// Copy schedule from one day to others (client-side utility)
+// --- Validation ---
+
+function hasOverlappingRanges(ranges: TimeRange[]): boolean {
+  if (ranges.length < 2) return false;
+  const sorted = [...ranges].sort((a, b) => a.startTime.localeCompare(b.startTime));
+  for (let i = 1; i < sorted.length; i++) {
+    if (sorted[i].startTime < sorted[i - 1].endTime) return true;
+  }
+  return false;
+}
+
+function validateRange(range: TimeRange): string | null {
+  if (range.endTime <= range.startTime) return 'End time must be after start time';
+  return null;
+}
+
+// --- Copy schedule utility ---
+
 type CopyScheduleData = {
   sourceDay: number;
   targetDays: number[];
@@ -24,12 +42,39 @@ function copyDaySchedule(data: CopyScheduleData): DaySchedule[] {
       return {
         ...day,
         isAvailable: sourceSchedule.isAvailable,
-        startTime: sourceSchedule.startTime,
-        endTime: sourceSchedule.endTime,
+        timeRanges: sourceSchedule.timeRanges.map((r) => ({ ...r })),
       };
     }
     return day;
   });
+}
+
+// --- Smart default for new range ---
+
+function getNextDefaultRange(existingRanges: TimeRange[]): TimeRange {
+  if (existingRanges.length === 0) return { startTime: '09:00', endTime: '17:00' };
+
+  const lastRange = [...existingRanges].sort((a, b) =>
+    b.endTime.localeCompare(a.endTime)
+  )[0];
+
+  const [hours, minutes] = lastRange.endTime.split(':').map(Number);
+  const startMinutes = (hours * 60 + minutes) + 60; // 1 hour gap
+  const endMinutes = startMinutes + 240; // 4 hours duration
+
+  const clampedStart = Math.min(startMinutes, 23 * 60);
+  const clampedEnd = Math.min(endMinutes, 23 * 60 + 30);
+
+  const formatTime = (mins: number) => {
+    const h = Math.floor(mins / 60).toString().padStart(2, '0');
+    const m = (mins % 60 < 30 ? '00' : '30');
+    return `${h}:${m}`;
+  };
+
+  const start = formatTime(clampedStart);
+  const end = formatTime(Math.max(clampedEnd, clampedStart + 30));
+
+  return { startTime: start, endTime: end };
 }
 
 import { Button } from '@/components/ui/button';
@@ -45,7 +90,7 @@ import {
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Loader2, Save, Copy, Clock } from 'lucide-react';
+import { Loader2, Save, Copy, Clock, Plus, X } from 'lucide-react';
 
 const DAYS_OF_WEEK = [
   { value: 0, label: 'Sunday', short: 'Sun' },
@@ -125,11 +170,81 @@ export function AvailabilityForm({ initialData }: AvailabilityFormProps) {
   const [copySourceDay, setCopySourceDay] = useState<number | null>(null);
   const [copyTargetDays, setCopyTargetDays] = useState<number[]>([]);
   const [copyPopoverOpen, setCopyPopoverOpen] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
   const updateDaySchedule = (dayOfWeek: number, updates: Partial<DaySchedule>) => {
     setSchedule((prev) =>
       prev.map((day) => (day.dayOfWeek === dayOfWeek ? { ...day, ...updates } : day))
     );
+  };
+
+  const updateTimeRange = (dayOfWeek: number, rangeIndex: number, updates: Partial<TimeRange>) => {
+    setSchedule((prev) =>
+      prev.map((day) => {
+        if (day.dayOfWeek !== dayOfWeek) return day;
+        const newRanges = day.timeRanges.map((range, i) =>
+          i === rangeIndex ? { ...range, ...updates } : range
+        );
+        return { ...day, timeRanges: newRanges };
+      })
+    );
+
+    // Clear validation error for this specific range when user edits
+    const errorKey = `${dayOfWeek}-${rangeIndex}`;
+    setValidationErrors((prev) => {
+      const next = { ...prev };
+      delete next[errorKey];
+      delete next[`${dayOfWeek}-overlap`];
+      return next;
+    });
+  };
+
+  const addTimeRange = (dayOfWeek: number) => {
+    setSchedule((prev) =>
+      prev.map((day) => {
+        if (day.dayOfWeek !== dayOfWeek) return day;
+        const newRange = getNextDefaultRange(day.timeRanges);
+        return { ...day, timeRanges: [...day.timeRanges, newRange] };
+      })
+    );
+  };
+
+  const removeTimeRange = (dayOfWeek: number, rangeIndex: number) => {
+    setSchedule((prev) =>
+      prev.map((day) => {
+        if (day.dayOfWeek !== dayOfWeek) return day;
+        return { ...day, timeRanges: day.timeRanges.filter((_, i) => i !== rangeIndex) };
+      })
+    );
+
+    // Clear any validation errors for this day
+    setValidationErrors((prev) => {
+      const next = { ...prev };
+      Object.keys(next)
+        .filter((k) => k.startsWith(`${dayOfWeek}-`))
+        .forEach((k) => delete next[k]);
+      return next;
+    });
+  };
+
+  const validateAll = (): boolean => {
+    const errors: Record<string, string> = {};
+
+    for (const day of schedule) {
+      if (!day.isAvailable) continue;
+
+      for (let i = 0; i < day.timeRanges.length; i++) {
+        const rangeError = validateRange(day.timeRanges[i]);
+        if (rangeError) errors[`${day.dayOfWeek}-${i}`] = rangeError;
+      }
+
+      if (hasOverlappingRanges(day.timeRanges)) {
+        errors[`${day.dayOfWeek}-overlap`] = 'Time ranges overlap';
+      }
+    }
+
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   const handleCopySchedule = () => {
@@ -159,6 +274,15 @@ export function AvailabilityForm({ initialData }: AvailabilityFormProps) {
   };
 
   async function handleSave() {
+    if (!validateAll()) {
+      toast({
+        variant: 'destructive',
+        title: 'Validation Error',
+        description: 'Please fix the highlighted errors before saving.',
+      });
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -222,7 +346,7 @@ export function AvailabilityForm({ initialData }: AvailabilityFormProps) {
             </div>
             <Popover open={copyPopoverOpen} onOpenChange={setCopyPopoverOpen}>
               <PopoverTrigger asChild>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" className="min-h-[44px]">
                   <Copy className="mr-2 h-4 w-4" />
                   Copy Schedule
                 </Button>
@@ -285,74 +409,105 @@ export function AvailabilityForm({ initialData }: AvailabilityFormProps) {
               const daySchedule = schedule.find((s) => s.dayOfWeek === day.value);
               if (!daySchedule) return null;
 
+              const overlapError = validationErrors[`${day.value}-overlap`];
+
               return (
                 <div
                   key={day.value}
-                  className="flex flex-col gap-4 rounded-lg border p-4 sm:flex-row sm:items-center"
+                  className="flex flex-col gap-4 rounded-lg border p-4"
                 >
-                  <div className="flex min-w-[120px] items-center justify-between sm:justify-start">
-                    <span className="font-medium">{day.label}</span>
-                    <div className="flex items-center gap-2 sm:hidden">
-                      <Switch
-                        checked={daySchedule.isAvailable}
-                        onCheckedChange={(checked) =>
-                          updateDaySchedule(day.value, { isAvailable: checked })
-                        }
-                      />
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <span className="min-w-[100px] font-medium">{day.label}</span>
+                      <div className="flex min-h-[44px] min-w-[44px] items-center justify-center">
+                        <Switch
+                          checked={daySchedule.isAvailable}
+                          onCheckedChange={(checked) =>
+                            updateDaySchedule(day.value, { isAvailable: checked })
+                          }
+                        />
+                      </div>
+                      <span className="text-sm text-muted-foreground">
+                        {daySchedule.isAvailable ? 'Available' : 'Unavailable'}
+                      </span>
                     </div>
                   </div>
 
-                  <div className="hidden items-center gap-2 sm:flex">
-                    <Switch
-                      checked={daySchedule.isAvailable}
-                      onCheckedChange={(checked) =>
-                        updateDaySchedule(day.value, { isAvailable: checked })
-                      }
-                    />
-                    <span className="text-sm text-muted-foreground">
-                      {daySchedule.isAvailable ? 'Available' : 'Unavailable'}
-                    </span>
-                  </div>
+                  {daySchedule.isAvailable && (
+                    <div className="space-y-3 sm:pl-[112px]">
+                      {daySchedule.timeRanges.map((range, rangeIndex) => {
+                        const rangeError = validationErrors[`${day.value}-${rangeIndex}`];
 
-                  {daySchedule.isAvailable ? (
-                    <div className="flex flex-1 flex-wrap items-center gap-2">
-                      <Select
-                        value={daySchedule.startTime}
-                        onValueChange={(value) =>
-                          updateDaySchedule(day.value, { startTime: value })
-                        }
+                        return (
+                          <div key={rangeIndex}>
+                            <div className="flex flex-wrap items-center gap-2">
+                              <Select
+                                value={range.startTime}
+                                onValueChange={(value) =>
+                                  updateTimeRange(day.value, rangeIndex, { startTime: value })
+                                }
+                              >
+                                <SelectTrigger className="w-[120px]">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {TIME_OPTIONS.map((time) => (
+                                    <SelectItem key={time.value} value={time.value}>
+                                      {time.label}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              <span className="text-muted-foreground">to</span>
+                              <Select
+                                value={range.endTime}
+                                onValueChange={(value) =>
+                                  updateTimeRange(day.value, rangeIndex, { endTime: value })
+                                }
+                              >
+                                <SelectTrigger className="w-[120px]">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {TIME_OPTIONS.map((time) => (
+                                    <SelectItem key={time.value} value={time.value}>
+                                      {time.label}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                              {daySchedule.timeRanges.length > 1 && (
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="min-h-[44px] min-w-[44px] text-muted-foreground hover:text-destructive"
+                                  onClick={() => removeTimeRange(day.value, rangeIndex)}
+                                >
+                                  <X className="h-4 w-4" />
+                                  <span className="sr-only">Remove time slot</span>
+                                </Button>
+                              )}
+                            </div>
+                            {rangeError && (
+                              <p className="mt-1 text-sm text-destructive">{rangeError}</p>
+                            )}
+                          </div>
+                        );
+                      })}
+
+                      {overlapError && (
+                        <p className="text-sm text-destructive">{overlapError}</p>
+                      )}
+
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="min-h-[44px] text-muted-foreground"
+                        onClick={() => addTimeRange(day.value)}
                       >
-                        <SelectTrigger className="w-[120px]">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {TIME_OPTIONS.map((time) => (
-                            <SelectItem key={time.value} value={time.value}>
-                              {time.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <span className="text-muted-foreground">to</span>
-                      <Select
-                        value={daySchedule.endTime}
-                        onValueChange={(value) => updateDaySchedule(day.value, { endTime: value })}
-                      >
-                        <SelectTrigger className="w-[120px]">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {TIME_OPTIONS.map((time) => (
-                            <SelectItem key={time.value} value={time.value}>
-                              {time.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  ) : (
-                    <div className="flex-1">
-                      <span className="text-sm text-muted-foreground sm:hidden">Unavailable</span>
+                        <Plus className="mr-2 h-4 w-4" />
+                        Add time slot
+                      </Button>
                     </div>
                   )}
                 </div>
@@ -441,7 +596,7 @@ export function AvailabilityForm({ initialData }: AvailabilityFormProps) {
       {/* Save Button */}
       <Card>
         <CardContent className="flex justify-end pt-6">
-          <Button onClick={handleSave} disabled={isSubmitting} size="lg">
+          <Button onClick={handleSave} disabled={isSubmitting} size="lg" className="min-h-[44px]">
             {isSubmitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

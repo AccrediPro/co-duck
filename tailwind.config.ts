@@ -50,6 +50,17 @@ const config: Config = {
           '4': 'hsl(var(--chart-4))',
           '5': 'hsl(var(--chart-5))',
         },
+        burgundy: {
+          DEFAULT: '#722f37',
+          light: '#8b3a42',
+          dark: '#5d262d',
+        },
+        gold: {
+          DEFAULT: '#d4af37',
+          dark: '#b8963c',
+        },
+        sage: '#8b9a64',
+        cream: '#f5eddc',
       },
       borderRadius: {
         lg: 'var(--radius)',

@@ -324,7 +324,7 @@ const TEST_SECTIONS = [
           },
           { id: 'email-4', text: 'Check email includes session details, date, time' },
           { id: 'email-5', text: 'Check email includes meeting link if set' },
-          { id: 'email-6', text: 'Verify emails have proper CoachHub branding' },
+          { id: 'email-6', text: 'Verify emails have proper AccrediPro CoachHub branding' },
         ],
       },
       {
@@ -654,17 +654,17 @@ export default function TestPage() {
       </Card>
 
       {/* Test Data - Existing Users & Coaches */}
-      <Card className="mb-6 border-emerald-500/30 bg-emerald-50/50 dark:bg-emerald-950/20">
+      <Card className="mb-6 border-burgundy/30 bg-cream/50 dark:bg-burgundy-dark/20">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <User className="h-5 w-5 text-emerald-600" />
+            <User className="h-5 w-5 text-burgundy" />
             Test Data (Database)
           </CardTitle>
           <CardDescription>Existing users and coaches for testing</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <h4 className="font-semibold text-emerald-700 dark:text-emerald-400">Coach Accounts</h4>
+            <h4 className="font-semibold text-burgundy dark:text-burgundy-light">Coach Accounts</h4>
             <div className="mt-2 overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
@@ -753,7 +753,7 @@ export default function TestPage() {
           </div>
           <Separator />
           <div>
-            <h4 className="font-semibold text-green-700 dark:text-green-400">Client Accounts</h4>
+            <h4 className="font-semibold text-burgundy dark:text-burgundy-light">Client Accounts</h4>
             <div className="mt-2 overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
@@ -779,22 +779,22 @@ export default function TestPage() {
             </div>
           </div>
           <Separator />
-          <div className="rounded-md bg-amber-100/50 p-3 dark:bg-amber-900/20">
-            <h4 className="font-semibold text-amber-700 dark:text-amber-400">Quick Links</h4>
+          <div className="rounded-md bg-gold/10 p-3 dark:bg-gold-dark/20">
+            <h4 className="font-semibold text-burgundy-dark dark:text-gold">Quick Links</h4>
             <div className="mt-2 flex flex-wrap gap-2 text-xs">
-              <a href="/coaches/test-coach" className="text-emerald-600 hover:underline">
+              <a href="/coaches/test-coach" className="text-burgundy hover:underline">
                 /coaches/test-coach
               </a>
               <span className="text-muted-foreground">|</span>
-              <a href="/coaches/sarah-johnson" className="text-emerald-600 hover:underline">
+              <a href="/coaches/sarah-johnson" className="text-burgundy hover:underline">
                 /coaches/sarah-johnson
               </a>
               <span className="text-muted-foreground">|</span>
-              <a href="/coaches/michael-chen" className="text-emerald-600 hover:underline">
+              <a href="/coaches/michael-chen" className="text-burgundy hover:underline">
                 /coaches/michael-chen
               </a>
               <span className="text-muted-foreground">|</span>
-              <a href="/admin" className="text-emerald-600 hover:underline">
+              <a href="/admin" className="text-burgundy hover:underline">
                 /admin
               </a>
             </div>
@@ -828,18 +828,18 @@ export default function TestPage() {
               const allComplete = sectionCompleted === sectionTotal;
 
               return (
-                <Card key={section.id} className={allComplete ? 'border-green-500/50' : ''}>
+                <Card key={section.id} className={allComplete ? 'border-sage/50' : ''}>
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
                       <CardTitle className="flex items-center gap-2 text-base">
                         {getIcon(section.icon)}
                         {section.title}
-                        {allComplete && <CheckCircle className="h-4 w-4 text-green-500" />}
+                        {allComplete && <CheckCircle className="h-4 w-4 text-sage" />}
                       </CardTitle>
                       <div className="flex items-center gap-2">
                         <Badge
                           variant={allComplete ? 'default' : 'secondary'}
-                          className={`text-xs ${allComplete ? 'bg-green-500' : ''}`}
+                          className={`text-xs ${allComplete ? 'bg-sage' : ''}`}
                         >
                           {sectionCompleted}/{sectionTotal}
                         </Badge>

@@ -15,15 +15,15 @@ export function VerificationEmail({
   notes,
   unsubscribeUrl,
 }: VerificationEmailProps) {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://coachhub.com';
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://accredipro-coachhub.com';
   const isApproved = status === 'verified';
 
   return (
     <EmailLayout
       preview={
         isApproved
-          ? `Your CoachHub profile has been verified!`
-          : `Update on your CoachHub profile verification`
+          ? `Your AccrediPro CoachHub profile has been verified!`
+          : `Update on your AccrediPro CoachHub profile verification`
       }
       unsubscribeUrl={unsubscribeUrl}
     >
@@ -32,7 +32,7 @@ export function VerificationEmail({
       {isApproved ? (
         <>
           <Text style={paragraph}>
-            Hi {coachName}, great news! Your coach profile on CoachHub has been verified. You now
+            Hi {coachName}, great news! Your coach profile on AccrediPro CoachHub has been verified. You now
             have a verification badge visible on your profile.
           </Text>
           <Text style={paragraph}>

@@ -64,8 +64,8 @@ export function CoachCard({
   return (
     <Link href={`/coaches/${slug}`}>
       <Card className="group h-full cursor-pointer transition-all hover:border-primary/50 hover:shadow-lg">
-        <CardContent className="p-6">
-          <div className="flex flex-col items-center text-center">
+        <CardContent className="flex h-full flex-col p-6">
+          <div className="flex flex-1 flex-col items-center text-center">
             {/* Avatar */}
             <Avatar className="h-20 w-20 border-2 border-background shadow-md">
               <AvatarImage src={avatarUrl || undefined} alt={name} />
@@ -106,16 +106,16 @@ export function CoachCard({
                   </Badge>
                 ))}
                 {hasMoreSpecialties && (
-                  <Badge variant="outline" className="text-xs">
+                  <Badge variant="outline" className="text-xs text-muted-foreground">
                     +{(specialties?.length || 0) - 3}
                   </Badge>
                 )}
               </div>
             )}
 
-            {/* Starting Price */}
+            {/* Starting Price — anchored to bottom */}
             {lowestPricedSession && (
-              <div className="mt-4 w-full border-t pt-4">
+              <div className="mt-auto w-full border-t pt-4">
                 <p className="text-sm text-muted-foreground">Starting from</p>
                 <p className="text-xl font-bold text-primary">
                   {currencySymbol}

@@ -101,8 +101,8 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       sendEmail({
         to: coach.email,
         subject: isApproved
-          ? 'Your CoachHub profile has been verified!'
-          : 'Update on your CoachHub profile verification',
+          ? 'Your AccrediPro CoachHub profile has been verified!'
+          : 'Update on your AccrediPro CoachHub profile verification',
         react: VerificationEmail({
           coachName: coach.name || 'Coach',
           status,

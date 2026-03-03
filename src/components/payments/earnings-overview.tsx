@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DollarSign, TrendingUp, Clock } from 'lucide-react';
+import { formatMonthYear } from '@/lib/date-utils';
 import type { EarningsData } from '@/app/(dashboard)/dashboard/payments/actions';
 
 interface EarningsOverviewProps {
@@ -44,7 +45,7 @@ export function EarningsOverview({ earnings }: EarningsOverviewProps) {
         <CardContent>
           <div className="text-2xl font-bold">{formatCurrency(thisMonthEarnings, currency)}</div>
           <p className="text-xs text-muted-foreground">
-            {new Date().toLocaleString('en-US', { month: 'long', year: 'numeric' })}
+            {formatMonthYear(new Date())}
           </p>
         </CardContent>
       </Card>

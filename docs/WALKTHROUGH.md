@@ -1,6 +1,6 @@
-# CoachHub Platform Walkthrough Guide
+# AccrediPro CoachHub Platform Walkthrough Guide
 
-A comprehensive visual guide to all features of the CoachHub coaching platform.
+A comprehensive visual guide to all features of the AccrediPro CoachHub coaching platform.
 
 ## Table of Contents
 
@@ -26,7 +26,7 @@ The homepage introduces visitors to the platform with a hero section, features, 
 | Section                 | Description                                                                  |
 | ----------------------- | ---------------------------------------------------------------------------- |
 | **Hero**                | "Find Your Perfect Coach" headline with CTA buttons                          |
-| **Why Choose CoachHub** | 3 value propositions (Expert Coaches, Flexible Scheduling, Secure & Private) |
+| **Why Choose AccrediPro CoachHub** | 3 value propositions (Expert Coaches, Flexible Scheduling, Secure & Private) |
 | **How It Works**        | 3-step process (Browse, Book, Achieve)                                       |
 | **Featured Coaches**    | Showcase of top coaches with quick links                                     |
 | **Become a Coach CTA**  | Invitation for coaches to join the platform                                  |
@@ -151,7 +151,7 @@ Contact form and FAQ section.
 
 | Method            | Details                   |
 | ----------------- | ------------------------- |
-| **Email**         | support@coachhub.com      |
+| **Email**         | support@accredipro-coachhub.com      |
 | **Location**      | San Francisco, CA         |
 | **Response Time** | Within 24 hours (Mon-Fri) |
 

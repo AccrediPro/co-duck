@@ -30,8 +30,13 @@ export interface UploadError {
 
 function getSupabaseAdmin() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-  if (!url || !key) return null;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!url || !key) {
+    console.error(
+      'Missing SUPABASE_SERVICE_ROLE_KEY. File uploads require the service role key.'
+    );
+    return null;
+  }
   return createClient(url, key);
 }
 
@@ -91,11 +96,15 @@ export async function uploadMessageAttachment(
   const { data: buckets } = await supabase.storage.listBuckets();
   const bucketExists = buckets?.some((b) => b.name === MESSAGE_ATTACHMENTS_BUCKET);
   if (!bucketExists) {
-    await supabase.storage.createBucket(MESSAGE_ATTACHMENTS_BUCKET, {
+    const { error: bucketError } = await supabase.storage.createBucket(MESSAGE_ATTACHMENTS_BUCKET, {
       public: true,
       fileSizeLimit: MAX_FILE_SIZE,
       allowedMimeTypes: ALLOWED_MIME_TYPES,
     });
+    if (bucketError) {
+      console.error('Failed to create message attachments bucket:', bucketError);
+      return { error: { code: 'BUCKET_CREATION_FAILED', message: 'File storage is not configured' } };
+    }
   }
 
   const sanitized = sanitizeFileName(file.name);

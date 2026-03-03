@@ -15,6 +15,7 @@ import { ReviewRequestEmail } from '@/lib/emails';
 import { createNotification } from '@/lib/notifications';
 import { getUnsubscribeUrl } from '@/lib/unsubscribe';
 import { rateLimit, FREQUENT_LIMIT, WRITE_LIMIT, rateLimitResponse } from '@/lib/rate-limit';
+import { formatDateLong } from '@/lib/date-utils';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -245,12 +246,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
             clientName: client.name || 'there',
             coachName: coach.name || 'Your Coach',
             sessionType: sessionType?.name || 'Coaching',
-            sessionDate: booking.startTime.toLocaleDateString('en-US', {
-              weekday: 'long',
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-            }),
+            sessionDate: formatDateLong(booking.startTime),
             coachSlug: coachProfile.slug,
             unsubscribeUrl: getUnsubscribeUrl(booking.clientId, 'reviews'),
           }),

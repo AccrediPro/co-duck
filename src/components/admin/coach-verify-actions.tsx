@@ -78,7 +78,7 @@ export function CoachVerifyActions({ coachId, currentStatus }: CoachVerifyAction
       )}
 
       {success && (
-        <div className="rounded-md bg-green-50 p-3 text-sm text-green-700">
+        <div className="rounded-md bg-[hsl(var(--brand-surface))] p-3 text-sm text-[hsl(var(--brand-accent-hover))]">
           {success}
         </div>
       )}
@@ -87,7 +87,7 @@ export function CoachVerifyActions({ coachId, currentStatus }: CoachVerifyAction
         <Button
           onClick={() => handleAction('verified')}
           disabled={isLoading !== null}
-          className="bg-green-600 hover:bg-green-700"
+          className="bg-[hsl(var(--brand-warm))] hover:bg-[hsl(var(--brand-accent-hover))]"
         >
           {isLoading === 'verified' ? (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -117,7 +117,7 @@ export function VerificationBadge({ status }: { status: string }) {
   switch (status) {
     case 'verified':
       return (
-        <Badge className="bg-green-100 text-green-800 hover:bg-green-100">
+        <Badge className="bg-[hsl(var(--brand-accent-light))] text-[hsl(var(--brand-accent-dark))] hover:bg-[hsl(var(--brand-accent-light))]">
           <CheckCircle className="mr-1 h-3 w-3" />
           Verified
         </Badge>

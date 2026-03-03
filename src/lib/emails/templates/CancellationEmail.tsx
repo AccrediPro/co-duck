@@ -127,7 +127,7 @@ export function CancellationEmail({
 
       <Text style={paragraph}>
         We understand plans can change. If you&apos;d like to reschedule,{' '}
-        <Link href="https://coachhub.com/coaches" style={link}>
+        <Link href="https://accredipro-coachhub.com/coaches" style={link}>
           browse available coaches
         </Link>{' '}
         and book a new session at your convenience.
@@ -135,7 +135,7 @@ export function CancellationEmail({
 
       <Text style={paragraph}>
         Questions about your cancellation?{' '}
-        <Link href="https://coachhub.com/support" style={link}>
+        <Link href="https://accredipro-coachhub.com/support" style={link}>
           Contact our support team
         </Link>
       </Text>
@@ -231,14 +231,14 @@ const refundSection = {
 };
 
 const refundTitle = {
-  color: '#166534',
+  color: '#4d2d30',
   fontSize: '14px',
   fontWeight: '600' as const,
   margin: '0 0 8px',
 };
 
 const refundText = {
-  color: '#166534',
+  color: '#4d2d30',
   fontSize: '14px',
   lineHeight: '20px',
   margin: '0',

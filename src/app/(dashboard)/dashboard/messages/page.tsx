@@ -94,23 +94,27 @@ export default async function MessagesPage() {
 
   if (!result.success) {
     return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold">Messages</h1>
-          <p className="text-muted-foreground">Your conversations</p>
-        </div>
-
-        <Card>
+      <div>
+        <Card className="mb-6">
           <CardHeader>
-            <CardTitle>Error Loading Messages</CardTitle>
-            <CardDescription>{result.error}</CardDescription>
+            <CardTitle className="text-2xl font-bold">Messages</CardTitle>
+            <CardDescription>Your conversations</CardDescription>
           </CardHeader>
-          <CardContent>
-            <Button asChild>
-              <Link href="/dashboard">Return to Dashboard</Link>
-            </Button>
-          </CardContent>
         </Card>
+
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Error Loading Messages</CardTitle>
+              <CardDescription>{result.error}</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button asChild>
+                <Link href="/dashboard">Return to Dashboard</Link>
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     );
   }
@@ -124,14 +128,18 @@ export default async function MessagesPage() {
   const otherPartyLabel = userRole === 'coach' ? 'clients' : 'coaches';
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Messages</h1>
-        <p className="text-muted-foreground">Your conversations with {otherPartyLabel}</p>
-      </div>
+    <div>
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold">Messages</CardTitle>
+          <CardDescription>Your conversations with {otherPartyLabel}</CardDescription>
+        </CardHeader>
+      </Card>
 
-      {/* Client component handles conversation selection and navigation */}
-      <ConversationsList initialConversations={result.conversations || []} userRole={userRole} />
+      <div className="space-y-6">
+        {/* Client component handles conversation selection and navigation */}
+        <ConversationsList initialConversations={result.conversations || []} userRole={userRole} />
+      </div>
     </div>
   );
 }

@@ -111,7 +111,7 @@ export function SessionReminderEmail({
 
       <Text style={paragraph}>
         Need to reschedule?{' '}
-        <Link href="https://coachhub.com/dashboard/bookings" style={link}>
+        <Link href="https://accredipro-coachhub.com/dashboard/bookings" style={link}>
           Manage your booking
         </Link>{' '}
         before the session starts.

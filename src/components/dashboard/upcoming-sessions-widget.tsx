@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Clock, ArrowRight } from 'lucide-react';
+import { formatDateShort } from '@/lib/date-utils';
 import type { DashboardSession } from '@/app/(dashboard)/dashboard/actions';
 
 interface UpcomingSessionsWidgetProps {
@@ -20,7 +21,7 @@ function getRelativeTime(date: Date): string {
   if (diffHours < 24) return `in ${diffHours}h`;
   if (diffDays === 1) return 'tomorrow';
   if (diffDays < 7) return `in ${diffDays} days`;
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  return formatDateShort(date);
 }
 
 export function UpcomingSessionsWidget({ sessions }: UpcomingSessionsWidgetProps) {

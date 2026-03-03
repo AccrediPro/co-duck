@@ -37,7 +37,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       <AdminSidebar userName={userName} userEmail={userEmail} />
       <div className="flex flex-1 flex-col">
         <AdminMobileHeader userName={userName} userEmail={userEmail} />
-        <main className="flex-1 overflow-auto bg-amber-50/20 p-4 md:p-8">{children}</main>
+        <main className="flex-1 overflow-auto bg-cream p-4 md:p-8">{children}</main>
       </div>
     </div>
   );

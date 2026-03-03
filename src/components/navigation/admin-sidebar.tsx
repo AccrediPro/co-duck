@@ -45,7 +45,7 @@ export function AdminSidebar({ userName, userEmail }: AdminSidebarProps) {
       {/* Logo */}
       <div className="flex h-16 items-center px-6">
         <Link href="/admin" className="flex items-center gap-2 text-xl font-bold">
-          <Shield className="h-5 w-5 text-amber-500" />
+          <Shield className="h-5 w-5 text-burgundy" />
           <span>Admin</span>
         </Link>
       </div>
@@ -63,8 +63,8 @@ export function AdminSidebar({ userName, userEmail }: AdminSidebarProps) {
               className={cn(
                 'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
                 isActiveLink(link.href)
-                  ? 'bg-amber-500 text-white'
-                  : 'text-muted-foreground hover:bg-amber-500/10 hover:text-amber-600'
+                  ? 'bg-burgundy text-white'
+                  : 'text-muted-foreground hover:bg-burgundy/10 hover:text-burgundy'
               )}
             >
               <Icon className="h-4 w-4" />
@@ -105,7 +105,7 @@ export function AdminSidebar({ userName, userEmail }: AdminSidebarProps) {
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside className="hidden w-64 flex-col border-r border-amber-200 bg-gradient-to-b from-amber-50/50 to-background md:flex">
+      <aside className="hidden w-64 flex-col border-r border-burgundy/20 bg-gradient-to-b from-cream/50 to-background md:flex">
         <NavContent />
       </aside>
     </>
@@ -124,9 +124,9 @@ export function AdminMobileHeader({ userName, userEmail }: AdminSidebarProps) {
   };
 
   return (
-    <header className="sticky top-0 z-50 flex h-16 items-center justify-between border-b border-amber-200 bg-gradient-to-r from-amber-50/50 to-background px-4 md:hidden">
+    <header className="sticky top-0 z-50 flex h-16 items-center justify-between border-b border-burgundy/20 bg-gradient-to-r from-cream/50 to-background px-4 md:hidden">
       <Link href="/admin" className="flex items-center gap-2 text-xl font-bold">
-        <Shield className="h-5 w-5 text-amber-500" />
+        <Shield className="h-5 w-5 text-burgundy" />
         <span>Admin</span>
       </Link>
 
@@ -143,7 +143,7 @@ export function AdminMobileHeader({ userName, userEmail }: AdminSidebarProps) {
           onInteractOutside={() => setMobileMenuOpen(false)}
         >
           <SheetTitle className="sr-only">Admin Navigation</SheetTitle>
-          <div className="flex h-full flex-col bg-gradient-to-b from-amber-50/50 to-background">
+          <div className="flex h-full flex-col bg-gradient-to-b from-cream/50 to-background">
             {/* Logo */}
             <div className="flex h-16 items-center px-6">
               <Link
@@ -151,7 +151,7 @@ export function AdminMobileHeader({ userName, userEmail }: AdminSidebarProps) {
                 className="flex items-center gap-2 text-xl font-bold"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                <Shield className="h-5 w-5 text-amber-500" />
+                <Shield className="h-5 w-5 text-burgundy" />
                 <span>Admin</span>
               </Link>
             </div>
@@ -170,8 +170,8 @@ export function AdminMobileHeader({ userName, userEmail }: AdminSidebarProps) {
                     className={cn(
                       'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
                       isActiveLink(link.href)
-                        ? 'bg-amber-500 text-white'
-                        : 'text-muted-foreground hover:bg-amber-500/10 hover:text-amber-600'
+                        ? 'bg-burgundy text-white'
+                        : 'text-muted-foreground hover:bg-burgundy/10 hover:text-burgundy'
                     )}
                   >
                     <Icon className="h-4 w-4" />

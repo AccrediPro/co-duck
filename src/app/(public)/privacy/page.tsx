@@ -27,7 +27,7 @@ const sections = [
     id: 'overview',
     icon: Eye,
     title: '1. Privacy Overview',
-    content: `CoachHub ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our platform.
+    content: `AccrediPro CoachHub ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our platform.
 
 **Key Points:**
 • We collect information you provide directly and automatically through your use of the Service
@@ -36,7 +36,7 @@ const sections = [
 • You have rights regarding your personal information, including access, correction, and deletion
 • We implement security measures to protect your data
 
-By using CoachHub, you consent to the data practices described in this policy. If you do not agree with these practices, please do not use our Service.`,
+By using AccrediPro CoachHub, you consent to the data practices described in this policy. If you do not agree with these practices, please do not use our Service.`,
   },
   {
     id: 'collection',
@@ -222,7 +222,7 @@ Coaches may retain their own copies of session notes and materials, subject to t
 
 **How to Exercise Your Rights:**
 • Access your data through your account settings
-• Email us at privacy@coachhub.com with your request
+• Email us at privacy@accredipro-coachhub.com with your request
 • We will respond within 30 days (or as required by local law)
 
 **Identity Verification:**
@@ -235,7 +235,7 @@ Under the CCPA, you have additional rights including the right to know what info
     id: 'international',
     icon: Globe,
     title: '9. International Data Transfers',
-    content: `CoachHub is based in the United States. If you access our Service from outside the US, your information may be transferred to, stored, and processed in the US or other countries.
+    content: `AccrediPro CoachHub is based in the United States. If you access our Service from outside the US, your information may be transferred to, stored, and processed in the US or other countries.
 
 **Data Transfer Mechanisms:**
 • Standard Contractual Clauses approved by relevant authorities
@@ -251,7 +251,7 @@ We comply with GDPR requirements for data transfers, including:
 **For Other Regions:**
 We comply with applicable local data protection laws and implement appropriate safeguards for cross-border transfers.
 
-If you have concerns about international data transfers, please contact us at privacy@coachhub.com.`,
+If you have concerns about international data transfers, please contact us at privacy@accredipro-coachhub.com.`,
   },
   {
     id: 'children',
@@ -270,7 +270,7 @@ If you have concerns about international data transfers, please contact us at pr
 • Coaches working with minors must comply with additional safeguards
 
 **Contact Us:**
-If you believe a child under 18 has provided personal information to us, please contact us immediately at privacy@coachhub.com.`,
+If you believe a child under 18 has provided personal information to us, please contact us immediately at privacy@accredipro-coachhub.com.`,
   },
   {
     id: 'changes',
@@ -299,19 +299,19 @@ You may request previous versions of this Privacy Policy by contacting us.`,
     content: `If you have questions, concerns, or requests regarding this Privacy Policy or our data practices, please contact us:
 
 **Privacy Inquiries:**
-Email: privacy@coachhub.com
+Email: privacy@accredipro-coachhub.com
 
 **Data Protection Officer:**
-Email: dpo@coachhub.com
+Email: dpo@accredipro-coachhub.com
 
 **Mailing Address:**
-CoachHub Privacy Team
+AccrediPro CoachHub Privacy Team
 123 Innovation Drive
 San Francisco, CA 94105
 United States
 
 **General Support:**
-Email: support@coachhub.com
+Email: support@accredipro-coachhub.com
 Visit: /contact page
 
 **Response Time:**
@@ -377,18 +377,18 @@ export default function PrivacyPage() {
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-background to-primary/10">
+      <section className="relative overflow-hidden bg-gradient-to-br from-burgundy-dark to-burgundy">
         <div className="container mx-auto px-4 py-16 md:py-20">
           <div className="mx-auto max-w-3xl text-center">
-            <div className="mb-4 inline-flex items-center rounded-full bg-primary/10 px-4 py-2 text-sm font-medium text-primary">
+            <div className="mb-4 inline-flex items-center rounded-full bg-gold/20 px-4 py-2 text-sm font-medium text-white">
               <Shield className="mr-2 h-4 w-4" />
               Your Privacy Matters
             </div>
-            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">Privacy Policy</h1>
-            <p className="mx-auto mt-4 max-w-xl text-muted-foreground">
+            <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">Privacy Policy</h1>
+            <p className="mx-auto mt-4 max-w-xl text-white/70">
               Last updated: January 31, 2026
             </p>
-            <p className="mx-auto mt-2 text-sm text-muted-foreground">
+            <p className="mx-auto mt-2 text-sm text-white/70">
               Learn how we collect, use, and protect your personal information.
             </p>
             <div className="mt-6 flex justify-center gap-4">
@@ -402,7 +402,7 @@ export default function PrivacyPage() {
             </div>
           </div>
         </div>
-        <div className="absolute -left-20 -top-20 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
+        <div className="absolute -left-20 -top-20 h-72 w-72 rounded-full bg-gold/10 blur-3xl" />
       </section>
 
       {/* Main Content */}
@@ -422,7 +422,7 @@ export default function PrivacyPage() {
                       onClick={() => scrollToSection(item.id)}
                       className={`block w-full rounded-lg px-3 py-2 text-left text-sm transition-colors hover:bg-muted ${
                         activeSection === item.id
-                          ? 'bg-primary/10 font-medium text-primary'
+                          ? 'bg-burgundy/10 font-medium text-burgundy'
                           : 'text-muted-foreground'
                       }`}
                     >
@@ -454,9 +454,9 @@ export default function PrivacyPage() {
               </div>
 
               {/* Introduction */}
-              <div className="mb-8 rounded-lg border bg-muted/30 p-6">
+              <div className="mb-8 rounded-lg border bg-cream p-6">
                 <p className="text-muted-foreground">
-                  At CoachHub, we take your privacy seriously. This Privacy Policy describes how we
+                  At AccrediPro CoachHub, we take your privacy seriously. This Privacy Policy describes how we
                   collect, use, share, and protect your personal information when you use our
                   platform. We believe in transparency and want you to understand exactly how your
                   data is handled.
@@ -464,30 +464,30 @@ export default function PrivacyPage() {
               </div>
 
               {/* Quick Summary */}
-              <div className="mb-8 rounded-lg border-2 border-primary/20 bg-primary/5 p-6">
+              <div className="mb-8 rounded-lg border-2 border-burgundy/20 bg-burgundy/5 p-6">
                 <h3 className="mb-4 flex items-center gap-2 font-semibold">
-                  <Shield className="h-5 w-5 text-primary" />
+                  <Shield className="h-5 w-5 text-burgundy" />
                   Privacy at a Glance
                 </h3>
                 <ul className="space-y-2 text-sm text-muted-foreground">
                   <li className="flex items-start gap-2">
-                    <span className="text-primary">•</span>
+                    <span className="text-burgundy">•</span>
                     <span>We collect only what we need to provide our services</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-primary">•</span>
+                    <span className="text-burgundy">•</span>
                     <span>We never sell your personal information</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-primary">•</span>
+                    <span className="text-burgundy">•</span>
                     <span>You can access, update, or delete your data anytime</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-primary">•</span>
+                    <span className="text-burgundy">•</span>
                     <span>We use encryption and security best practices</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="text-primary">•</span>
+                    <span className="text-burgundy">•</span>
                     <span>You control your communication preferences</span>
                   </li>
                 </ul>
@@ -504,8 +504,8 @@ export default function PrivacyPage() {
                   >
                     <AccordionTrigger className="hover:no-underline">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                          <section.icon className="h-5 w-5 text-primary" />
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-burgundy/10">
+                          <section.icon className="h-5 w-5 text-burgundy" />
                         </div>
                         <span className="text-left font-semibold">{section.title}</span>
                       </div>
@@ -524,7 +524,7 @@ export default function PrivacyPage() {
               </Accordion>
 
               {/* Footer Note */}
-              <div className="mt-12 rounded-lg border bg-muted/30 p-6 text-center">
+              <div className="mt-12 rounded-lg border bg-cream p-6 text-center">
                 <p className="text-sm text-muted-foreground">
                   Your privacy is important to us. If you have any questions about this Privacy
                   Policy, please don&apos;t hesitate to contact us.
@@ -547,7 +547,7 @@ export default function PrivacyPage() {
       {showBackToTop && (
         <button
           onClick={scrollToTop}
-          className="fixed bottom-8 right-8 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform hover:scale-110"
+          className="fixed bottom-8 right-8 z-50 flex h-12 w-12 items-center justify-center rounded-full bg-burgundy text-white shadow-lg transition-transform hover:scale-110"
           aria-label="Back to top"
         >
           <ArrowUp className="h-5 w-5" />

@@ -29,13 +29,13 @@ export function SessionStats({
           {pendingBookingRequests > 0 && (
             <Link
               href="/dashboard/sessions?tab=upcoming"
-              className="flex items-center justify-between rounded-md bg-amber-50 p-2 transition-colors hover:bg-amber-100 dark:bg-amber-950/30 dark:hover:bg-amber-950/50"
+              className="flex items-center justify-between rounded-md bg-gold/10 p-2 transition-colors hover:bg-gold/20"
             >
-              <div className="flex items-center gap-2 text-sm font-medium text-amber-800 dark:text-amber-200">
+              <div className="flex items-center gap-2 text-sm font-medium text-gold-dark">
                 <Bell className="h-4 w-4" />
                 Pending Requests
               </div>
-              <Badge variant="secondary" className="bg-amber-200 text-amber-900">
+              <Badge variant="secondary" className="bg-gold/20 text-gold-dark">
                 {pendingBookingRequests}
               </Badge>
             </Link>

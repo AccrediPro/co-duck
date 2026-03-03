@@ -417,16 +417,16 @@ export function ProfileEditorForm({ initialData }: ProfileEditorFormProps) {
       {/* Profile Status Card */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <span className="flex items-center gap-2">
+          <CardTitle className="flex flex-wrap items-center justify-between gap-2">
+            <span className="flex min-w-0 items-center gap-2">
               {completionPercentage === 100 ? (
-                <CheckCircle className="h-5 w-5 text-green-500" />
+                <CheckCircle className="h-5 w-5 shrink-0 text-[hsl(var(--brand-accent))]" />
               ) : (
-                <AlertCircle className="h-5 w-5 text-amber-500" />
+                <AlertCircle className="h-5 w-5 shrink-0 text-gold" />
               )}
-              Profile Completion: {completionPercentage}%
+              <span className="truncate">Profile Completion: {completionPercentage}%</span>
             </span>
-            <Badge variant={isPublished ? 'default' : 'secondary'}>
+            <Badge variant={isPublished ? 'default' : 'secondary'} className="shrink-0">
               {isPublished ? 'Published' : 'Draft'}
             </Badge>
           </CardTitle>
@@ -480,7 +480,7 @@ export function ProfileEditorForm({ initialData }: ProfileEditorFormProps) {
                     <FormControl>
                       <Input placeholder="John Smith" {...field} />
                     </FormControl>
-                    <FormDescription>
+                    <FormDescription className="break-words">
                       This is how your name will appear on your coach profile.
                     </FormDescription>
                     <FormMessage />
@@ -501,7 +501,7 @@ export function ProfileEditorForm({ initialData }: ProfileEditorFormProps) {
                         {...field}
                       />
                     </FormControl>
-                    <FormDescription>
+                    <FormDescription className="break-words">
                       A short tagline that describes what you do ({field.value?.length || 0}/150
                       characters).
                     </FormDescription>
@@ -517,8 +517,8 @@ export function ProfileEditorForm({ initialData }: ProfileEditorFormProps) {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Profile Photo</FormLabel>
-                    <div className="flex items-center gap-6">
-                      <div className="group relative">
+                    <div className="flex items-center gap-4 sm:gap-6">
+                      <div className="group relative shrink-0">
                         <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border-2 border-dashed border-muted-foreground/25 bg-muted">
                           {field.value ? (
                             <>
@@ -542,7 +542,7 @@ export function ProfileEditorForm({ initialData }: ProfileEditorFormProps) {
                           </div>
                         )}
                       </div>
-                      <div className="space-y-2">
+                      <div className="min-w-0 space-y-2">
                         <input
                           ref={fileInputRef}
                           type="file"
@@ -570,7 +570,7 @@ export function ProfileEditorForm({ initialData }: ProfileEditorFormProps) {
                             </>
                           )}
                         </Button>
-                        <FormDescription>
+                        <FormDescription className="break-words">
                           JPG, PNG, or WebP. Max 800x800px, auto-compressed.
                         </FormDescription>
                       </div>
@@ -601,7 +601,7 @@ export function ProfileEditorForm({ initialData }: ProfileEditorFormProps) {
                         ))}
                       </SelectContent>
                     </Select>
-                    <FormDescription>
+                    <FormDescription className="break-words">
                       Your timezone for scheduling sessions. Detected: {detectedTimezone}
                     </FormDescription>
                     <FormMessage />
@@ -634,7 +634,7 @@ export function ProfileEditorForm({ initialData }: ProfileEditorFormProps) {
                       />
                     </FormControl>
                     <FormDescription>
-                      <span className={bioLength > 1900 ? 'text-amber-600' : ''}>
+                      <span className={bioLength > 1900 ? 'text-gold-dark' : ''}>
                         {bioLength}/2000 characters
                       </span>
                       {bioLength > 1900 && bioLength <= 2000 && ' - approaching limit'}
@@ -799,7 +799,7 @@ export function ProfileEditorForm({ initialData }: ProfileEditorFormProps) {
                         />
                       </div>
                     </FormControl>
-                    <FormDescription>
+                    <FormDescription className="break-words">
                       Your base hourly rate for reference. Set specific prices for each session type
                       below.
                     </FormDescription>
@@ -810,39 +810,39 @@ export function ProfileEditorForm({ initialData }: ProfileEditorFormProps) {
 
               {/* Session Types */}
               <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="min-w-0">
                     <p className="text-base font-medium leading-none">Session Types *</p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-muted-foreground break-words">
                       Define the types of sessions you offer. At least one is required.
                     </p>
                   </div>
-                  <Button type="button" variant="outline" size="sm" onClick={addSessionType}>
+                  <Button type="button" variant="outline" size="sm" onClick={addSessionType} className="shrink-0">
                     <Plus className="mr-1 h-4 w-4" />
                     Add Session
                   </Button>
                 </div>
 
                 {fields.map((field, index) => (
-                  <Card key={field.id} className="p-4">
-                    <div className="space-y-4">
-                      <div className="flex items-start justify-between">
-                        <span className="text-sm font-medium text-muted-foreground">
-                          Session {index + 1}
-                        </span>
-                        {fields.length > 1 && (
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => removeSessionType(index)}
-                            className="text-destructive hover:text-destructive"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                            <span className="sr-only">Remove session</span>
-                          </Button>
-                        )}
-                      </div>
+                  <Card key={field.id} className="overflow-hidden border-border">
+                    <div className="flex items-center justify-between border-b bg-muted/50 px-4 py-2">
+                      <span className="text-sm font-semibold">
+                        Session {index + 1}
+                      </span>
+                      {fields.length > 1 && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeSessionType(index)}
+                          className="text-destructive hover:text-destructive"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          <span className="sr-only">Remove session</span>
+                        </Button>
+                      )}
+                    </div>
+                    <div className="space-y-4 p-4">
 
                       <div className="grid gap-4 sm:grid-cols-3">
                         {/* Session Name */}

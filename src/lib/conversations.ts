@@ -37,7 +37,7 @@
 import { auth } from '@clerk/nextjs/server';
 import { eq, and, or } from 'drizzle-orm';
 import { db, conversations, messages, users, coachProfiles } from '@/db';
-import { format } from 'date-fns';
+import { formatDateLong, formatTime } from '@/lib/date-utils';
 import type { BookingSessionType } from '@/db/schema';
 
 // ============================================================================
@@ -332,8 +332,8 @@ export async function createBookingSystemMessage(
     }
 
     // Format the date for the message
-    const formattedDate = format(startTime, 'EEEE, MMMM d, yyyy');
-    const formattedTime = format(startTime, 'h:mm a');
+    const formattedDate = formatDateLong(startTime);
+    const formattedTime = formatTime(startTime);
 
     // Create the system message content
     const messageContent = `Session booked: ${sessionType.name} on ${formattedDate} at ${formattedTime}`;

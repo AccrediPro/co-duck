@@ -2,8 +2,8 @@
 
 import Link from 'next/link';
 import { CalendarDays, BookOpen } from 'lucide-react';
-import { format } from 'date-fns';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { formatDate } from '@/lib/date-utils';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -83,7 +83,7 @@ export function MyCoachesList({ coaches }: { coaches: Coach[] }) {
 
               {coach.lastBookingDate && (
                 <p className="mt-2 text-xs text-muted-foreground">
-                  Last session: {format(new Date(coach.lastBookingDate), 'MMM d, yyyy')}
+                  Last session: {formatDate(coach.lastBookingDate)}
                 </p>
               )}
             </CardContent>

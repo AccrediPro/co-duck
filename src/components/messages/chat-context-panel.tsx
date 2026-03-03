@@ -10,8 +10,8 @@
  * 1. **Client Info** - Avatar, name, role label
  * 2. **Stats** - Past sessions count, total spent
  * 3. **Upcoming Sessions** - Next 3 scheduled sessions (clickable)
- * 4. **Action Items** - Pending/completed tasks with add capability
- * 5. **Quick Links** - Book Session, View All Sessions
+ * 4. **Client Progress** - Active programs with goals and completion progress
+ * 5. **Quick Links** - Programs, Book Session, View All Sessions
  *
  * ## Responsive Behavior
  *
@@ -23,13 +23,12 @@
 
 'use client';
 
-import { useState, useCallback } from 'react';
 import Link from 'next/link';
-import { format } from 'date-fns';
-import { useRouter } from 'next/navigation';
+import { formatTime, formatDateShort, formatWeekday } from '@/lib/date-utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import {
   Calendar,
@@ -37,10 +36,13 @@ import {
   History,
   CalendarPlus,
   ExternalLink,
-  CheckSquare,
+  Target,
+  CheckCircle2,
+  Circle,
+  Clock,
+  FolderOpen,
 } from 'lucide-react';
 import type { ClientContext } from '@/app/(dashboard)/dashboard/messages/[id]/actions';
-import { ActionItemsList, AddActionItemDialog } from '@/components/action-items';
 
 // ============================================================================
 // TYPE DEFINITIONS
@@ -124,13 +126,27 @@ function formatSessionTime(date: Date): string {
   const diffDays = Math.floor((date.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
 
   if (diffDays === 0) {
-    return `Today at ${format(date, 'h:mm a')}`;
+    return `Today at ${formatTime(date)}`;
   } else if (diffDays === 1) {
-    return `Tomorrow at ${format(date, 'h:mm a')}`;
+    return `Tomorrow at ${formatTime(date)}`;
   } else if (diffDays < 7) {
-    return format(date, "EEEE 'at' h:mm a");
+    return `${formatWeekday(date)} at ${formatTime(date)}`;
   } else {
-    return format(date, "MMM d 'at' h:mm a");
+    return `${formatDateShort(date)} at ${formatTime(date)}`;
+  }
+}
+
+/**
+ * Render a status icon for a goal based on its current state.
+ */
+function GoalStatusIcon({ status }: { status: 'pending' | 'in_progress' | 'completed' }) {
+  switch (status) {
+    case 'completed':
+      return <CheckCircle2 className="h-3.5 w-3.5 shrink-0 text-[hsl(var(--brand-accent))]" />;
+    case 'in_progress':
+      return <Clock className="h-3.5 w-3.5 shrink-0 text-[hsl(var(--brand-warm))]" />;
+    default:
+      return <Circle className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />;
   }
 }
 
@@ -154,23 +170,6 @@ function formatSessionTime(date: Date): string {
  * )}
  */
 export function ChatContextPanel({ context }: ChatContextPanelProps) {
-  const router = useRouter();
-  const [, setRefreshKey] = useState(0);
-
-  const handleActionItemUpdate = useCallback(() => {
-    // Force a refresh to reload the action items
-    setRefreshKey((prev) => prev + 1);
-    router.refresh();
-  }, [router]);
-
-  // Prepare action items for the list component
-  const actionItemsForList = (context.actionItems || []).map((item) => ({
-    ...item,
-    // Ensure dates are properly typed
-    completedAt: item.completedAt ? new Date(item.completedAt) : null,
-    createdAt: new Date(item.createdAt),
-  }));
-
   return (
     <div className="flex h-full flex-col overflow-y-auto border-l bg-muted/30">
       {/* Client Info Header */}
@@ -204,8 +203,8 @@ export function ChatContextPanel({ context }: ChatContextPanelProps) {
           </Card>
           <Card className="bg-background">
             <CardContent className="flex items-center gap-2 p-3">
-              <div className="rounded-full bg-green-500/10 p-2">
-                <DollarSign className="h-4 w-4 text-green-600" />
+              <div className="rounded-full bg-[hsl(var(--brand-accent))]/10 p-2">
+                <DollarSign className="h-4 w-4 text-[hsl(var(--brand-warm))]" />
               </div>
               <div>
                 <p className="text-lg font-semibold">
@@ -255,35 +254,61 @@ export function ChatContextPanel({ context }: ChatContextPanelProps) {
 
       <Separator />
 
-      {/* Action Items */}
+      {/* Client Progress */}
       <div className="p-4">
-        <div className="mb-3 flex items-center justify-between">
-          <h3 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-            Action Items
-          </h3>
-          <AddActionItemDialog
-            clientId={context.clientId}
-            clientName={context.clientName || undefined}
-            onActionItemAdded={handleActionItemUpdate}
-            variant="ghost"
-            size="sm"
-            className="h-6 px-2 text-xs"
-          />
-        </div>
-        {actionItemsForList.length === 0 ? (
+        <h3 className="mb-3 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+          Client Progress
+        </h3>
+        {(context.programs || []).length === 0 ? (
           <Card className="bg-background">
             <CardContent className="flex flex-col items-center py-6 text-center">
-              <CheckSquare className="mb-2 h-8 w-8 text-muted-foreground" />
-              <p className="text-sm text-muted-foreground">No action items</p>
+              <Target className="mb-2 h-8 w-8 text-muted-foreground" />
+              <p className="text-sm text-muted-foreground">No active programs</p>
             </CardContent>
           </Card>
         ) : (
-          <ActionItemsList
-            items={actionItemsForList}
-            onUpdate={handleActionItemUpdate}
-            showDelete={true}
-            compact={true}
-          />
+          <div className="space-y-3">
+            {context.programs.map((program) => {
+              const totalGoals = program.goals.length;
+              const completedGoals = program.goals.filter((g) => g.status === 'completed').length;
+              const percentage = totalGoals > 0 ? Math.round((completedGoals / totalGoals) * 100) : 0;
+
+              return (
+                <Card key={program.id} className="bg-background">
+                  <CardContent className="p-3">
+                    <p className="text-sm font-medium">{program.title}</p>
+                    {totalGoals > 0 && (
+                      <div className="mt-2">
+                        <div className="mb-1 flex justify-between text-xs text-muted-foreground">
+                          <span>{completedGoals}/{totalGoals} goals</span>
+                          <span>{percentage}%</span>
+                        </div>
+                        <Progress value={percentage} className="h-2" />
+                      </div>
+                    )}
+                    {program.goals.length > 0 && (
+                      <div className="mt-2 space-y-1">
+                        {program.goals.map((goal) => (
+                          <div key={goal.id} className="flex items-center gap-2 text-xs">
+                            <GoalStatusIcon status={goal.status} />
+                            <span
+                              className={
+                                goal.status === 'completed'
+                                  ? 'line-through text-muted-foreground'
+                                  : ''
+                              }
+                            >
+                              {goal.title}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
         )}
       </div>
 
@@ -295,6 +320,12 @@ export function ChatContextPanel({ context }: ChatContextPanelProps) {
           Quick Links
         </h3>
         <div className="flex flex-col gap-2">
+          <Button variant="outline" size="sm" className="justify-start" asChild>
+            <Link href={`/dashboard/clients/${context.clientId}`}>
+              <FolderOpen className="mr-2 h-4 w-4" />
+              Programs
+            </Link>
+          </Button>
           <Button variant="outline" size="sm" className="justify-start" asChild>
             <Link href={`/coaches/${context.coachSlug}/book`}>
               <CalendarPlus className="mr-2 h-4 w-4" />

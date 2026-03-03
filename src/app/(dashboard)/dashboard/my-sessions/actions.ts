@@ -34,6 +34,7 @@ import { stripe } from '@/lib/stripe';
 import type { BookingSessionType } from '@/db/schema';
 import { calculateRefundEligibility, formatRefundAmount } from '@/lib/refunds';
 import { removeBookingFromCalendar } from '@/lib/google-calendar-sync';
+import { formatDateLong, formatTime } from '@/lib/date-utils';
 
 // ============================================================================
 // Type Definitions
@@ -681,19 +682,8 @@ export async function createRetryCheckoutSession(
     const platformFeeAmount = Math.round(sessionType.price * 0.1);
 
     // Format date/time for display
-    const sessionDate = booking.startTime.toLocaleDateString('en-US', {
-      weekday: 'long',
-      month: 'long',
-      day: 'numeric',
-      year: 'numeric',
-      timeZone: timezone,
-    });
-    const sessionTime = booking.startTime.toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true,
-      timeZone: timezone,
-    });
+    const sessionDate = formatDateLong(booking.startTime);
+    const sessionTime = formatTime(booking.startTime);
 
     // Create Stripe Checkout Session
     const checkoutSession = await stripe.checkout.sessions.create({

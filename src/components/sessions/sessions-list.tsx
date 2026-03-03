@@ -4,6 +4,7 @@ import { useState, useEffect, useTransition } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { SessionCard } from './session-card';
 import { ChevronLeft, ChevronRight, Calendar, CheckCircle, Clock, XCircle } from 'lucide-react';
@@ -251,13 +252,15 @@ export function SessionsList({
     const { icon: Icon, title, description } = config[type];
 
     return (
-      <div className="flex flex-col items-center justify-center py-16 text-center">
-        <div className="mb-4 rounded-full bg-muted p-4">
-          <Icon className="h-8 w-8 text-muted-foreground" />
-        </div>
-        <h3 className="text-lg font-semibold">{title}</h3>
-        <p className="mt-2 max-w-md text-muted-foreground">{description}</p>
-      </div>
+      <Card>
+        <CardContent className="flex flex-col items-center justify-center py-16 text-center">
+          <div className="mb-4 rounded-full bg-muted p-4">
+            <Icon className="h-8 w-8 text-muted-foreground" />
+          </div>
+          <h3 className="text-lg font-semibold">{title}</h3>
+          <p className="mt-2 max-w-md text-muted-foreground">{description}</p>
+        </CardContent>
+      </Card>
     );
   };
 

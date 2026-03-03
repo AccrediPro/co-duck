@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { format } from 'date-fns';
+import { formatDate } from '@/lib/date-utils';
 import {
   ArrowLeft,
   CalendarDays,
@@ -100,14 +100,14 @@ const statusConfig = {
 
 const priorityConfig = {
   high: { label: 'High', className: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' },
-  medium: { label: 'Medium', className: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400' },
-  low: { label: 'Low', className: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' },
+  medium: { label: 'Medium', className: 'bg-gold/15 text-gold-dark dark:bg-gold/20 dark:text-gold' },
+  low: { label: 'Low', className: 'bg-sage/10 text-sage dark:bg-sage/20 dark:text-sage' },
 } as const;
 
 const goalStatusConfig = {
   pending: { label: 'Pending', className: 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400' },
-  in_progress: { label: 'In Progress', className: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400' },
-  completed: { label: 'Completed', className: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' },
+  in_progress: { label: 'In Progress', className: 'bg-burgundy/10 text-burgundy dark:bg-burgundy/20 dark:text-burgundy-light' },
+  completed: { label: 'Completed', className: 'bg-sage/10 text-sage dark:bg-sage/20 dark:text-sage' },
 } as const;
 
 export function ClientWorkspace({ client, initialPrograms, initialActionItems, clientId }: ClientWorkspaceProps) {
@@ -327,12 +327,12 @@ export function ClientWorkspace({ client, initialPrograms, initialActionItems, c
                       <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
                         {program.startDate && (
                           <span>
-                            From {format(new Date(program.startDate), 'MMM d, yyyy')}
+                            From {formatDate(program.startDate)}
                           </span>
                         )}
                         {program.endDate && (
                           <span>
-                            to {format(new Date(program.endDate), 'MMM d, yyyy')}
+                            to {formatDate(program.endDate)}
                           </span>
                         )}
                       </div>
@@ -344,7 +344,7 @@ export function ClientWorkspace({ client, initialPrograms, initialActionItems, c
                         </div>
                         <Progress
                           value={progress.percent}
-                          className={`h-2 ${progress.percent === 100 ? '[&>div]:bg-green-500' : ''}`}
+                          className={`h-2 ${progress.percent === 100 ? '[&>div]:bg-sage' : ''}`}
                         />
                       </div>
                     </div>
@@ -570,7 +570,7 @@ function GoalCard({ goal, onDelete }: { goal: Goal; onDelete: () => void }) {
         {goal.dueDate && (
           <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
             <Clock className="h-3 w-3" />
-            {format(new Date(goal.dueDate), 'MMM d, yyyy')}
+            {formatDate(goal.dueDate)}
           </p>
         )}
       </div>
@@ -615,7 +615,7 @@ function TaskCard({ item }: { item: ActionItem }) {
         {item.dueDate && (
           <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">
             <Clock className="h-3 w-3" />
-            Due: {format(new Date(item.dueDate), 'MMM d, yyyy')}
+            Due: {formatDate(item.dueDate)}
           </p>
         )}
       </div>

@@ -11,12 +11,8 @@ import {
   Users,
   Calendar,
   Shield,
-  Search,
-  MessageSquare,
-  Rocket,
   Star,
   ArrowRight,
-  CheckCircle,
   User,
 } from 'lucide-react';
 
@@ -87,32 +83,20 @@ const valueProps = [
 const howItWorks = [
   {
     step: 1,
-    icon: Search,
     title: 'Browse Coaches',
     description:
       'Explore profiles, read reviews, and find a coach that matches your goals and style.',
   },
   {
     step: 2,
-    icon: MessageSquare,
     title: 'Book a Session',
     description: 'Choose a time that works for you and book your first session in minutes.',
   },
   {
     step: 3,
-    icon: Rocket,
     title: 'Achieve Your Goals',
     description: 'Work with your coach to unlock your potential and make lasting progress.',
   },
-];
-
-const coachBenefits = [
-  'Set your own rates and schedule',
-  'Reach clients worldwide',
-  'Secure payments with low fees',
-  'Built-in scheduling tools',
-  'Professional profile page',
-  'Analytics and insights',
 ];
 
 export default async function HomePage() {
@@ -121,56 +105,56 @@ export default async function HomePage() {
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-background to-primary/10">
-        <div className="container mx-auto px-4 py-20 md:py-32">
+      <section className="relative overflow-hidden bg-gradient-to-br from-burgundy-dark to-burgundy">
+        <div className="container mx-auto px-4 py-20 md:py-28">
           <div className="mx-auto max-w-4xl text-center">
-            <Badge variant="secondary" className="mb-6 px-4 py-1.5 text-sm">
-              <Star className="mr-1.5 h-3.5 w-3.5" />
+            <Badge className="mb-6 border-gold/30 bg-gold/20 px-4 py-1.5 text-sm text-white hover:bg-gold/30">
+              <Star className="mr-1.5 h-3.5 w-3.5 text-gold" />
               Trusted by 1,000+ clients worldwide
             </Badge>
-            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
+            <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">
               Find Your{' '}
-              <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+              <span className="text-gold">
                 Perfect Coach
               </span>
             </h1>
-            <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl">
+            <p className="mx-auto mt-6 max-w-2xl text-lg text-white/80 md:text-xl">
               Connect with expert coaches for personalized guidance on your personal and
               professional journey. Transform your life with one-on-one coaching that works.
             </p>
             <div className="mt-10 flex flex-col justify-center gap-4 sm:flex-row">
-              <Button size="lg" className="h-12 px-8 text-base" asChild>
+              <Button size="lg" className="h-12 bg-gold px-8 text-base text-burgundy-dark hover:bg-gold-dark" asChild>
                 <Link href="/coaches">
                   Find a Coach
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" className="h-12 px-8 text-base" asChild>
-                <Link href="/sign-up">Become a Coach</Link>
+              <Button size="lg" variant="outline" className="h-12 border-white/30 px-8 text-base text-white hover:bg-white/10 hover:text-white" asChild>
+                <Link href="/sign-up">Get Started</Link>
               </Button>
             </div>
           </div>
         </div>
         {/* Decorative elements */}
-        <div className="absolute -left-20 -top-20 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
-        <div className="absolute -bottom-20 -right-20 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
+        <div className="absolute -left-20 -top-20 h-72 w-72 rounded-full bg-gold/10 blur-3xl" />
+        <div className="absolute -bottom-20 -right-20 h-72 w-72 rounded-full bg-burgundy-light/20 blur-3xl" />
       </section>
 
       {/* Value Proposition Section */}
-      <section className="border-y bg-muted/30 py-20">
+      <section className="border-y border-burgundy/10 bg-cream py-20">
         <div className="container mx-auto px-4">
           <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-3xl font-bold tracking-tight md:text-4xl">Why Choose CoachHub?</h2>
+            <h2 className="text-3xl font-bold tracking-tight text-burgundy-dark md:text-4xl">Why Choose AccrediPro CoachHub?</h2>
             <p className="mt-4 text-muted-foreground">
               Everything you need to find the right coach and achieve your goals.
             </p>
           </div>
           <div className="mt-16 grid gap-8 md:grid-cols-3">
             {valueProps.map((prop) => (
-              <Card key={prop.title} className="border-0 bg-background shadow-lg">
+              <Card key={prop.title} className="border border-burgundy/10 bg-white shadow-lg transition-all duration-200 hover:border-burgundy/30 hover:shadow-xl">
                 <CardContent className="p-8">
-                  <div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-xl bg-primary/10">
-                    <prop.icon className="h-7 w-7 text-primary" />
+                  <div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-xl bg-burgundy/10">
+                    <prop.icon className="h-7 w-7 text-burgundy" />
                   </div>
                   <h3 className="mb-3 text-xl font-semibold">{prop.title}</h3>
                   <p className="text-muted-foreground">{prop.description}</p>
@@ -185,7 +169,7 @@ export default async function HomePage() {
       <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-3xl font-bold tracking-tight md:text-4xl">How It Works</h2>
+            <h2 className="text-3xl font-bold tracking-tight text-burgundy-dark md:text-4xl">How It Works</h2>
             <p className="mt-4 text-muted-foreground">
               Get started in three simple steps and begin your transformation journey.
             </p>
@@ -194,16 +178,13 @@ export default async function HomePage() {
             {howItWorks.map((item) => (
               <div key={item.step} className="relative text-center">
                 {/* Step number */}
-                <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full border-2 border-primary bg-background text-2xl font-bold text-primary">
+                <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full border-2 border-burgundy bg-white text-2xl font-bold text-burgundy">
                   {item.step}
                 </div>
                 {/* Connector line (hidden on mobile, shown between items on desktop) */}
                 {item.step < 3 && (
-                  <div className="absolute left-[calc(50%+40px)] top-8 hidden h-0.5 w-[calc(100%-80px)] bg-gradient-to-r from-primary to-primary/30 md:block" />
+                  <div className="absolute left-[calc(50%+40px)] top-8 hidden h-0.5 w-[calc(100%-80px)] bg-gradient-to-r from-burgundy to-burgundy/30 md:block" />
                 )}
-                <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-muted">
-                  <item.icon className="h-6 w-6 text-muted-foreground" />
-                </div>
                 <h3 className="mb-2 text-xl font-semibold">{item.title}</h3>
                 <p className="mx-auto max-w-xs text-muted-foreground">{item.description}</p>
               </div>
@@ -213,10 +194,10 @@ export default async function HomePage() {
       </section>
 
       {/* Featured Coaches Section */}
-      <section className="border-y bg-muted/30 py-20">
+      <section className="border-y border-burgundy/10 bg-cream py-20">
         <div className="container mx-auto px-4">
           <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-3xl font-bold tracking-tight md:text-4xl">Featured Coaches</h2>
+            <h2 className="text-3xl font-bold tracking-tight text-burgundy-dark md:text-4xl">Featured Coaches</h2>
             <p className="mt-4 text-muted-foreground">
               Meet some of the amazing coaches ready to help you succeed.
             </p>
@@ -230,7 +211,7 @@ export default async function HomePage() {
 
                   return (
                     <Link key={coach.slug} href={`/coaches/${coach.slug}`}>
-                      <Card className="group h-full cursor-pointer transition-all hover:border-primary/50 hover:shadow-lg">
+                      <Card className="group h-full cursor-pointer transition-all hover:border-burgundy/30 hover:shadow-lg">
                         <CardContent className="p-8">
                           <div className="flex flex-col items-center text-center">
                             <Avatar className="h-24 w-24 border-4 border-background shadow-lg">
@@ -300,7 +281,7 @@ export default async function HomePage() {
                 ))}
           </div>
           <div className="mt-12 text-center">
-            <Button size="lg" variant="outline" asChild>
+            <Button size="lg" variant="outline" className="h-11" asChild>
               <Link href="/coaches">
                 View All Coaches
                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -310,78 +291,21 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* CTA Section for Coaches */}
-      <section className="py-20">
-        <div className="container mx-auto px-4">
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary to-primary/80 p-8 text-primary-foreground md:p-16">
-            <div className="relative z-10 mx-auto max-w-3xl text-center">
-              <Badge variant="secondary" className="mb-6 bg-white/20 text-white hover:bg-white/30">
-                Join Our Community
-              </Badge>
-              <h2 className="text-3xl font-bold tracking-tight md:text-4xl lg:text-5xl">
-                Share Your Expertise as a Coach
-              </h2>
-              <p className="mx-auto mt-6 max-w-xl text-lg text-primary-foreground/90">
-                Join our growing community of professional coaches. Build your practice, reach
-                clients worldwide, and make a real impact.
-              </p>
-              <div className="mt-8 grid gap-4 text-left sm:grid-cols-2 md:grid-cols-3">
-                {coachBenefits.map((benefit) => (
-                  <div key={benefit} className="flex items-center gap-2">
-                    <CheckCircle className="h-5 w-5 flex-shrink-0" />
-                    <span className="text-sm">{benefit}</span>
-                  </div>
-                ))}
-              </div>
-              <div className="mt-10 flex flex-col justify-center gap-4 sm:flex-row">
-                <Button
-                  size="lg"
-                  variant="secondary"
-                  className="h-12 px-8 text-base font-semibold"
-                  asChild
-                >
-                  <Link href="/sign-up">
-                    Start Coaching Today
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Link>
-                </Button>
-                <Button
-                  size="lg"
-                  variant="ghost"
-                  className="h-12 border border-white/30 px-8 text-base text-white hover:bg-white/10 hover:text-white"
-                  asChild
-                >
-                  <Link href="/coaches">See How It Works</Link>
-                </Button>
-              </div>
-            </div>
-            {/* Decorative elements */}
-            <div className="absolute -left-10 -top-10 h-40 w-40 rounded-full bg-white/10" />
-            <div className="absolute -bottom-10 -right-10 h-60 w-60 rounded-full bg-white/10" />
-            <div className="absolute right-20 top-10 h-20 w-20 rounded-full bg-white/5" />
-          </div>
-        </div>
-      </section>
-
       {/* Final CTA Section */}
-      <section className="border-t bg-muted/30 py-20">
+      <section className="bg-gradient-to-br from-burgundy-dark to-burgundy py-20">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold tracking-tight md:text-4xl">
+          <h2 className="text-3xl font-bold tracking-tight text-white md:text-4xl">
             Ready to Transform Your Life?
           </h2>
-          <p className="mx-auto mt-4 max-w-xl text-muted-foreground">
-            Whether you are looking for guidance or ready to share your expertise, CoachHub is the
-            place for you.
+          <p className="mx-auto mt-4 max-w-xl text-white/80">
+            Find the right coach and start your journey toward personal and professional growth.
           </p>
-          <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
-            <Button size="lg" className="h-12 px-8 text-base" asChild>
+          <div className="mt-8 flex justify-center">
+            <Button size="lg" className="h-12 bg-gold px-8 text-base text-burgundy-dark hover:bg-gold-dark" asChild>
               <Link href="/coaches">
                 Browse Coaches
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
-            </Button>
-            <Button size="lg" variant="outline" className="h-12 px-8 text-base" asChild>
-              <Link href="/sign-up">Join as a Coach</Link>
             </Button>
           </div>
         </div>

@@ -110,11 +110,11 @@ export function CancellationDialog({
     if (isCoach) {
       // Coach cancellations always result in full refund
       return (
-        <div className="flex items-start gap-3 rounded-md border border-green-200 bg-green-50 p-3">
-          <CheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-green-600" />
+        <div className="flex items-start gap-3 rounded-md border border-[hsl(var(--brand-border))] bg-[hsl(var(--brand-surface))] p-3">
+          <CheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-[hsl(var(--brand-warm))]" />
           <div className="text-sm">
-            <p className="font-medium text-green-800">Refund Information</p>
-            <p className="mt-1 text-green-700">
+            <p className="font-medium text-[hsl(var(--brand-accent-dark))]">Refund Information</p>
+            <p className="mt-1 text-[hsl(var(--brand-accent-hover))]">
               The client will receive a full refund of {refundInfo.refundAmountFormatted}.
             </p>
           </div>
@@ -125,11 +125,11 @@ export function CancellationDialog({
     // Client cancellation - depends on timing
     if (refundInfo.isEligibleForRefund) {
       return (
-        <div className="flex items-start gap-3 rounded-md border border-green-200 bg-green-50 p-3">
-          <CheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-green-600" />
+        <div className="flex items-start gap-3 rounded-md border border-[hsl(var(--brand-border))] bg-[hsl(var(--brand-surface))] p-3">
+          <CheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-[hsl(var(--brand-warm))]" />
           <div className="text-sm">
-            <p className="font-medium text-green-800">Full Refund Available</p>
-            <p className="mt-1 text-green-700">
+            <p className="font-medium text-[hsl(var(--brand-accent-dark))]">Full Refund Available</p>
+            <p className="mt-1 text-[hsl(var(--brand-accent-hover))]">
               You will receive a full refund of {refundInfo.refundAmountFormatted}.
             </p>
           </div>
@@ -168,11 +168,11 @@ export function CancellationDialog({
 
           {/* Cancellation Policy Warning (only show if no refund info) */}
           {(!refundInfo || !refundInfo.hasPaidTransaction) && (
-            <div className="flex items-start gap-3 rounded-md border border-amber-200 bg-amber-50 p-3">
-              <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
+            <div className="flex items-start gap-3 rounded-md border border-gold/30 bg-gold/10 p-3">
+              <AlertTriangle className="mt-0.5 h-5 w-5 shrink-0 text-gold-dark" />
               <div className="text-sm">
-                <p className="font-medium text-amber-800">Cancellation Policy</p>
-                <p className="mt-1 text-amber-700">
+                <p className="font-medium text-gold-dark">Cancellation Policy</p>
+                <p className="mt-1 text-gold-dark/80">
                   {isWithin24Hours ? (
                     <>
                       This session is within 24 hours. Cancellations made less than 24 hours before

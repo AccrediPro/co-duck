@@ -49,7 +49,7 @@ export function RecentMessagesWidget({ messages, unreadCount }: RecentMessagesWi
                   <div className="flex items-center gap-2">
                     <p className="truncate text-sm font-medium">{msg.otherUserName || 'User'}</p>
                     {msg.unreadCount > 0 && (
-                      <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                      <span className="h-2 w-2 rounded-full bg-[hsl(var(--brand-accent))]" />
                     )}
                   </div>
                   <p className="truncate text-xs text-muted-foreground">

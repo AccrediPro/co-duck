@@ -74,11 +74,13 @@ export default async function ConversationPage({ params }: PageProps) {
   }
 
   return (
-    <ChatView
-      conversation={detailsResult.conversation}
-      initialMessages={initialMessages}
-      initialHasMore={hasMore}
-      clientContext={clientContext}
-    />
+    <div>
+      <ChatView
+        conversation={detailsResult.conversation}
+        initialMessages={initialMessages}
+        initialHasMore={hasMore}
+        clientContext={clientContext}
+      />
+    </div>
   );
 }

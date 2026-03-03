@@ -30,8 +30,8 @@ export function PublicHeader() {
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         {/* Logo */}
-        <Link href="/" className="flex items-center space-x-2">
-          <span className="text-xl font-bold">CoachHub</span>
+        <Link href="/" className="flex items-center space-x-2 py-2">
+          <span className="text-xl font-bold">AccrediPro CoachHub</span>
         </Link>
 
         {/* Desktop Navigation */}
@@ -41,7 +41,7 @@ export function PublicHeader() {
               key={link.href}
               href={link.href}
               className={cn(
-                'text-sm font-medium transition-colors hover:text-primary',
+                'flex min-h-[44px] items-center text-sm font-medium transition-colors hover:text-primary',
                 isActiveLink(link.href) ? 'text-foreground' : 'text-muted-foreground'
               )}
             >
@@ -53,15 +53,15 @@ export function PublicHeader() {
         {/* Desktop Auth Buttons / User Menu */}
         <div className="hidden items-center space-x-4 md:flex">
           <SignedOut>
-            <Button variant="ghost" asChild>
+            <Button variant="ghost" className="min-h-[44px]" asChild>
               <Link href="/sign-in">Sign In</Link>
             </Button>
-            <Button asChild>
+            <Button className="min-h-[44px]" asChild>
               <Link href="/sign-up">Get Started</Link>
             </Button>
           </SignedOut>
           <SignedIn>
-            <Button variant="ghost" asChild>
+            <Button variant="ghost" className="min-h-[44px]" asChild>
               <Link href="/dashboard">Dashboard</Link>
             </Button>
             <UserButton afterSignOutUrl="/" />
@@ -71,7 +71,7 @@ export function PublicHeader() {
         {/* Mobile Menu */}
         <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
           <SheetTrigger asChild className="md:hidden">
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" className="h-11 w-11">
               <Menu className="h-6 w-6" />
               <span className="sr-only">Toggle menu</span>
             </Button>
@@ -85,7 +85,7 @@ export function PublicHeader() {
                   href={link.href}
                   onClick={() => setMobileMenuOpen(false)}
                   className={cn(
-                    'text-lg font-medium transition-colors hover:text-primary',
+                    'flex min-h-[44px] items-center text-lg font-medium transition-colors hover:text-primary',
                     isActiveLink(link.href) ? 'text-foreground' : 'text-muted-foreground'
                   )}
                 >
@@ -95,12 +95,12 @@ export function PublicHeader() {
               <div className="pt-4">
                 <SignedOut>
                   <div className="flex flex-col space-y-2">
-                    <Button variant="outline" asChild className="w-full">
+                    <Button variant="outline" asChild className="min-h-[44px] w-full">
                       <Link href="/sign-in" onClick={() => setMobileMenuOpen(false)}>
                         Sign In
                       </Link>
                     </Button>
-                    <Button asChild className="w-full">
+                    <Button asChild className="min-h-[44px] w-full">
                       <Link href="/sign-up" onClick={() => setMobileMenuOpen(false)}>
                         Get Started
                       </Link>
@@ -109,7 +109,7 @@ export function PublicHeader() {
                 </SignedOut>
                 <SignedIn>
                   <div className="flex flex-col space-y-2">
-                    <Button variant="outline" asChild className="w-full">
+                    <Button variant="outline" asChild className="min-h-[44px] w-full">
                       <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)}>
                         Dashboard
                       </Link>

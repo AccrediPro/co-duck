@@ -235,7 +235,7 @@ export function BioSpecialtiesForm({ initialData }: BioSpecialtiesFormProps) {
                     />
                   </FormControl>
                   <FormDescription>
-                    <span className={bioLength > 1900 ? 'text-amber-600' : ''}>
+                    <span className={bioLength > 1900 ? 'text-gold-dark' : ''}>
                       {bioLength}/2000 characters
                     </span>
                     {bioLength > 1900 && bioLength <= 2000 && ' - approaching limit'}

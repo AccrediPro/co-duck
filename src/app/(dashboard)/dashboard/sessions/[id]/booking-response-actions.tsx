@@ -116,7 +116,7 @@ export function BookingResponseActions({
         <Button
           variant="default"
           size="sm"
-          className="w-full justify-start bg-green-600 hover:bg-green-700"
+          className="w-full justify-start bg-[hsl(var(--brand-warm))] hover:bg-[hsl(var(--brand-accent-hover))]"
           onClick={handleAccept}
           disabled={isAccepting}
         >
@@ -155,7 +155,7 @@ export function BookingResponseActions({
     <div className="flex flex-wrap gap-3">
       <Button
         variant="default"
-        className="bg-green-600 hover:bg-green-700"
+        className="bg-[hsl(var(--brand-warm))] hover:bg-[hsl(var(--brand-accent-hover))]"
         onClick={handleAccept}
         disabled={isAccepting}
       >
@@ -211,11 +211,11 @@ function RejectDialogContent({
       </DialogHeader>
 
       <div className="grid gap-4 py-4">
-        <div className="flex items-start gap-3 rounded-md border border-amber-200 bg-amber-50 p-3">
-          <XCircle className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" />
+        <div className="flex items-start gap-3 rounded-md border border-gold/30 bg-gold/5 p-3">
+          <XCircle className="mt-0.5 h-5 w-5 shrink-0 text-gold-dark" />
           <div className="text-sm">
-            <p className="font-medium text-amber-800">Refund Notice</p>
-            <p className="mt-1 text-amber-700">
+            <p className="font-medium text-burgundy-dark">Refund Notice</p>
+            <p className="mt-1 text-burgundy">
               The client&apos;s payment will be fully refunded when you reject this booking.
             </p>
           </div>

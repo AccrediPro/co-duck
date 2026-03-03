@@ -9,12 +9,13 @@ const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 
 function getSupabaseAdmin() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !key) {
+    console.error(
+      'Missing SUPABASE_SERVICE_ROLE_KEY. File uploads require the service role key.'
+    );
     return null;
   }
-
   return createClient(url, key);
 }
 
@@ -60,11 +61,18 @@ export async function POST(request: NextRequest) {
     const bucketExists = buckets?.some((b) => b.name === BUCKET_NAME);
 
     if (!bucketExists) {
-      await supabase.storage.createBucket(BUCKET_NAME, {
+      const { error: bucketError } = await supabase.storage.createBucket(BUCKET_NAME, {
         public: true,
         fileSizeLimit: MAX_FILE_SIZE,
         allowedMimeTypes: ALLOWED_TYPES,
       });
+      if (bucketError) {
+        console.error('Failed to create avatar bucket:', bucketError);
+        return NextResponse.json(
+          { error: 'File storage is not configured. Please contact support.' },
+          { status: 500 }
+        );
+      }
     }
 
     // Generate unique filename

@@ -2,10 +2,11 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { format } from 'date-fns';
+import { formatDateLong, formatTime } from '@/lib/date-utils';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { StatusBadge } from '@/components/ui/status-badge';
 import { Button } from '@/components/ui/button';
 import {
   Calendar,
@@ -58,42 +59,6 @@ export function SessionCard({
       .slice(0, 2);
   };
 
-  const getStatusBadge = () => {
-    switch (session.status) {
-      case 'confirmed':
-        return (
-          <Badge variant="default" className="bg-green-500 hover:bg-green-600">
-            Confirmed
-          </Badge>
-        );
-      case 'pending':
-        return (
-          <Badge variant="secondary" className="bg-amber-100 text-amber-800 hover:bg-amber-200">
-            Pending Approval
-          </Badge>
-        );
-      case 'completed':
-        return (
-          <Badge variant="outline" className="border-green-500 text-green-600">
-            Completed
-          </Badge>
-        );
-      case 'cancelled':
-        return (
-          <Badge variant="destructive" className="bg-red-100 text-red-600 hover:bg-red-200">
-            Cancelled
-          </Badge>
-        );
-      case 'no_show':
-        return (
-          <Badge variant="outline" className="border-gray-400 text-gray-500">
-            No Show
-          </Badge>
-        );
-      default:
-        return null;
-    }
-  };
 
   const getPaymentBadge = (status: PaymentStatus, price: number) => {
     // No badge for free sessions
@@ -102,14 +67,14 @@ export function SessionCard({
     switch (status) {
       case 'paid':
         return (
-          <Badge variant="outline" className="border-green-500 bg-green-50 text-green-700">
+          <Badge variant="outline" className="border-[hsl(var(--brand-accent))] bg-[hsl(var(--brand-surface))] text-[hsl(var(--brand-accent-hover))]">
             <CreditCard className="mr-1 h-3 w-3" />
             Paid
           </Badge>
         );
       case 'payment_required':
         return (
-          <Badge variant="secondary" className="bg-amber-100 text-amber-800">
+          <Badge variant="secondary" className="bg-gold/15 text-gold-dark">
             <CreditCard className="mr-1 h-3 w-3" />
             Payment Required
           </Badge>
@@ -154,7 +119,7 @@ export function SessionCard({
     <Card
       className={
         isPendingApproval
-          ? 'border-amber-300 bg-amber-50/30 transition-all hover:border-amber-400 hover:shadow-md dark:border-amber-800 dark:bg-amber-950/20'
+          ? 'border-gold/40 bg-gold/5 transition-all hover:border-gold/60 hover:shadow-md'
           : 'transition-all hover:border-primary/30 hover:shadow-md'
       }
     >
@@ -176,7 +141,7 @@ export function SessionCard({
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
                 <h3 className="font-semibold">{session.clientName || 'Unknown Client'}</h3>
-                {getStatusBadge()}
+                <StatusBadge status={session.status} label={session.status === 'pending' ? 'Pending Approval' : undefined} />
                 {getPaymentBadge(session.paymentStatus, session.sessionType.price)}
               </div>
 
@@ -185,12 +150,12 @@ export function SessionCard({
               <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground">
                 <span className="flex items-center gap-1">
                   <Calendar className="h-3.5 w-3.5" />
-                  {format(new Date(session.startTime), 'EEE, MMM d, yyyy')}
+                  {formatDateLong(session.startTime)}
                 </span>
                 <span className="flex items-center gap-1">
                   <Clock className="h-3.5 w-3.5" />
-                  {format(new Date(session.startTime), 'h:mm a')} -{' '}
-                  {format(new Date(session.endTime), 'h:mm a')}
+                  {formatTime(session.startTime)} -{' '}
+                  {formatTime(session.endTime)}
                 </span>
               </div>
 
@@ -214,7 +179,7 @@ export function SessionCard({
               <Button
                 variant="default"
                 size="sm"
-                className="bg-green-600 hover:bg-green-700"
+                className="bg-[hsl(var(--brand-warm))] hover:bg-[hsl(var(--brand-accent-hover))]"
                 onClick={handleAccept}
                 disabled={isAccepting || isRejecting}
               >
@@ -254,7 +219,7 @@ export function SessionCard({
                   variant="outline"
                   size="sm"
                   onClick={() => onMarkComplete(session.id)}
-                  className="text-green-600 hover:bg-green-50 hover:text-green-700"
+                  className="text-[hsl(var(--brand-warm))] hover:bg-[hsl(var(--brand-surface))] hover:text-[hsl(var(--brand-accent-hover))]"
                 >
                   <CheckCircle className="mr-1.5 h-4 w-4" />
                   Complete

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { formatDate } from '@/lib/date-utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -28,11 +29,7 @@ export function SessionReviewSection({ review, isCoachView }: SessionReviewSecti
   const [coachResponse, setCoachResponse] = useState(review.coachResponse);
   const { toast } = useToast();
 
-  const formattedDate = new Date(review.createdAt).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
+  const formattedDate = formatDate(review.createdAt);
 
   const handleSubmit = async () => {
     if (!response.trim()) return;

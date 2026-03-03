@@ -69,7 +69,8 @@ app.prepare().then(async () => {
 
   io.on('connection', async (socket) => {
     const userId: string = socket.data.userId;
-    console.log(`[socket.io] User connected: ${userId} (socket: ${socket.id})`);
+    const isReconnect = connectedUsers.has(userId);
+    console.log(`[socket.io] User ${isReconnect ? 'reconnected' : 'connected'}: ${userId} (socket: ${socket.id})`);
 
     // Track connected user
     if (!connectedUsers.has(userId)) {
@@ -190,15 +191,17 @@ app.prepare().then(async () => {
           conversation.coachId === userId ? conversation.clientId : conversation.coachId;
 
         // Create notification for recipient and emit via Socket.io
+        const notifBody = content.trim().length > 100 ? content.trim().slice(0, 100) + '...' : content.trim();
         await db.insert(notifications).values({
           userId: recipientId,
           type: 'new_message',
           title: `New message from ${sender?.name || 'Someone'}`,
-          body: content.trim().length > 100 ? content.trim().slice(0, 100) + '...' : content.trim(),
+          message: notifBody,
+          body: notifBody,
           link: `/dashboard/messages/${conversationId}`,
         }).returning().then(([inserted]) => {
           if (inserted) {
-            io.to(`user:${recipientId}`).emit('notification:new', {
+            io.to(`user:${recipientId}`).timeout(5000).emit('notification:new', {
               id: inserted.id,
               type: inserted.type,
               title: inserted.title,
@@ -206,6 +209,10 @@ app.prepare().then(async () => {
               link: inserted.link,
               isRead: inserted.isRead,
               createdAt: inserted.createdAt,
+            }, (err: Error | null) => {
+              if (err) {
+                console.warn(`[socket.io] Notification not acknowledged by ${recipientId} within 5s (type: ${inserted.type})`);
+              }
             });
           }
         }).catch((err: unknown) => {
@@ -331,8 +338,8 @@ app.prepare().then(async () => {
 
     // ── Disconnect ──────────────────────────────────────────────────────
 
-    socket.on('disconnect', () => {
-      console.log(`[socket.io] User disconnected: ${userId} (socket: ${socket.id})`);
+    socket.on('disconnect', (reason) => {
+      console.log(`[socket.io] User disconnected: ${userId} (socket: ${socket.id}, reason: ${reason})`);
 
       // Remove socket from user's set
       const userSockets = connectedUsers.get(userId);

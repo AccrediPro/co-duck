@@ -35,6 +35,7 @@ import { eq } from 'drizzle-orm';
 import { sendEmail } from '@/lib/email';
 import { WelcomeEmail } from '@/lib/emails';
 import { getUnsubscribeUrl } from '@/lib/unsubscribe';
+import { claimCoachInvite } from '@/lib/claim-invite';
 
 /**
  * Handles incoming Clerk webhook events for user synchronization.
@@ -176,10 +177,16 @@ export async function POST(req: Request) {
 
       console.log(`User created: ${id}`);
 
+      // Check if this new user has a pending coach invite
+      const claimed = await claimCoachInvite(id, email, name);
+      if (claimed) {
+        console.log(`Coach invite claimed for user: ${id}`);
+      }
+
       // Send welcome email (non-blocking)
       sendEmail({
         to: email,
-        subject: 'Welcome to CoachHub!',
+        subject: 'Welcome to AccrediPro CoachHub!',
         react: WelcomeEmail({
           name: name || 'there',
           unsubscribeUrl: getUnsubscribeUrl(id, 'marketing'),

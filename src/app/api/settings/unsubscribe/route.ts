@@ -95,7 +95,7 @@ export async function GET(request: Request) {
     return new Response(
       htmlPage(
         'Unsubscribed',
-        `You have been unsubscribed from ${categoryLabels[category]}. You can re-enable this in your <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://coachhub.com'}/dashboard/settings">account settings</a>.`
+        `You have been unsubscribed from ${categoryLabels[category]}. You can re-enable this in your <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://accredipro-coachhub.com'}/dashboard/settings">account settings</a>.`
       ),
       {
         status: 200,
@@ -117,7 +117,7 @@ function htmlPage(title: string, message: string): string {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${title} - CoachHub</title>
+  <title>${title} - AccrediPro CoachHub</title>
   <style>
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; background: #f6f9fc; color: #4a5568; }
     .card { background: white; padding: 48px; border-radius: 12px; max-width: 480px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }

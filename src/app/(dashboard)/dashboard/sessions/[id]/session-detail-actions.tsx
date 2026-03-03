@@ -142,7 +142,7 @@ export function SessionDetailActions({
         <Button
           variant="outline"
           size="sm"
-          className="w-full justify-start text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700"
+          className="w-full justify-start text-[hsl(var(--brand-warm))] hover:bg-[hsl(var(--brand-surface))] hover:text-[hsl(var(--brand-accent-hover))]"
           asChild
         >
           <Link href={`/dashboard/sessions/${sessionId}/reschedule`}>
@@ -180,7 +180,7 @@ export function SessionDetailActions({
       </Button>
       <Button
         variant="outline"
-        className="text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700"
+        className="text-[hsl(var(--brand-warm))] hover:bg-[hsl(var(--brand-surface))] hover:text-[hsl(var(--brand-accent-hover))]"
         asChild
       >
         <Link href={`/dashboard/sessions/${sessionId}/reschedule`}>

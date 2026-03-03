@@ -105,11 +105,11 @@ export function BookingRequestClientEmail({
 
       <Text style={paragraph}>
         Have questions?{' '}
-        <Link href="https://coachhub.com/dashboard/messages" style={link}>
+        <Link href="https://accredipro-coachhub.com/dashboard/messages" style={link}>
           Message your coach
         </Link>{' '}
         or{' '}
-        <Link href="https://coachhub.com/support" style={link}>
+        <Link href="https://accredipro-coachhub.com/support" style={link}>
           contact support
         </Link>
       </Text>

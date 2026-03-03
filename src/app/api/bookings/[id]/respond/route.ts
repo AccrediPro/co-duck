@@ -24,7 +24,7 @@ import { stripe } from '@/lib/stripe';
 import { createNotification } from '@/lib/notifications';
 import { syncBookingToCalendar } from '@/lib/google-calendar-sync';
 import { getOrCreateConversationInternal, sendSystemMessage } from '@/lib/conversations';
-import { format } from 'date-fns';
+import { formatDateLong, formatTime } from '@/lib/date-utils';
 import type { BookingSessionType } from '@/db/schema';
 
 interface RouteParams {
@@ -144,8 +144,8 @@ export async function POST(request: Request, { params }: RouteParams) {
     ]);
 
     const sessionName = sessionType?.name || 'Coaching session';
-    const formattedDate = format(booking.startTime, 'EEEE, MMMM d, yyyy');
-    const formattedTime = format(booking.startTime, 'h:mm a');
+    const formattedDate = formatDateLong(booking.startTime);
+    const formattedTime = formatTime(booking.startTime);
 
     if (action === 'accept') {
       return await handleAccept({

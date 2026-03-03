@@ -115,7 +115,7 @@ export function BookingConfirmationEmail({
 
       <Text style={paragraph}>
         Need to make changes?{' '}
-        <Link href="https://coachhub.com/dashboard/bookings" style={link}>
+        <Link href="https://accredipro-coachhub.com/dashboard/bookings" style={link}>
           Manage your booking
         </Link>
       </Text>

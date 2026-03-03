@@ -41,60 +41,73 @@ export default async function MyCoachesPage() {
 
   if (!coaches) {
     return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold">My Coach</h1>
-          <p className="text-muted-foreground">Your coaching relationships and programs</p>
-        </div>
-        <Card>
-          <CardContent className="py-12 text-center">
-            <p className="text-muted-foreground">Failed to load coaches. Please try again later.</p>
-          </CardContent>
+      <div className="mx-auto max-w-3xl">
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="text-2xl font-bold text-burgundy-dark">My Coaches</CardTitle>
+            <CardDescription>View your coaching relationships</CardDescription>
+          </CardHeader>
         </Card>
+
+        <div className="space-y-6">
+          <Card>
+            <CardContent className="py-12 text-center">
+              <p className="text-muted-foreground">Failed to load coaches. Please try again later.</p>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     );
   }
 
   if (coaches.length === 0) {
     return (
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-3xl font-bold">My Coach</h1>
-          <p className="text-muted-foreground">Your coaching relationships and programs</p>
-        </div>
-
-        <Card>
-          <CardHeader className="text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-              <UserCheck className="h-8 w-8 text-primary" />
-            </div>
-            <CardTitle>You&apos;re not working with any coach yet</CardTitle>
-            <CardDescription className="mx-auto max-w-md">
-              Find a coach and book a session! The relationship is created automatically after
-              your first confirmed booking.
-            </CardDescription>
+      <div className="mx-auto max-w-3xl">
+        <Card className="mb-6">
+          <CardHeader>
+            <CardTitle className="text-2xl font-bold text-burgundy-dark">My Coaches</CardTitle>
+            <CardDescription>View your coaching relationships</CardDescription>
           </CardHeader>
-          <CardContent className="text-center">
-            <a
-              href="/coaches"
-              className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-            >
-              Find a Coach
-            </a>
-          </CardContent>
         </Card>
+
+        <div className="space-y-6">
+          <Card>
+            <CardHeader className="text-center">
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-burgundy/10">
+                <UserCheck className="h-8 w-8 text-burgundy" />
+              </div>
+              <CardTitle>You&apos;re not working with any coach yet</CardTitle>
+              <CardDescription className="mx-auto max-w-md">
+                Find a coach and book a session! The relationship is created automatically after
+                your first confirmed booking.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="text-center">
+              <a
+                href="/coaches"
+                className="inline-flex items-center justify-center rounded-md bg-burgundy px-4 py-2 text-sm font-medium text-white hover:bg-burgundy-light"
+              >
+                Find a Coach
+              </a>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">My Coach</h1>
-        <p className="text-muted-foreground">Your coaching relationships and programs</p>
-      </div>
+    <div className="mx-auto max-w-3xl">
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold text-burgundy-dark">My Coaches</CardTitle>
+          <CardDescription>View your coaching relationships</CardDescription>
+        </CardHeader>
+      </Card>
 
-      <MyCoachesList coaches={coaches} />
+      <div className="space-y-6">
+        <MyCoachesList coaches={coaches} />
+      </div>
     </div>
   );
 }

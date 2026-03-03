@@ -130,14 +130,14 @@ export function PaymentsContent({ initialData, setupStatus, earningsData }: Paym
     switch (onboardingStatus) {
       case 'complete':
         return (
-          <Badge variant="default" className="bg-green-500 hover:bg-green-600">
+          <Badge variant="default" className="bg-[hsl(var(--brand-accent))] hover:bg-[hsl(var(--brand-warm))]">
             <CheckCircle className="mr-1 h-3 w-3" />
             Active
           </Badge>
         );
       case 'pending':
         return (
-          <Badge variant="secondary" className="bg-amber-500/10 text-amber-600">
+          <Badge variant="secondary" className="bg-gold/10 text-gold-dark">
             <Clock className="mr-1 h-3 w-3" />
             Pending Setup
           </Badge>
@@ -155,9 +155,9 @@ export function PaymentsContent({ initialData, setupStatus, earningsData }: Paym
   const getStatusIcon = () => {
     switch (onboardingStatus) {
       case 'complete':
-        return <CheckCircle className="h-12 w-12 text-green-500" />;
+        return <CheckCircle className="h-12 w-12 text-[hsl(var(--brand-accent))]" />;
       case 'pending':
-        return <Clock className="h-12 w-12 text-amber-500" />;
+        return <Clock className="h-12 w-12 text-gold" />;
       default:
         return <CreditCard className="h-12 w-12 text-muted-foreground" />;
     }
@@ -211,8 +211,8 @@ export function PaymentsContent({ initialData, setupStatus, earningsData }: Paym
                     You have started setting up your payment account but there are still some steps
                     remaining. Complete the setup to start receiving payments from clients.
                   </p>
-                  <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-900 dark:bg-amber-950">
-                    <p className="text-sm text-amber-800 dark:text-amber-200">
+                  <div className="mt-3 rounded-lg border border-gold/30 bg-gold/10 p-3">
+                    <p className="text-sm text-gold-dark">
                       <AlertCircle className="mr-2 inline h-4 w-4" />
                       Your account setup is incomplete. Click below to continue where you left off.
                     </p>
@@ -227,8 +227,8 @@ export function PaymentsContent({ initialData, setupStatus, earningsData }: Paym
                     Your Stripe account is fully set up and ready to receive payments. Clients can
                     now book and pay for sessions with you.
                   </p>
-                  <div className="mt-3 rounded-lg border border-green-200 bg-green-50 p-3 dark:border-green-900 dark:bg-green-950">
-                    <p className="text-sm text-green-800 dark:text-green-200">
+                  <div className="mt-3 rounded-lg border border-[hsl(var(--brand-border))] bg-[hsl(var(--brand-surface))] p-3 dark:border-[hsl(var(--brand-accent-darker))] dark:bg-[hsl(var(--brand-accent-deep))]">
+                    <p className="text-sm text-[hsl(var(--brand-accent-dark))] dark:text-[hsl(var(--brand-border))]">
                       <CheckCircle className="mr-2 inline h-4 w-4" />
                       Your account is verified and ready to accept payments.
                     </p>
@@ -240,7 +240,7 @@ export function PaymentsContent({ initialData, setupStatus, earningsData }: Paym
 
           <div className="flex flex-wrap gap-3">
             {onboardingStatus === 'not_started' && (
-              <Button onClick={handleStartOnboarding} disabled={isLoading}>
+              <Button onClick={handleStartOnboarding} disabled={isLoading} className="min-h-[44px]">
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -256,7 +256,7 @@ export function PaymentsContent({ initialData, setupStatus, earningsData }: Paym
             )}
 
             {onboardingStatus === 'pending' && (
-              <Button onClick={handleContinueOnboarding} disabled={isLoading}>
+              <Button onClick={handleContinueOnboarding} disabled={isLoading} className="min-h-[44px]">
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -272,7 +272,7 @@ export function PaymentsContent({ initialData, setupStatus, earningsData }: Paym
             )}
 
             {onboardingStatus === 'complete' && (
-              <Button variant="outline" asChild>
+              <Button variant="outline" asChild className="min-h-[44px]">
                 <a
                   href="https://dashboard.stripe.com/express"
                   target="_blank"

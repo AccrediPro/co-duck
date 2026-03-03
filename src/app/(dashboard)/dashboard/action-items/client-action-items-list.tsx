@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { format } from 'date-fns';
+import { formatDate, formatDateShort } from '@/lib/date-utils';
 import { CheckCircle2, Circle, Clock, Loader2, AlertCircle } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -90,11 +90,11 @@ export function ClientActionItemsList({
   const getStatusIcon = (status: ActionItemWithCoach['status']) => {
     switch (status) {
       case 'completed':
-        return <CheckCircle2 className="h-5 w-5 text-green-600" />;
+        return <CheckCircle2 className="h-5 w-5 text-[hsl(var(--brand-warm))]" />;
       case 'overdue':
         return <AlertCircle className="h-5 w-5 text-red-500" />;
       case 'pending':
-        return <Circle className="h-5 w-5 text-emerald-500" />;
+        return <Circle className="h-5 w-5 text-[hsl(var(--brand-accent))]" />;
     }
   };
 
@@ -102,7 +102,7 @@ export function ClientActionItemsList({
     switch (status) {
       case 'completed':
         return (
-          <span className="inline-flex items-center rounded-full bg-green-100 px-2 py-0.5 text-xs font-medium text-green-800 dark:bg-green-900/30 dark:text-green-400">
+          <span className="inline-flex items-center rounded-full bg-[hsl(var(--brand-accent-light))] px-2 py-0.5 text-xs font-medium text-[hsl(var(--brand-accent-dark))] dark:bg-[hsl(var(--brand-accent-darker))]/30 dark:text-[hsl(var(--brand-accent-muted))]">
             Completed
           </span>
         );
@@ -114,7 +114,7 @@ export function ClientActionItemsList({
         );
       case 'pending':
         return (
-          <span className="inline-flex items-center rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400">
+          <span className="inline-flex items-center rounded-full bg-[hsl(var(--brand-accent-light))] px-2 py-0.5 text-xs font-medium text-[hsl(var(--brand-accent-dark))] dark:bg-[hsl(var(--brand-accent-darker))]/30 dark:text-[hsl(var(--brand-accent-muted))]">
             Pending
           </span>
         );
@@ -221,7 +221,7 @@ export function ClientActionItemsList({
                             )}
                           >
                             <Clock className="h-4 w-4" />
-                            Due {format(new Date(item.dueDate), 'MMM d, yyyy')}
+                            Due {formatDate(item.dueDate)}
                           </span>
                         )}
 
@@ -238,7 +238,7 @@ export function ClientActionItemsList({
 
                         {/* Created date */}
                         <span className="hidden sm:inline">
-                          Added {format(new Date(item.createdAt), 'MMM d')}
+                          Added {formatDateShort(item.createdAt)}
                         </span>
                       </div>
                     </div>

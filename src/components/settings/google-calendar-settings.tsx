@@ -4,6 +4,7 @@ import { useEffect, useState, useTransition } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Calendar, CheckCircle2, XCircle, Loader2, Info } from 'lucide-react';
+import { formatDateTime } from '@/lib/date-utils';
 import {
   getGoogleCalendarStatus,
   disconnectGoogleCalendar,
@@ -99,13 +100,13 @@ export function GoogleCalendarSettings() {
       <CardContent className="space-y-4">
         {isConnected ? (
           <>
-            <div className="flex items-center gap-2 text-sm text-emerald-600">
+            <div className="flex items-center gap-2 text-sm text-[hsl(var(--brand-warm))]">
               <CheckCircle2 className="h-4 w-4" />
               Google Calendar connected
             </div>
             {lastSyncAt && (
               <p className="text-xs text-muted-foreground">
-                Last synced: {new Date(lastSyncAt).toLocaleDateString()}
+                Last synced: {formatDateTime(lastSyncAt)}
               </p>
             )}
             <p className="text-sm text-muted-foreground">

@@ -95,33 +95,36 @@ export async function GET(request: Request, { params }: RouteParams) {
       ),
     });
 
-    let startTime: string | null = null;
-    let endTime: string | null = null;
-    let isAvailable = false;
+    let ranges: { startTime: string; endTime: string }[] = [];
 
     if (override) {
-      // Use override settings
-      isAvailable = override.isAvailable;
-      startTime = override.startTime;
-      endTime = override.endTime;
-    } else {
-      // Use weekly schedule
-      const weeklySlot = await db.query.coachAvailability.findFirst({
-        where: and(
-          eq(coachAvailability.coachId, coach.userId),
-          eq(coachAvailability.dayOfWeek, dayOfWeek)
-        ),
-      });
-
-      if (weeklySlot) {
-        isAvailable = weeklySlot.isAvailable;
-        startTime = weeklySlot.startTime;
-        endTime = weeklySlot.endTime;
+      // Use override settings (single range)
+      if (override.isAvailable && override.startTime && override.endTime) {
+        ranges = [{ startTime: override.startTime, endTime: override.endTime }];
       }
+    } else {
+      // Use weekly schedule — fetch ALL ranges for this day
+      const weeklySlots = await db
+        .select({
+          isAvailable: coachAvailability.isAvailable,
+          startTime: coachAvailability.startTime,
+          endTime: coachAvailability.endTime,
+        })
+        .from(coachAvailability)
+        .where(
+          and(
+            eq(coachAvailability.coachId, coach.userId),
+            eq(coachAvailability.dayOfWeek, dayOfWeek)
+          )
+        );
+
+      ranges = weeklySlots
+        .filter((s) => s.isAvailable && s.startTime && s.endTime)
+        .map((s) => ({ startTime: s.startTime!, endTime: s.endTime! }));
     }
 
     // If not available on this day, return empty slots
-    if (!isAvailable || !startTime || !endTime) {
+    if (ranges.length === 0) {
       return Response.json({
         success: true,
         data: {
@@ -151,10 +154,9 @@ export async function GET(request: Request, { params }: RouteParams) {
         )
       );
 
-    // Generate time slots
+    // Generate time slots across all ranges
     const slots = generateTimeSlots(
-      startTime,
-      endTime,
+      ranges,
       duration,
       coach.bufferMinutes,
       existingBookings,
@@ -183,11 +185,10 @@ export async function GET(request: Request, { params }: RouteParams) {
 }
 
 /**
- * Generate available time slots for a day
+ * Generate available time slots for a day across multiple time ranges
  */
 function generateTimeSlots(
-  startTime: string,
-  endTime: string,
+  ranges: { startTime: string; endTime: string }[],
   duration: number,
   bufferMinutes: number,
   existingBookings: { startTime: Date; endTime: Date }[],
@@ -196,44 +197,46 @@ function generateTimeSlots(
 ): { start: string; end: string; available: boolean }[] {
   const slots: { start: string; end: string; available: boolean }[] = [];
 
-  // Parse start/end times (format: "HH:MM:SS" or "HH:MM")
-  const [startHour, startMin] = startTime.split(':').map(Number);
-  const [endHour, endMin] = endTime.split(':').map(Number);
-
-  const slotDuration = duration + bufferMinutes;
-  let currentMinutes = startHour * 60 + startMin;
-  const endMinutes = endHour * 60 + endMin;
-
   const now = new Date();
   const minBookingTime = new Date(now.getTime() + advanceNoticeHours * 60 * 60 * 1000);
+  const slotDuration = duration + bufferMinutes;
 
-  while (currentMinutes + duration <= endMinutes) {
-    const slotStart = formatTime(currentMinutes);
-    const slotEnd = formatTime(currentMinutes + duration);
+  for (const range of ranges) {
+    // Parse start/end times (format: "HH:MM:SS" or "HH:MM")
+    const [startHour, startMin] = range.startTime.split(':').map(Number);
+    const [endHour, endMin] = range.endTime.split(':').map(Number);
 
-    // Create slot datetime for comparison
-    const slotDateTime = new Date(`${date}T${slotStart}:00`);
+    let currentMinutes = startHour * 60 + startMin;
+    const endMinutes = endHour * 60 + endMin;
 
-    // Check if slot is in the past or within advance notice window
-    const isPast = slotDateTime < minBookingTime;
+    while (currentMinutes + duration <= endMinutes) {
+      const slotStart = formatTime(currentMinutes);
+      const slotEnd = formatTime(currentMinutes + duration);
 
-    // Check if slot conflicts with existing bookings
-    const hasConflict = existingBookings.some((booking) => {
-      const bookingStart = booking.startTime.getTime();
-      const bookingEnd = booking.endTime.getTime();
-      const slotStartMs = slotDateTime.getTime();
-      const slotEndMs = new Date(`${date}T${slotEnd}:00`).getTime();
+      // Create slot datetime for comparison
+      const slotDateTime = new Date(`${date}T${slotStart}:00`);
 
-      return slotStartMs < bookingEnd && slotEndMs > bookingStart;
-    });
+      // Check if slot is in the past or within advance notice window
+      const isPast = slotDateTime < minBookingTime;
 
-    slots.push({
-      start: slotStart,
-      end: slotEnd,
-      available: !isPast && !hasConflict,
-    });
+      // Check if slot conflicts with existing bookings
+      const hasConflict = existingBookings.some((booking) => {
+        const bookingStart = booking.startTime.getTime();
+        const bookingEnd = booking.endTime.getTime();
+        const slotStartMs = slotDateTime.getTime();
+        const slotEndMs = new Date(`${date}T${slotEnd}:00`).getTime();
 
-    currentMinutes += slotDuration;
+        return slotStartMs < bookingEnd && slotEndMs > bookingStart;
+      });
+
+      slots.push({
+        start: slotStart,
+        end: slotEnd,
+        available: !isPast && !hasConflict,
+      });
+
+      currentMinutes += slotDuration;
+    }
   }
 
   return slots;

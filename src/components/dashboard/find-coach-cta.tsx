@@ -6,9 +6,9 @@ import { Search } from 'lucide-react';
 export function FindCoachCta() {
   return (
     <Card className="overflow-hidden">
-      <CardContent className="bg-gradient-to-br from-emerald-500 to-emerald-700 p-6 text-white">
+      <CardContent className="bg-gradient-to-br from-burgundy to-burgundy-dark p-6 text-white">
         <h3 className="mb-2 text-lg font-semibold">Find Your Coach</h3>
-        <p className="mb-4 text-sm text-emerald-100">
+        <p className="mb-4 text-sm text-cream">
           Browse our directory of professional coaches and book your next session.
         </p>
         <Button variant="secondary" size="sm" asChild>

@@ -39,7 +39,7 @@ export default async function CoachOnboardingStep3Page() {
     <div className="mx-auto max-w-2xl space-y-8">
       {/* Header */}
       <div className="text-center">
-        <h1 className="text-3xl font-bold">Become a Coach</h1>
+        <h1 className="text-2xl font-bold text-burgundy-dark">Coach Profile Setup</h1>
         <p className="mt-2 text-muted-foreground">
           Complete your profile to start connecting with clients
         </p>

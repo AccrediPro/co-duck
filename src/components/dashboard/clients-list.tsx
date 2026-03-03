@@ -2,10 +2,11 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { format } from 'date-fns';
-import { Search, CalendarDays, BookOpen, Activity } from 'lucide-react';
+import { Search, CalendarDays, BookOpen, Activity, Info } from 'lucide-react';
+import { formatDate } from '@/lib/date-utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 
@@ -46,15 +47,19 @@ export function ClientsList({ initialClients }: ClientsListProps) {
 
   return (
     <div className="space-y-4">
-      <div className="relative max-w-sm">
-        <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <Input
-          placeholder="Search clients..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="pl-9"
-        />
-      </div>
+      <Card>
+        <CardContent className="pt-6">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Search clients..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-9"
+            />
+          </div>
+        </CardContent>
+      </Card>
 
       {filteredClients.length === 0 ? (
         <Card>
@@ -108,9 +113,22 @@ export function ClientsList({ initialClients }: ClientsListProps) {
                 {client.lastBookingDate && (
                   <p className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
                     <Activity className="h-3 w-3" />
-                    Last session: {format(new Date(client.lastBookingDate), 'MMM d, yyyy')}
+                    Last session: {formatDate(client.lastBookingDate)}
                   </p>
                 )}
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="mt-4 w-full"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    router.push(`/dashboard/clients/${client.id}/profile`);
+                  }}
+                >
+                  <Info className="mr-1.5 h-4 w-4" />
+                  See Information
+                </Button>
               </CardContent>
             </Card>
           ))}

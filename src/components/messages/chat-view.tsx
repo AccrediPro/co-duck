@@ -447,7 +447,7 @@ export function ChatView({
             <div className="flex items-center gap-2">
               <h1 className="truncate font-semibold">{conversation.otherUserName || 'User'}</h1>
               {otherUserOnline && (
-                <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" title="Online" />
+                <span className="h-2.5 w-2.5 rounded-full bg-[hsl(var(--brand-accent))]" title="Online" />
               )}
             </div>
             <p className="text-sm text-muted-foreground">

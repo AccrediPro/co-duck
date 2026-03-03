@@ -16,7 +16,7 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: 'Coaching Platform',
+  title: 'AccrediPro CoachHub',
   description: 'Connect with expert coaches for personalized guidance',
 };
 

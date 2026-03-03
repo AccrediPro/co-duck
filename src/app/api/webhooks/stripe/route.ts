@@ -30,7 +30,7 @@ import { createNotification } from '@/lib/notifications';
 import { sendEmail } from '@/lib/email';
 import { PaymentReceiptEmail, BookingRequestCoachEmail, BookingRequestClientEmail } from '@/lib/emails';
 import { getUnsubscribeUrl } from '@/lib/unsubscribe';
-import { format } from 'date-fns';
+import { formatDateLong, formatTime } from '@/lib/date-utils';
 
 /**
  * Retrieves the Stripe webhook secret from environment variables.
@@ -299,8 +299,8 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
   ]);
 
   const sessionName = sessionType?.name || 'Coaching session';
-  const formattedDate = format(booking.startTime, 'EEEE, MMMM d, yyyy');
-  const formattedTime = format(booking.startTime, 'h:mm a');
+  const formattedDate = formatDateLong(booking.startTime);
+  const formattedTime = formatTime(booking.startTime);
   const priceFormatted = amountTotal / 100;
 
   // Send payment receipt to client (still relevant — they paid)
@@ -537,7 +537,7 @@ async function handlePaymentIntentFailed(paymentIntent: Stripe.PaymentIntent) {
 /**
  * Handles the account.application.deauthorized event.
  *
- * When a coach disconnects their Stripe Connect account from the CoachHub platform,
+ * When a coach disconnects their Stripe Connect account from the AccrediPro CoachHub platform,
  * this handler:
  * 1. Finds the coach profile with that Stripe account ID
  * 2. Clears the stripeAccountId

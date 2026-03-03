@@ -80,5 +80,38 @@ export default defineConfig({
       },
       dependencies: ['client-setup'],
     },
+
+    // M6: Mobile responsive audit — coach pages
+    {
+      name: 'mobile-audit-coach',
+      testMatch: /mobile-responsive-audit\.spec\.ts/,
+      grep: /Coach/,
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: 'e2e/.auth/coach.json',
+      },
+      dependencies: ['coach-setup'],
+    },
+
+    // M6: Mobile responsive audit — client pages
+    {
+      name: 'mobile-audit-client',
+      testMatch: /mobile-responsive-audit\.spec\.ts/,
+      grep: /Client/,
+      use: {
+        ...devices['Desktop Chrome'],
+        storageState: 'e2e/.auth/client.json',
+      },
+      dependencies: ['client-setup'],
+    },
+
+    // G3: Mobile navigation drawer test
+    {
+      name: 'mobile-nav',
+      testMatch: /mobile-nav-drawer\.spec\.ts/,
+      use: {
+        ...devices['Desktop Chrome'],
+      },
+    },
   ],
 });

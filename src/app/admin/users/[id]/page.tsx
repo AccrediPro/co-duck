@@ -2,6 +2,7 @@ import { notFound } from 'next/navigation';
 import { eq, sql, or } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import Link from 'next/link';
+import { formatDate } from '@/lib/date-utils';
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -123,14 +124,6 @@ async function getUserDetail(id: string) {
   }
 }
 
-function formatDate(date: Date): string {
-  return new Intl.DateTimeFormat('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
-  }).format(new Date(date));
-}
-
 function getRoleVariant(role: string): 'default' | 'secondary' | 'outline' {
   switch (role) {
     case 'admin':
@@ -212,22 +205,26 @@ export default async function AdminUserDetailPage({
   const { user, activity } = result;
 
   return (
-    <div className="space-y-6">
-      {/* Back button + header */}
-      <div className="flex items-center gap-4">
-        <Button asChild variant="ghost" size="sm">
-          <Link href="/admin/users">
-            <ArrowLeft className="mr-1 h-4 w-4" />
-            Back to Users
-          </Link>
-        </Button>
-      </div>
+    <div className="mx-auto max-w-3xl">
+      {/* Page Header */}
+      <Card className="mb-6">
+        <CardHeader>
+          <div className="flex items-center gap-3">
+            <Button asChild variant="ghost" size="sm" className="-ml-2">
+              <Link href="/admin/users">
+                <ArrowLeft className="mr-1 h-4 w-4" />
+                Back
+              </Link>
+            </Button>
+            <div>
+              <CardTitle className="text-2xl font-bold">{user.name || user.email}</CardTitle>
+              <CardDescription>User account details</CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+      </Card>
 
-      <div>
-        <h1 className="text-3xl font-bold">User Detail</h1>
-        <p className="text-muted-foreground">View user profile and activity</p>
-      </div>
-
+      <div className="space-y-6">
       {/* Profile Card */}
       <Card>
         <CardHeader>
@@ -300,7 +297,7 @@ export default async function AdminUserDetailPage({
               </Badge>
               {user.coachProfile.averageRating && (
                 <span className="flex items-center gap-1 text-sm">
-                  <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                  <Star className="h-4 w-4 fill-gold text-gold" />
                   {user.coachProfile.averageRating} ({user.coachProfile.reviewCount} reviews)
                 </span>
               )}
@@ -380,6 +377,7 @@ export default async function AdminUserDetailPage({
           </div>
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }

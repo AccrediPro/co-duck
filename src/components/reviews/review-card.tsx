@@ -4,6 +4,7 @@ import * as React from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { StarRating } from '@/components/ui/star-rating';
 import { cn } from '@/lib/utils';
+import { formatDate } from '@/lib/date-utils';
 
 export interface ReviewCardProps extends React.HTMLAttributes<HTMLDivElement> {
   rating: number;
@@ -28,11 +29,7 @@ const ReviewCard = React.forwardRef<HTMLDivElement, ReviewCardProps>(
     },
     ref
   ) => {
-    const formattedDate = new Date(createdAt).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
+    const formattedDate = formatDate(createdAt);
 
     return (
       <Card ref={ref} className={cn('', className)} {...props}>

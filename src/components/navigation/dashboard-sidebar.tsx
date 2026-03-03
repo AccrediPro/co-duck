@@ -13,7 +13,7 @@ import {
   Menu,
   CreditCard,
   MessageSquare,
-  CheckSquare,
+  LayoutList,
 } from 'lucide-react';
 import { UserButton } from '@clerk/nextjs';
 import { useState } from 'react';
@@ -25,6 +25,7 @@ import { cn } from '@/lib/utils';
 import { LucideIcon } from 'lucide-react';
 import { NotificationBell } from '@/components/notifications/notification-bell';
 import { useUnreadMessageCount } from '@/hooks/useUnreadMessageCount';
+import { useIConnectUnread } from '@/hooks/useIConnectUnread';
 
 type UserRole = 'admin' | 'coach' | 'client';
 
@@ -52,13 +53,14 @@ const coachLinks: NavLink[] = [
   { href: '/dashboard/clients', label: 'My Clients', icon: Users, roles: ['coach'] },
   { href: '/dashboard/availability', label: 'Availability', icon: Clock, roles: ['coach'] },
   { href: '/dashboard/payments', label: 'Payments', icon: CreditCard, roles: ['coach'] },
+  { href: '/dashboard/iconnect', label: 'iConnect', icon: LayoutList, roles: ['coach'], showBadge: true },
 ];
 
 // Client-specific links
 const clientLinks: NavLink[] = [
   { href: '/dashboard/my-coaches', label: 'My Coach', icon: UserCheck, roles: ['client'] },
   { href: '/dashboard/my-sessions', label: 'My Sessions', icon: CalendarDays, roles: ['client'] },
-  { href: '/dashboard/action-items', label: 'Action Items', icon: CheckSquare, roles: ['client'] },
+  { href: '/dashboard/iconnect', label: 'iConnect', icon: LayoutList, roles: ['client'], showBadge: true },
 ];
 
 // Get navigation links based on user role
@@ -89,6 +91,7 @@ interface DashboardSidebarProps {
   userEmail?: string | null;
   userRole?: UserRole;
   unreadMessageCount?: number;
+  iconnectUnreadCount?: number;
 }
 
 export function DashboardSidebar({
@@ -96,10 +99,12 @@ export function DashboardSidebar({
   userEmail,
   userRole = 'client',
   unreadMessageCount: initialUnreadCount = 0,
+  iconnectUnreadCount: initialIConnectUnread = 0,
 }: DashboardSidebarProps) {
   const pathname = usePathname();
   const navLinks = getNavLinksForRole(userRole);
   const unreadMessageCount = useUnreadMessageCount(initialUnreadCount);
+  const iconnectUnreadCount = useIConnectUnread(initialIConnectUnread);
 
   const isActiveLink = (href: string) => {
     if (href === '/dashboard') {
@@ -112,7 +117,7 @@ export function DashboardSidebar({
     <>
       {/* Logo + Notification Bell */}
       <div className="flex h-16 items-center justify-between px-6">
-        <Link href="/" className="min-w-0 flex-1 whitespace-normal leading-tight min-h-[44px] flex items-center text-xl font-bold">
+        <Link href="/" className="min-w-0 flex-1 truncate min-h-[44px] flex items-center text-sm font-bold">
           AccrediPro CoachHub
         </Link>
         <NotificationBell />
@@ -124,7 +129,13 @@ export function DashboardSidebar({
       <nav className="flex-1 space-y-1 px-3 py-4">
         {navLinks.map((link) => {
           const Icon = link.icon;
-          const showBadge = link.showBadge && unreadMessageCount > 0;
+          const badgeCount =
+            link.href === '/dashboard/messages'
+              ? unreadMessageCount
+              : link.href === '/dashboard/iconnect'
+                ? iconnectUnreadCount
+                : 0;
+          const showBadge = link.showBadge && badgeCount > 0;
           return (
             <Link
               key={link.href}
@@ -140,7 +151,7 @@ export function DashboardSidebar({
               <span className="flex-1">{link.label}</span>
               {showBadge && (
                 <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-xs font-medium text-destructive-foreground">
-                  {unreadMessageCount > 99 ? '99+' : unreadMessageCount}
+                  {badgeCount > 99 ? '99+' : badgeCount}
                 </span>
               )}
             </Link>
@@ -178,11 +189,13 @@ export function DashboardMobileHeader({
   userEmail,
   userRole = 'client',
   unreadMessageCount: initialUnreadCount = 0,
+  iconnectUnreadCount: initialIConnectUnread = 0,
 }: DashboardSidebarProps) {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const navLinks = getNavLinksForRole(userRole);
   const unreadMessageCount = useUnreadMessageCount(initialUnreadCount);
+  const iconnectUnreadCount = useIConnectUnread(initialIConnectUnread);
 
   const isActiveLink = (href: string) => {
     if (href === '/dashboard') {
@@ -193,7 +206,7 @@ export function DashboardMobileHeader({
 
   return (
     <header className="sticky top-0 z-50 flex h-16 items-center justify-between border-b bg-background px-4 md:hidden">
-      <Link href="/" className="flex min-h-[44px] items-center whitespace-normal leading-tight text-xl font-bold">
+      <Link href="/" className="flex min-h-[44px] items-center text-xl font-bold whitespace-nowrap">
         AccrediPro CoachHub
       </Link>
 
@@ -205,6 +218,14 @@ export function DashboardMobileHeader({
             <MessageSquare className="h-5 w-5 text-muted-foreground" />
             <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-medium text-destructive-foreground">
               {unreadMessageCount > 99 ? '99+' : unreadMessageCount}
+            </span>
+          </Link>
+        )}
+        {iconnectUnreadCount > 0 && (
+          <Link href="/dashboard/iconnect" className="relative flex min-h-[44px] min-w-[44px] items-center justify-center">
+            <LayoutList className="h-5 w-5 text-muted-foreground" />
+            <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[hsl(var(--brand-accent))] px-1 text-[10px] font-medium text-white">
+              {iconnectUnreadCount > 99 ? '99+' : iconnectUnreadCount}
             </span>
           </Link>
         )}
@@ -229,7 +250,7 @@ export function DashboardMobileHeader({
               <div className="flex h-16 items-center px-6">
                 <Link
                   href="/"
-                  className="flex min-h-[44px] items-center whitespace-normal leading-tight text-xl font-bold"
+                  className="flex min-h-[44px] items-center truncate text-sm font-bold"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   AccrediPro CoachHub
@@ -242,7 +263,13 @@ export function DashboardMobileHeader({
               <nav className="flex-1 space-y-1 px-3 py-4">
                 {navLinks.map((link) => {
                   const Icon = link.icon;
-                  const showBadge = link.showBadge && unreadMessageCount > 0;
+                  const badgeCount =
+                    link.href === '/dashboard/messages'
+                      ? unreadMessageCount
+                      : link.href === '/dashboard/iconnect'
+                        ? iconnectUnreadCount
+                        : 0;
+                  const showBadge = link.showBadge && badgeCount > 0;
                   return (
                     <Link
                       key={link.href}
@@ -259,7 +286,7 @@ export function DashboardMobileHeader({
                       <span className="flex-1">{link.label}</span>
                       {showBadge && (
                         <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-xs font-medium text-destructive-foreground">
-                          {unreadMessageCount > 99 ? '99+' : unreadMessageCount}
+                          {badgeCount > 99 ? '99+' : badgeCount}
                         </span>
                       )}
                     </Link>

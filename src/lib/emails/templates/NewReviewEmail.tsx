@@ -21,7 +21,7 @@ export function NewReviewEmail({
   bookingId,
   unsubscribeUrl,
 }: NewReviewEmailProps) {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://coachhub.com';
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://accredipro-coachhub.com';
   const stars = '\u2605'.repeat(rating) + '\u2606'.repeat(5 - rating);
 
   return (

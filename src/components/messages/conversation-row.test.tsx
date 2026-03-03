@@ -90,8 +90,8 @@ describe('ConversationRow', () => {
       />
     );
 
-    // Unread dot is an emerald div
-    const unreadDot = container.querySelector('.bg-emerald-500');
+    // Unread dot is a brown div
+    const unreadDot = container.querySelector('.bg-\\[hsl\\(var\\(--brand-accent\\)\\)\\]');
     expect(unreadDot).toBeInTheDocument();
   });
 
@@ -103,7 +103,7 @@ describe('ConversationRow', () => {
       />
     );
 
-    const unreadDot = container.querySelector('.bg-emerald-500');
+    const unreadDot = container.querySelector('.bg-\\[hsl\\(var\\(--brand-accent\\)\\)\\]');
     expect(unreadDot).not.toBeInTheDocument();
   });
 

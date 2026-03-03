@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { format } from 'date-fns';
+import { formatDateShort } from '@/lib/date-utils';
 import { CheckCircle2, Circle, Clock, Loader2, Trash2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -95,22 +95,22 @@ export function ActionItemsList({
   const getStatusIcon = (status: ActionItemWithStatus['status']) => {
     switch (status) {
       case 'completed':
-        return <CheckCircle2 className="h-4 w-4 text-green-600" />;
+        return <CheckCircle2 className="h-4 w-4 text-[hsl(var(--brand-warm))]" />;
       case 'overdue':
         return <AlertCircle className="h-4 w-4 text-red-500" />;
       case 'pending':
-        return <Circle className="h-4 w-4 text-emerald-500" />;
+        return <Circle className="h-4 w-4 text-[hsl(var(--brand-accent))]" />;
     }
   };
 
   const getStatusColor = (status: ActionItemWithStatus['status']) => {
     switch (status) {
       case 'completed':
-        return 'text-green-600';
+        return 'text-[hsl(var(--brand-warm))]';
       case 'overdue':
         return 'text-red-500';
       case 'pending':
-        return 'text-emerald-500';
+        return 'text-[hsl(var(--brand-accent))]';
     }
   };
 
@@ -199,7 +199,7 @@ export function ActionItemsList({
                         )}
                       >
                         <Clock className="h-3 w-3" />
-                        {format(new Date(item.dueDate), 'MMM d')}
+                        {formatDateShort(item.dueDate)}
                       </span>
                     )}
                     <span className={cn('text-xs', getStatusColor(item.status))}>

@@ -21,12 +21,13 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Mail, MapPin, Clock, Send, CheckCircle } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const contactInfo = [
   {
     icon: Mail,
     title: 'Email',
-    details: 'support@coachhub.com',
+    details: 'support@accredipro-coachhub.com',
     description: 'Send us an email anytime',
   },
   {
@@ -57,7 +58,7 @@ const faqs = [
   {
     question: 'How do I become a coach on the platform?',
     answer:
-      'Sign up and complete our coach onboarding process. You will need to provide your credentials, experience, and set up your profile with session types and pricing.',
+      'Coach accounts are set up by our team. If you are interested in coaching on AccrediPro CoachHub, please contact us and we will get you started.',
   },
   {
     question: 'Are the sessions confidential?',
@@ -142,14 +143,14 @@ export default function ContactPage() {
     return (
       <div className="container mx-auto px-4 py-20">
         <div className="mx-auto max-w-md text-center">
-          <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-green-100">
-            <CheckCircle className="h-10 w-10 text-green-600" />
+          <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-[hsl(var(--brand-accent-light))]">
+            <CheckCircle className="h-10 w-10 text-[hsl(var(--brand-warm))]" />
           </div>
           <h1 className="text-3xl font-bold">Message Sent!</h1>
           <p className="mt-4 text-muted-foreground">
             Thank you for reaching out. We will get back to you within 24 hours.
           </p>
-          <Button className="mt-8" asChild>
+          <Button className="mt-8 h-11" asChild>
             <Link href="/">Return Home</Link>
           </Button>
         </div>
@@ -160,32 +161,32 @@ export default function ContactPage() {
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-background to-primary/10">
+      <section className="relative overflow-hidden bg-gradient-to-br from-burgundy-dark to-burgundy">
         <div className="container mx-auto px-4 py-16 md:py-24">
           <div className="mx-auto max-w-3xl text-center">
-            <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">Get in Touch</h1>
-            <p className="mx-auto mt-4 max-w-xl text-lg text-muted-foreground">
+            <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">Get in Touch</h1>
+            <p className="mx-auto mt-4 max-w-xl text-lg text-white/80">
               Have a question or need assistance? We are here to help. Fill out the form below and
               we will get back to you as soon as possible.
             </p>
           </div>
         </div>
-        <div className="absolute -left-20 -top-20 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
+        <div className="absolute -left-20 -top-20 h-72 w-72 rounded-full bg-gold/10 blur-3xl" />
       </section>
 
       {/* Contact Info Cards */}
-      <section className="border-y bg-muted/30 py-12">
+      <section className="border-y border-burgundy/10 bg-cream py-12">
         <div className="container mx-auto px-4">
           <div className="grid gap-6 sm:grid-cols-3">
             {contactInfo.map((info) => (
-              <Card key={info.title} className="border-0 bg-background shadow-sm">
+              <Card key={info.title} className="border-0 bg-white shadow-sm">
                 <CardContent className="flex items-start gap-4 p-6">
-                  <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                    <info.icon className="h-6 w-6 text-primary" />
+                  <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg bg-burgundy/10">
+                    <info.icon className="h-6 w-6 text-burgundy" />
                   </div>
                   <div>
                     <h3 className="font-semibold">{info.title}</h3>
-                    <p className="text-sm font-medium text-primary">{info.details}</p>
+                    <p className="text-sm font-medium text-burgundy">{info.details}</p>
                     <p className="text-sm text-muted-foreground">{info.description}</p>
                   </div>
                 </CardContent>
@@ -201,7 +202,7 @@ export default function ContactPage() {
           <div className="grid gap-12 lg:grid-cols-2">
             {/* Contact Form */}
             <div>
-              <h2 className="text-2xl font-bold">Send Us a Message</h2>
+              <h2 className="text-2xl font-bold text-burgundy-dark">Send Us a Message</h2>
               <p className="mt-2 text-muted-foreground">
                 Fill out the form and we will respond within 24 hours.
               </p>
@@ -238,7 +239,7 @@ export default function ContactPage() {
                     value={formState.subject}
                     onValueChange={(value) => handleInputChange('subject', value)}
                   >
-                    <SelectTrigger className={errors.subject ? 'border-red-500' : ''}>
+                    <SelectTrigger className={cn('min-h-[44px]', errors.subject ? 'border-red-500' : '')}>
                       <SelectValue placeholder="Select a topic" />
                     </SelectTrigger>
                     <SelectContent>
@@ -271,7 +272,7 @@ export default function ContactPage() {
                   {errors.message && <p className="text-sm text-red-500">{errors.message}</p>}
                 </div>
 
-                <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
+                <Button type="submit" size="lg" className="h-11 w-full" disabled={isSubmitting}>
                   {isSubmitting ? (
                     'Sending...'
                   ) : (
@@ -286,7 +287,7 @@ export default function ContactPage() {
 
             {/* FAQ Section */}
             <div>
-              <h2 className="text-2xl font-bold">Frequently Asked Questions</h2>
+              <h2 className="text-2xl font-bold text-burgundy-dark">Frequently Asked Questions</h2>
               <p className="mt-2 text-muted-foreground">Find quick answers to common questions.</p>
 
               <Accordion type="single" collapsible className="mt-8">
@@ -300,7 +301,7 @@ export default function ContactPage() {
                 ))}
               </Accordion>
 
-              <Card className="mt-8 bg-muted/50">
+              <Card className="mt-8 bg-cream">
                 <CardHeader>
                   <CardTitle className="text-lg">Still have questions?</CardTitle>
                 </CardHeader>

@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { format } from 'date-fns';
+import { formatDate, formatDateShort } from '@/lib/date-utils';
 import {
   CalendarDays,
   MessageSquare,
@@ -22,13 +22,21 @@ import {
   Target,
   Paperclip,
   ListChecks,
+  Star,
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ReviewForm } from '@/components/reviews';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
@@ -110,11 +118,11 @@ function getInitials(name: string | null): string {
 
 function getStatusBadge(status: string) {
   const styles: Record<string, string> = {
-    active: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
-    completed: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400',
+    active: 'bg-[hsl(var(--brand-accent-light))] text-[hsl(var(--brand-accent-dark))] dark:bg-[hsl(var(--brand-accent-darker))]/30 dark:text-[hsl(var(--brand-accent-muted))]',
+    completed: 'bg-sage/15 text-sage dark:bg-sage/20 dark:text-sage',
     archived: 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400',
-    pending: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400',
-    in_progress: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400',
+    pending: 'bg-gold/15 text-gold-dark dark:bg-gold/20 dark:text-gold',
+    in_progress: 'bg-[hsl(var(--brand-accent-light))] text-[hsl(var(--brand-accent-dark))] dark:bg-[hsl(var(--brand-accent-darker))]/30 dark:text-[hsl(var(--brand-accent-muted))]',
   };
   const labels: Record<string, string> = {
     active: 'Active',
@@ -137,7 +145,7 @@ function getStatusBadge(status: string) {
 
 function getFileIcon(fileType: string | null) {
   if (!fileType) return <FileIcon className="h-5 w-5 text-muted-foreground" />;
-  if (fileType.startsWith('image/')) return <ImageIcon className="h-5 w-5 text-blue-500" />;
+  if (fileType.startsWith('image/')) return <ImageIcon className="h-5 w-5 text-burgundy" />;
   if (fileType === 'application/pdf') return <FileText className="h-5 w-5 text-red-500" />;
   return <FileIcon className="h-5 w-5 text-muted-foreground" />;
 }
@@ -157,6 +165,99 @@ interface CoachWorkspaceProps {
 }
 
 export function CoachWorkspace({ coach, initialPrograms }: CoachWorkspaceProps) {
+  const { toast } = useToast();
+  const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
+  const [reviewableBookingIds, setReviewableBookingIds] = useState<number[]>([]);
+  const [submittingReview, setSubmittingReview] = useState(false);
+
+  // Fetch completed bookings for this coach to determine if review is possible
+  useEffect(() => {
+    async function checkReviewable() {
+      try {
+        const res = await fetch('/api/bookings?status=completed&role=client&limit=50');
+        const json = await res.json();
+        if (!json.success) return;
+
+        const coachBookingIds = (
+          json.data.bookings as { id: number; coach: { id: string } | null }[]
+        )
+          .filter((b) => b.coach?.id === coach.id)
+          .map((b) => b.id);
+
+        if (coachBookingIds.length > 0) {
+          setReviewableBookingIds(coachBookingIds);
+        }
+      } catch {
+        // Silent fail — button stays hidden
+      }
+    }
+    checkReviewable();
+  }, [coach.id]);
+
+  const handleReviewSubmit = async (data: { rating: number; title: string; content: string }) => {
+    if (reviewableBookingIds.length === 0) return;
+    setSubmittingReview(true);
+
+    // Try each booking until one succeeds (skipping already-reviewed ones)
+    for (const bookingId of reviewableBookingIds) {
+      try {
+        const res = await fetch('/api/reviews', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            bookingId,
+            rating: data.rating,
+            title: data.title || undefined,
+            content: data.content || undefined,
+          }),
+        });
+        const json = await res.json();
+
+        if (json.success) {
+          setReviewDialogOpen(false);
+          setReviewableBookingIds([]);
+          toast({
+            title: 'Review submitted',
+            description: 'Thank you for your feedback!',
+          });
+          setSubmittingReview(false);
+          return;
+        }
+
+        // If already reviewed, try next booking
+        if (json.error?.code === 'ALREADY_REVIEWED') {
+          continue;
+        }
+
+        // Any other error — show it and stop
+        toast({
+          title: 'Error',
+          description: json.error?.message || 'Failed to submit review',
+          variant: 'destructive',
+        });
+        setSubmittingReview(false);
+        return;
+      } catch {
+        toast({
+          title: 'Error',
+          description: 'An unexpected error occurred',
+          variant: 'destructive',
+        });
+        setSubmittingReview(false);
+        return;
+      }
+    }
+
+    // All bookings already reviewed
+    setReviewableBookingIds([]);
+    setReviewDialogOpen(false);
+    toast({
+      title: 'Already reviewed',
+      description: 'You have already reviewed all sessions with this coach.',
+    });
+    setSubmittingReview(false);
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -182,6 +283,12 @@ export function CoachWorkspace({ coach, initialPrograms }: CoachWorkspaceProps) 
               </Link>
             </Button>
           )}
+          {reviewableBookingIds.length > 0 && (
+            <Button variant="outline" onClick={() => setReviewDialogOpen(true)}>
+              <Star className="mr-2 h-4 w-4" />
+              Write a Review
+            </Button>
+          )}
           <Button variant="outline" asChild>
             <Link href="/dashboard/messages">
               <MessageSquare className="mr-2 h-4 w-4" />
@@ -190,6 +297,22 @@ export function CoachWorkspace({ coach, initialPrograms }: CoachWorkspaceProps) 
           </Button>
         </div>
       </div>
+
+      {/* Review Dialog */}
+      <Dialog open={reviewDialogOpen} onOpenChange={setReviewDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Review {coach.name || 'your coach'}</DialogTitle>
+          </DialogHeader>
+          {reviewableBookingIds.length > 0 && (
+            <ReviewForm
+              bookingId={reviewableBookingIds[0]}
+              onSubmit={handleReviewSubmit}
+              isLoading={submittingReview}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Programs as primary content */}
       <ProgramsList programs={initialPrograms} coachId={coach.id} />
@@ -701,10 +824,10 @@ function ProgramsList({ programs, coachId }: { programs: Program[]; coachId: str
                   )}
                   <div className="mt-3 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
                     {program.startDate && (
-                      <span>From {format(new Date(program.startDate), 'MMM d, yyyy')}</span>
+                      <span>From {formatDate(program.startDate)}</span>
                     )}
                     {program.endDate && (
-                      <span>To {format(new Date(program.endDate), 'MMM d, yyyy')}</span>
+                      <span>To {formatDate(program.endDate)}</span>
                     )}
                   </div>
                   {/* Progress bar */}
@@ -717,7 +840,7 @@ function ProgramsList({ programs, coachId }: { programs: Program[]; coachId: str
                     </div>
                     <Progress
                       value={progressPct}
-                      className={cn('h-2', progressPct === 100 && '[&>div]:bg-green-500')}
+                      className={cn('h-2', progressPct === 100 && '[&>div]:bg-[hsl(var(--brand-accent))]')}
                     />
                   </div>
                 </div>
@@ -812,14 +935,14 @@ function ProgramsList({ programs, coachId }: { programs: Program[]; coachId: str
                                         <span className="flex items-center gap-1">
                                           <Clock className="h-3 w-3" />
                                           Due{' '}
-                                          {format(new Date(goal.dueDate), 'MMM d, yyyy')}
+                                          {formatDate(goal.dueDate)}
                                         </span>
                                       )}
                                       {goal.completedAt && (
-                                        <span className="flex items-center gap-1 text-green-600">
+                                        <span className="flex items-center gap-1 text-[hsl(var(--brand-warm))]">
                                           <CheckCircle2 className="h-3 w-3" />
                                           Completed{' '}
-                                          {format(new Date(goal.completedAt), 'MMM d')}
+                                          {formatDateShort(goal.completedAt)}
                                         </span>
                                       )}
                                     </div>
@@ -900,14 +1023,14 @@ function ProgramsList({ programs, coachId }: { programs: Program[]; coachId: str
                                         >
                                           <Clock className="h-3 w-3" />
                                           Due{' '}
-                                          {format(new Date(task.dueDate), 'MMM d, yyyy')}
+                                          {formatDate(task.dueDate)}
                                         </span>
                                       )}
                                       {task.isCompleted && task.completedAt && (
-                                        <span className="flex items-center gap-1 text-green-600">
+                                        <span className="flex items-center gap-1 text-[hsl(var(--brand-warm))]">
                                           <CheckCircle2 className="h-3 w-3" />
                                           Completed{' '}
-                                          {format(new Date(task.completedAt), 'MMM d')}
+                                          {formatDateShort(task.completedAt)}
                                         </span>
                                       )}
                                     </div>
@@ -978,7 +1101,7 @@ function ProgramsList({ programs, coachId }: { programs: Program[]; coachId: str
                                         <span>{formatFileSize(att.fileSize)}</span>
                                       )}
                                       <span>
-                                        {format(new Date(att.createdAt), 'MMM d, yyyy')}
+                                        {formatDate(att.createdAt)}
                                       </span>
                                     </div>
                                   </div>

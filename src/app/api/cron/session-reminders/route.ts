@@ -29,7 +29,7 @@ import { getUnsubscribeUrl } from '@/lib/unsubscribe';
 import { stripe } from '@/lib/stripe';
 import { createNotification } from '@/lib/notifications';
 import { getOrCreateConversationInternal, sendSystemMessage } from '@/lib/conversations';
-import { format } from 'date-fns';
+import { formatDateLong, formatTime } from '@/lib/date-utils';
 
 /**
  * Verifies the CRON_SECRET from the Authorization header.
@@ -217,8 +217,8 @@ async function autoCancelPendingBookings(
 
       const sessionType = booking.sessionType as BookingSessionType;
       const sessionName = sessionType?.name || 'Coaching session';
-      const formattedDate = format(booking.startTime, 'EEEE, MMMM d, yyyy');
-      const formattedTime = format(booking.startTime, 'h:mm a');
+      const formattedDate = formatDateLong(booking.startTime);
+      const formattedTime = formatTime(booking.startTime);
       const refundAmount = transaction ? transaction.amountCents / 100 : 0;
 
       // Send cancellation email to client
@@ -366,18 +366,8 @@ async function send24HourReminders(now: Date): Promise<{ sent: number; failed: n
       const sessionType = booking.sessionType as BookingSessionType;
 
       // Format date and time
-      const startDate = new Date(booking.startTime);
-      const dateStr = startDate.toLocaleDateString('en-US', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      });
-      const timeStr = startDate.toLocaleTimeString('en-US', {
-        hour: 'numeric',
-        minute: '2-digit',
-        hour12: true,
-      });
+      const dateStr = formatDateLong(booking.startTime);
+      const timeStr = formatTime(booking.startTime);
 
       // Send email to client
       const clientEmailResult = await sendEmail({
@@ -491,18 +481,8 @@ async function send1HourReminders(now: Date): Promise<{ sent: number; failed: nu
       const sessionType = booking.sessionType as BookingSessionType;
 
       // Format date and time
-      const startDate = new Date(booking.startTime);
-      const dateStr = startDate.toLocaleDateString('en-US', {
-        weekday: 'long',
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      });
-      const timeStr = startDate.toLocaleTimeString('en-US', {
-        hour: 'numeric',
-        minute: '2-digit',
-        hour12: true,
-      });
+      const dateStr = formatDateLong(booking.startTime);
+      const timeStr = formatTime(booking.startTime);
 
       // Send email to client
       const clientEmailResult = await sendEmail({

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { format } from 'date-fns';
+import { formatDateTime } from '@/lib/date-utils';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -82,14 +82,14 @@ export function PaymentSection({
     switch (paymentStatus) {
       case 'paid':
         return (
-          <Badge variant="outline" className="border-green-500 bg-green-50 text-green-700">
+          <Badge variant="outline" className="border-[hsl(var(--brand-accent))] bg-[hsl(var(--brand-surface))] text-[hsl(var(--brand-accent-hover))]">
             <CheckCircle className="mr-1 h-3 w-3" />
             Paid
           </Badge>
         );
       case 'payment_required':
         return (
-          <Badge variant="secondary" className="bg-amber-100 text-amber-800">
+          <Badge variant="secondary" className="bg-gold/10 text-gold-dark">
             <AlertCircle className="mr-1 h-3 w-3" />
             Payment Required
           </Badge>
@@ -137,14 +137,14 @@ export function PaymentSection({
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">Payment Date</span>
               <span className="font-medium">
-                {format(new Date(transaction.createdAt), 'MMM d, yyyy h:mm a')}
+                {formatDateTime(transaction.createdAt)}
               </span>
             </div>
             {/* Only show payout info to coach */}
             {!isClientView && (
               <div className="flex items-center justify-between border-t pt-3">
                 <span className="text-sm text-muted-foreground">Your Payout</span>
-                <span className="font-medium text-green-600">
+                <span className="font-medium text-[hsl(var(--brand-warm))]">
                   {formatPrice(transaction.coachPayoutCents, transaction.currency)}
                 </span>
               </div>
@@ -186,7 +186,7 @@ export function PaymentSection({
               <Button
                 onClick={handlePayNow}
                 disabled={isLoading}
-                className="w-full bg-green-600 hover:bg-green-700"
+                className="w-full bg-[hsl(var(--brand-warm))] hover:bg-[hsl(var(--brand-accent-hover))]"
               >
                 <CreditCard className="mr-2 h-4 w-4" />
                 {isLoading ? 'Redirecting...' : 'Pay Now'}

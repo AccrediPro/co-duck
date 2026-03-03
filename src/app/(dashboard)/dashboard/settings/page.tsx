@@ -20,11 +20,13 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="container mx-auto max-w-3xl px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold">Settings</h1>
-        <p className="mt-1 text-muted-foreground">Manage your account settings and preferences</p>
-      </div>
+    <div className="mx-auto max-w-3xl">
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle className="text-2xl font-bold">Settings</CardTitle>
+          <CardDescription>Manage your account settings and preferences</CardDescription>
+        </CardHeader>
+      </Card>
 
       <div className="space-y-6">
         {/* Account Info */}
