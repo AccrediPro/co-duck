@@ -64,7 +64,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
         }
       }
     }
-  } catch {
+  } catch (error) {
+    console.error('[dashboard layout] DB sync error:', error);
     // Default to client if DB query fails
   }
 
