@@ -265,6 +265,25 @@ app.prepare().then(async () => {
             }
           });
         }
+
+        // Send push notification if recipient is not actively viewing the conversation
+        const roomMembers = io.sockets.adapter.rooms.get(room);
+        const recipientInRoom = recipientSockets && roomMembers
+          ? Array.from(recipientSockets).some((sid) => roomMembers.has(sid))
+          : false;
+
+        if (!recipientInRoom) {
+          const { sendPushNotification } = await import('./src/lib/push-notifications');
+          sendPushNotification(recipientId, {
+            title: `New message from ${sender?.name || 'Someone'}`,
+            body: notifBody,
+            data: {
+              type: 'new_message',
+              link: `/dashboard/messages/${conversationId}`,
+              conversationId: String(conversationId),
+            },
+          });
+        }
       } catch (err) {
         console.error('[socket.io] message:send error:', err);
         socket.emit('error', { message: 'Failed to send message' });

@@ -59,6 +59,7 @@ import {
   integer,
   boolean,
   index,
+  uniqueIndex,
   time,
   date,
   serial,
@@ -2478,6 +2479,56 @@ export type CoachInvite = typeof coachInvites.$inferSelect;
 export type NewCoachInvite = typeof coachInvites.$inferInsert;
 
 // ============================================================================
+// PUSH TOKENS TABLE
+// ============================================================================
+
+/**
+ * Push Tokens Table
+ *
+ * Stores Expo push notification tokens for mobile and web clients.
+ * One token per device per user. Upserted on device re-registration.
+ *
+ * ## Relationships
+ * - Belongs to users (many:1, cascade delete)
+ *
+ * ## Uniqueness
+ * - Unique per (userId, deviceId) — re-registration updates the token
+ */
+export const pushTokens = pgTable(
+  'push_tokens',
+  {
+    id: serial('id').primaryKey(),
+
+    /** The user this token belongs to */
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+
+    /** Expo push token (e.g. ExponentPushToken[xxx]) */
+    token: text('token').notNull(),
+
+    /** Device platform */
+    platform: text('platform').notNull(), // 'ios' | 'android' | 'web'
+
+    /** Unique device identifier (used to upsert on re-registration) */
+    deviceId: text('device_id').notNull(),
+
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
+  },
+  (table) => [
+    uniqueIndex('push_tokens_user_device_idx').on(table.userId, table.deviceId),
+    index('push_tokens_user_id_idx').on(table.userId),
+  ]
+);
+
+export type PushToken = typeof pushTokens.$inferSelect;
+export type NewPushToken = typeof pushTokens.$inferInsert;
+
+// ============================================================================
 // DRIZZLE RELATIONS
 // ============================================================================
 
@@ -2504,6 +2555,7 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   coachGroupSessions: many(groupSessions),
   iconnectPosts: many(iconnectPosts),
   iconnectComments: many(iconnectComments),
+  pushTokens: many(pushTokens),
 }));
 
 export const programsRelations = relations(programs, ({ one, many }) => ({
@@ -2745,6 +2797,13 @@ export const iconnectCommentsRelations = relations(iconnectComments, ({ one }) =
 export const coachInvitesRelations = relations(coachInvites, ({ one }) => ({
   inviter: one(users, {
     fields: [coachInvites.invitedBy],
+    references: [users.id],
+  }),
+}));
+
+export const pushTokensRelations = relations(pushTokens, ({ one }) => ({
+  user: one(users, {
+    fields: [pushTokens.userId],
     references: [users.id],
   }),
 }));

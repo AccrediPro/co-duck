@@ -28,6 +28,7 @@ import type { BookingSessionType } from '@/db/schema';
 import { getUnsubscribeUrl } from '@/lib/unsubscribe';
 import { stripe } from '@/lib/stripe';
 import { createNotification } from '@/lib/notifications';
+import { sendPushNotification } from '@/lib/push-notifications';
 import { getOrCreateConversationInternal, sendSystemMessage } from '@/lib/conversations';
 import { formatDateLong, formatTime } from '@/lib/date-utils';
 
@@ -408,6 +409,24 @@ async function send24HourReminders(now: Date): Promise<{ sent: number; failed: n
           .set({ reminder24hSentAt: new Date() })
           .where(eq(bookings.id, booking.id));
 
+        sendPushNotification(booking.coachId, {
+          title: 'Session Tomorrow',
+          body: `Your session with ${client.name || 'a client'} starts in 24 hours`,
+          data: {
+            type: 'session_reminder',
+            link: `/dashboard/sessions/${booking.id}`,
+          },
+        });
+
+        sendPushNotification(booking.clientId, {
+          title: 'Session Tomorrow',
+          body: `Your session with ${coach.name || 'your coach'} starts in 24 hours`,
+          data: {
+            type: 'session_reminder',
+            link: `/dashboard/my-sessions/${booking.id}`,
+          },
+        });
+
         sent++;
         console.log(`[SessionReminders] 24h reminder sent for booking ${booking.id}`);
       } else {
@@ -522,6 +541,24 @@ async function send1HourReminders(now: Date): Promise<{ sent: number; failed: nu
           .update(bookings)
           .set({ reminder1hSentAt: new Date() })
           .where(eq(bookings.id, booking.id));
+
+        sendPushNotification(booking.coachId, {
+          title: 'Session Starting Soon',
+          body: `Your session with ${client.name || 'a client'} starts in 1 hour`,
+          data: {
+            type: 'session_reminder',
+            link: `/dashboard/sessions/${booking.id}`,
+          },
+        });
+
+        sendPushNotification(booking.clientId, {
+          title: 'Session Starting Soon',
+          body: `Your session with ${coach.name || 'your coach'} starts in 1 hour`,
+          data: {
+            type: 'session_reminder',
+            link: `/dashboard/my-sessions/${booking.id}`,
+          },
+        });
 
         sent++;
         console.log(`[SessionReminders] 1h reminder sent for booking ${booking.id}`);

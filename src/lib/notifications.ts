@@ -11,6 +11,7 @@ import { db } from '@/db';
 import { notifications } from '@/db/schema';
 import type { NewNotification } from '@/db/schema';
 import { emitNotification } from '@/lib/socket-server';
+import { sendPushNotification, sendPushNotifications } from '@/lib/push-notifications';
 
 type NotificationType = NewNotification['type'];
 
@@ -47,6 +48,15 @@ export async function createNotification(params: CreateNotificationParams): Prom
       link: inserted.link,
       isRead: inserted.isRead,
       createdAt: inserted.createdAt,
+    });
+
+    sendPushNotification(params.userId, {
+      title: params.title,
+      body: params.body || params.title,
+      data: {
+        type: params.type,
+        ...(params.link ? { link: params.link } : {}),
+      },
     });
   } catch (error) {
     console.error('Failed to create notification:', error);
@@ -86,6 +96,15 @@ export async function createNotifications(
         createdAt: row.createdAt,
       });
     }
+
+    sendPushNotifications(userIds, {
+      title: params.title,
+      body: params.body || params.title,
+      data: {
+        type: params.type,
+        ...(params.link ? { link: params.link } : {}),
+      },
+    });
   } catch (error) {
     console.error('Failed to create notifications:', error);
   }
