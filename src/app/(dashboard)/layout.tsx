@@ -56,6 +56,17 @@ export default async function DashboardLayout({ children }: { children: React.Re
           .returning();
         if (newUser?.role) {
           userRole = newUser.role;
+        } else if (!newUser) {
+          // Email might exist with a different Clerk ID (account was recreated)
+          const existingByEmail = await db.select().from(users).where(eq(users.email, email)).limit(1);
+          if (existingByEmail.length > 0 && existingByEmail[0].id !== userId) {
+            // Re-link: update old Clerk ID to current one
+            await db.update(users).set({ id: userId }).where(eq(users.email, email));
+            const [relinked] = await db.select({ role: users.role }).from(users).where(eq(users.id, userId)).limit(1);
+            if (relinked?.role) {
+              userRole = relinked.role;
+            }
+          }
         }
         // Check if this new user has a pending coach invite
         if (email && userRole === 'client') {

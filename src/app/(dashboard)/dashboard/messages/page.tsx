@@ -93,6 +93,15 @@ export default async function MessagesPage() {
           .values({ id: userId, email, name, avatarUrl: clerkUser.imageUrl || null, role: 'client' })
           .onConflictDoNothing();
         userRecords = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+        if (userRecords.length === 0) {
+          // Email might exist with a different Clerk ID (account was recreated)
+          const existingByEmail = await db.select().from(users).where(eq(users.email, email)).limit(1);
+          if (existingByEmail.length > 0 && existingByEmail[0].id !== userId) {
+            // Re-link: update old Clerk ID to current one
+            await db.update(users).set({ id: userId }).where(eq(users.email, email));
+            userRecords = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+          }
+        }
       }
     }
     if (userRecords.length === 0) {
