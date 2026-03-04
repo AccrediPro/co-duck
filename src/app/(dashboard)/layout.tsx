@@ -22,15 +22,16 @@ export default async function DashboardLayout({ children }: { children: React.Re
   } catch (err) {
     console.error('Failed to fetch Clerk user:', err);
   }
-  const userName = user?.firstName || user?.username;
   const userEmail = user?.emailAddresses[0]?.emailAddress;
 
   // Fetch user role from database, auto-sync from Clerk if not found
   let userRole: 'admin' | 'coach' | 'client' = 'client';
+  let dbUserName: string | null = null;
   try {
-    const dbUser = await db.select({ role: users.role }).from(users).where(eq(users.id, userId));
+    const dbUser = await db.select({ role: users.role, name: users.name }).from(users).where(eq(users.id, userId));
     if (dbUser.length > 0 && dbUser[0].role) {
       userRole = dbUser[0].role;
+      dbUserName = dbUser[0].name ?? null;
       // Check if existing client user has a pending coach invite
       // (webhook may have created user before invite was claimed)
       if (userRole === 'client' && userEmail) {
@@ -56,15 +57,17 @@ export default async function DashboardLayout({ children }: { children: React.Re
           .returning();
         if (newUser?.role) {
           userRole = newUser.role;
+          dbUserName = newUser.name ?? null;
         } else if (!newUser) {
           // Email might exist with a different Clerk ID (account was recreated)
           const existingByEmail = await db.select().from(users).where(eq(users.email, email)).limit(1);
           if (existingByEmail.length > 0 && existingByEmail[0].id !== userId) {
             // Re-link: update old Clerk ID to current one
             await db.update(users).set({ id: userId }).where(eq(users.email, email));
-            const [relinked] = await db.select({ role: users.role }).from(users).where(eq(users.id, userId)).limit(1);
+            const [relinked] = await db.select({ role: users.role, name: users.name }).from(users).where(eq(users.id, userId)).limit(1);
             if (relinked?.role) {
               userRole = relinked.role;
+              dbUserName = relinked.name ?? null;
             }
           }
         }
@@ -79,6 +82,8 @@ export default async function DashboardLayout({ children }: { children: React.Re
     console.error('[dashboard layout] DB sync error:', error);
     // Default to client if DB query fails
   }
+
+  const userName = dbUserName || user?.firstName || user?.username;
 
   // For coaches, check profile completeness (for banner)
   let coachProfileData: { hasBio: boolean; hasSessionTypes: boolean; isPublished: boolean; profileExists: boolean } = {
