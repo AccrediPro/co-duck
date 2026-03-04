@@ -1,4 +1,4 @@
-import { auth } from '@clerk/nextjs/server';
+import { auth, currentUser } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import { eq } from 'drizzle-orm';
 import { db, users, coachProfiles } from '@/db';
@@ -23,10 +23,25 @@ export default async function ProfilePage() {
   }
 
   // Check if user is a coach
-  const userRecords = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+  let userRecords = await db.select().from(users).where(eq(users.id, userId)).limit(1);
 
   if (userRecords.length === 0) {
-    redirect('/dashboard');
+    // User not in DB yet — sync from Clerk (layout may not have finished INSERT)
+    const clerkUser = await currentUser();
+    if (clerkUser) {
+      const email = clerkUser.emailAddresses[0]?.emailAddress;
+      if (email) {
+        const name = [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(' ') || null;
+        await db
+          .insert(users)
+          .values({ id: userId, email, name, avatarUrl: clerkUser.imageUrl || null, role: 'client' })
+          .onConflictDoNothing();
+        userRecords = await db.select().from(users).where(eq(users.id, userId)).limit(1);
+      }
+    }
+    if (userRecords.length === 0) {
+      redirect('/dashboard');
+    }
   }
 
   const user = userRecords[0];
