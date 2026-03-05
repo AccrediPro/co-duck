@@ -33,7 +33,7 @@ export default async function ClientsPage() {
   const protocol = host.startsWith('localhost') ? 'http' : 'https';
   const baseUrl = `${protocol}://${host}`;
 
-  const data = await fetchClients(baseUrl, cookie);
+  const data = await fetchClients(baseUrl, cookie).catch(() => ({ clients: [], pagination: null }));
 
   if (!data.clients || data.clients.length === 0) {
     return (

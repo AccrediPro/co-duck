@@ -84,6 +84,11 @@ function formatRelativeTime(dateStr: string): string {
 }
 
 const POLL_INTERVAL = 600_000; // 10min safety net — real-time updates via Socket.io
+// Minimum gap between any two fetchUnreadCount calls (debounce rapid triggers)
+const FETCH_DEBOUNCE_MS = 5_000;
+// Backoff on 429: start at 60s, double each time, cap at 5min
+const BACKOFF_INITIAL_MS = 60_000;
+const BACKOFF_MAX_MS = 300_000;
 
 export function NotificationBell() {
   const router = useRouter();
@@ -97,11 +102,17 @@ export function NotificationBell() {
   const [pulse, setPulse] = useState(false);
   const hasFetchedRef = useRef(false);
   const lastDisconnectRef = useRef<number | null>(null);
+  // Debounce: track last successful dispatch time
+  const lastFetchTimeRef = useRef<number>(0);
+  // Backoff: when non-zero, don't fetch until this timestamp
+  const backoffUntilRef = useRef<number>(0);
+  const backoffDelayRef = useRef<number>(BACKOFF_INITIAL_MS);
 
   const fetchNotifications = useCallback(async () => {
     try {
       setLoading(true);
       const res = await fetch('/api/notifications?limit=20');
+      if (res.status === 429) return; // Rate limited — skip silently
       if (!res.ok) return;
       const json: NotificationsResponse = await res.json();
       if (json.success) {
@@ -117,8 +128,26 @@ export function NotificationBell() {
   }, []);
 
   const fetchUnreadCount = useCallback(async () => {
+    const now = Date.now();
+
+    // Skip if we're in a backoff window (previous 429)
+    if (now < backoffUntilRef.current) return;
+
+    // Debounce: skip if called too recently
+    if (now - lastFetchTimeRef.current < FETCH_DEBOUNCE_MS) return;
+
+    lastFetchTimeRef.current = now;
+
     try {
       const res = await fetch('/api/notifications?unread=true&limit=1');
+      if (res.status === 429) {
+        // Exponential backoff: double delay each 429, cap at 5min
+        backoffUntilRef.current = Date.now() + backoffDelayRef.current;
+        backoffDelayRef.current = Math.min(backoffDelayRef.current * 2, BACKOFF_MAX_MS);
+        return;
+      }
+      // Reset backoff on success
+      backoffDelayRef.current = BACKOFF_INITIAL_MS;
       if (!res.ok) return;
       const json: NotificationsResponse = await res.json();
       if (json.success) {
