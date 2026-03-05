@@ -1,5 +1,6 @@
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
+import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { CoachWorkspace } from '@/components/dashboard/coach-workspace';
 
@@ -58,12 +59,12 @@ export default async function CoachDetailPage({ params }: PageProps) {
               <p className="text-muted-foreground">
                 You need at least one confirmed booking with this coach to access their workspace.
               </p>
-              <a
+              <Link
                 href="/dashboard/my-coaches"
                 className="mt-4 inline-flex items-center justify-center rounded-md bg-burgundy px-4 py-2 text-sm font-medium text-white hover:bg-burgundy-light"
               >
                 Back to My Coaches
-              </a>
+              </Link>
             </CardContent>
           </Card>
         </div>

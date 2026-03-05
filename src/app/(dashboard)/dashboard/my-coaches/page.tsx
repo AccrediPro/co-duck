@@ -1,5 +1,6 @@
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
+import Link from 'next/link';
 import { UserCheck } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { MyCoachesList } from '@/components/dashboard/my-coaches-list';
@@ -83,12 +84,12 @@ export default async function MyCoachesPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="text-center">
-              <a
+              <Link
                 href="/coaches"
                 className="inline-flex items-center justify-center rounded-md bg-burgundy px-4 py-2 text-sm font-medium text-white hover:bg-burgundy-light"
               >
                 Find a Coach
-              </a>
+              </Link>
             </CardContent>
           </Card>
         </div>

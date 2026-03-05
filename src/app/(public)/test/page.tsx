@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -782,17 +783,17 @@ export default function TestPage() {
           <div className="rounded-md bg-gold/10 p-3 dark:bg-gold-dark/20">
             <h4 className="font-semibold text-burgundy-dark dark:text-gold">Quick Links</h4>
             <div className="mt-2 flex flex-wrap gap-2 text-xs">
-              <a href="/coaches/test-coach" className="text-burgundy hover:underline">
+              <Link href="/coaches/test-coach" className="text-burgundy hover:underline">
                 /coaches/test-coach
-              </a>
+              </Link>
               <span className="text-muted-foreground">|</span>
-              <a href="/coaches/sarah-johnson" className="text-burgundy hover:underline">
+              <Link href="/coaches/sarah-johnson" className="text-burgundy hover:underline">
                 /coaches/sarah-johnson
-              </a>
+              </Link>
               <span className="text-muted-foreground">|</span>
-              <a href="/coaches/michael-chen" className="text-burgundy hover:underline">
+              <Link href="/coaches/michael-chen" className="text-burgundy hover:underline">
                 /coaches/michael-chen
-              </a>
+              </Link>
               <span className="text-muted-foreground">|</span>
               <a href="/admin" className="text-burgundy hover:underline">
                 /admin

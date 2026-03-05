@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -210,7 +211,7 @@ export function ClientSessionsList({
           <p className="mt-2 max-w-md text-muted-foreground">{description}</p>
           {type === 'upcoming' && (
             <Button className="mt-4" asChild>
-              <a href="/coaches">Find a Coach</a>
+              <Link href="/coaches">Find a Coach</Link>
             </Button>
           )}
         </CardContent>
