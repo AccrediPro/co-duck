@@ -63,11 +63,11 @@ export function CoachCard({
 
   return (
     <Link href={`/coaches/${slug}`}>
-      <Card className="group h-full cursor-pointer transition-all hover:border-primary/50 hover:shadow-lg">
+      <Card className="group h-full cursor-pointer bg-burgundy transition-all hover:bg-burgundy-light hover:shadow-lg">
         <CardContent className="flex h-full flex-col p-6">
           <div className="flex flex-1 flex-col items-center text-center">
             {/* Avatar */}
-            <Avatar className="h-20 w-20 border-2 border-background shadow-md">
+            <Avatar className="h-20 w-20 border-2 border-white/30 shadow-md">
               <AvatarImage src={avatarUrl || undefined} alt={name} />
               <AvatarFallback className="text-lg">
                 {name ? getInitials(name) : <User className="h-8 w-8" />}
@@ -76,7 +76,7 @@ export function CoachCard({
 
             {/* Name */}
             <div className="mt-4 flex items-center gap-1">
-              <h3 className="text-lg font-semibold transition-colors group-hover:text-primary">
+              <h3 className="text-lg font-semibold text-white">
                 {name}
               </h3>
               {isVerified && <VerifiedBadge size="sm" />}
@@ -84,29 +84,29 @@ export function CoachCard({
 
             {/* Headline */}
             {headline && (
-              <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{headline}</p>
+              <p className="mt-1 line-clamp-2 text-sm text-cream/80">{headline}</p>
             )}
 
             {/* Rating */}
             {reviewCount && reviewCount > 0 ? (
               <div className="mt-2 flex items-center gap-1.5">
                 <StarRating rating={parseFloat(averageRating || '0')} size="sm" />
-                <span className="text-sm text-muted-foreground">({reviewCount})</span>
+                <span className="text-sm text-cream/70">({reviewCount})</span>
               </div>
             ) : (
-              <p className="mt-2 text-xs text-muted-foreground">No reviews yet</p>
+              <p className="mt-2 text-xs text-cream/70">No reviews yet</p>
             )}
 
             {/* Specialties */}
             {displaySpecialties.length > 0 && (
               <div className="mt-4 flex flex-wrap justify-center gap-1">
                 {displaySpecialties.map((specialty, index) => (
-                  <Badge key={index} variant="secondary" className="text-xs">
+                  <Badge key={index} variant="secondary" className="border border-white/20 bg-white/15 text-xs text-white hover:bg-white/25">
                     {specialty}
                   </Badge>
                 ))}
                 {hasMoreSpecialties && (
-                  <Badge variant="outline" className="text-xs text-muted-foreground">
+                  <Badge variant="outline" className="border-white/30 text-xs text-cream/70">
                     +{(specialties?.length || 0) - 3}
                   </Badge>
                 )}
@@ -115,9 +115,9 @@ export function CoachCard({
 
             {/* Starting Price — anchored to bottom */}
             {lowestPricedSession && (
-              <div className="mt-auto w-full border-t pt-4">
-                <p className="text-sm text-muted-foreground">Starting from</p>
-                <p className="text-xl font-bold text-primary">
+              <div className="mt-auto w-full border-t border-white/20 pt-4">
+                <p className="text-sm text-cream/80">Starting from</p>
+                <p className="text-xl font-bold text-gold">
                   {currencySymbol}
                   {formatPrice(lowestPricedSession.price)}
                 </p>
