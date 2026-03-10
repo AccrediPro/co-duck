@@ -129,7 +129,7 @@ export default async function HomePage() {
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
-              <Button size="lg" variant="outline" className="h-12 border-white/30 px-8 text-base text-white hover:bg-white/10 hover:text-white" asChild>
+              <Button size="lg" className="h-12 bg-gold px-8 text-base text-white hover:bg-gold-dark" asChild>
                 <Link href="/sign-up">Get Started</Link>
               </Button>
             </div>
