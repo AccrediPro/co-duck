@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ArrowLeft, User, MapPin, Briefcase, Target, CalendarDays } from 'lucide-react';
+import { ClientGroupBadges } from '@/components/dashboard/client-group-badges';
 
 export const metadata = {
   title: 'Client Profile | Coaching Platform',
@@ -115,6 +116,10 @@ export default async function ClientProfilePage({ params }: PageProps) {
             <div className="mt-3 flex items-center gap-1.5 text-sm text-muted-foreground">
               <CalendarDays className="h-4 w-4" />
               Member since {formatMonthYear(client.createdAt)}
+            </div>
+
+            <div className="mt-4">
+              <ClientGroupBadges clientId={clientId} />
             </div>
           </CardContent>
         </Card>

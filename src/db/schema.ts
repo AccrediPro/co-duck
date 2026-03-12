@@ -2556,6 +2556,8 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   iconnectPosts: many(iconnectPosts),
   iconnectComments: many(iconnectComments),
   pushTokens: many(pushTokens),
+  clientGroups: many(clientGroups),
+  clientGroupMemberships: many(clientGroupMembers),
 }));
 
 export const programsRelations = relations(programs, ({ one, many }) => ({
@@ -2804,6 +2806,118 @@ export const coachInvitesRelations = relations(coachInvites, ({ one }) => ({
 export const pushTokensRelations = relations(pushTokens, ({ one }) => ({
   user: one(users, {
     fields: [pushTokens.userId],
+    references: [users.id],
+  }),
+}));
+
+// ============================================================================
+// CLIENT GROUPS TABLE
+// ============================================================================
+
+/**
+ * Client Groups Table
+ *
+ * Organizational folders for coaches to group their clients.
+ *
+ * ## Purpose
+ * Allows coaches to organize clients into named groups (e.g., "VIP", "Q1 Cohort").
+ *
+ * ## Relationships
+ * - Belongs to users (as coach, many:1)
+ * - Has many clientGroupMembers (1:N)
+ */
+export const clientGroups = pgTable(
+  'client_groups',
+  {
+    id: serial('id').primaryKey(),
+
+    /** The coach who owns this group */
+    coachId: text('coach_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+
+    /** Group name (unique per coach) */
+    name: text('name').notNull(),
+
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
+  },
+  (table) => [
+    index('client_groups_coach_id_idx').on(table.coachId),
+    unique('client_groups_coach_name_unique').on(table.coachId, table.name),
+  ]
+);
+
+/** Type for selecting a client group record */
+export type ClientGroup = typeof clientGroups.$inferSelect;
+
+/** Type for inserting a new client group record */
+export type NewClientGroup = typeof clientGroups.$inferInsert;
+
+// ============================================================================
+// CLIENT GROUP MEMBERS TABLE
+// ============================================================================
+
+/**
+ * Client Group Members Table
+ *
+ * Junction table linking clients to their groups.
+ *
+ * ## Purpose
+ * Tracks which clients belong to which coach-defined group.
+ *
+ * ## Relationships
+ * - Belongs to clientGroups (many:1)
+ * - Belongs to users (as client, many:1)
+ */
+export const clientGroupMembers = pgTable(
+  'client_group_members',
+  {
+    id: serial('id').primaryKey(),
+
+    /** The group this membership belongs to */
+    groupId: integer('group_id')
+      .notNull()
+      .references(() => clientGroups.id, { onDelete: 'cascade' }),
+
+    /** The client user in this group */
+    clientId: text('client_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('client_group_members_group_id_idx').on(table.groupId),
+    index('client_group_members_client_id_idx').on(table.clientId),
+    unique('client_group_members_group_client_unique').on(table.groupId, table.clientId),
+  ]
+);
+
+/** Type for selecting a client group member record */
+export type ClientGroupMember = typeof clientGroupMembers.$inferSelect;
+
+/** Type for inserting a new client group member record */
+export type NewClientGroupMember = typeof clientGroupMembers.$inferInsert;
+
+export const clientGroupsRelations = relations(clientGroups, ({ one, many }) => ({
+  coach: one(users, {
+    fields: [clientGroups.coachId],
+    references: [users.id],
+  }),
+  members: many(clientGroupMembers),
+}));
+
+export const clientGroupMembersRelations = relations(clientGroupMembers, ({ one }) => ({
+  group: one(clientGroups, {
+    fields: [clientGroupMembers.groupId],
+    references: [clientGroups.id],
+  }),
+  client: one(users, {
+    fields: [clientGroupMembers.clientId],
     references: [users.id],
   }),
 }));
