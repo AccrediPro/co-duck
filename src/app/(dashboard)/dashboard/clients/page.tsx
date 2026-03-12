@@ -37,7 +37,7 @@ export default async function ClientsPage() {
 
   if (!data.clients || data.clients.length === 0) {
     return (
-      <div className="mx-auto max-w-3xl">
+      <div className="mx-auto max-w-5xl">
         <Card className="mb-6">
           <CardHeader>
             <CardTitle className="text-2xl font-bold">My Clients</CardTitle>
@@ -63,7 +63,7 @@ export default async function ClientsPage() {
   }
 
   return (
-    <div className="mx-auto max-w-3xl">
+    <div className="mx-auto max-w-5xl">
       <Card className="mb-6">
         <CardHeader>
           <CardTitle className="text-2xl font-bold">My Clients</CardTitle>
