@@ -33,6 +33,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { CreateProgramDialog, CreateGoalDialog, CreateTaskDialog } from './client-workspace-dialogs';
 import { ClientFilesTab } from './client-files-tab';
+import { ClientGroupBadges } from './client-group-badges';
 
 interface Client {
   id: string;
@@ -268,6 +269,9 @@ export function ClientWorkspace({ client, initialPrograms, initialActionItems, c
         <div className="flex-1">
           <h1 className="text-2xl font-bold">{client.name || 'Client'}</h1>
           <p className="text-sm text-muted-foreground">{client.email}</p>
+          <div className="mt-2">
+            <ClientGroupBadges clientId={clientId} />
+          </div>
         </div>
         <div className="hidden items-center gap-4 text-sm text-muted-foreground sm:flex">
           <span className="flex items-center gap-1">

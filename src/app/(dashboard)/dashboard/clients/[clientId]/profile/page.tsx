@@ -71,9 +71,9 @@ export default async function ClientProfilePage({ params }: PageProps) {
     <div className="mx-auto max-w-3xl">
       {/* Back button */}
       <Button variant="ghost" size="sm" asChild className="mb-4">
-        <Link href="/dashboard/sessions">
+        <Link href={`/dashboard/clients/${clientId}`}>
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Sessions
+          Back to Client
         </Link>
       </Button>
 
