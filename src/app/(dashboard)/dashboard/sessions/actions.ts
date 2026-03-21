@@ -24,7 +24,7 @@
 
 import { auth } from '@clerk/nextjs/server';
 import { eq, and, or, gte, lt, desc, asc, sql } from 'drizzle-orm';
-import { db, bookings, users, transactions, coachProfiles, sessionNotes } from '@/db';
+import { db, bookings, users, transactions, coachProfiles, sessionNotes, sessionNoteTemplates } from '@/db';
 import type { BookingSessionType } from '@/db/schema';
 import { stripe } from '@/lib/stripe';
 import { formatRefundAmount } from '@/lib/refunds';
@@ -572,7 +572,9 @@ export interface SaveSessionNoteResult {
  */
 export async function saveSessionNote(
   bookingId: number,
-  content: string
+  content: string,
+  templateId?: number | null,
+  sections?: Record<string, string> | null
 ): Promise<SaveSessionNoteResult> {
   const { userId } = await auth();
 
@@ -603,7 +605,11 @@ export async function saveSessionNote(
       // Update existing note
       await db
         .update(sessionNotes)
-        .set({ content: content || '' })
+        .set({
+          content: content || '',
+          templateId: templateId ?? null,
+          sections: sections ?? null,
+        })
         .where(eq(sessionNotes.bookingId, bookingId));
     } else {
       // Create new note
@@ -611,6 +617,8 @@ export async function saveSessionNote(
         bookingId,
         coachId: userId,
         content: content || '',
+        templateId: templateId ?? null,
+        sections: sections ?? null,
       });
     }
 
@@ -627,6 +635,10 @@ export interface GetSessionNoteResult {
   success: boolean;
   /** The note content, or null if no note exists */
   content?: string | null;
+  /** Template ID used for this note, or null */
+  templateId?: number | null;
+  /** Structured section content when a template was used */
+  sections?: Record<string, string> | null;
   /** Error message when success is false */
   error?: string;
 }
@@ -664,7 +676,11 @@ export async function getSessionNote(bookingId: number): Promise<GetSessionNoteR
 
     // Get the note
     const note = await db
-      .select({ content: sessionNotes.content })
+      .select({
+        content: sessionNotes.content,
+        templateId: sessionNotes.templateId,
+        sections: sessionNotes.sections,
+      })
       .from(sessionNotes)
       .where(eq(sessionNotes.bookingId, bookingId))
       .limit(1);
@@ -672,9 +688,47 @@ export async function getSessionNote(bookingId: number): Promise<GetSessionNoteR
     return {
       success: true,
       content: note.length > 0 ? note[0].content : null,
+      templateId: note.length > 0 ? note[0].templateId : null,
+      sections: note.length > 0 ? (note[0].sections as Record<string, string> | null) : null,
     };
   } catch {
     return { success: false, error: 'Failed to get notes' };
+  }
+}
+
+/**
+ * Result of fetching session note templates.
+ */
+export interface GetSessionNoteTemplatesResult {
+  success: boolean;
+  /** Available templates (system + coach's own) */
+  templates?: import('@/db/schema').SessionNoteTemplate[];
+  /** Error message when success is false */
+  error?: string;
+}
+
+/**
+ * Fetches all session note templates available to the authenticated coach:
+ * system templates (visible to all coaches) plus the coach's own custom templates.
+ *
+ * @returns Promise with templates array or error
+ */
+export async function getSessionNoteTemplates(): Promise<GetSessionNoteTemplatesResult> {
+  const { userId } = await auth();
+
+  if (!userId) {
+    return { success: false, error: 'Not authenticated' };
+  }
+
+  try {
+    const templates = await db
+      .select()
+      .from(sessionNoteTemplates)
+      .where(or(eq(sessionNoteTemplates.isSystem, true), eq(sessionNoteTemplates.coachId, userId)));
+
+    return { success: true, templates };
+  } catch {
+    return { success: false, error: 'Failed to get templates' };
   }
 }
 

@@ -1462,6 +1462,44 @@ export type Message = typeof messages.$inferSelect;
 export type NewMessage = typeof messages.$inferInsert;
 
 // ============================================================================
+// SESSION NOTE TEMPLATES TABLE
+// ============================================================================
+
+/**
+ * Session Note Templates Table
+ *
+ * Reusable structured templates for coaching session notes.
+ * System templates (isSystem=true, coachId=null) are available to all coaches.
+ * Custom templates (isSystem=false) are created by individual coaches.
+ */
+export const sessionNoteTemplates = pgTable(
+  'session_note_templates',
+  {
+    id: serial('id').primaryKey(),
+    coachId: text('coach_id').references(() => users.id, { onDelete: 'cascade' }), // null = system template
+    name: text('name').notNull(),
+    description: text('description'),
+    sections: jsonb('sections').notNull().$type<Array<{ title: string; placeholder: string; type: 'text' | 'textarea' }>>(),
+    isSystem: boolean('is_system').notNull().default(false),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
+  },
+  (table) => [
+    index('session_note_templates_coach_id_idx').on(table.coachId),
+    index('session_note_templates_is_system_idx').on(table.isSystem),
+  ]
+);
+
+/** Type for selecting a session note template record */
+export type SessionNoteTemplate = typeof sessionNoteTemplates.$inferSelect;
+
+/** Type for inserting a new session note template record */
+export type NewSessionNoteTemplate = typeof sessionNoteTemplates.$inferInsert;
+
+// ============================================================================
 // SESSION NOTES TABLE
 // ============================================================================
 
@@ -1513,6 +1551,18 @@ export const sessionNotes = pgTable(
      * @type {string}
      */
     content: text('content').notNull(),
+
+    /**
+     * Optional template used to structure this note
+     * @type {number | null}
+     */
+    templateId: integer('template_id').references(() => sessionNoteTemplates.id, { onDelete: 'set null' }),
+
+    /**
+     * Structured section content when a template was used
+     * @type {Record<string, string> | null}
+     */
+    sections: jsonb('sections').$type<Record<string, string>>(),
 
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true })
@@ -2692,6 +2742,17 @@ export const sessionNotesRelations = relations(sessionNotes, ({ one }) => ({
   }),
   coach: one(users, {
     fields: [sessionNotes.coachId],
+    references: [users.id],
+  }),
+  template: one(sessionNoteTemplates, {
+    fields: [sessionNotes.templateId],
+    references: [sessionNoteTemplates.id],
+  }),
+}));
+
+export const sessionNoteTemplatesRelations = relations(sessionNoteTemplates, ({ one }) => ({
+  coach: one(users, {
+    fields: [sessionNoteTemplates.coachId],
     references: [users.id],
   }),
 }));

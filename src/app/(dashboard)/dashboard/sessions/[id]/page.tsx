@@ -109,7 +109,11 @@ export default async function SessionDetailPage({ params }: PageProps) {
             )
           ),
         db
-          .select({ content: sessionNotes.content })
+          .select({
+            content: sessionNotes.content,
+            templateId: sessionNotes.templateId,
+            sections: sessionNotes.sections,
+          })
           .from(sessionNotes)
           .where(eq(sessionNotes.bookingId, sessionId))
           .limit(1),
@@ -167,6 +171,8 @@ export default async function SessionDetailPage({ params }: PageProps) {
   } | null = null;
   let pastSessionsCount = 0;
   let sessionNoteContent: string | null = null;
+  let sessionNoteTemplateId: number | null = null;
+  let sessionNoteSections: Record<string, string> | null = null;
 
   if (isCoachView && coachResults) {
     const [clientData, countResult, noteData] = coachResults;
@@ -178,7 +184,11 @@ export default async function SessionDetailPage({ params }: PageProps) {
       };
     }
     pastSessionsCount = countResult[0]?.count || 0;
-    sessionNoteContent = noteData.length > 0 ? noteData[0].content : null;
+    if (noteData.length > 0) {
+      sessionNoteContent = noteData[0].content;
+      sessionNoteTemplateId = noteData[0].templateId ?? null;
+      sessionNoteSections = noteData[0].sections as Record<string, string> | null;
+    }
   } else if (clientResult) {
     if (clientResult.length > 0) {
       otherParty = {
@@ -442,7 +452,12 @@ export default async function SessionDetailPage({ params }: PageProps) {
 
           {/* Editable Coach Notes - Only visible to coach */}
           {isCoachView && (
-            <CoachNotesEditor sessionId={session.id} initialNotes={sessionNoteContent} />
+            <CoachNotesEditor
+              sessionId={session.id}
+              initialNotes={sessionNoteContent}
+              initialTemplateId={sessionNoteTemplateId}
+              initialSections={sessionNoteSections}
+            />
           )}
 
           {/* Review Section */}
