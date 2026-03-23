@@ -119,8 +119,8 @@ export async function POST(request: Request) {
         createNotification({
           userId: booking.clientId,
           type: 'system',
-          title: 'Preparati per la sessione',
-          body: `La tua sessione con ${coach.name || 'il tuo coach'} è domani. Vuoi prepararti?`,
+          title: 'Prepare for your session',
+          body: `Your session with ${coach.name || 'your coach'} is tomorrow. Want to prepare?`,
           link: '/dashboard/session-prep',
         });
 

@@ -21,9 +21,9 @@ interface CheckInEntry {
 }
 
 const MOOD_CONFIG = {
-  good: { y: 20, color: '#8b9a64', emoji: '😊', label: 'Bene' },
-  okay: { y: 50, color: '#d4af37', emoji: '😐', label: 'Così così' },
-  struggling: { y: 80, color: '#722f37', emoji: '😔', label: 'In difficoltà' },
+  good: { y: 20, color: '#8b9a64', emoji: '😊', label: 'Good' },
+  okay: { y: 50, color: '#d4af37', emoji: '😐', label: 'Okay' },
+  struggling: { y: 80, color: '#722f37', emoji: '😔', label: 'Struggling' },
 } as const;
 
 export function CheckInHistory() {
@@ -60,12 +60,12 @@ export function CheckInHistory() {
   return (
     <Card>
       <CardHeader className="pb-3">
-        <CardTitle className="text-lg text-burgundy-dark">I tuoi Check-in</CardTitle>
+        <CardTitle className="text-lg text-burgundy-dark">Your Check-ins</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {chartEntries.length === 0 ? (
           <p className="py-6 text-center text-sm text-muted-foreground">
-            Nessun check-in completato.
+            No check-ins completed.
           </p>
         ) : (
           <>
@@ -82,7 +82,7 @@ export function CheckInHistory() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-medium">
-                        Sett. {entry.weekNumber}, {entry.weekYear}
+                        Wk. {entry.weekNumber}, {entry.weekYear}
                       </span>
                       <span
                         className={cn(
@@ -141,7 +141,7 @@ function MoodChart({ entries }: { entries: CheckInEntry[] }) {
         viewBox={`0 0 ${width} ${height}`}
         className="w-full"
         role="img"
-        aria-label="Grafico umore ultime settimane"
+        aria-label="Mood chart last few weeks"
       >
         {/* Y-axis labels */}
         <text x={padding.left - 4} y={padding.top + 2} className="fill-muted-foreground" fontSize="8" textAnchor="end">
@@ -189,7 +189,7 @@ function MoodChart({ entries }: { entries: CheckInEntry[] }) {
             </TooltipTrigger>
             <TooltipContent side="top" className="max-w-[200px]">
               <p className="font-medium">
-                Sett. {p.entry.weekNumber} — {MOOD_CONFIG[p.entry.mood as 'good' | 'okay' | 'struggling'].label}
+                Wk. {p.entry.weekNumber} — {MOOD_CONFIG[p.entry.mood as 'good' | 'okay' | 'struggling'].label}
               </p>
               {p.entry.note && (
                 <p className="mt-1 text-xs text-muted-foreground line-clamp-3">{p.entry.note}</p>

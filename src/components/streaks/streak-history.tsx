@@ -19,11 +19,11 @@ interface WeekData {
 }
 
 const ACTION_LABELS: Record<string, string> = {
-  session_completed: 'Sessione completata',
-  check_in_submitted: 'Check-in inviato',
-  action_item_completed: 'Azione completata',
-  session_prep_completed: 'Preparazione sessione',
-  message_sent: 'Messaggio inviato',
+  session_completed: 'Session completed',
+  check_in_submitted: 'Check-in submitted',
+  action_item_completed: 'Action completed',
+  session_prep_completed: 'Session preparation',
+  message_sent: 'Message sent',
 };
 
 function getActionLabel(type: string): string {
@@ -67,7 +67,7 @@ export function StreakHistory() {
     <Card>
       <CardHeader className="pb-2">
         <CardTitle className="text-lg text-burgundy-dark">
-          Ultime 12 Settimane
+          Last 12 Weeks
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -79,7 +79,7 @@ export function StreakHistory() {
               );
               const tooltipText = week.hasActivity
                 ? activityTypes.map(getActionLabel).join(', ')
-                : 'Nessuna attività';
+                : 'No activity';
 
               return (
                 <Tooltip key={`${week.weekYear}-${week.weekNumber}`}>
@@ -95,7 +95,7 @@ export function StreakHistory() {
                   </TooltipTrigger>
                   <TooltipContent>
                     <p className="text-xs">
-                      Sett. {week.weekNumber} — {tooltipText}
+                      Wk. {week.weekNumber} — {tooltipText}
                     </p>
                   </TooltipContent>
                 </Tooltip>
@@ -105,11 +105,11 @@ export function StreakHistory() {
           <div className="mt-2 flex items-center justify-end gap-2 text-xs text-muted-foreground">
             <div className="flex items-center gap-1">
               <div className="h-2.5 w-2.5 rounded-sm bg-muted" />
-              <span>Inattivo</span>
+              <span>Inactive</span>
             </div>
             <div className="flex items-center gap-1">
               <div className="h-2.5 w-2.5 rounded-sm bg-sage" />
-              <span>Attivo</span>
+              <span>Active</span>
             </div>
           </div>
         </TooltipProvider>

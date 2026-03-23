@@ -77,7 +77,7 @@ export function StreakWidget() {
     >
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-burgundy-dark">
-          <span className="text-lg">La Tua Streak</span>
+          <span className="text-lg">Your Streak</span>
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -87,10 +87,10 @@ export function StreakWidget() {
               🔥
             </span>
             <p className="mt-2 text-base font-medium text-muted-foreground">
-              Inizia la tua streak!
+              Start your streak!
             </p>
             <p className="text-sm text-muted-foreground">
-              Completa un&apos;attività questa settimana per iniziare.
+              Complete an activity this week to get started.
             </p>
           </div>
         ) : (
@@ -104,20 +104,20 @@ export function StreakWidget() {
                   {data.currentStreak}
                 </p>
                 <p className="text-sm text-muted-foreground">
-                  {data.currentStreak === 1 ? 'settimana' : 'settimane'}
+                  {data.currentStreak === 1 ? 'week' : 'weeks'}
                 </p>
               </div>
             </div>
 
             {data.isAtRisk && (
               <p className="text-center text-sm font-medium text-gold-dark">
-                Completa un&apos;azione oggi!
+                Complete an action today!
               </p>
             )}
 
             <div className="space-y-1.5">
               <div className="flex items-center justify-between text-xs text-muted-foreground">
-                <span>Prossimo traguardo: {nextMilestone} sett.</span>
+                <span>Next milestone: {nextMilestone} wks.</span>
                 <span>{data.currentStreak}/{nextMilestone}</span>
               </div>
               <Progress
@@ -129,7 +129,7 @@ export function StreakWidget() {
             <div className="flex justify-center">
               <Badge variant="secondary" className="gap-1.5 bg-cream text-burgundy">
                 Record: {data.longestStreak}{' '}
-                {data.longestStreak === 1 ? 'settimana' : 'settimane'}
+                {data.longestStreak === 1 ? 'week' : 'weeks'}
               </Badge>
             </div>
           </>

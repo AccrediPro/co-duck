@@ -92,8 +92,8 @@ export async function POST(request: Request) {
     createNotification({
       userId: prep.coachId,
       type: 'system',
-      title: 'Preparazione ricevuta',
-      body: `${clientUser?.name || 'Un cliente'} ha completato la preparazione per la sessione di domani`,
+      title: 'Session prep received',
+      body: `${clientUser?.name || 'A client'} has completed their session prep for tomorrow`,
       link: `/dashboard/sessions`,
     });
 

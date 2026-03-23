@@ -16,13 +16,13 @@ interface TimelineEntry {
 }
 
 const MOOD_CONFIG = {
-  good: { emoji: '😊', label: 'Bene', dotClass: 'bg-sage', lineClass: 'border-sage/40' },
-  okay: { emoji: '😐', label: 'Così così', dotClass: 'bg-gold', lineClass: 'border-gold/40' },
-  struggling: { emoji: '😔', label: 'In difficoltà', dotClass: 'bg-burgundy', lineClass: 'border-burgundy/40' },
+  good: { emoji: '😊', label: 'Good', dotClass: 'bg-sage', lineClass: 'border-sage/40' },
+  okay: { emoji: '😐', label: 'Okay', dotClass: 'bg-gold', lineClass: 'border-gold/40' },
+  struggling: { emoji: '😔', label: 'Struggling', dotClass: 'bg-burgundy', lineClass: 'border-burgundy/40' },
 } as const;
 
 function formatDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString('it-IT', {
+  return new Date(dateStr).toLocaleDateString('en-US', {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
@@ -76,7 +76,7 @@ export function ClientCheckInTimeline({ clientId }: ClientCheckInTimelineProps) 
       <CardContent>
         {entries.length === 0 ? (
           <p className="py-6 text-center text-sm text-muted-foreground">
-            Nessun check-in disponibile.
+            No check-ins available.
           </p>
         ) : (
           <div className="relative">
@@ -114,7 +114,7 @@ export function ClientCheckInTimeline({ clientId }: ClientCheckInTimelineProps) 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-medium">
-                        Sett. {entry.weekNumber}, {entry.weekYear}
+                        Wk. {entry.weekNumber}, {entry.weekYear}
                       </span>
                       {moodConfig && (
                         <span className="text-xs text-muted-foreground">
@@ -124,10 +124,10 @@ export function ClientCheckInTimeline({ clientId }: ClientCheckInTimelineProps) 
                     </div>
                     {entry.respondedAt ? (
                       <p className="text-xs text-muted-foreground">
-                        Risposto il {formatDate(entry.respondedAt)}
+                        Responded on {formatDate(entry.respondedAt)}
                       </p>
                     ) : (
-                      <p className="text-xs text-gold-dark">In attesa di risposta</p>
+                      <p className="text-xs text-gold-dark">Awaiting response</p>
                     )}
                     {entry.note && (
                       <p className="mt-1 text-sm text-muted-foreground rounded bg-muted/50 p-2">

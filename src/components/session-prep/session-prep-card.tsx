@@ -42,12 +42,12 @@ export function SessionPrepCard() {
   if (isLoading || !prep || completed) return null;
 
   const sessionDate = new Date(prep.sessionDate);
-  const formattedDate = sessionDate.toLocaleDateString('it-IT', {
+  const formattedDate = sessionDate.toLocaleDateString('en-US', {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
   });
-  const formattedTime = sessionDate.toLocaleTimeString('it-IT', {
+  const formattedTime = sessionDate.toLocaleTimeString('en-US', {
     hour: '2-digit',
     minute: '2-digit',
   });
@@ -74,23 +74,22 @@ export function SessionPrepCard() {
           </div>
           <div className="min-w-0 flex-1">
             <h3 className="font-semibold text-burgundy-dark">
-              Preparati per la sessione
+              Prepare for your session
             </h3>
             <div className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
               <Calendar className="h-3.5 w-3.5" />
               <span>
-                {formattedDate} alle {formattedTime} con {prep.coachName}
+                {formattedDate} at {formattedTime} with {prep.coachName}
               </span>
             </div>
             <p className="mt-2 text-sm text-muted-foreground">
-              Il tuo coach ha preparato alcune domande per rendere la sessione
-              ancora più efficace.
+              Your coach has prepared some questions to make the session even more effective.
             </p>
             <Button
               className="mt-3 bg-gold text-white hover:bg-gold-dark"
               onClick={() => setShowForm(true)}
             >
-              Preparati ora
+              Prepare now
             </Button>
           </div>
         </div>

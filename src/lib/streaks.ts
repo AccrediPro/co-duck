@@ -176,15 +176,15 @@ export async function evaluateStreaks(): Promise<{
         if (MILESTONE_WEEKS.includes(newStreak)) {
           stats.milestones++;
           sendPushNotification(streak.userId, {
-            title: 'Traguardo streak!',
-            body: `Incredibile! ${newStreak} settimane consecutive di coaching!`,
+            title: 'Streak milestone!',
+            body: `Amazing! ${newStreak} consecutive weeks of coaching!`,
             data: { type: 'streak_milestone', streak: String(newStreak) },
           });
           createNotification({
             userId: streak.userId,
             type: 'system',
-            title: 'Traguardo streak!',
-            body: `Incredibile! ${newStreak} settimane consecutive di coaching!`,
+            title: 'Streak milestone!',
+            body: `Amazing! ${newStreak} consecutive weeks of coaching!`,
             link: '/dashboard',
           });
         }
@@ -204,15 +204,15 @@ export async function evaluateStreaks(): Promise<{
         if (!streak.notifiedAtRisk) {
           updateData.notifiedAtRisk = true;
           sendPushNotification(streak.userId, {
-            title: 'La tua streak sta per scadere!',
-            body: `Hai una streak di ${streak.currentStreak} settimane. Completa un'azione per mantenerla!`,
+            title: 'Your streak is about to expire!',
+            body: `You have a ${streak.currentStreak}-week streak. Complete an action to keep it alive!`,
             data: { type: 'streak_at_risk', streak: String(streak.currentStreak) },
           });
           createNotification({
             userId: streak.userId,
             type: 'system',
-            title: 'La tua streak sta per scadere!',
-            body: `Hai una streak di ${streak.currentStreak} settimane. Completa un'azione per mantenerla!`,
+            title: 'Your streak is about to expire!',
+            body: `You have a ${streak.currentStreak}-week streak. Complete an action to keep it alive!`,
             link: '/dashboard',
           });
         }

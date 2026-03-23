@@ -12,9 +12,9 @@ const MIN_QUESTIONS = 2;
 const MAX_QUESTIONS = 5;
 
 const DEFAULT_QUESTIONS = [
-  'Cosa vorresti ottenere dalla sessione di oggi?',
-  'C\'è qualcosa di specifico che vorresti discutere?',
-  'Come ti senti riguardo ai tuoi progressi dall\'ultima sessione?',
+  'What would you like to get out of today\'s session?',
+  'Is there something specific you\'d like to discuss?',
+  'How do you feel about your progress since the last session?',
 ];
 
 export function PrepQuestionsConfig() {
@@ -35,8 +35,8 @@ export function PrepQuestionsConfig() {
       }
     } catch {
       toast({
-        title: 'Errore',
-        description: 'Impossibile caricare le domande di preparazione.',
+        title: 'Error',
+        description: 'Unable to load preparation questions.',
         variant: 'destructive',
       });
     } finally {
@@ -79,8 +79,8 @@ export function PrepQuestionsConfig() {
 
     if (cleaned.length < MIN_QUESTIONS) {
       toast({
-        title: 'Errore',
-        description: `Servono almeno ${MIN_QUESTIONS} domande.`,
+        title: 'Error',
+        description: `At least ${MIN_QUESTIONS} questions are required.`,
         variant: 'destructive',
       });
       return;
@@ -97,19 +97,19 @@ export function PrepQuestionsConfig() {
       const result = await res.json();
 
       if (!res.ok || !result.success) {
-        throw new Error(result.error?.message || 'Salvataggio fallito');
+        throw new Error(result.error?.message || 'Save failed');
       }
 
       setQuestions(result.data.questions);
       setOriginalQuestions(result.data.questions);
       toast({
-        title: 'Domande salvate',
-        description: 'Le domande di preparazione sono state aggiornate.',
+        title: 'Questions saved',
+        description: 'Preparation questions have been updated.',
       });
     } catch (err) {
       toast({
-        title: 'Errore',
-        description: err instanceof Error ? err.message : 'Salvataggio fallito',
+        title: 'Error',
+        description: err instanceof Error ? err.message : 'Save failed',
         variant: 'destructive',
       });
     } finally {
@@ -123,7 +123,7 @@ export function PrepQuestionsConfig() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <ClipboardList className="h-5 w-5" />
-            Domande di Preparazione
+            Preparation Questions
           </CardTitle>
         </CardHeader>
         <CardContent className="flex items-center justify-center py-8">
@@ -138,10 +138,10 @@ export function PrepQuestionsConfig() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <ClipboardList className="h-5 w-5" />
-          Domande di Preparazione
+          Preparation Questions
         </CardTitle>
         <CardDescription>
-          Domande inviate ai clienti prima di ogni sessione per aiutarli a prepararsi.
+          Questions sent to clients before each session to help them prepare.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -149,11 +149,11 @@ export function PrepQuestionsConfig() {
           <div key={index} className="flex items-start gap-2">
             <div className="min-w-0 flex-1 space-y-1.5">
               <Label htmlFor={`prep-config-q-${index}`} className="text-xs text-muted-foreground">
-                Domanda {index + 1}
+                Question {index + 1}
               </Label>
               <Input
                 id={`prep-config-q-${index}`}
-                placeholder="Scrivi la domanda..."
+                placeholder="Write the question..."
                 value={question}
                 onChange={(e) => updateQuestion(index, e.target.value)}
               />
@@ -164,7 +164,7 @@ export function PrepQuestionsConfig() {
                 size="icon"
                 className="mt-6 shrink-0"
                 onClick={() => removeQuestion(index)}
-                aria-label={`Rimuovi domanda ${index + 1}`}
+                aria-label={`Remove question ${index + 1}`}
               >
                 <Trash2 className="h-4 w-4 text-destructive" />
               </Button>
@@ -175,14 +175,14 @@ export function PrepQuestionsConfig() {
         {questions.length < MAX_QUESTIONS && (
           <Button variant="outline" size="sm" onClick={addQuestion}>
             <Plus className="mr-2 h-4 w-4" />
-            Aggiungi domanda
+            Add question
           </Button>
         )}
 
         <div className="flex items-center justify-between gap-2 pt-2">
           <Button variant="outline" size="sm" onClick={resetToDefaults}>
             <RotateCcw className="mr-2 h-4 w-4" />
-            Ripristina default
+            Reset to defaults
           </Button>
           <Button
             onClick={handleSave}
@@ -194,7 +194,7 @@ export function PrepQuestionsConfig() {
             ) : (
               <Save className="mr-2 h-4 w-4" />
             )}
-            Salva
+            Save
           </Button>
         </div>
       </CardContent>

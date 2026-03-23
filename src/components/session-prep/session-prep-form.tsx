@@ -36,8 +36,8 @@ export function SessionPrepForm({ prepId, questions, onComplete }: SessionPrepFo
   const handleSubmit = async () => {
     if (!canSubmit) {
       toast({
-        title: 'Errore',
-        description: 'Rispondi a tutte le domande prima di inviare.',
+        title: 'Error',
+        description: 'Please answer all questions before submitting.',
         variant: 'destructive',
       });
       return;
@@ -60,13 +60,13 @@ export function SessionPrepForm({ prepId, questions, onComplete }: SessionPrepFo
       const result = await res.json();
 
       if (!res.ok || !result.success) {
-        throw new Error(result.error?.message || 'Invio fallito');
+        throw new Error(result.error?.message || 'Submission failed');
       }
 
       setIsCompleted(true);
       toast({
-        title: 'Preparazione inviata',
-        description: 'Il tuo coach riceverà le tue risposte prima della sessione.',
+        title: 'Preparation submitted',
+        description: 'Your coach will receive your answers before the session.',
       });
 
       // Delay callback so user sees success state
@@ -75,8 +75,8 @@ export function SessionPrepForm({ prepId, questions, onComplete }: SessionPrepFo
       }
     } catch (err) {
       toast({
-        title: 'Errore',
-        description: err instanceof Error ? err.message : 'Invio fallito',
+        title: 'Error',
+        description: err instanceof Error ? err.message : 'Submission failed',
         variant: 'destructive',
       });
     } finally {
@@ -91,10 +91,10 @@ export function SessionPrepForm({ prepId, questions, onComplete }: SessionPrepFo
           <CheckCircle2 className="h-6 w-6 text-sage" />
           <div>
             <p className="font-semibold text-burgundy-dark">
-              Preparazione inviata!
+              Preparation submitted!
             </p>
             <p className="text-sm text-muted-foreground">
-              Il tuo coach potrà leggere le tue risposte prima della sessione.
+              Your coach will be able to read your answers before the session.
             </p>
           </div>
         </CardContent>
@@ -106,7 +106,7 @@ export function SessionPrepForm({ prepId, questions, onComplete }: SessionPrepFo
     <Card>
       <CardHeader>
         <CardTitle className="text-lg text-burgundy-dark">
-          Preparazione alla Sessione
+          Session Preparation
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-5">
@@ -117,7 +117,7 @@ export function SessionPrepForm({ prepId, questions, onComplete }: SessionPrepFo
             </Label>
             <Textarea
               id={`prep-q-${index}`}
-              placeholder="Scrivi la tua risposta..."
+              placeholder="Write your answer..."
               value={answers[index]}
               onChange={(e) => updateAnswer(index, e.target.value)}
               rows={3}
@@ -140,7 +140,7 @@ export function SessionPrepForm({ prepId, questions, onComplete }: SessionPrepFo
           ) : (
             <Send className="mr-2 h-4 w-4" />
           )}
-          Invia preparazione
+          Submit preparation
         </Button>
       </CardContent>
     </Card>

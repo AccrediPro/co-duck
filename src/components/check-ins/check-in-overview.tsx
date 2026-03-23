@@ -19,19 +19,19 @@ interface ClientCheckIn {
 }
 
 const MOOD_DISPLAY = {
-  good: { emoji: '😊', label: 'Bene', badgeClass: 'bg-sage/15 text-sage border-sage/30' },
-  okay: { emoji: '😐', label: 'Così così', badgeClass: 'bg-gold/15 text-gold-dark border-gold/30' },
-  struggling: { emoji: '😔', label: 'In difficoltà', badgeClass: 'bg-burgundy/15 text-burgundy border-burgundy/30' },
+  good: { emoji: '😊', label: 'Good', badgeClass: 'bg-sage/15 text-sage border-sage/30' },
+  okay: { emoji: '😐', label: 'Okay', badgeClass: 'bg-gold/15 text-gold-dark border-gold/30' },
+  struggling: { emoji: '😔', label: 'Struggling', badgeClass: 'bg-burgundy/15 text-burgundy border-burgundy/30' },
 } as const;
 
 function timeAgo(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60000);
-  if (mins < 60) return `${mins}m fa`;
+  if (mins < 60) return `${mins}m ago`;
   const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours}h fa`;
+  if (hours < 24) return `${hours}h ago`;
   const days = Math.floor(hours / 24);
-  return `${days}g fa`;
+  return `${days}d ago`;
 }
 
 function getInitials(name: string): string {
@@ -74,12 +74,12 @@ export function CheckInOverview() {
   return (
     <Card>
       <CardHeader className="pb-3">
-        <CardTitle className="text-lg text-burgundy-dark">Check-in Clienti</CardTitle>
+        <CardTitle className="text-lg text-burgundy-dark">Client Check-ins</CardTitle>
       </CardHeader>
       <CardContent>
         {clients.length === 0 ? (
           <p className="py-6 text-center text-sm text-muted-foreground">
-            Nessun check-in questa settimana
+            No check-ins this week
           </p>
         ) : (
           <div className="space-y-1">
@@ -118,7 +118,7 @@ export function CheckInOverview() {
                       </Badge>
                     ) : (
                       <Badge variant="outline" className="text-muted-foreground">
-                        In attesa
+                        Pending
                       </Badge>
                     )}
                     {client.respondedAt && (

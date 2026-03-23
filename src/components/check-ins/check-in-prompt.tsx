@@ -22,9 +22,9 @@ interface PendingCheckIn {
 type Mood = 'good' | 'okay' | 'struggling';
 
 const MOOD_OPTIONS: { mood: Mood; emoji: string; label: string; colorClass: string }[] = [
-  { mood: 'good', emoji: '😊', label: 'Bene', colorClass: 'border-sage bg-sage/10 hover:bg-sage/20 ring-sage' },
-  { mood: 'okay', emoji: '😐', label: 'Così così', colorClass: 'border-gold bg-gold/10 hover:bg-gold/20 ring-gold' },
-  { mood: 'struggling', emoji: '😔', label: 'In difficoltà', colorClass: 'border-burgundy bg-burgundy/10 hover:bg-burgundy/20 ring-burgundy' },
+  { mood: 'good', emoji: '😊', label: 'Good', colorClass: 'border-sage bg-sage/10 hover:bg-sage/20 ring-sage' },
+  { mood: 'okay', emoji: '😐', label: 'Okay', colorClass: 'border-gold bg-gold/10 hover:bg-gold/20 ring-gold' },
+  { mood: 'struggling', emoji: '😔', label: 'Struggling', colorClass: 'border-burgundy bg-burgundy/10 hover:bg-burgundy/20 ring-burgundy' },
 ];
 
 const NOTE_MAX = 280;
@@ -67,10 +67,10 @@ export function CheckInPrompt() {
       if (json.success) {
         setSubmitted(true);
       } else {
-        toast({ title: 'Errore', description: json.error?.message || 'Riprova più tardi', variant: 'destructive' });
+        toast({ title: 'Error', description: json.error?.message || 'Please try again later', variant: 'destructive' });
       }
     } catch {
-      toast({ title: 'Errore', description: 'Impossibile inviare il check-in', variant: 'destructive' });
+      toast({ title: 'Error', description: 'Unable to send check-in', variant: 'destructive' });
     } finally {
       setSubmitting(false);
     }
@@ -96,11 +96,11 @@ export function CheckInPrompt() {
     return (
       <Card className="border-sage/50 bg-sage/5">
         <CardContent className="flex flex-col items-center py-8">
-          <span className="text-4xl" role="img" aria-label="grazie">
+          <span className="text-4xl" role="img" aria-label="thank you">
             ✅
           </span>
-          <p className="mt-3 text-lg font-semibold text-sage">Grazie!</p>
-          <p className="text-sm text-muted-foreground">Il tuo check-in è stato inviato.</p>
+          <p className="mt-3 text-lg font-semibold text-sage">Thank you!</p>
+          <p className="text-sm text-muted-foreground">Your check-in has been sent.</p>
         </CardContent>
       </Card>
     );
@@ -110,10 +110,10 @@ export function CheckInPrompt() {
     <Card>
       <CardHeader className="pb-3">
         <CardTitle className="text-lg text-burgundy-dark">
-          Come stai questa settimana?
+          How are you doing this week?
         </CardTitle>
         <p className="text-sm text-muted-foreground">
-          Check-in settimanale per {pending.coachName}
+          Weekly check-in for {pending.coachName}
         </p>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -142,7 +142,7 @@ export function CheckInPrompt() {
         {selectedMood && (
           <div className="space-y-2">
             <Textarea
-              placeholder="Vuoi aggiungere una nota? (opzionale)"
+              placeholder="Want to add a note? (optional)"
               value={note}
               onChange={(e) => {
                 if (e.target.value.length <= NOTE_MAX) {
@@ -163,7 +163,7 @@ export function CheckInPrompt() {
           disabled={!selectedMood || submitting}
           className="w-full bg-burgundy text-white hover:bg-burgundy-light"
         >
-          {submitting ? 'Invio...' : 'Invia'}
+          {submitting ? 'Sending...' : 'Send'}
         </Button>
       </CardContent>
     </Card>

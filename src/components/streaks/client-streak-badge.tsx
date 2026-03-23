@@ -19,8 +19,8 @@ export function ClientStreakBadge({ currentStreak, isAtRisk }: ClientStreakBadge
       className={cn('inline-flex items-center gap-0.5 text-xs font-medium', color)}
       title={
         isAtRisk
-          ? 'Streak a rischio'
-          : `${currentStreak} ${currentStreak === 1 ? 'settimana' : 'settimane'} di streak`
+          ? 'Streak at risk'
+          : `${currentStreak} ${currentStreak === 1 ? 'week' : 'weeks'} streak`
       }
     >
       <span role="img" aria-label="fire" className="text-sm">

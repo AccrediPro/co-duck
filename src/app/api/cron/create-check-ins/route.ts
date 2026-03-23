@@ -113,8 +113,8 @@ export async function POST(request: Request) {
 
         // Send push notification to client
         sendPushNotification(pair.clientId, {
-          title: 'Check-in settimanale',
-          body: 'Come stai rispetto al tuo obiettivo questa settimana?',
+          title: 'Weekly check-in',
+          body: 'How are you doing with your goal this week?',
           data: {
             type: 'weekly_check_in',
             link: '/dashboard',
@@ -125,8 +125,8 @@ export async function POST(request: Request) {
         createNotification({
           userId: pair.clientId,
           type: 'system',
-          title: 'Check-in settimanale',
-          body: 'Come stai rispetto al tuo obiettivo questa settimana?',
+          title: 'Weekly check-in',
+          body: 'How are you doing with your goal this week?',
           link: '/dashboard',
         });
 

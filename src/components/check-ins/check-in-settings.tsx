@@ -15,13 +15,13 @@ import { useToast } from '@/hooks/use-toast';
 import { CalendarDays } from 'lucide-react';
 
 const DAYS = [
-  { value: '1', label: 'Lunedì' },
-  { value: '2', label: 'Martedì' },
-  { value: '3', label: 'Mercoledì' },
-  { value: '4', label: 'Giovedì' },
-  { value: '5', label: 'Venerdì' },
-  { value: '6', label: 'Sabato' },
-  { value: '0', label: 'Domenica' },
+  { value: '1', label: 'Monday' },
+  { value: '2', label: 'Tuesday' },
+  { value: '3', label: 'Wednesday' },
+  { value: '4', label: 'Thursday' },
+  { value: '5', label: 'Friday' },
+  { value: '6', label: 'Saturday' },
+  { value: '0', label: 'Sunday' },
 ] as const;
 
 interface CheckInSettingsProps {
@@ -37,7 +37,7 @@ export function CheckInSettings({ clientId }: CheckInSettingsProps) {
     if (!clientId) {
       toast({
         title: 'Info',
-        description: 'Seleziona un cliente per configurare il giorno del check-in.',
+        description: 'Select a client to configure the check-in day.',
       });
       return;
     }
@@ -53,16 +53,16 @@ export function CheckInSettings({ clientId }: CheckInSettingsProps) {
       });
       const json = await res.json();
       if (json.success) {
-        toast({ title: 'Salvato', description: 'Giorno del check-in aggiornato.' });
+        toast({ title: 'Saved', description: 'Check-in day updated.' });
       } else {
         toast({
-          title: 'Errore',
-          description: json.error?.message || 'Impossibile salvare',
+          title: 'Error',
+          description: json.error?.message || 'Unable to save',
           variant: 'destructive',
         });
       }
     } catch {
-      toast({ title: 'Errore', description: 'Errore di rete', variant: 'destructive' });
+      toast({ title: 'Error', description: 'Network error', variant: 'destructive' });
     } finally {
       setSaving(false);
     }
@@ -73,19 +73,19 @@ export function CheckInSettings({ clientId }: CheckInSettingsProps) {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <CalendarDays className="h-5 w-5" />
-          Check-in Settimanale
+          Weekly Check-in
         </CardTitle>
         <CardDescription>
-          Configura il giorno predefinito per i check-in settimanali.
-          {!clientId && ' Le impostazioni per singolo cliente sono disponibili nella scheda del cliente.'}
+          Configure the default day for weekly check-ins.
+          {!clientId && ' Per-client settings are available on the client card.'}
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="checkin-day">Giorno del check-in</Label>
+          <Label htmlFor="checkin-day">Check-in day</Label>
           <Select value={selectedDay} onValueChange={setSelectedDay}>
             <SelectTrigger id="checkin-day" className="w-full sm:w-[240px]">
-              <SelectValue placeholder="Seleziona giorno" />
+              <SelectValue placeholder="Select day" />
             </SelectTrigger>
             <SelectContent>
               {DAYS.map((day) => (
@@ -103,7 +103,7 @@ export function CheckInSettings({ clientId }: CheckInSettingsProps) {
             disabled={saving}
             className="bg-burgundy text-white hover:bg-burgundy-light"
           >
-            {saving ? 'Salvataggio...' : 'Salva'}
+            {saving ? 'Saving...' : 'Save'}
           </Button>
         )}
       </CardContent>

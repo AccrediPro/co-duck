@@ -77,17 +77,17 @@ export function SessionPrepView({ bookingId }: SessionPrepViewProps) {
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2">
             <ClipboardList className="h-5 w-5" />
-            Preparazione del Cliente
+            Client Preparation
           </CardTitle>
           {isCompleted ? (
             <Badge variant="outline" className="border-sage text-sage">
               <Eye className="mr-1 h-3 w-3" />
-              Completata
+              Completed
             </Badge>
           ) : (
             <Badge variant="outline" className="border-gold text-gold-dark">
               <Clock className="mr-1 h-3 w-3" />
-              In attesa
+              Pending
             </Badge>
           )}
         </div>
@@ -95,7 +95,7 @@ export function SessionPrepView({ bookingId }: SessionPrepViewProps) {
       <CardContent>
         {!isCompleted ? (
           <p className="text-sm text-muted-foreground">
-            Il cliente non ha ancora completato la preparazione alla sessione.
+            The client has not yet completed the session preparation.
           </p>
         ) : (
           <div className="space-y-4">

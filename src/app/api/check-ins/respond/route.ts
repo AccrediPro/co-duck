@@ -104,19 +104,19 @@ export async function POST(request: Request) {
         columns: { name: true },
       });
 
-      const clientName = client?.name || 'Un tuo cliente';
+      const clientName = client?.name || 'One of your clients';
 
       createNotification({
         userId: existing.coachId,
         type: 'system',
-        title: 'Un tuo cliente ha bisogno di te',
-        body: `${clientName} ha indicato di essere in difficoltà nel check-in settimanale.`,
+        title: 'One of your clients needs you',
+        body: `${clientName} indicated they are struggling in this week's check-in.`,
         link: '/dashboard/clients',
       });
 
       sendPushNotification(existing.coachId, {
-        title: 'Un tuo cliente ha bisogno di te',
-        body: `${clientName} ha indicato di essere in difficoltà nel check-in settimanale.`,
+        title: 'One of your clients needs you',
+        body: `${clientName} indicated they are struggling in this week's check-in.`,
         data: {
           type: 'check_in_struggling',
           link: '/dashboard/clients',
