@@ -23,6 +23,7 @@ import { GroupToggle, GroupViewMode } from './group-toggle';
 import { GroupSection } from './group-section';
 import { GroupDialog } from './group-dialog';
 import { useToast } from '@/hooks/use-toast';
+import { ClientStreakBadge } from '@/components/streaks/client-streak-badge';
 
 interface Client {
   id: string;
@@ -41,6 +42,12 @@ interface ClientGroup {
   clientIds: string[];
 }
 
+interface ClientStreak {
+  userId: string;
+  currentStreak: number;
+  isAtRisk: boolean;
+}
+
 interface ClientsListProps {
   initialClients: Client[];
 }
@@ -55,7 +62,7 @@ function getInitials(name: string | null): string {
   return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
 }
 
-function ClientCard({ client, onNavigate }: { client: Client; onNavigate: (path: string) => void }) {
+function ClientCard({ client, streak, onNavigate }: { client: Client; streak?: ClientStreak; onNavigate: (path: string) => void }) {
   return (
     <Card
       className="cursor-pointer transition-shadow hover:shadow-md"
@@ -70,7 +77,15 @@ function ClientCard({ client, onNavigate }: { client: Client; onNavigate: (path:
             </AvatarFallback>
           </Avatar>
           <div className="min-w-0 flex-1">
-            <p className="truncate font-semibold">{client.name || 'Client'}</p>
+            <p className="flex items-center gap-1.5 truncate font-semibold">
+              {client.name || 'Client'}
+              {streak && (
+                <ClientStreakBadge
+                  currentStreak={streak.currentStreak}
+                  isAtRisk={streak.isAtRisk}
+                />
+              )}
+            </p>
             <p className="truncate text-sm text-muted-foreground">{client.email}</p>
           </div>
         </div>
@@ -123,6 +138,23 @@ export function ClientsList({ initialClients }: ClientsListProps) {
   const [renameTarget, setRenameTarget] = useState<{ id: number; name: string } | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<{ id: number; name: string } | null>(null);
   const [deletingGroup, setDeletingGroup] = useState(false);
+  const [streakMap, setStreakMap] = useState<Map<string, ClientStreak>>(new Map());
+
+  // Fetch client streaks
+  useEffect(() => {
+    fetch('/api/streaks/clients')
+      .then((res) => res.json())
+      .then((json) => {
+        if (json.success) {
+          const map = new Map<string, ClientStreak>();
+          for (const s of json.data) {
+            map.set(s.userId, { userId: s.userId, currentStreak: s.currentStreak, isAtRisk: s.isAtRisk });
+          }
+          setStreakMap(map);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   // Persist view mode in localStorage
   useEffect(() => {
@@ -249,7 +281,7 @@ export function ClientsList({ initialClients }: ClientsListProps) {
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {filteredClients.map((client) => (
-                <ClientCard key={client.id} client={client} onNavigate={navigate} />
+                <ClientCard key={client.id} client={client} streak={streakMap.get(client.id)} onNavigate={navigate} />
               ))}
             </div>
           )}
@@ -288,7 +320,7 @@ export function ClientsList({ initialClients }: ClientsListProps) {
                       ) : (
                         <div className="grid gap-4 pb-3 pt-1 sm:grid-cols-2 lg:grid-cols-3">
                           {members.map((client) => (
-                            <ClientCard key={client.id} client={client} onNavigate={navigate} />
+                            <ClientCard key={client.id} client={client} streak={streakMap.get(client.id)} onNavigate={navigate} />
                           ))}
                         </div>
                       )}
@@ -306,7 +338,7 @@ export function ClientsList({ initialClients }: ClientsListProps) {
                 >
                   <div className="grid gap-4 pb-3 pt-1 sm:grid-cols-2 lg:grid-cols-3">
                     {ungroupedClients.map((client) => (
-                      <ClientCard key={client.id} client={client} onNavigate={navigate} />
+                      <ClientCard key={client.id} client={client} streak={streakMap.get(client.id)} onNavigate={navigate} />
                     ))}
                   </div>
                 </GroupSection>

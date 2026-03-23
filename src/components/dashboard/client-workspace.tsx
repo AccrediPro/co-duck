@@ -34,6 +34,7 @@ import { useToast } from '@/hooks/use-toast';
 import { CreateProgramDialog, CreateGoalDialog, CreateTaskDialog } from './client-workspace-dialogs';
 import { ClientFilesTab } from './client-files-tab';
 import { ClientGroupBadges } from './client-group-badges';
+import { ClientCheckInTimeline } from '@/components/check-ins/client-check-in-timeline';
 
 interface Client {
   id: string;
@@ -423,6 +424,9 @@ export function ClientWorkspace({ client, initialPrograms, initialActionItems, c
           })}
         </div>
       )}
+
+      {/* Check-ins Timeline */}
+      <ClientCheckInTimeline clientId={clientId} />
 
       {/* Dialogs */}
       <CreateProgramDialog

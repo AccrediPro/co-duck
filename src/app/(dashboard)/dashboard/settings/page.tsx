@@ -8,6 +8,8 @@ import { Separator } from '@/components/ui/separator';
 import { LogOut, User, Mail, Shield, Palette } from 'lucide-react';
 import { GoogleCalendarSettings } from '@/components/settings/google-calendar-settings';
 import { EmailPreferencesSettings } from '@/components/settings/email-preferences';
+import { CheckInSettings } from '@/components/check-ins/check-in-settings';
+import { PrepQuestionsConfig } from '@/components/session-prep/prep-questions-config';
 
 export default function SettingsPage() {
   const { user } = useUser();
@@ -74,6 +76,12 @@ export default function SettingsPage() {
             <p className="text-sm text-muted-foreground">Preference settings coming soon.</p>
           </CardContent>
         </Card>
+
+        {/* Check-in Settings (Coach) */}
+        <CheckInSettings />
+
+        {/* Session Prep Questions Config (Coach) */}
+        <PrepQuestionsConfig />
 
         {/* Email Notifications */}
         <EmailPreferencesSettings />

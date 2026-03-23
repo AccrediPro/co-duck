@@ -19,6 +19,7 @@ import { getUnsubscribeUrl } from '@/lib/unsubscribe';
 import { getSocketServer } from '@/lib/socket-server';
 import { uploadMessageAttachment } from '@/lib/file-upload';
 import { extractUrls, fetchLinkPreview } from '@/lib/link-preview';
+import { recordStreakActivity } from '@/lib/streaks';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -331,6 +332,9 @@ export async function POST(request: Request, { params }: RouteParams) {
           size: newMessage.attachmentSize,
         }
       : null;
+
+    // Record streak activity for message sent (fire-and-forget)
+    recordStreakActivity(userId, 'message_sent', String(newMessage.id)).catch(console.error);
 
     // Emit via Socket.io for real-time delivery
     const io = getSocketServer();

@@ -16,6 +16,7 @@ import { createNotification } from '@/lib/notifications';
 import { getUnsubscribeUrl } from '@/lib/unsubscribe';
 import { rateLimit, FREQUENT_LIMIT, WRITE_LIMIT, rateLimitResponse } from '@/lib/rate-limit';
 import { formatDateLong } from '@/lib/date-utils';
+import { recordStreakActivity } from '@/lib/streaks';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -217,6 +218,11 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       .set(updateData)
       .where(eq(bookings.id, bookingId))
       .returning();
+
+    // Record streak activity on session completion (fire-and-forget)
+    if (updateData.status === 'completed') {
+      recordStreakActivity(booking.clientId, 'session_completed', String(booking.id)).catch(console.error);
+    }
 
     // Notify client when session is completed and send review request email
     if (updateData.status === 'completed') {

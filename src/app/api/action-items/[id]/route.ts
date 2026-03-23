@@ -11,6 +11,7 @@ import { db } from '@/db';
 import { actionItems, users } from '@/db/schema';
 import { eq, or, and } from 'drizzle-orm';
 import { rateLimit, FREQUENT_LIMIT, WRITE_LIMIT, rateLimitResponse } from '@/lib/rate-limit';
+import { recordStreakActivity } from '@/lib/streaks';
 
 interface RouteParams {
   params: Promise<{ id: string }>;
@@ -205,6 +206,11 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     if (body.isCompleted !== undefined) {
       updateData.isCompleted = body.isCompleted;
       updateData.completedAt = body.isCompleted ? new Date() : null;
+    }
+
+    // Record streak activity when action item is completed (fire-and-forget)
+    if (body.isCompleted === true) {
+      recordStreakActivity(item.clientId, 'action_item_completed', String(item.id)).catch(console.error);
     }
 
     if (Object.keys(updateData).length === 0) {

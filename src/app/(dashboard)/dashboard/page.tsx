@@ -10,6 +10,11 @@ import { User, Calendar, CheckCircle } from 'lucide-react';
 import { getCoachDashboardData, getClientDashboardData } from './actions';
 import { CoachDashboardLayout } from '@/components/dashboard/coach-dashboard-layout';
 import { ClientDashboardLayout } from '@/components/dashboard/client-dashboard-layout';
+import { StreakWidget } from '@/components/streaks/streak-widget';
+import { StreakHistory } from '@/components/streaks/streak-history';
+import { CheckInPrompt } from '@/components/check-ins/check-in-prompt';
+import { CheckInOverview } from '@/components/check-ins/check-in-overview';
+import { SessionPrepCard } from '@/components/session-prep/session-prep-card';
 
 async function getUserWithProfile(userId: string) {
   const userRecords = await db.select().from(users).where(eq(users.id, userId)).limit(1);
@@ -109,7 +114,12 @@ async function CoachDashboardContent() {
     );
   }
 
-  return <CoachDashboardLayout data={result.data} />;
+  return (
+    <>
+      <CheckInOverview />
+      <CoachDashboardLayout data={result.data} />
+    </>
+  );
 }
 
 async function ClientDashboardContent() {
@@ -125,7 +135,17 @@ async function ClientDashboardContent() {
     );
   }
 
-  return <ClientDashboardLayout data={result.data} />;
+  return (
+    <>
+      <CheckInPrompt />
+      <SessionPrepCard />
+      <div className="grid gap-4 md:grid-cols-2">
+        <StreakWidget />
+        <StreakHistory />
+      </div>
+      <ClientDashboardLayout data={result.data} />
+    </>
+  );
 }
 
 function CoachOnboardingPrompt() {

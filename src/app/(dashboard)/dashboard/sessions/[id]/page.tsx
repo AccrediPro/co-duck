@@ -22,6 +22,7 @@ import {
 import { SessionDetailActions } from './session-detail-actions';
 import { CoachNotesEditor } from './coach-notes-editor';
 import { CoachSessionActions } from './coach-session-actions';
+import { SessionPrepView } from '@/components/session-prep/session-prep-view';
 import { BookingResponseActions } from './booking-response-actions';
 import { PaymentSection } from './payment-section';
 import { MeetingLinkSection } from './meeting-link-section';
@@ -448,6 +449,11 @@ export default async function SessionDetailPage({ params }: PageProps) {
                 <p className="whitespace-pre-wrap text-muted-foreground">{session.clientNotes}</p>
               </CardContent>
             </Card>
+          )}
+
+          {/* Client Session Prep - Only visible to coach */}
+          {isCoachView && (
+            <SessionPrepView bookingId={session.id} />
           )}
 
           {/* Editable Coach Notes - Only visible to coach */}

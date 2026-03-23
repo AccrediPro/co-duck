@@ -219,6 +219,36 @@ export const goalPriorityEnum = pgEnum('goal_priority', ['low', 'medium', 'high'
  */
 export const iconnectPostTypeEnum = pgEnum('iconnect_post_type', ['text', 'image', 'task']);
 
+/**
+ * Check-In Mood Enum
+ *
+ * Client self-reported mood during weekly check-ins.
+ *
+ * @enum {string}
+ * @property {'good'} good - Client feels positive
+ * @property {'okay'} okay - Client feels neutral
+ * @property {'struggling'} struggling - Client is having difficulties
+ */
+export const checkInMoodEnum = pgEnum('check_in_mood', ['good', 'okay', 'struggling']);
+
+/**
+ * Streak Action Type Enum
+ *
+ * Qualifying actions that count toward a client's coaching streak.
+ *
+ * @enum {string}
+ * @property {'session_completed'} session_completed - Completed a coaching session
+ * @property {'action_item_completed'} action_item_completed - Completed an action item
+ * @property {'iconnect_post'} iconnect_post - Posted in iConnect workspace
+ * @property {'message_sent'} message_sent - Sent a message to coach
+ * @property {'check_in_completed'} check_in_completed - Completed a weekly check-in
+ * @property {'session_prep_completed'} session_prep_completed - Completed session prep
+ */
+export const streakActionTypeEnum = pgEnum('streak_action_type', [
+  'session_completed', 'action_item_completed', 'iconnect_post',
+  'message_sent', 'check_in_completed', 'session_prep_completed',
+]);
+
 // ============================================================================
 // JSONB TYPE DEFINITIONS
 // ============================================================================
@@ -2608,6 +2638,19 @@ export const usersRelations = relations(users, ({ one, many }) => ({
   pushTokens: many(pushTokens),
   clientGroups: many(clientGroups),
   clientGroupMemberships: many(clientGroupMembers),
+  coachingStreak: one(coachingStreaks, {
+    fields: [users.id],
+    references: [coachingStreaks.userId],
+  }),
+  streakActivities: many(streakActivities),
+  clientCheckIns: many(weeklyCheckIns, { relationName: 'clientCheckIns' }),
+  coachCheckIns: many(weeklyCheckIns, { relationName: 'coachCheckIns' }),
+  clientPrepResponses: many(sessionPrepResponses, { relationName: 'clientPrepResponses' }),
+  coachPrepResponses: many(sessionPrepResponses, { relationName: 'coachPrepResponses' }),
+  sessionPrepQuestions: one(sessionPrepQuestions, {
+    fields: [users.id],
+    references: [sessionPrepQuestions.coachId],
+  }),
 }));
 
 export const programsRelations = relations(programs, ({ one, many }) => ({
@@ -2700,6 +2743,7 @@ export const bookingsRelations = relations(bookings, ({ one, many }) => ({
   sessionNote: one(sessionNotes),
   review: one(reviews),
   actionItems: many(actionItems),
+  sessionPrepResponse: one(sessionPrepResponses),
 }));
 
 export const transactionsRelations = relations(transactions, ({ one }) => ({
@@ -2979,6 +3023,374 @@ export const clientGroupMembersRelations = relations(clientGroupMembers, ({ one 
   }),
   client: one(users, {
     fields: [clientGroupMembers.clientId],
+    references: [users.id],
+  }),
+}));
+
+// ============================================================================
+// === Retention Features (S18) ===
+// ============================================================================
+
+// ============================================================================
+// COACHING STREAKS TABLE
+// ============================================================================
+
+/**
+ * Coaching Streaks Table
+ *
+ * Tracks the current and longest coaching streak per client.
+ * A streak represents consecutive weeks of coaching engagement.
+ *
+ * ## Purpose
+ * Gamification layer to encourage consistent client engagement.
+ * One row per client, updated weekly by CRON job.
+ *
+ * ## Relationships
+ * - Belongs to users (as client, 1:1 via unique index)
+ * - Has many streakActivities (audit log)
+ */
+export const coachingStreaks = pgTable(
+  'coaching_streaks',
+  {
+    id: serial('id').primaryKey(),
+
+    /** The client whose streak is tracked */
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+
+    /** Current consecutive weeks of engagement */
+    currentStreak: integer('current_streak').notNull().default(0),
+
+    /** All-time longest streak in weeks */
+    longestStreak: integer('longest_streak').notNull().default(0),
+
+    /** Timestamp of the most recent qualifying activity */
+    lastActivityAt: timestamp('last_activity_at', { withTimezone: true }),
+
+    /** Day the week starts on (0=Sunday, 1=Monday) */
+    weekStartsOn: integer('week_starts_on').notNull().default(1),
+
+    /** When the current streak began */
+    streakStartedAt: timestamp('streak_started_at', { withTimezone: true }),
+
+    /** Whether the streak is at risk of breaking (no activity this week) */
+    isAtRisk: boolean('is_at_risk').notNull().default(false),
+
+    /** Whether the at-risk notification was already sent */
+    notifiedAtRisk: boolean('notified_at_risk').notNull().default(false),
+
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
+  },
+  (table) => [
+    uniqueIndex('coaching_streaks_user_id_idx').on(table.userId),
+  ]
+);
+
+/** Type for selecting a coaching streak record */
+export type CoachingStreak = typeof coachingStreaks.$inferSelect;
+
+/** Type for inserting a new coaching streak record */
+export type NewCoachingStreak = typeof coachingStreaks.$inferInsert;
+
+// ============================================================================
+// STREAK ACTIVITIES TABLE
+// ============================================================================
+
+/**
+ * Streak Activities Table
+ *
+ * Audit log of qualifying actions per week that contribute to streaks.
+ *
+ * ## Purpose
+ * Records each qualifying action (session, check-in, message, etc.) with
+ * ISO week/year for weekly aggregation.
+ *
+ * ## Relationships
+ * - Belongs to users (as client, many:1)
+ */
+export const streakActivities = pgTable(
+  'streak_activities',
+  {
+    id: serial('id').primaryKey(),
+
+    /** The client who performed the action */
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+
+    /** The type of qualifying action */
+    actionType: streakActionTypeEnum('action_type').notNull(),
+
+    /** Optional reference to the source entity (bookingId, actionItemId, etc.) */
+    referenceId: text('reference_id'),
+
+    /** ISO week number (1-53) */
+    weekNumber: integer('week_number').notNull(),
+
+    /** ISO year for the week */
+    weekYear: integer('week_year').notNull(),
+
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('streak_activities_user_id_idx').on(table.userId),
+    index('streak_activities_user_week_idx').on(table.userId, table.weekYear, table.weekNumber),
+  ]
+);
+
+/** Type for selecting a streak activity record */
+export type StreakActivity = typeof streakActivities.$inferSelect;
+
+/** Type for inserting a new streak activity record */
+export type NewStreakActivity = typeof streakActivities.$inferInsert;
+
+// ============================================================================
+// WEEKLY CHECK-INS TABLE
+// ============================================================================
+
+/**
+ * Weekly Check-Ins Table
+ *
+ * Client mood check-ins submitted weekly to their coach.
+ *
+ * ## Purpose
+ * Lightweight pulse-check allowing clients to share their mood and a brief note
+ * with their coach between sessions.
+ *
+ * ## Relationships
+ * - Belongs to users (as client, many:1)
+ * - Belongs to users (as coach, many:1)
+ *
+ * ## Constraints
+ * - One check-in per client-coach pair per week (unique index)
+ * - Note max 280 chars (enforced at API level)
+ */
+export const weeklyCheckIns = pgTable(
+  'weekly_check_ins',
+  {
+    id: serial('id').primaryKey(),
+
+    /** The client submitting the check-in */
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+
+    /** The coach receiving the check-in */
+    coachId: text('coach_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+
+    /** Client's self-reported mood */
+    mood: checkInMoodEnum('mood').notNull(),
+
+    /** Optional brief note (max 280 chars, enforced at API level) */
+    note: text('note'),
+
+    /** ISO week number (1-53) */
+    weekNumber: integer('week_number').notNull(),
+
+    /** ISO year for the week */
+    weekYear: integer('week_year').notNull(),
+
+    /** Day of week the check-in is prompted (0=Sun..6=Sat, default Wed) */
+    checkInDay: integer('check_in_day').notNull().default(3),
+
+    /** When the coach responded/acknowledged (null = pending) */
+    respondedAt: timestamp('responded_at', { withTimezone: true }),
+
+    /** When the check-in prompt was sent to the client */
+    promptedAt: timestamp('prompted_at', { withTimezone: true }).notNull().defaultNow(),
+
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex('weekly_check_ins_user_coach_week_idx').on(
+      table.userId, table.coachId, table.weekYear, table.weekNumber
+    ),
+    index('weekly_check_ins_coach_id_idx').on(table.coachId),
+  ]
+);
+
+/** Type for selecting a weekly check-in record */
+export type WeeklyCheckIn = typeof weeklyCheckIns.$inferSelect;
+
+/** Type for inserting a new weekly check-in record */
+export type NewWeeklyCheckIn = typeof weeklyCheckIns.$inferInsert;
+
+// ============================================================================
+// SESSION PREP RESPONSES TABLE
+// ============================================================================
+
+/**
+ * Session Prep Responses Table
+ *
+ * Client-submitted preparation for upcoming sessions.
+ *
+ * ## Purpose
+ * Captures client answers to prep questions before each session,
+ * giving coaches context to prepare better sessions.
+ *
+ * ## Relationships
+ * - Belongs to bookings (1:1 via unique index)
+ * - Belongs to users (as client, many:1)
+ * - Belongs to users (as coach, many:1)
+ */
+export const sessionPrepResponses = pgTable(
+  'session_prep_responses',
+  {
+    id: serial('id').primaryKey(),
+
+    /** The upcoming session this prep is for (unique — one prep per session) */
+    bookingId: integer('booking_id')
+      .notNull()
+      .references(() => bookings.id, { onDelete: 'cascade' }),
+
+    /** The client preparing for the session */
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+
+    /** The coach for the session */
+    coachId: text('coach_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+
+    /** Client's answers to prep questions */
+    responses: jsonb('responses').notNull().$type<Array<{ question: string; answer: string }>>(),
+
+    /** When the prep prompt was sent to the client */
+    promptedAt: timestamp('prompted_at', { withTimezone: true }).notNull().defaultNow(),
+
+    /** When the client completed the prep (null = in progress) */
+    completedAt: timestamp('completed_at', { withTimezone: true }),
+
+    /** Whether the coach has viewed this prep */
+    viewedByCoach: boolean('viewed_by_coach').notNull().default(false),
+
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    uniqueIndex('session_prep_responses_booking_id_idx').on(table.bookingId),
+    index('session_prep_responses_coach_id_idx').on(table.coachId),
+    index('session_prep_responses_user_id_idx').on(table.userId),
+  ]
+);
+
+/** Type for selecting a session prep response record */
+export type SessionPrepResponse = typeof sessionPrepResponses.$inferSelect;
+
+/** Type for inserting a new session prep response record */
+export type NewSessionPrepResponse = typeof sessionPrepResponses.$inferInsert;
+
+// ============================================================================
+// SESSION PREP QUESTIONS TABLE
+// ============================================================================
+
+/**
+ * Session Prep Questions Table
+ *
+ * Coach-configurable questions asked to clients before sessions.
+ *
+ * ## Purpose
+ * Each coach can customize their prep questions (2-5 questions).
+ * One row per coach (unique index). Default questions seeded for new coaches.
+ *
+ * ## Relationships
+ * - Belongs to users (as coach, 1:1 via unique index)
+ */
+export const sessionPrepQuestions = pgTable(
+  'session_prep_questions',
+  {
+    id: serial('id').primaryKey(),
+
+    /** The coach who configured these questions (null = global default) */
+    coachId: text('coach_id')
+      .references(() => users.id, { onDelete: 'cascade' }),
+
+    /** Array of 2-5 prep questions */
+    questions: jsonb('questions').notNull().$type<string[]>(),
+
+    /** Whether these are the default questions */
+    isDefault: boolean('is_default').notNull().default(false),
+
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
+  },
+  (table) => [
+    uniqueIndex('session_prep_questions_coach_id_idx').on(table.coachId),
+  ]
+);
+
+/** Type for selecting a session prep questions record */
+export type SessionPrepQuestion = typeof sessionPrepQuestions.$inferSelect;
+
+/** Type for inserting a new session prep questions record */
+export type NewSessionPrepQuestion = typeof sessionPrepQuestions.$inferInsert;
+
+// ============================================================================
+// RETENTION FEATURES RELATIONS (S18)
+// ============================================================================
+
+export const coachingStreaksRelations = relations(coachingStreaks, ({ one, many }) => ({
+  user: one(users, {
+    fields: [coachingStreaks.userId],
+    references: [users.id],
+  }),
+  activities: many(streakActivities),
+}));
+
+export const streakActivitiesRelations = relations(streakActivities, ({ one }) => ({
+  user: one(users, {
+    fields: [streakActivities.userId],
+    references: [users.id],
+  }),
+  streak: one(coachingStreaks, {
+    fields: [streakActivities.userId],
+    references: [coachingStreaks.userId],
+  }),
+}));
+
+export const weeklyCheckInsRelations = relations(weeklyCheckIns, ({ one }) => ({
+  user: one(users, {
+    fields: [weeklyCheckIns.userId],
+    references: [users.id],
+    relationName: 'clientCheckIns',
+  }),
+  coach: one(users, {
+    fields: [weeklyCheckIns.coachId],
+    references: [users.id],
+    relationName: 'coachCheckIns',
+  }),
+}));
+
+export const sessionPrepResponsesRelations = relations(sessionPrepResponses, ({ one }) => ({
+  booking: one(bookings, {
+    fields: [sessionPrepResponses.bookingId],
+    references: [bookings.id],
+  }),
+  user: one(users, {
+    fields: [sessionPrepResponses.userId],
+    references: [users.id],
+    relationName: 'clientPrepResponses',
+  }),
+  coach: one(users, {
+    fields: [sessionPrepResponses.coachId],
+    references: [users.id],
+    relationName: 'coachPrepResponses',
+  }),
+}));
+
+export const sessionPrepQuestionsRelations = relations(sessionPrepQuestions, ({ one }) => ({
+  coach: one(users, {
+    fields: [sessionPrepQuestions.coachId],
     references: [users.id],
   }),
 }));

@@ -1,0 +1,1 @@
+ALTER TABLE "session_prep_questions" ALTER COLUMN "coach_id" DROP NOT NULL;

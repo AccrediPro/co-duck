@@ -5,6 +5,7 @@ import { eq, and, ne, lt, desc, inArray, count } from 'drizzle-orm';
 import { z } from 'zod';
 import { rateLimit, WRITE_LIMIT, FREQUENT_LIMIT, rateLimitResponse } from '@/lib/rate-limit';
 import { getSocketServer } from '@/lib/socket-server';
+import { recordStreakActivity } from '@/lib/streaks';
 
 const createPostSchema = z
   .object({
@@ -295,6 +296,9 @@ export async function POST(request: Request) {
         conversation.coachId === userId ? conversation.clientId : conversation.coachId;
       emitIConnectPostEvents(recipientId, postPayload, conversationId);
 
+      // Record streak activity (fire-and-forget)
+      recordStreakActivity(userId, 'iconnect_post', String(result.post.id)).catch(console.error);
+
       return Response.json({ success: true, data: { post: postPayload } });
     }
 
@@ -331,6 +335,9 @@ export async function POST(request: Request) {
     const recipientId =
       conversation.coachId === userId ? conversation.clientId : conversation.coachId;
     emitIConnectPostEvents(recipientId, postPayload, conversationId);
+
+    // Record streak activity (fire-and-forget)
+    recordStreakActivity(userId, 'iconnect_post', String(post.id)).catch(console.error);
 
     return Response.json({ success: true, data: { post: postPayload } });
   } catch (error) {

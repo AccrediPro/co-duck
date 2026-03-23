@@ -176,6 +176,20 @@
       "when": 1774099090810,
       "tag": "0024_opposite_frightful_four",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1774285020848,
+      "tag": "0025_exotic_monster_badoon",
+      "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1774285085635,
+      "tag": "0026_long_alice",
+      "breakpoints": true
     }
   ]
 }
