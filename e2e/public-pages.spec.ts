@@ -4,7 +4,10 @@ import { test, expect } from '@playwright/test';
 async function gotoWithRetry(page: import('@playwright/test').Page, path: string, maxRetries = 2) {
   for (let i = 0; i <= maxRetries; i++) {
     await page.goto(path);
-    const hasServerError = await page.locator('h1:has-text("Server Error")').isVisible({ timeout: 2_000 }).catch(() => false);
+    const hasServerError = await page
+      .locator('h1:has-text("Server Error")')
+      .isVisible({ timeout: 2_000 })
+      .catch(() => false);
     if (!hasServerError) return;
     if (i < maxRetries) await page.waitForTimeout(1_000);
   }
@@ -22,7 +25,9 @@ test.describe('Pagine pubbliche', () => {
     await expect(page.getByRole('link', { name: /become a coach/i }).first()).toBeVisible();
 
     // Verifica sezione "Why Choose AccrediPro CoachHub?"
-    await expect(page.getByRole('heading', { name: 'Why Choose AccrediPro CoachHub?' })).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: 'Why Choose AccrediPro CoachHub?' })
+    ).toBeVisible();
 
     // Verifica sezione "How It Works"
     await expect(page.getByRole('heading', { name: 'How It Works', exact: true })).toBeVisible();
@@ -104,7 +109,10 @@ test.describe('Pagine pubbliche', () => {
 
     // Verifica risposta 404 o messaggio di errore nella pagina
     const is404 = response?.status() === 404;
-    const hasNotFoundText = await page.getByText(/not found|404|doesn't exist/i).isVisible().catch(() => false);
+    const hasNotFoundText = await page
+      .getByText(/not found|404|doesn't exist/i)
+      .isVisible()
+      .catch(() => false);
 
     expect(is404 || hasNotFoundText).toBeTruthy();
   });

@@ -13,7 +13,9 @@ const SCREENSHOT_DIR = join(__dirname, '..', 'screenshots', 'design-audit');
 const VIEWPORT = { width: 1440, height: 900 };
 const MOBILE_VIEWPORT = { width: 390, height: 844 };
 
-async function ensureDir(dir) { await mkdir(dir, { recursive: true }); }
+async function ensureDir(dir) {
+  await mkdir(dir, { recursive: true });
+}
 
 async function goTo(page, url) {
   try {
@@ -52,7 +54,9 @@ async function clerkLogin(page, email, password) {
   let filled = false;
   for (const frame of frames) {
     try {
-      const emailInput = await frame.$('input[name="identifier"], input[autocomplete*="email"], input[type="email"]');
+      const emailInput = await frame.$(
+        'input[name="identifier"], input[autocomplete*="email"], input[type="email"]'
+      );
       if (emailInput) {
         console.log(`  Found email input in frame: ${frame.url()}`);
         await emailInput.fill(email);
@@ -124,7 +128,11 @@ async function run() {
     const links = await page.$$('a[href]');
     for (const link of links) {
       const href = await link.getAttribute('href').catch(() => null);
-      if (href && href.startsWith('/dashboard/sessions/') && href.length > '/dashboard/sessions/'.length) {
+      if (
+        href &&
+        href.startsWith('/dashboard/sessions/') &&
+        href.length > '/dashboard/sessions/'.length
+      ) {
         console.log(`  Found session link: ${href}`);
         await auditPage(page, `${BASE_URL}${href}`, 'auth-22-session-detail-coach');
         break;
@@ -157,7 +165,11 @@ async function run() {
     const links = await page.$$('a[href]');
     for (const link of links) {
       const href = await link.getAttribute('href').catch(() => null);
-      if (href && href.startsWith('/dashboard/sessions/') && href.length > '/dashboard/sessions/'.length) {
+      if (
+        href &&
+        href.startsWith('/dashboard/sessions/') &&
+        href.length > '/dashboard/sessions/'.length
+      ) {
         await auditPage(page, `${BASE_URL}${href}`, 'auth-31-session-detail-client');
         break;
       }

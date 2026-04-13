@@ -11,12 +11,7 @@
 
 import 'dotenv/config';
 import { db } from '../src/db';
-import {
-  actionItems,
-  conversations,
-  iconnectPosts,
-  iconnectTaskItems,
-} from '../src/db/schema';
+import { actionItems, conversations, iconnectPosts, iconnectTaskItems } from '../src/db/schema';
 import { eq, and } from 'drizzle-orm';
 
 const isDryRun = process.argv.includes('--dry-run');
@@ -25,10 +20,7 @@ if (isDryRun) {
   console.log('[DRY RUN] No writes will be performed.\n');
 }
 
-async function findOrCreateConversation(
-  coachId: string,
-  clientId: string
-): Promise<number> {
+async function findOrCreateConversation(coachId: string, clientId: string): Promise<number> {
   const existing = await db
     .select({ id: conversations.id })
     .from(conversations)
@@ -79,10 +71,10 @@ async function alreadyMigrated(
   return existing.length > 0;
 }
 
-async function migrateItem(item: typeof actionItems.$inferSelect): Promise<'migrated' | 'skipped' | 'error'> {
-  const content = item.description
-    ? `${item.title}\n${item.description}`
-    : item.title;
+async function migrateItem(
+  item: typeof actionItems.$inferSelect
+): Promise<'migrated' | 'skipped' | 'error'> {
+  const content = item.description ? `${item.title}\n${item.description}` : item.title;
 
   try {
     const conversationId = await findOrCreateConversation(item.coachId, item.clientId);
@@ -124,7 +116,10 @@ async function migrateItem(item: typeof actionItems.$inferSelect): Promise<'migr
     console.log(`  OK    id=${item.id} "${item.title}"`);
     return 'migrated';
   } catch (err) {
-    console.error(`  ERROR id=${item.id} "${item.title}":`, err instanceof Error ? err.message : err);
+    console.error(
+      `  ERROR id=${item.id} "${item.title}":`,
+      err instanceof Error ? err.message : err
+    );
     return 'error';
   }
 }

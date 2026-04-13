@@ -38,16 +38,16 @@
     --success: 79 22% 50%;
 
     /* Brand accent palette */
-    --brand-warm: 354 42% 32%;               /* #722f37 */
-    --brand-accent: 354 41% 39%;             /* #8b3a42 */
-    --brand-accent-light: 40 60% 91%;        /* #f5eddc */
-    --brand-accent-dark: 354 41% 26%;        /* #5d262d */
-    --brand-accent-darker: 354 41% 20%;      /* #4d2026 */
-    --brand-accent-muted: 354 30% 45%;       /* #956168 */
-    --brand-accent-hover: 354 41% 39%;       /* #8b3a42 */
-    --brand-surface: 40 50% 97%;             /* #faf7f0 */
-    --brand-border: 36 30% 82%;              /* #ddd4c4 */
-    --brand-accent-deep: 354 41% 16%;        /* #3b1a1e */
+    --brand-warm: 354 42% 32%; /* #722f37 */
+    --brand-accent: 354 41% 39%; /* #8b3a42 */
+    --brand-accent-light: 40 60% 91%; /* #f5eddc */
+    --brand-accent-dark: 354 41% 26%; /* #5d262d */
+    --brand-accent-darker: 354 41% 20%; /* #4d2026 */
+    --brand-accent-muted: 354 30% 45%; /* #956168 */
+    --brand-accent-hover: 354 41% 39%; /* #8b3a42 */
+    --brand-surface: 40 50% 97%; /* #faf7f0 */
+    --brand-border: 36 30% 82%; /* #ddd4c4 */
+    --brand-accent-deep: 354 41% 16%; /* #3b1a1e */
   }
   .dark {
     --background: 354 30% 6%;

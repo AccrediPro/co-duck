@@ -22,11 +22,16 @@ test.describe('Messaggistica', () => {
       await page.waitForLoadState('domcontentloaded');
 
       // Verifica che la chat si apre (input messaggio o area messaggi)
-      const chatArea = page.locator('textarea, input[placeholder*="message" i], input[placeholder*="type" i]').first();
+      const chatArea = page
+        .locator('textarea, input[placeholder*="message" i], input[placeholder*="type" i]')
+        .first();
       await expect(chatArea).toBeVisible({ timeout: 10_000 });
     } else {
       // Nessuna conversazione — verifica messaggio vuoto
-      const emptyMessage = await page.getByText(/no conversations|no messages|start a conversation/i).isVisible().catch(() => false);
+      const emptyMessage = await page
+        .getByText(/no conversations|no messages|start a conversation/i)
+        .isVisible()
+        .catch(() => false);
       expect(emptyMessage).toBeTruthy();
     }
   });
@@ -47,7 +52,9 @@ test.describe('Messaggistica', () => {
     await page.waitForLoadState('networkidle');
 
     // Trova l'input per il messaggio
-    const messageInput = page.locator('textarea, input[placeholder*="message" i], input[placeholder*="type" i]').first();
+    const messageInput = page
+      .locator('textarea, input[placeholder*="message" i], input[placeholder*="type" i]')
+      .first();
     await messageInput.waitFor({ state: 'visible', timeout: 10_000 });
 
     // Digita un messaggio di test
@@ -73,7 +80,9 @@ test.describe('Messaggistica', () => {
     await conversation.click();
     await page.waitForLoadState('networkidle');
 
-    const messageInput = page.locator('textarea, input[placeholder*="message" i], input[placeholder*="type" i]').first();
+    const messageInput = page
+      .locator('textarea, input[placeholder*="message" i], input[placeholder*="type" i]')
+      .first();
     await messageInput.waitFor({ state: 'visible', timeout: 10_000 });
 
     // Invia un messaggio
@@ -95,7 +104,10 @@ test.describe('Messaggistica', () => {
     await page.waitForTimeout(2000);
 
     // Verifica che il messaggio inviato sia visibile nella chat
-    const messageSent = await page.getByText(testMessage).isVisible().catch(() => false);
+    const messageSent = await page
+      .getByText(testMessage)
+      .isVisible()
+      .catch(() => false);
     expect(messageSent).toBeTruthy();
   });
 });

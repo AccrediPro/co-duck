@@ -28,11 +28,11 @@ app.prepare().then(async () => {
     cors: {
       origin: dev
         ? true // Allow all origins in dev (mobile connects from LAN IP)
-        : [
+        : ([
             `http://localhost:${port}`,
             `https://localhost:${port}`,
             process.env.NEXT_PUBLIC_APP_URL,
-          ].filter(Boolean) as string[],
+          ].filter(Boolean) as string[]),
       methods: ['GET', 'POST'],
       credentials: true,
     },
@@ -74,7 +74,9 @@ app.prepare().then(async () => {
   io.on('connection', async (socket) => {
     const userId: string = socket.data.userId;
     const isReconnect = connectedUsers.has(userId);
-    console.log(`[socket.io] User ${isReconnect ? 'reconnected' : 'connected'}: ${userId} (socket: ${socket.id})`);
+    console.log(
+      `[socket.io] User ${isReconnect ? 'reconnected' : 'connected'}: ${userId} (socket: ${socket.id})`
+    );
 
     // Track connected user
     if (!connectedUsers.has(userId)) {
@@ -100,10 +102,7 @@ app.prepare().then(async () => {
         const conversation = await db.query.conversations.findFirst({
           where: and(
             eq(conversations.id, conversationId),
-            or(
-              eq(conversations.coachId, userId),
-              eq(conversations.clientId, userId)
-            )
+            or(eq(conversations.coachId, userId), eq(conversations.clientId, userId))
           ),
         });
 
@@ -142,7 +141,12 @@ app.prepare().then(async () => {
       try {
         const { conversationId, content } = data;
 
-        if (!conversationId || !content || typeof content !== 'string' || content.trim().length === 0) {
+        if (
+          !conversationId ||
+          !content ||
+          typeof content !== 'string' ||
+          content.trim().length === 0
+        ) {
           socket.emit('error', { message: 'Invalid message data' });
           return;
         }
@@ -155,10 +159,7 @@ app.prepare().then(async () => {
         const conversation = await db.query.conversations.findFirst({
           where: and(
             eq(conversations.id, conversationId),
-            or(
-              eq(conversations.coachId, userId),
-              eq(conversations.clientId, userId)
-            )
+            or(eq(conversations.coachId, userId), eq(conversations.clientId, userId))
           ),
         });
 
@@ -195,33 +196,47 @@ app.prepare().then(async () => {
           conversation.coachId === userId ? conversation.clientId : conversation.coachId;
 
         // Create notification for recipient and emit via Socket.io
-        const notifBody = content.trim().length > 100 ? content.trim().slice(0, 100) + '...' : content.trim();
-        await db.insert(notifications).values({
-          userId: recipientId,
-          type: 'new_message',
-          title: `New message from ${sender?.name || 'Someone'}`,
-          message: notifBody,
-          body: notifBody,
-          link: `/dashboard/messages/${conversationId}`,
-        }).returning().then(([inserted]) => {
-          if (inserted) {
-            io.to(`user:${recipientId}`).timeout(5000).emit('notification:new', {
-              id: inserted.id,
-              type: inserted.type,
-              title: inserted.title,
-              body: inserted.body,
-              link: inserted.link,
-              isRead: inserted.isRead,
-              createdAt: inserted.createdAt,
-            }, (err: Error | null) => {
-              if (err) {
-                console.warn(`[socket.io] Notification not acknowledged by ${recipientId} within 5s (type: ${inserted.type})`);
-              }
-            });
-          }
-        }).catch((err: unknown) => {
-          console.error('[socket.io] Failed to create notification:', err);
-        });
+        const notifBody =
+          content.trim().length > 100 ? content.trim().slice(0, 100) + '...' : content.trim();
+        await db
+          .insert(notifications)
+          .values({
+            userId: recipientId,
+            type: 'new_message',
+            title: `New message from ${sender?.name || 'Someone'}`,
+            message: notifBody,
+            body: notifBody,
+            link: `/dashboard/messages/${conversationId}`,
+          })
+          .returning()
+          .then(([inserted]) => {
+            if (inserted) {
+              io.to(`user:${recipientId}`)
+                .timeout(5000)
+                .emit(
+                  'notification:new',
+                  {
+                    id: inserted.id,
+                    type: inserted.type,
+                    title: inserted.title,
+                    body: inserted.body,
+                    link: inserted.link,
+                    isRead: inserted.isRead,
+                    createdAt: inserted.createdAt,
+                  },
+                  (err: Error | null) => {
+                    if (err) {
+                      console.warn(
+                        `[socket.io] Notification not acknowledged by ${recipientId} within 5s (type: ${inserted.type})`
+                      );
+                    }
+                  }
+                );
+            }
+          })
+          .catch((err: unknown) => {
+            console.error('[socket.io] Failed to create notification:', err);
+          });
 
         // Build the message payload
         const messagePayload = {
@@ -272,9 +287,10 @@ app.prepare().then(async () => {
 
         // Send push notification if recipient is not actively viewing the conversation
         const roomMembers = io.sockets.adapter.rooms.get(room);
-        const recipientInRoom = recipientSockets && roomMembers
-          ? Array.from(recipientSockets).some((sid) => roomMembers.has(sid))
-          : false;
+        const recipientInRoom =
+          recipientSockets && roomMembers
+            ? Array.from(recipientSockets).some((sid) => roomMembers.has(sid))
+            : false;
 
         if (!recipientInRoom) {
           const { sendPushNotification } = await import('./src/lib/push-notifications');
@@ -327,10 +343,7 @@ app.prepare().then(async () => {
         const conversation = await db.query.conversations.findFirst({
           where: and(
             eq(conversations.id, conversationId),
-            or(
-              eq(conversations.coachId, userId),
-              eq(conversations.clientId, userId)
-            )
+            or(eq(conversations.coachId, userId), eq(conversations.clientId, userId))
           ),
         });
 
@@ -362,7 +375,9 @@ app.prepare().then(async () => {
     // ── Disconnect ──────────────────────────────────────────────────────
 
     socket.on('disconnect', (reason) => {
-      console.log(`[socket.io] User disconnected: ${userId} (socket: ${socket.id}, reason: ${reason})`);
+      console.log(
+        `[socket.io] User disconnected: ${userId} (socket: ${socket.id}, reason: ${reason})`
+      );
 
       // Remove socket from user's set
       const userSockets = connectedUsers.get(userId);

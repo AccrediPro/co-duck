@@ -23,14 +23,14 @@ The homepage introduces visitors to the platform with a hero section, features, 
 
 ### Key Elements
 
-| Section                 | Description                                                                  |
-| ----------------------- | ---------------------------------------------------------------------------- |
-| **Hero**                | "Find Your Perfect Coach" headline with CTA buttons                          |
+| Section                            | Description                                                                  |
+| ---------------------------------- | ---------------------------------------------------------------------------- |
+| **Hero**                           | "Find Your Perfect Coach" headline with CTA buttons                          |
 | **Why Choose AccrediPro CoachHub** | 3 value propositions (Expert Coaches, Flexible Scheduling, Secure & Private) |
-| **How It Works**        | 3-step process (Browse, Book, Achieve)                                       |
-| **Featured Coaches**    | Showcase of top coaches with quick links                                     |
-| **Become a Coach CTA**  | Invitation for coaches to join the platform                                  |
-| **Footer**              | Navigation links, newsletter signup, social media                            |
+| **How It Works**                   | 3-step process (Browse, Book, Achieve)                                       |
+| **Featured Coaches**               | Showcase of top coaches with quick links                                     |
+| **Become a Coach CTA**             | Invitation for coaches to join the platform                                  |
+| **Footer**                         | Navigation links, newsletter signup, social media                            |
 
 ### User Actions
 
@@ -149,11 +149,11 @@ Contact form and FAQ section.
 
 ### Contact Options
 
-| Method            | Details                   |
-| ----------------- | ------------------------- |
-| **Email**         | support@accredipro-coachhub.com      |
-| **Location**      | San Francisco, CA         |
-| **Response Time** | Within 24 hours (Mon-Fri) |
+| Method            | Details                         |
+| ----------------- | ------------------------------- |
+| **Email**         | support@accredipro-coachhub.com |
+| **Location**      | San Francisco, CA               |
+| **Response Time** | Within 24 hours (Mon-Fri)       |
 
 ### Form Fields
 

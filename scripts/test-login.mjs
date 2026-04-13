@@ -10,10 +10,10 @@ await page.fill('#password-field', 'tettypottycoach');
 await page.waitForTimeout(500);
 
 const btns = await page.evaluate(() => {
-  return Array.from(document.querySelectorAll('button[type=submit]')).map(b => ({
+  return Array.from(document.querySelectorAll('button[type=submit]')).map((b) => ({
     text: b.textContent?.trim(),
     visible: b.offsetParent !== null,
-    disabled: b.disabled
+    disabled: b.disabled,
   }));
 });
 console.log('Submit buttons:', JSON.stringify(btns, null, 2));
@@ -24,7 +24,7 @@ for (const btn of submitBtns) {
   const visible = await btn.isVisible();
   const disabled = await btn.isDisabled();
   const text = (await btn.innerText().catch(() => '')).trim();
-  console.log(`Button: visible=${visible} disabled=${disabled} text="${text.slice(0,50)}"`);
+  console.log(`Button: visible=${visible} disabled=${disabled} text="${text.slice(0, 50)}"`);
   if (visible && !disabled) {
     console.log('Clicking...');
     await btn.click({ timeout: 5000 });

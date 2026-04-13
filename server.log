@@ -23,3 +23,8 @@
  ✓ Compiled in 161ms (1155 modules)
  ✓ Compiled in 1371ms (5065 modules)
  ✓ Compiled in 2.4s (5932 modules)
+<w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (188kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)
+<w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (187kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)
+<w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (139kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)
+ ✓ Compiled in 1240ms (5918 modules)
+ ✓ Compiled in 907ms (5065 modules)

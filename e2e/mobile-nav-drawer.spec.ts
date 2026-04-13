@@ -15,7 +15,7 @@ test.describe('G3: Mobile Navigation Drawer', () => {
 
     // Desktop sidebar should be hidden on mobile
     const sidebar = page.locator('aside');
-    if (await sidebar.count() > 0) {
+    if ((await sidebar.count()) > 0) {
       await expect(sidebar.first()).not.toBeVisible();
     }
 
@@ -165,7 +165,7 @@ test.describe('G3: Desktop sidebar unchanged', () => {
 
     // Mobile header should be hidden
     const mobileHeader = page.locator('header.md\\:hidden');
-    if (await mobileHeader.count() > 0) {
+    if ((await mobileHeader.count()) > 0) {
       await expect(mobileHeader.first()).not.toBeVisible();
     }
   });

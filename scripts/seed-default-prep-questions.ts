@@ -15,8 +15,8 @@ import { sessionPrepQuestions } from '../src/db/schema';
 import { eq } from 'drizzle-orm';
 
 const defaultQuestions = [
-  "What is the most important thing you want to discuss in the next session?",
-  "How do you feel about the last goal we set together?",
+  'What is the most important thing you want to discuss in the next session?',
+  'How do you feel about the last goal we set together?',
   "Is there anything that happened this week that you'd like to share?",
 ];
 

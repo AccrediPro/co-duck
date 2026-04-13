@@ -13,7 +13,9 @@ const SCREENSHOT_DIR = join(__dirname, '..', 'screenshots', 'design-audit');
 const VIEWPORT = { width: 1440, height: 900 };
 const MOBILE_VIEWPORT = { width: 390, height: 844 };
 
-async function ensureDir(dir) { await mkdir(dir, { recursive: true }); }
+async function ensureDir(dir) {
+  await mkdir(dir, { recursive: true });
+}
 
 async function goTo(page, url) {
   try {
@@ -82,7 +84,11 @@ async function run() {
     await auditPage(page, `${BASE_URL}/dashboard/profile`, 'final-18-coach-profile');
     await auditPage(page, `${BASE_URL}/dashboard/payments`, 'final-19-coach-payments');
     await auditPage(page, `${BASE_URL}/dashboard/settings`, 'final-20-coach-settings');
-    await auditPage(page, `${BASE_URL}/dashboard/settings/security`, 'final-21-coach-settings-security');
+    await auditPage(
+      page,
+      `${BASE_URL}/dashboard/settings/security`,
+      'final-21-coach-settings-security'
+    );
 
     // Find a session detail
     await goTo(page, `${BASE_URL}/dashboard/sessions`);
@@ -112,7 +118,11 @@ async function run() {
     await auditPage(page, `${BASE_URL}/dashboard/action-items`, 'final-27-client-action-items');
     await auditPage(page, `${BASE_URL}/dashboard/profile`, 'final-28-client-profile');
     await auditPage(page, `${BASE_URL}/dashboard/settings`, 'final-29-client-settings');
-    await auditPage(page, `${BASE_URL}/dashboard/settings/security`, 'final-30-client-settings-security');
+    await auditPage(
+      page,
+      `${BASE_URL}/dashboard/settings/security`,
+      'final-30-client-settings-security'
+    );
 
     // Find a session detail
     await goTo(page, `${BASE_URL}/dashboard/my-sessions`);

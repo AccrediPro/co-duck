@@ -84,7 +84,11 @@ test.describe('Flusso di prenotazione', () => {
 
     // Verifica che ci siano elementi relativi alla prenotazione
     // (tipi di sessione, calendario, o step)
-    const hasBookingContent = await page.getByText(/session|minutes|select|book/i).first().isVisible().catch(() => false);
+    const hasBookingContent = await page
+      .getByText(/session|minutes|select|book/i)
+      .first()
+      .isVisible()
+      .catch(() => false);
     expect(hasBookingContent).toBeTruthy();
   });
 
@@ -105,7 +109,8 @@ test.describe('Flusso di prenotazione', () => {
     await page.waitForLoadState('networkidle');
 
     // Cerca e clicca un tipo di sessione (se visibile)
-    const sessionCard = page.locator('[class*="card"], [class*="Card"]')
+    const sessionCard = page
+      .locator('[class*="card"], [class*="Card"]')
       .filter({ hasText: /minutes/i })
       .first();
 
@@ -118,7 +123,8 @@ test.describe('Flusso di prenotazione', () => {
       await page.waitForTimeout(1000);
 
       // Verifica che ci sia un elemento di selezione data (calendario o date)
-      const hasDateSelection = await page.locator('button, [role="gridcell"]')
+      const hasDateSelection = await page
+        .locator('button, [role="gridcell"]')
         .filter({ hasText: /\d{1,2}/ })
         .first()
         .isVisible()

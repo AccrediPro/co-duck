@@ -17,7 +17,9 @@ console.log('URL after Enter:', page.url());
 
 if (page.url().includes('sign-in')) {
   console.log('Trying force click on submit button...');
-  await page.click('button[type=submit]', { force: true, timeout: 5000 }).catch(e => console.log('force click error:', e.message));
+  await page
+    .click('button[type=submit]', { force: true, timeout: 5000 })
+    .catch((e) => console.log('force click error:', e.message));
   await page.waitForTimeout(5000);
   console.log('URL after force click:', page.url());
 }

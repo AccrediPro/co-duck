@@ -32,7 +32,10 @@ test.describe('Dashboard Coach', () => {
     await expect(page.getByText(/availability/i).first()).toBeVisible({ timeout: 10_000 });
     const weekdays = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
     for (const day of weekdays.slice(0, 3)) {
-      const dayVisible = await page.getByText(day).isVisible().catch(() => false);
+      const dayVisible = await page
+        .getByText(day)
+        .isVisible()
+        .catch(() => false);
       if (dayVisible) {
         await expect(page.getByText(day)).toBeVisible();
         break;
@@ -44,7 +47,9 @@ test.describe('Dashboard Coach', () => {
     await page.goto('/dashboard/messages');
 
     // Verifica che la pagina messaggi si carica
-    await expect(page.getByText(/messages|conversations/i).first()).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText(/messages|conversations/i).first()).toBeVisible({
+      timeout: 10_000,
+    });
   });
 
   test('la pagina Profile si carica con il form di modifica', async ({ page }) => {

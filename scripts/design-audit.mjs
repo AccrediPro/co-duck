@@ -26,7 +26,9 @@ async function goTo(page, url) {
 async function screenshot(page, name, suffix = '') {
   const filename = suffix ? `${name}-${suffix}.png` : `${name}.png`;
   const path = join(SCREENSHOT_DIR, filename);
-  await page.screenshot({ path, fullPage: true }).catch(e => console.log(`  ⚠️  Screenshot failed: ${e.message}`));
+  await page
+    .screenshot({ path, fullPage: true })
+    .catch((e) => console.log(`  ⚠️  Screenshot failed: ${e.message}`));
   console.log(`  📸 ${filename}`);
 }
 
@@ -49,13 +51,17 @@ async function loginAs(page, email, password, role) {
   // Clerk renders an iframe or direct form
   try {
     // Try direct inputs first
-    const emailInput = await page.$('input[name="identifier"], input[type="email"], input[autocomplete="username email"]');
+    const emailInput = await page.$(
+      'input[name="identifier"], input[type="email"], input[autocomplete="username email"]'
+    );
     if (emailInput) {
       await emailInput.click();
       await emailInput.fill(email);
       await page.waitForTimeout(300);
 
-      const continueBtn = await page.$('button[type="submit"], button:has-text("Continue"), button:has-text("Sign in")');
+      const continueBtn = await page.$(
+        'button[type="submit"], button:has-text("Continue"), button:has-text("Sign in")'
+      );
       if (continueBtn) {
         await continueBtn.click();
         await page.waitForTimeout(1500);
@@ -154,7 +160,9 @@ async function run() {
 
     // Try finding a specific session
     await goTo(page, `${BASE_URL}/dashboard/sessions`);
-    const sessionLink = await page.$('a[href*="/dashboard/sessions/"][href!="/dashboard/sessions"]');
+    const sessionLink = await page.$(
+      'a[href*="/dashboard/sessions/"][href!="/dashboard/sessions"]'
+    );
     if (sessionLink) {
       const href = await sessionLink.getAttribute('href');
       if (href && href.length > '/dashboard/sessions'.length) {

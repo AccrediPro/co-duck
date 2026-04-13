@@ -53,7 +53,9 @@ async function main() {
     console.error('Missing required environment variables:');
     if (!url) console.error('  - NEXT_PUBLIC_SUPABASE_URL');
     if (!key) console.error('  - SUPABASE_SERVICE_ROLE_KEY');
-    console.error('\nAdd SUPABASE_SERVICE_ROLE_KEY to .env (find it in Supabase Dashboard → Settings → API)');
+    console.error(
+      '\nAdd SUPABASE_SERVICE_ROLE_KEY to .env (find it in Supabase Dashboard → Settings → API)'
+    );
     process.exit(1);
   }
 
