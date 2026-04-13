@@ -545,7 +545,9 @@ async function getRecentMessagesForUser(userId: string, limit: number): Promise<
   if (convs.length === 0) return [];
 
   const convIds = convs.map((c) => c.id);
-  const otherUserIds = Array.from(new Set(convs.map((c) => (c.coachId === userId ? c.clientId : c.coachId))));
+  const otherUserIds = Array.from(
+    new Set(convs.map((c) => (c.coachId === userId ? c.clientId : c.coachId)))
+  );
 
   const [usersData, lastMessages, unreadCounts] = await Promise.all([
     db
@@ -556,7 +558,9 @@ async function getRecentMessagesForUser(userId: string, limit: number): Promise<
       .select({
         conversationId: messages.conversationId,
         content: messages.content,
-        rn: sql<number>`ROW_NUMBER() OVER (PARTITION BY ${messages.conversationId} ORDER BY ${messages.createdAt} DESC)`.as('rn'),
+        rn: sql<number>`ROW_NUMBER() OVER (PARTITION BY ${messages.conversationId} ORDER BY ${messages.createdAt} DESC)`.as(
+          'rn'
+        ),
       })
       .from(messages)
       .where(inArray(messages.conversationId, convIds))
@@ -578,9 +582,7 @@ async function getRecentMessagesForUser(userId: string, limit: number): Promise<
   ]);
 
   const userMap = new Map(usersData.map((u) => [u.id, u]));
-  const lastMsgMap = new Map(
-    lastMessages.map((r) => [r.conversationId, r.content])
-  );
+  const lastMsgMap = new Map(lastMessages.map((r) => [r.conversationId, r.content]));
   const unreadMap = new Map(unreadCounts.map((r) => [r.conversationId, Number(r.count)]));
 
   return convs.map((conv) => {

@@ -54,20 +54,20 @@ function copyDaySchedule(data: CopyScheduleData): DaySchedule[] {
 function getNextDefaultRange(existingRanges: TimeRange[]): TimeRange {
   if (existingRanges.length === 0) return { startTime: '09:00', endTime: '17:00' };
 
-  const lastRange = [...existingRanges].sort((a, b) =>
-    b.endTime.localeCompare(a.endTime)
-  )[0];
+  const lastRange = [...existingRanges].sort((a, b) => b.endTime.localeCompare(a.endTime))[0];
 
   const [hours, minutes] = lastRange.endTime.split(':').map(Number);
-  const startMinutes = (hours * 60 + minutes) + 60; // 1 hour gap
+  const startMinutes = hours * 60 + minutes + 60; // 1 hour gap
   const endMinutes = startMinutes + 240; // 4 hours duration
 
   const clampedStart = Math.min(startMinutes, 23 * 60);
   const clampedEnd = Math.min(endMinutes, 23 * 60 + 30);
 
   const formatTime = (mins: number) => {
-    const h = Math.floor(mins / 60).toString().padStart(2, '0');
-    const m = (mins % 60 < 30 ? '00' : '30');
+    const h = Math.floor(mins / 60)
+      .toString()
+      .padStart(2, '0');
+    const m = mins % 60 < 30 ? '00' : '30';
     return `${h}:${m}`;
   };
 
@@ -412,10 +412,7 @@ export function AvailabilityForm({ initialData }: AvailabilityFormProps) {
               const overlapError = validationErrors[`${day.value}-overlap`];
 
               return (
-                <div
-                  key={day.value}
-                  className="flex flex-col gap-4 rounded-lg border p-4"
-                >
+                <div key={day.value} className="flex flex-col gap-4 rounded-lg border p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <span className="min-w-[100px] font-medium">{day.label}</span>
@@ -495,9 +492,7 @@ export function AvailabilityForm({ initialData }: AvailabilityFormProps) {
                         );
                       })}
 
-                      {overlapError && (
-                        <p className="text-sm text-destructive">{overlapError}</p>
-                      )}
+                      {overlapError && <p className="text-sm text-destructive">{overlapError}</p>}
 
                       <Button
                         variant="ghost"

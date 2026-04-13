@@ -218,7 +218,9 @@ export function TemplateManagerDialog({ onTemplatesChanged }: TemplateManagerDia
       {/* Delete confirmation */}
       <AlertDialog
         open={!!deleteTarget}
-        onOpenChange={(v) => { if (!v) setDeleteTarget(null); }}
+        onOpenChange={(v) => {
+          if (!v) setDeleteTarget(null);
+        }}
       >
         <AlertDialogContent>
           <AlertDialogHeader>

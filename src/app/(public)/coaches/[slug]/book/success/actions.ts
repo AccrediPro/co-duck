@@ -197,7 +197,6 @@ export async function getBookingFromCheckoutSession(
           // Don't fail the booking if message creation fails
         });
       }
-
     }
 
     return {

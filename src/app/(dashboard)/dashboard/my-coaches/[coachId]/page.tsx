@@ -18,7 +18,10 @@ async function getCoachData(coachId: string) {
 
   const [coachesRes, programsRes] = await Promise.all([
     fetch(`${baseUrl}/api/my-coaches?limit=50`, { headers: { Cookie: cookie }, cache: 'no-store' }),
-    fetch(`${baseUrl}/api/programs?coachId=${coachId}&limit=50`, { headers: { Cookie: cookie }, cache: 'no-store' }),
+    fetch(`${baseUrl}/api/programs?coachId=${coachId}&limit=50`, {
+      headers: { Cookie: cookie },
+      cache: 'no-store',
+    }),
   ]);
 
   const [coachesJson, programsJson] = await Promise.all([coachesRes.json(), programsRes.json()]);

@@ -230,7 +230,7 @@ export async function POST(req: Request) {
         .set({
           email,
           name,
-          avatarUrl: hasCustomAvatar ? existingUser!.avatarUrl : (image_url || null),
+          avatarUrl: hasCustomAvatar ? existingUser!.avatarUrl : image_url || null,
         })
         .where(eq(users.id, id));
 

@@ -12,8 +12,8 @@ const MIN_QUESTIONS = 2;
 const MAX_QUESTIONS = 5;
 
 const DEFAULT_QUESTIONS = [
-  'What would you like to get out of today\'s session?',
-  'Is there something specific you\'d like to discuss?',
+  "What would you like to get out of today's session?",
+  "Is there something specific you'd like to discuss?",
   'How do you feel about your progress since the last session?',
 ];
 
@@ -184,11 +184,7 @@ export function PrepQuestionsConfig() {
             <RotateCcw className="mr-2 h-4 w-4" />
             Reset to defaults
           </Button>
-          <Button
-            onClick={handleSave}
-            disabled={!hasChanges || isSaving}
-            size="sm"
-          >
+          <Button onClick={handleSave} disabled={!hasChanges || isSaving} size="sm">
             {isSaving ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             ) : (

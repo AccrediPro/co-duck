@@ -59,7 +59,6 @@ export function SessionCard({
       .slice(0, 2);
   };
 
-
   const getPaymentBadge = (status: PaymentStatus, price: number) => {
     // No badge for free sessions
     if (status === 'free' || price === 0) return null;
@@ -67,7 +66,10 @@ export function SessionCard({
     switch (status) {
       case 'paid':
         return (
-          <Badge variant="outline" className="border-[hsl(var(--brand-accent))] bg-[hsl(var(--brand-surface))] text-[hsl(var(--brand-accent-hover))]">
+          <Badge
+            variant="outline"
+            className="border-[hsl(var(--brand-accent))] bg-[hsl(var(--brand-surface))] text-[hsl(var(--brand-accent-hover))]"
+          >
             <CreditCard className="mr-1 h-3 w-3" />
             Paid
           </Badge>
@@ -141,7 +143,10 @@ export function SessionCard({
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
                 <h3 className="font-semibold">{session.clientName || 'Unknown Client'}</h3>
-                <StatusBadge status={session.status} label={session.status === 'pending' ? 'Pending Approval' : undefined} />
+                <StatusBadge
+                  status={session.status}
+                  label={session.status === 'pending' ? 'Pending Approval' : undefined}
+                />
                 {getPaymentBadge(session.paymentStatus, session.sessionType.price)}
               </div>
 
@@ -154,8 +159,7 @@ export function SessionCard({
                 </span>
                 <span className="flex items-center gap-1">
                   <Clock className="h-3.5 w-3.5" />
-                  {formatTime(session.startTime)} -{' '}
-                  {formatTime(session.endTime)}
+                  {formatTime(session.startTime)} - {formatTime(session.endTime)}
                 </span>
               </div>
 

@@ -76,16 +76,16 @@ export async function POST(request: Request) {
       return Response.json(
         {
           success: false,
-          error: { code: 'NOT_FOUND', message: 'Profile not found. Please complete onboarding first.' },
+          error: {
+            code: 'NOT_FOUND',
+            message: 'Profile not found. Please complete onboarding first.',
+          },
         },
         { status: 404 }
       );
     }
 
-    await db
-      .update(coachProfiles)
-      .set({ isPublished })
-      .where(eq(coachProfiles.userId, userId));
+    await db.update(coachProfiles).set({ isPublished }).where(eq(coachProfiles.userId, userId));
 
     return Response.json({
       success: true,
@@ -94,7 +94,10 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('Error toggling publish status:', error);
     return Response.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to update publish status' } },
+      {
+        success: false,
+        error: { code: 'INTERNAL_ERROR', message: 'Failed to update publish status' },
+      },
       { status: 500 }
     );
   }

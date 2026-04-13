@@ -193,7 +193,12 @@ export async function getCoachAvailabilityForProfile(
         availabilityMap.set(avail.dayOfWeek, {
           dayOfWeek: avail.dayOfWeek,
           timeRanges: avail.isAvailable
-            ? [{ startTime: avail.startTime.substring(0, 5), endTime: avail.endTime.substring(0, 5) }]
+            ? [
+                {
+                  startTime: avail.startTime.substring(0, 5),
+                  endTime: avail.endTime.substring(0, 5),
+                },
+              ]
             : [],
           isAvailable: avail.isAvailable,
         });

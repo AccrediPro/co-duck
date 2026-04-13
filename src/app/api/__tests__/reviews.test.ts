@@ -32,9 +32,7 @@ describe('POST /api/reviews', () => {
   it('returns 400 when bookingId is missing', async () => {
     mockAuth.mockResolvedValueOnce({ userId: 'user_client' });
 
-    const response = await POST(
-      makeJsonRequest('https://example.com/api/reviews', { rating: 5 })
-    );
+    const response = await POST(makeJsonRequest('https://example.com/api/reviews', { rating: 5 }));
     const body = await response.json();
 
     expect(response.status).toBe(400);

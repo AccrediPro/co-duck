@@ -46,7 +46,10 @@ export async function DELETE(request: Request, { params }: RouteParams) {
 
     if (!currentUser || currentUser.role !== 'coach') {
       return Response.json(
-        { success: false, error: { code: 'FORBIDDEN', message: 'Only coaches can remove members from groups' } },
+        {
+          success: false,
+          error: { code: 'FORBIDDEN', message: 'Only coaches can remove members from groups' },
+        },
         { status: 403 }
       );
     }
@@ -66,7 +69,9 @@ export async function DELETE(request: Request, { params }: RouteParams) {
 
     const [deleted] = await db
       .delete(clientGroupMembers)
-      .where(and(eq(clientGroupMembers.groupId, groupId), eq(clientGroupMembers.clientId, clientId)))
+      .where(
+        and(eq(clientGroupMembers.groupId, groupId), eq(clientGroupMembers.clientId, clientId))
+      )
       .returning({ id: clientGroupMembers.id });
 
     if (!deleted) {
@@ -80,7 +85,10 @@ export async function DELETE(request: Request, { params }: RouteParams) {
   } catch (error) {
     console.error('Error removing group member:', error);
     return Response.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to remove group member' } },
+      {
+        success: false,
+        error: { code: 'INTERNAL_ERROR', message: 'Failed to remove group member' },
+      },
       { status: 500 }
     );
   }

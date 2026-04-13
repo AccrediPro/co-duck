@@ -49,11 +49,7 @@ export function ActionItemsWidget({ count, recentItems }: ActionItemsWidgetProps
                   <p className="truncate text-sm">{item.title}</p>
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
                     {item.coachName && <span>From {item.coachName}</span>}
-                    {item.dueDate && (
-                      <span>
-                        Due {formatDateShort(item.dueDate)}
-                      </span>
-                    )}
+                    {item.dueDate && <span>Due {formatDateShort(item.dueDate)}</span>}
                   </div>
                 </div>
               </div>

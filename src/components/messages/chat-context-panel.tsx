@@ -271,7 +271,8 @@ export function ChatContextPanel({ context }: ChatContextPanelProps) {
             {context.programs.map((program) => {
               const totalGoals = program.goals.length;
               const completedGoals = program.goals.filter((g) => g.status === 'completed').length;
-              const percentage = totalGoals > 0 ? Math.round((completedGoals / totalGoals) * 100) : 0;
+              const percentage =
+                totalGoals > 0 ? Math.round((completedGoals / totalGoals) * 100) : 0;
 
               return (
                 <Card key={program.id} className="bg-background">
@@ -280,7 +281,9 @@ export function ChatContextPanel({ context }: ChatContextPanelProps) {
                     {totalGoals > 0 && (
                       <div className="mt-2">
                         <div className="mb-1 flex justify-between text-xs text-muted-foreground">
-                          <span>{completedGoals}/{totalGoals} goals</span>
+                          <span>
+                            {completedGoals}/{totalGoals} goals
+                          </span>
                           <span>{percentage}%</span>
                         </div>
                         <Progress value={percentage} className="h-2" />
@@ -294,7 +297,7 @@ export function ChatContextPanel({ context }: ChatContextPanelProps) {
                             <span
                               className={
                                 goal.status === 'completed'
-                                  ? 'line-through text-muted-foreground'
+                                  ? 'text-muted-foreground line-through'
                                   : ''
                               }
                             >

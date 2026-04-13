@@ -15,7 +15,10 @@ function getISOWeek(date: Date): { weekNumber: number; weekYear: number } {
   return { weekNumber, weekYear: d.getUTCFullYear() };
 }
 
-function getPreviousISOWeek(weekNumber: number, weekYear: number): { weekNumber: number; weekYear: number } {
+function getPreviousISOWeek(
+  weekNumber: number,
+  weekYear: number
+): { weekNumber: number; weekYear: number } {
   if (weekNumber > 1) {
     return { weekNumber: weekNumber - 1, weekYear };
   }
@@ -48,7 +51,13 @@ const MILESTONE_WEEKS = [4, 8, 12, 24, 52];
 
 export async function recordStreakActivity(
   userId: string,
-  actionType: 'session_completed' | 'action_item_completed' | 'iconnect_post' | 'message_sent' | 'check_in_completed' | 'session_prep_completed',
+  actionType:
+    | 'session_completed'
+    | 'action_item_completed'
+    | 'iconnect_post'
+    | 'message_sent'
+    | 'check_in_completed'
+    | 'session_prep_completed',
   referenceId?: string
 ): Promise<void> {
   try {
@@ -71,15 +80,18 @@ export async function recordStreakActivity(
 
     if (!existing) {
       // First ever activity — create streak row
-      const [inserted] = await db.insert(coachingStreaks).values({
-        userId,
-        currentStreak: 1,
-        longestStreak: 1,
-        lastActivityAt: now,
-        streakStartedAt: now,
-        isAtRisk: false,
-        notifiedAtRisk: false,
-      }).returning();
+      const [inserted] = await db
+        .insert(coachingStreaks)
+        .values({
+          userId,
+          currentStreak: 1,
+          longestStreak: 1,
+          lastActivityAt: now,
+          streakStartedAt: now,
+          isAtRisk: false,
+          notifiedAtRisk: false,
+        })
+        .returning();
 
       emitStreakUpdated(userId, {
         currentStreak: inserted.currentStreak,
@@ -145,19 +157,17 @@ export async function evaluateStreaks(): Promise<{
       const currentWeekActivities = await db
         .select()
         .from(streakActivities)
-        .where(
-          eq(streakActivities.userId, streak.userId)
-        )
-        .then(rows => rows.filter(r => r.weekNumber === currentWeek && r.weekYear === currentYear));
+        .where(eq(streakActivities.userId, streak.userId))
+        .then((rows) =>
+          rows.filter((r) => r.weekNumber === currentWeek && r.weekYear === currentYear)
+        );
 
       // Check activity for previous week
       const prevWeekActivities = await db
         .select()
         .from(streakActivities)
-        .where(
-          eq(streakActivities.userId, streak.userId)
-        )
-        .then(rows => rows.filter(r => r.weekNumber === prevWeek && r.weekYear === prevYear));
+        .where(eq(streakActivities.userId, streak.userId))
+        .then((rows) => rows.filter((r) => r.weekNumber === prevWeek && r.weekYear === prevYear));
 
       const hadActivityPrevWeek = prevWeekActivities.length > 0;
       const hadActivityCurrentWeek = currentWeekActivities.length > 0;

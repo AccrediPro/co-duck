@@ -46,7 +46,10 @@ export async function GET(request: Request, { params }: RouteParams) {
 
     if (!currentUser || currentUser.role !== 'coach') {
       return Response.json(
-        { success: false, error: { code: 'FORBIDDEN', message: 'Only coaches can view group members' } },
+        {
+          success: false,
+          error: { code: 'FORBIDDEN', message: 'Only coaches can view group members' },
+        },
         { status: 403 }
       );
     }
@@ -81,7 +84,10 @@ export async function GET(request: Request, { params }: RouteParams) {
   } catch (error) {
     console.error('Error fetching group members:', error);
     return Response.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch group members' } },
+      {
+        success: false,
+        error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch group members' },
+      },
       { status: 500 }
     );
   }
@@ -127,7 +133,10 @@ export async function POST(request: Request, { params }: RouteParams) {
 
     if (!currentUser || currentUser.role !== 'coach') {
       return Response.json(
-        { success: false, error: { code: 'FORBIDDEN', message: 'Only coaches can add members to groups' } },
+        {
+          success: false,
+          error: { code: 'FORBIDDEN', message: 'Only coaches can add members to groups' },
+        },
         { status: 403 }
       );
     }
@@ -170,13 +179,19 @@ export async function POST(request: Request, { params }: RouteParams) {
 
     // Check for duplicate membership
     const existing = await db.query.clientGroupMembers.findFirst({
-      where: and(eq(clientGroupMembers.groupId, groupId), eq(clientGroupMembers.clientId, clientId)),
+      where: and(
+        eq(clientGroupMembers.groupId, groupId),
+        eq(clientGroupMembers.clientId, clientId)
+      ),
       columns: { id: true },
     });
 
     if (existing) {
       return Response.json(
-        { success: false, error: { code: 'ALREADY_MEMBER', message: 'Client is already in this group' } },
+        {
+          success: false,
+          error: { code: 'ALREADY_MEMBER', message: 'Client is already in this group' },
+        },
         { status: 409 }
       );
     }
@@ -187,7 +202,17 @@ export async function POST(request: Request, { params }: RouteParams) {
       .returning();
 
     return Response.json(
-      { success: true, data: { membership: { id: membership.id, groupId: membership.groupId, clientId: membership.clientId, createdAt: membership.createdAt } } },
+      {
+        success: true,
+        data: {
+          membership: {
+            id: membership.id,
+            groupId: membership.groupId,
+            clientId: membership.clientId,
+            createdAt: membership.createdAt,
+          },
+        },
+      },
       { status: 201 }
     );
   } catch (error) {

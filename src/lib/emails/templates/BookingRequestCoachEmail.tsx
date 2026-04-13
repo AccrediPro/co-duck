@@ -29,10 +29,7 @@ export function BookingRequestCoachEmail({
   const bookingUrl = `${appUrl}/dashboard/sessions/${bookingId}`;
 
   return (
-    <EmailLayout
-      preview={`New booking request from ${clientName}`}
-      unsubscribeUrl={unsubscribeUrl}
-    >
+    <EmailLayout preview={`New booking request from ${clientName}`} unsubscribeUrl={unsubscribeUrl}>
       <Text style={heading}>New Booking Request</Text>
       <Text style={paragraph}>
         Hi {coachName}, you have a new booking request from {clientName}. Please review and accept
@@ -114,8 +111,9 @@ export function BookingRequestCoachEmail({
       <Section style={noteSection}>
         <Text style={noteTitle}>Please respond promptly</Text>
         <Text style={noteText}>
-          The client has already paid for this session. If you do not accept before the session time,
-          the booking will be automatically cancelled and the client will receive a full refund.
+          The client has already paid for this session. If you do not accept before the session
+          time, the booking will be automatically cancelled and the client will receive a full
+          refund.
         </Text>
       </Section>
     </EmailLayout>

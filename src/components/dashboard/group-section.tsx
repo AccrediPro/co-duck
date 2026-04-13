@@ -34,11 +34,7 @@ export function GroupSection({
           className="h-7 gap-1.5 px-2 text-sm font-semibold"
           onClick={() => setOpen((prev) => !prev)}
         >
-          {open ? (
-            <ChevronDown className="h-4 w-4" />
-          ) : (
-            <ChevronRight className="h-4 w-4" />
-          )}
+          {open ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
           <span>{groupName}</span>
           <span className="ml-1 rounded-full bg-muted px-1.5 py-0.5 text-xs font-normal text-muted-foreground">
             {memberCount}

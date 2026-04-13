@@ -53,7 +53,9 @@ export default async function MyCoachesPage() {
         <div className="space-y-6">
           <Card>
             <CardContent className="py-12 text-center">
-              <p className="text-muted-foreground">Failed to load coaches. Please try again later.</p>
+              <p className="text-muted-foreground">
+                Failed to load coaches. Please try again later.
+              </p>
             </CardContent>
           </Card>
         </div>

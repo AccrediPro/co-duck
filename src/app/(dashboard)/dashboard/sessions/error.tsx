@@ -22,13 +22,17 @@ export default function SessionsError({
     <div className="flex min-h-[60vh] flex-col items-center justify-center px-4">
       <div className="mx-auto max-w-md text-center">
         <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-orange-100 dark:bg-orange-950/30">
-          <AlertTriangle className="h-10 w-10 text-orange-600 dark:text-orange-400" aria-hidden="true" />
+          <AlertTriangle
+            className="h-10 w-10 text-orange-600 dark:text-orange-400"
+            aria-hidden="true"
+          />
         </div>
 
         <h2 className="mb-2 text-xl font-semibold">Something went wrong loading your sessions</h2>
 
         <p className="mb-6 text-muted-foreground">
-          We couldn&apos;t load your sessions right now. Your bookings and session data are safe — please try again.
+          We couldn&apos;t load your sessions right now. Your bookings and session data are safe —
+          please try again.
         </p>
 
         {error.digest && (

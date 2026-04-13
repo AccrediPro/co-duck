@@ -44,9 +44,7 @@ export function EarningsOverview({ earnings }: EarningsOverviewProps) {
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{formatCurrency(thisMonthEarnings, currency)}</div>
-          <p className="text-xs text-muted-foreground">
-            {formatMonthYear(new Date())}
-          </p>
+          <p className="text-xs text-muted-foreground">{formatMonthYear(new Date())}</p>
         </CardContent>
       </Card>
 

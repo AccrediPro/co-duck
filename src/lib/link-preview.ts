@@ -1,6 +1,7 @@
 import type { LinkPreviewData } from '@/db/schema';
 
-const URL_REGEX = /https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b[-a-zA-Z0-9()@:%_+.~#?&/=]*/gi;
+const URL_REGEX =
+  /https?:\/\/(?:www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b[-a-zA-Z0-9()@:%_+.~#?&/=]*/gi;
 
 const FETCH_TIMEOUT_MS = 5000;
 const CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
@@ -35,14 +36,8 @@ export function extractUrls(text: string): string[] {
 function extractMetaContent(html: string, property: string): string | undefined {
   // Match both property="..." and name="..." attributes
   const patterns = [
-    new RegExp(
-      `<meta[^>]+(?:property|name)=["']${property}["'][^>]+content=["']([^"']*)["']`,
-      'i'
-    ),
-    new RegExp(
-      `<meta[^>]+content=["']([^"']*)["'][^>]+(?:property|name)=["']${property}["']`,
-      'i'
-    ),
+    new RegExp(`<meta[^>]+(?:property|name)=["']${property}["'][^>]+content=["']([^"']*)["']`, 'i'),
+    new RegExp(`<meta[^>]+content=["']([^"']*)["'][^>]+(?:property|name)=["']${property}["']`, 'i'),
   ];
 
   for (const pattern of patterns) {
@@ -111,8 +106,7 @@ export async function fetchLinkPreview(url: string): Promise<LinkPreviewData | n
     const response = await fetch(url, {
       signal: controller.signal,
       headers: {
-        'User-Agent':
-          'Mozilla/5.0 (compatible; CoachingPlatformBot/1.0; +https://example.com/bot)',
+        'User-Agent': 'Mozilla/5.0 (compatible; CoachingPlatformBot/1.0; +https://example.com/bot)',
         Accept: 'text/html',
       },
       redirect: 'follow',

@@ -32,7 +32,10 @@ export async function GET(request: Request) {
 
     if (!coachProfile) {
       return Response.json(
-        { success: false, error: { code: 'FORBIDDEN', message: 'Only coaches can access client streaks' } },
+        {
+          success: false,
+          error: { code: 'FORBIDDEN', message: 'Only coaches can access client streaks' },
+        },
         { status: 403 }
       );
     }
@@ -80,7 +83,10 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error('Error fetching client streaks:', error);
     return Response.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch client streaks' } },
+      {
+        success: false,
+        error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch client streaks' },
+      },
       { status: 500 }
     );
   }

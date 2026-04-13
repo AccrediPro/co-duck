@@ -754,7 +754,9 @@ export default function TestPage() {
           </div>
           <Separator />
           <div>
-            <h4 className="font-semibold text-burgundy dark:text-burgundy-light">Client Accounts</h4>
+            <h4 className="font-semibold text-burgundy dark:text-burgundy-light">
+              Client Accounts
+            </h4>
             <div className="mt-2 overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>

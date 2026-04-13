@@ -51,7 +51,10 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
     if (!currentUser || currentUser.role !== 'coach') {
       return Response.json(
-        { success: false, error: { code: 'FORBIDDEN', message: 'Only coaches can update session note templates' } },
+        {
+          success: false,
+          error: { code: 'FORBIDDEN', message: 'Only coaches can update session note templates' },
+        },
         { status: 403 }
       );
     }
@@ -151,7 +154,10 @@ export async function DELETE(request: Request, { params }: RouteParams) {
 
     if (!currentUser || currentUser.role !== 'coach') {
       return Response.json(
-        { success: false, error: { code: 'FORBIDDEN', message: 'Only coaches can delete session note templates' } },
+        {
+          success: false,
+          error: { code: 'FORBIDDEN', message: 'Only coaches can delete session note templates' },
+        },
         { status: 403 }
       );
     }
@@ -178,7 +184,9 @@ export async function DELETE(request: Request, { params }: RouteParams) {
 
     await db
       .delete(sessionNoteTemplates)
-      .where(and(eq(sessionNoteTemplates.id, templateId), eq(sessionNoteTemplates.coachId, userId)));
+      .where(
+        and(eq(sessionNoteTemplates.id, templateId), eq(sessionNoteTemplates.coachId, userId))
+      );
 
     return Response.json({ success: true, data: { deleted: true } });
   } catch (error) {

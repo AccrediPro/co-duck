@@ -55,7 +55,10 @@ function getStatusBadge(status: TransactionWithClient['status']) {
   switch (status) {
     case 'succeeded':
       return (
-        <Badge variant="default" className="bg-[hsl(var(--brand-accent))] hover:bg-[hsl(var(--brand-warm))]">
+        <Badge
+          variant="default"
+          className="bg-[hsl(var(--brand-accent))] hover:bg-[hsl(var(--brand-warm))]"
+        >
           Completed
         </Badge>
       );

@@ -50,9 +50,14 @@ export const VerifiedBadge = React.forwardRef<HTMLDivElement, VerifiedBadgeProps
           <TooltipTrigger asChild>
             <div
               ref={ref}
-              className={cn('inline-flex items-center gap-1 text-[hsl(var(--brand-warm))]', className)}
+              className={cn(
+                'inline-flex items-center gap-1 text-[hsl(var(--brand-warm))]',
+                className
+              )}
             >
-              <BadgeCheck className={cn(sizeClasses[size], 'fill-[hsl(var(--brand-warm))] text-white')} />
+              <BadgeCheck
+                className={cn(sizeClasses[size], 'fill-[hsl(var(--brand-warm))] text-white')}
+              />
               {showLabel && (
                 <span className={cn('font-medium', textSizeClasses[size])}>Verified</span>
               )}

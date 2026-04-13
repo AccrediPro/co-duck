@@ -4,8 +4,18 @@ import { PaymentSuccessContent } from './payment-success-content';
 
 // Mock next/link
 vi.mock('next/link', () => ({
-  default: ({ children, href, ...props }: { children: React.ReactNode; href: string; [key: string]: unknown }) => (
-    <a href={href} {...props}>{children}</a>
+  default: ({
+    children,
+    href,
+    ...props
+  }: {
+    children: React.ReactNode;
+    href: string;
+    [key: string]: unknown;
+  }) => (
+    <a href={href} {...props}>
+      {children}
+    </a>
   ),
 }));
 
@@ -58,11 +68,7 @@ const defaultBooking = {
 describe('PaymentSuccessContent', () => {
   it('renders success state with booking details', () => {
     render(
-      <PaymentSuccessContent
-        coach={defaultCoach}
-        slug="coach-jane"
-        booking={defaultBooking}
-      />
+      <PaymentSuccessContent coach={defaultCoach} slug="coach-jane" booking={defaultBooking} />
     );
 
     expect(screen.getByText('Booking Request Submitted!')).toBeInTheDocument();
@@ -71,11 +77,7 @@ describe('PaymentSuccessContent', () => {
 
   it('renders coach name in description', () => {
     render(
-      <PaymentSuccessContent
-        coach={defaultCoach}
-        slug="coach-jane"
-        booking={defaultBooking}
-      />
+      <PaymentSuccessContent coach={defaultCoach} slug="coach-jane" booking={defaultBooking} />
     );
 
     const coachNameElements = screen.getAllByText(/Coach Jane/);
@@ -84,11 +86,7 @@ describe('PaymentSuccessContent', () => {
 
   it('renders session type details', () => {
     render(
-      <PaymentSuccessContent
-        coach={defaultCoach}
-        slug="coach-jane"
-        booking={defaultBooking}
-      />
+      <PaymentSuccessContent coach={defaultCoach} slug="coach-jane" booking={defaultBooking} />
     );
 
     expect(screen.getByText('Power Session')).toBeInTheDocument();
@@ -97,11 +95,7 @@ describe('PaymentSuccessContent', () => {
 
   it('renders booking reference number', () => {
     render(
-      <PaymentSuccessContent
-        coach={defaultCoach}
-        slug="coach-jane"
-        booking={defaultBooking}
-      />
+      <PaymentSuccessContent coach={defaultCoach} slug="coach-jane" booking={defaultBooking} />
     );
 
     expect(screen.getByText('#42')).toBeInTheDocument();
@@ -110,11 +104,7 @@ describe('PaymentSuccessContent', () => {
 
   it('renders client notes when present', () => {
     render(
-      <PaymentSuccessContent
-        coach={defaultCoach}
-        slug="coach-jane"
-        booking={defaultBooking}
-      />
+      <PaymentSuccessContent coach={defaultCoach} slug="coach-jane" booking={defaultBooking} />
     );
 
     expect(screen.getByText('Looking forward to it!')).toBeInTheDocument();
@@ -134,11 +124,7 @@ describe('PaymentSuccessContent', () => {
 
   it('shows pending approval notice', () => {
     render(
-      <PaymentSuccessContent
-        coach={defaultCoach}
-        slug="coach-jane"
-        booking={defaultBooking}
-      />
+      <PaymentSuccessContent coach={defaultCoach} slug="coach-jane" booking={defaultBooking} />
     );
 
     expect(screen.getByText(/Awaiting coach approval/)).toBeInTheDocument();
@@ -146,11 +132,7 @@ describe('PaymentSuccessContent', () => {
 
   it('renders action buttons', () => {
     render(
-      <PaymentSuccessContent
-        coach={defaultCoach}
-        slug="coach-jane"
-        booking={defaultBooking}
-      />
+      <PaymentSuccessContent coach={defaultCoach} slug="coach-jane" booking={defaultBooking} />
     );
 
     expect(screen.getByText('Add to Calendar')).toBeInTheDocument();
@@ -160,11 +142,7 @@ describe('PaymentSuccessContent', () => {
 
   it('links to correct coach profile', () => {
     render(
-      <PaymentSuccessContent
-        coach={defaultCoach}
-        slug="coach-jane"
-        booking={defaultBooking}
-      />
+      <PaymentSuccessContent coach={defaultCoach} slug="coach-jane" booking={defaultBooking} />
     );
 
     const profileLink = screen.getByText('View Coach Profile').closest('a');
@@ -173,11 +151,7 @@ describe('PaymentSuccessContent', () => {
 
   it('renders error state when error prop is set', () => {
     render(
-      <PaymentSuccessContent
-        coach={defaultCoach}
-        slug="coach-jane"
-        error="Something went wrong"
-      />
+      <PaymentSuccessContent coach={defaultCoach} slug="coach-jane" error="Something went wrong" />
     );
 
     expect(screen.getByText('Payment Processing')).toBeInTheDocument();
@@ -185,24 +159,14 @@ describe('PaymentSuccessContent', () => {
   });
 
   it('renders error state when booking is undefined', () => {
-    render(
-      <PaymentSuccessContent
-        coach={defaultCoach}
-        slug="coach-jane"
-      />
-    );
+    render(<PaymentSuccessContent coach={defaultCoach} slug="coach-jane" />);
 
     expect(screen.getByText('Payment Processing')).toBeInTheDocument();
     expect(screen.getByText('View My Sessions')).toBeInTheDocument();
   });
 
   it('shows fallback message in error state', () => {
-    render(
-      <PaymentSuccessContent
-        coach={defaultCoach}
-        slug="coach-jane"
-      />
-    );
+    render(<PaymentSuccessContent coach={defaultCoach} slug="coach-jane" />);
 
     expect(screen.getByText(/We are processing your booking/)).toBeInTheDocument();
   });

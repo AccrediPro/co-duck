@@ -72,9 +72,7 @@ describe('POST /api/conversations', () => {
   it('returns 400 when otherUserId is missing', async () => {
     mockAuth.mockResolvedValueOnce({ userId: 'user_123' });
 
-    const response = await POST(
-      makeJsonRequest('https://example.com/api/conversations', {})
-    );
+    const response = await POST(makeJsonRequest('https://example.com/api/conversations', {}));
     const body = await response.json();
 
     expect(response.status).toBe(400);

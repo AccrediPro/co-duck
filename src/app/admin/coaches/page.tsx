@@ -30,7 +30,16 @@ import {
 import { VerificationStatusDropdown } from '@/components/admin/verification-status-dropdown';
 import { InviteCoachDialog } from '@/components/admin/invite-coach-dialog';
 import { db, users, coachProfiles, coachInvites } from '@/db';
-import { UserCheck, Search, ChevronLeft, ChevronRight, Star, CheckCircle, Mail, Clock } from 'lucide-react';
+import {
+  UserCheck,
+  Search,
+  ChevronLeft,
+  ChevronRight,
+  Star,
+  CheckCircle,
+  Mail,
+  Clock,
+} from 'lucide-react';
 import Link from 'next/link';
 import { formatDate } from '@/lib/date-utils';
 
@@ -479,16 +488,17 @@ export default async function AdminCoachesPage({
   const status = params.status || 'all';
   const page = Math.max(1, parseInt(params.page || '1', 10));
 
-  const [{ coaches: coachList, totalCount, totalPages, currentPage }, stats, pendingInvites] = await Promise.all([
-    getCoaches({
-      search,
-      status,
-      page,
-      limit: COACHES_PER_PAGE,
-    }),
-    getCoachStats(),
-    getPendingInvites(),
-  ]);
+  const [{ coaches: coachList, totalCount, totalPages, currentPage }, stats, pendingInvites] =
+    await Promise.all([
+      getCoaches({
+        search,
+        status,
+        page,
+        limit: COACHES_PER_PAGE,
+      }),
+      getCoachStats(),
+      getPendingInvites(),
+    ]);
 
   return (
     <div className="mx-auto max-w-3xl">
@@ -506,140 +516,143 @@ export default async function AdminCoachesPage({
       </Card>
 
       <div className="space-y-6">
-      {/* Stats Cards */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>Total Coaches</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.total}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>Pending Review</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-gold-dark">{stats.pending}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>Verified</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-[hsl(var(--brand-warm))]">{stats.verified}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>Rejected</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-600">{stats.rejected}</div>
-          </CardContent>
-        </Card>
-      </div>
+        {/* Stats Cards */}
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardDescription>Total Coaches</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.total}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardDescription>Pending Review</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-gold-dark">{stats.pending}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardDescription>Verified</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-[hsl(var(--brand-warm))]">
+                {stats.verified}
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardDescription>Rejected</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-red-600">{stats.rejected}</div>
+            </CardContent>
+          </Card>
+        </div>
 
-      {/* Search and Filters */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Search Coaches</CardTitle>
-          <CardDescription>
-            Find coaches by name, email, or filter by verification status
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <SearchFilters currentSearch={search} currentStatus={status} />
-        </CardContent>
-      </Card>
+        {/* Search and Filters */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Search Coaches</CardTitle>
+            <CardDescription>
+              Find coaches by name, email, or filter by verification status
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <SearchFilters currentSearch={search} currentStatus={status} />
+          </CardContent>
+        </Card>
 
-      {/* Pending Invites */}
-      {pendingInvites.length > 0 && (
+        {/* Pending Invites */}
+        {pendingInvites.length > 0 && (
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle className="text-lg">Pending Invites</CardTitle>
+                  <CardDescription>
+                    {pendingInvites.length} invite{pendingInvites.length !== 1 ? 's' : ''} awaiting
+                    signup
+                  </CardDescription>
+                </div>
+                <Mail className="h-5 w-5 text-muted-foreground" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-0">
+                {pendingInvites.map((invite) => (
+                  <div
+                    key={invite.id}
+                    className="flex items-center justify-between border-b py-3 last:border-0"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
+                        <Mail className="h-4 w-4 text-muted-foreground" />
+                      </div>
+                      <div>
+                        <p className="font-medium">{invite.email}</p>
+                        <p className="flex items-center gap-1 text-xs text-muted-foreground">
+                          <Clock className="h-3 w-3" />
+                          Invited {formatDate(invite.createdAt)}
+                        </p>
+                      </div>
+                    </div>
+                    <Badge variant="outline" className="border-gold/30 bg-gold/5 text-gold-dark">
+                      Invited
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Coaches Table */}
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <CardTitle className="text-lg">Pending Invites</CardTitle>
+                <CardTitle>All Coaches</CardTitle>
                 <CardDescription>
-                  {pendingInvites.length} invite{pendingInvites.length !== 1 ? 's' : ''} awaiting signup
+                  {totalCount} coach{totalCount !== 1 ? 'es' : ''} found
                 </CardDescription>
               </div>
-              <Mail className="h-5 w-5 text-muted-foreground" />
+              <UserCheck className="h-5 w-5 text-muted-foreground" />
             </div>
           </CardHeader>
           <CardContent>
-            <div className="space-y-0">
-              {pendingInvites.map((invite) => (
-                <div
-                  key={invite.id}
-                  className="flex items-center justify-between border-b py-3 last:border-0"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
-                      <Mail className="h-4 w-4 text-muted-foreground" />
-                    </div>
-                    <div>
-                      <p className="font-medium">{invite.email}</p>
-                      <p className="flex items-center gap-1 text-xs text-muted-foreground">
-                        <Clock className="h-3 w-3" />
-                        Invited {formatDate(invite.createdAt)}
-                      </p>
-                    </div>
-                  </div>
-                  <Badge variant="outline" className="text-gold-dark border-gold/30 bg-gold/5">
-                    Invited
-                  </Badge>
-                </div>
-              ))}
-            </div>
+            {coachList.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-8 text-center">
+                <UserCheck className="mb-2 h-8 w-8 text-muted-foreground" />
+                <p className="text-muted-foreground">No coaches found</p>
+                <p className="text-xs text-muted-foreground">
+                  Try adjusting your search or filter criteria
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-0">
+                {coachList.map((coach) => (
+                  <CoachRow
+                    key={coach.userId}
+                    coach={coach}
+                    onStatusChange={updateVerificationStatus}
+                  />
+                ))}
+              </div>
+            )}
+
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              search={search}
+              status={status}
+            />
           </CardContent>
         </Card>
-      )}
-
-      {/* Coaches Table */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle>All Coaches</CardTitle>
-              <CardDescription>
-                {totalCount} coach{totalCount !== 1 ? 'es' : ''} found
-              </CardDescription>
-            </div>
-            <UserCheck className="h-5 w-5 text-muted-foreground" />
-          </div>
-        </CardHeader>
-        <CardContent>
-          {coachList.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-8 text-center">
-              <UserCheck className="mb-2 h-8 w-8 text-muted-foreground" />
-              <p className="text-muted-foreground">No coaches found</p>
-              <p className="text-xs text-muted-foreground">
-                Try adjusting your search or filter criteria
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-0">
-              {coachList.map((coach) => (
-                <CoachRow
-                  key={coach.userId}
-                  coach={coach}
-                  onStatusChange={updateVerificationStatus}
-                />
-              ))}
-            </div>
-          )}
-
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            search={search}
-            status={status}
-          />
-        </CardContent>
-      </Card>
       </div>
     </div>
   );

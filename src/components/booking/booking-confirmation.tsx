@@ -242,9 +242,7 @@ export function BookingConfirmation({
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div className="flex items-center gap-2">
                     <Calendar className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm">
-                      {formatDateLong(bookingResult.startTime)}
-                    </span>
+                    <span className="text-sm">{formatDateLong(bookingResult.startTime)}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Clock className="h-4 w-4 text-muted-foreground" />
@@ -378,7 +376,8 @@ export function BookingConfirmation({
                 <div className="flex items-center gap-2">
                   <Clock className="h-4 w-4 text-muted-foreground" />
                   <span className="text-sm">
-                    {formatTimeInTz(startDate, clientTimezone)} - {formatTimeInTz(endDate, clientTimezone)}
+                    {formatTimeInTz(startDate, clientTimezone)} -{' '}
+                    {formatTimeInTz(endDate, clientTimezone)}
                   </span>
                 </div>
               </div>

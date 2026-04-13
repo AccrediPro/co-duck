@@ -172,10 +172,7 @@ async function autoCancelPendingBookings(
 
       // Find and refund the transaction
       const transaction = await db.query.transactions.findFirst({
-        where: and(
-          eq(transactions.bookingId, booking.id),
-          eq(transactions.status, 'succeeded')
-        ),
+        where: and(eq(transactions.bookingId, booking.id), eq(transactions.status, 'succeeded')),
       });
 
       if (transaction?.stripePaymentIntentId) {
@@ -278,9 +275,7 @@ async function autoCancelPendingBookings(
           conversationResult.conversationId,
           `Booking auto-cancelled: ${sessionName} on ${formattedDate} at ${formattedTime} was cancelled because the coach did not respond in time. A full refund has been issued.`,
           booking.clientId
-        ).catch((err) =>
-          console.error(`[AutoCancel] Failed to send system message:`, err)
-        );
+        ).catch((err) => console.error(`[AutoCancel] Failed to send system message:`, err));
       }
 
       // Notifications
@@ -304,9 +299,7 @@ async function autoCancelPendingBookings(
       console.log(`[AutoCancel] Booking ${booking.id} auto-cancelled successfully`);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      console.error(
-        `[AutoCancel] Error auto-cancelling booking ${booking.id}: ${errorMessage}`
-      );
+      console.error(`[AutoCancel] Error auto-cancelling booking ${booking.id}: ${errorMessage}`);
       failed++;
     }
   }

@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { usePathname } from 'next/navigation';
 import { useSocket } from './useSocket';
 import { getIConnectUnreadCount } from '@/app/(dashboard)/dashboard/iconnect/actions';
 
@@ -17,7 +16,6 @@ const POLL_INTERVAL = 600_000; // 10min safety net — real-time updates via Soc
 export function useIConnectUnread(initialCount: number) {
   const [count, setCount] = useState(initialCount);
   const { socket } = useSocket();
-  const pathname = usePathname();
   const hasFetchedRef = useRef(false);
   const lastDisconnectRef = useRef<number | null>(null);
 
@@ -108,11 +106,6 @@ export function useIConnectUnread(initialCount: number) {
     const interval = setInterval(refetchCount, POLL_INTERVAL);
     return () => clearInterval(interval);
   }, [refetchCount]);
-
-  // Reconcile count from server when navigating (e.g., after reading posts)
-  useEffect(() => {
-    refetchCount();
-  }, [pathname, refetchCount]);
 
   return count;
 }

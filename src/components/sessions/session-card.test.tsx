@@ -5,8 +5,18 @@ import type { SessionWithClient } from '@/app/(dashboard)/dashboard/sessions/act
 
 // Mock next/link
 vi.mock('next/link', () => ({
-  default: ({ children, href, ...props }: { children: React.ReactNode; href: string; [key: string]: unknown }) => (
-    <a href={href} {...props}>{children}</a>
+  default: ({
+    children,
+    href,
+    ...props
+  }: {
+    children: React.ReactNode;
+    href: string;
+    [key: string]: unknown;
+  }) => (
+    <a href={href} {...props}>
+      {children}
+    </a>
   ),
 }));
 
@@ -90,31 +100,19 @@ describe('SessionCard', () => {
   });
 
   it('shows Paid payment badge for paid sessions', () => {
-    render(
-      <SessionCard
-        session={createMockSession({ paymentStatus: 'paid' })}
-      />
-    );
+    render(<SessionCard session={createMockSession({ paymentStatus: 'paid' })} />);
 
     expect(screen.getByText('Paid')).toBeInTheDocument();
   });
 
   it('shows Payment Required badge', () => {
-    render(
-      <SessionCard
-        session={createMockSession({ paymentStatus: 'payment_required' })}
-      />
-    );
+    render(<SessionCard session={createMockSession({ paymentStatus: 'payment_required' })} />);
 
     expect(screen.getByText('Payment Required')).toBeInTheDocument();
   });
 
   it('shows Payment Failed badge', () => {
-    render(
-      <SessionCard
-        session={createMockSession({ paymentStatus: 'payment_failed' })}
-      />
-    );
+    render(<SessionCard session={createMockSession({ paymentStatus: 'payment_failed' })} />);
 
     expect(screen.getByText('Payment Failed')).toBeInTheDocument();
   });
@@ -199,12 +197,7 @@ describe('SessionCard', () => {
   });
 
   it('shows Cancel button for cancellable sessions', () => {
-    render(
-      <SessionCard
-        session={createMockSession({ status: 'confirmed' })}
-        onCancel={vi.fn()}
-      />
-    );
+    render(<SessionCard session={createMockSession({ status: 'confirmed' })} onCancel={vi.fn()} />);
 
     expect(screen.getByText('Cancel')).toBeInTheDocument();
   });
@@ -223,12 +216,7 @@ describe('SessionCard', () => {
 
   it('calls onAccept when Accept is clicked', async () => {
     const onAccept = vi.fn().mockResolvedValue(undefined);
-    render(
-      <SessionCard
-        session={createMockSession({ status: 'pending' })}
-        onAccept={onAccept}
-      />
-    );
+    render(<SessionCard session={createMockSession({ status: 'pending' })} onAccept={onAccept} />);
 
     fireEvent.click(screen.getByText('Accept'));
 
@@ -239,12 +227,7 @@ describe('SessionCard', () => {
 
   it('calls onReject when Reject is clicked', async () => {
     const onReject = vi.fn().mockResolvedValue(undefined);
-    render(
-      <SessionCard
-        session={createMockSession({ status: 'pending' })}
-        onReject={onReject}
-      />
-    );
+    render(<SessionCard session={createMockSession({ status: 'pending' })} onReject={onReject} />);
 
     fireEvent.click(screen.getByText('Reject'));
 

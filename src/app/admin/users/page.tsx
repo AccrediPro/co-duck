@@ -392,55 +392,55 @@ export default async function AdminUsersPage({
       </Card>
 
       <div className="space-y-6">
-      {/* Search and Filters */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Search Users</CardTitle>
-          <CardDescription>Find users by name, email, or filter by role</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <SearchFilters currentSearch={search} currentRole={role} />
-        </CardContent>
-      </Card>
+        {/* Search and Filters */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Search Users</CardTitle>
+            <CardDescription>Find users by name, email, or filter by role</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <SearchFilters currentSearch={search} currentRole={role} />
+          </CardContent>
+        </Card>
 
-      {/* Users Table */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle>All Users</CardTitle>
-              <CardDescription>
-                {totalCount} user{totalCount !== 1 ? 's' : ''} found
-              </CardDescription>
+        {/* Users Table */}
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>All Users</CardTitle>
+                <CardDescription>
+                  {totalCount} user{totalCount !== 1 ? 's' : ''} found
+                </CardDescription>
+              </div>
+              <Users className="h-5 w-5 text-muted-foreground" />
             </div>
-            <Users className="h-5 w-5 text-muted-foreground" />
-          </div>
-        </CardHeader>
-        <CardContent>
-          {userList.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-8 text-center">
-              <Users className="mb-2 h-8 w-8 text-muted-foreground" />
-              <p className="text-muted-foreground">No users found</p>
-              <p className="text-xs text-muted-foreground">
-                Try adjusting your search or filter criteria
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-0">
-              {userList.map((user) => (
-                <UserRow key={user.id} user={user} onRoleChange={updateUserRole} />
-              ))}
-            </div>
-          )}
+          </CardHeader>
+          <CardContent>
+            {userList.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-8 text-center">
+                <Users className="mb-2 h-8 w-8 text-muted-foreground" />
+                <p className="text-muted-foreground">No users found</p>
+                <p className="text-xs text-muted-foreground">
+                  Try adjusting your search or filter criteria
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-0">
+                {userList.map((user) => (
+                  <UserRow key={user.id} user={user} onRoleChange={updateUserRole} />
+                ))}
+              </div>
+            )}
 
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            search={search}
-            role={role}
-          />
-        </CardContent>
-      </Card>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              search={search}
+              role={role}
+            />
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

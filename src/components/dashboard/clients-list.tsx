@@ -2,7 +2,16 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { Search, CalendarDays, BookOpen, Activity, Info, Plus, Loader2, FolderOpen } from 'lucide-react';
+import {
+  Search,
+  CalendarDays,
+  BookOpen,
+  Activity,
+  Info,
+  Plus,
+  Loader2,
+  FolderOpen,
+} from 'lucide-react';
 import { formatDate } from '@/lib/date-utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -62,7 +71,15 @@ function getInitials(name: string | null): string {
   return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
 }
 
-function ClientCard({ client, streak, onNavigate }: { client: Client; streak?: ClientStreak; onNavigate: (path: string) => void }) {
+function ClientCard({
+  client,
+  streak,
+  onNavigate,
+}: {
+  client: Client;
+  streak?: ClientStreak;
+  onNavigate: (path: string) => void;
+}) {
   return (
     <Card
       className="cursor-pointer transition-shadow hover:shadow-md"
@@ -98,7 +115,8 @@ function ClientCard({ client, streak, onNavigate }: { client: Client; streak?: C
           {client.activeProgramsCount > 0 && (
             <Badge variant="secondary" className="gap-1">
               <BookOpen className="h-3 w-3" />
-              {client.activeProgramsCount} {client.activeProgramsCount === 1 ? 'program' : 'programs'}
+              {client.activeProgramsCount}{' '}
+              {client.activeProgramsCount === 1 ? 'program' : 'programs'}
             </Badge>
           )}
         </div>
@@ -148,7 +166,11 @@ export function ClientsList({ initialClients }: ClientsListProps) {
         if (json.success) {
           const map = new Map<string, ClientStreak>();
           for (const s of json.data) {
-            map.set(s.userId, { userId: s.userId, currentStreak: s.currentStreak, isAtRisk: s.isAtRisk });
+            map.set(s.userId, {
+              userId: s.userId,
+              currentStreak: s.currentStreak,
+              isAtRisk: s.isAtRisk,
+            });
           }
           setStreakMap(map);
         }
@@ -222,7 +244,11 @@ export function ClientsList({ initialClients }: ClientsListProps) {
         setGroups((prev) => prev.filter((g) => g.id !== deleteTarget.id));
         toast({ title: 'Group deleted', description: deleteTarget.name });
       } else {
-        toast({ title: 'Error', description: json.error?.message || 'Failed to delete group', variant: 'destructive' });
+        toast({
+          title: 'Error',
+          description: json.error?.message || 'Failed to delete group',
+          variant: 'destructive',
+        });
       }
     } catch {
       toast({ title: 'Error', description: 'Failed to delete group', variant: 'destructive' });
@@ -281,7 +307,12 @@ export function ClientsList({ initialClients }: ClientsListProps) {
           ) : (
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {filteredClients.map((client) => (
-                <ClientCard key={client.id} client={client} streak={streakMap.get(client.id)} onNavigate={navigate} />
+                <ClientCard
+                  key={client.id}
+                  client={client}
+                  streak={streakMap.get(client.id)}
+                  onNavigate={navigate}
+                />
               ))}
             </div>
           )}
@@ -315,12 +346,19 @@ export function ClientsList({ initialClients }: ClientsListProps) {
                     >
                       {members.length === 0 ? (
                         <p className="py-3 text-sm text-muted-foreground">
-                          {search ? 'No matching clients in this group.' : 'No clients in this group yet.'}
+                          {search
+                            ? 'No matching clients in this group.'
+                            : 'No clients in this group yet.'}
                         </p>
                       ) : (
                         <div className="grid gap-4 pb-3 pt-1 sm:grid-cols-2 lg:grid-cols-3">
                           {members.map((client) => (
-                            <ClientCard key={client.id} client={client} streak={streakMap.get(client.id)} onNavigate={navigate} />
+                            <ClientCard
+                              key={client.id}
+                              client={client}
+                              streak={streakMap.get(client.id)}
+                              onNavigate={navigate}
+                            />
                           ))}
                         </div>
                       )}
@@ -338,7 +376,12 @@ export function ClientsList({ initialClients }: ClientsListProps) {
                 >
                   <div className="grid gap-4 pb-3 pt-1 sm:grid-cols-2 lg:grid-cols-3">
                     {ungroupedClients.map((client) => (
-                      <ClientCard key={client.id} client={client} streak={streakMap.get(client.id)} onNavigate={navigate} />
+                      <ClientCard
+                        key={client.id}
+                        client={client}
+                        streak={streakMap.get(client.id)}
+                        onNavigate={navigate}
+                      />
                     ))}
                   </div>
                 </GroupSection>
@@ -371,7 +414,9 @@ export function ClientsList({ initialClients }: ClientsListProps) {
       {/* Rename group dialog */}
       <GroupDialog
         open={!!renameTarget}
-        onOpenChange={(open) => { if (!open) setRenameTarget(null); }}
+        onOpenChange={(open) => {
+          if (!open) setRenameTarget(null);
+        }}
         mode="rename"
         groupId={renameTarget?.id}
         initialName={renameTarget?.name}
@@ -379,13 +424,18 @@ export function ClientsList({ initialClients }: ClientsListProps) {
       />
 
       {/* Delete group confirmation */}
-      <AlertDialog open={!!deleteTarget} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
+      <AlertDialog
+        open={!!deleteTarget}
+        onOpenChange={(open) => {
+          if (!open) setDeleteTarget(null);
+        }}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Group</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete &quot;{deleteTarget?.name}&quot;? Clients in this group will
-              not be deleted — they will be moved to Ungrouped.
+              Are you sure you want to delete &quot;{deleteTarget?.name}&quot;? Clients in this
+              group will not be deleted — they will be moved to Ungrouped.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -412,9 +462,7 @@ function EmptyState({ search }: { search: string }) {
         <CardContent className="flex flex-col items-center py-12 text-center">
           <Search className="mb-4 h-12 w-12 text-muted-foreground" />
           <p className="text-lg font-medium">No results</p>
-          <p className="text-sm text-muted-foreground">
-            No clients found for &quot;{search}&quot;
-          </p>
+          <p className="text-sm text-muted-foreground">No clients found for &quot;{search}&quot;</p>
         </CardContent>
       </Card>
     );

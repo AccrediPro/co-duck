@@ -17,10 +17,7 @@ import type {
   MessageWithSender,
   ClientContext,
 } from '@/app/(dashboard)/dashboard/messages/[id]/actions';
-import {
-  getMessages,
-  markMessagesAsRead,
-} from '@/app/(dashboard)/dashboard/messages/[id]/actions';
+import { getMessages, markMessagesAsRead } from '@/app/(dashboard)/dashboard/messages/[id]/actions';
 
 interface ChatViewProps {
   conversation: ConversationDetails;
@@ -96,7 +93,12 @@ export function ChatView({
       conversationId: number;
       senderId: string;
       sender: { id: string; name: string | null; avatarUrl: string | null } | null;
-      attachment?: { url: string; name: string | null; type: string | null; size: number | null } | null;
+      attachment?: {
+        url: string;
+        name: string | null;
+        type: string | null;
+        size: number | null;
+      } | null;
     }) => {
       if (data.conversationId !== conversation.id) return;
 
@@ -171,9 +173,7 @@ export function ChatView({
     const handleMessagesRead = (data: { conversationId: number; readBy: string }) => {
       if (data.conversationId !== conversation.id) return;
       if (data.readBy === conversation.otherUserId) {
-        setMessages((prev) =>
-          prev.map((m) => (m.isOwn && !m.isRead ? { ...m, isRead: true } : m))
-        );
+        setMessages((prev) => prev.map((m) => (m.isOwn && !m.isRead ? { ...m, isRead: true } : m)));
       }
     };
 
@@ -270,20 +270,17 @@ export function ChatView({
     e.stopPropagation();
   }, []);
 
-  const handleDrop = useCallback(
-    (e: React.DragEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      dragCounterRef.current = 0;
-      setIsDragOver(false);
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounterRef.current = 0;
+    setIsDragOver(false);
 
-      const file = e.dataTransfer.files[0];
-      if (file && messageInputRef.current) {
-        messageInputRef.current.attachFile(file);
-      }
-    },
-    []
-  );
+    const file = e.dataTransfer.files[0];
+    if (file && messageInputRef.current) {
+      messageInputRef.current.attachFile(file);
+    }
+  }, []);
 
   // Send message via API (supports text + optional file via FormData)
   const handleSend = async (content: string, file?: File) => {
@@ -302,9 +299,7 @@ export function ChatView({
       isOwn: true,
       isRead: false,
       createdAt: new Date(),
-      attachment: hasFile
-        ? { url: '', name: file.name, type: file.type, size: file.size }
-        : null,
+      attachment: hasFile ? { url: '', name: file.name, type: file.type, size: file.size } : null,
     };
 
     setMessages((prev) => [...prev, optimisticMessage]);
@@ -341,13 +336,10 @@ export function ChatView({
             metadata: result.data.metadata ?? null,
           };
 
-          setMessages((prev) =>
-            prev.map((msg) => (msg.id === tempId ? serverMsg : msg))
-          );
+          setMessages((prev) => prev.map((msg) => (msg.id === tempId ? serverMsg : msg)));
         } else {
           setMessages((prev) => prev.filter((msg) => msg.id !== tempId));
-          const errMsg =
-            result.error?.message || result.error || 'Failed to send message';
+          const errMsg = result.error?.message || result.error || 'Failed to send message';
           setSendError(errMsg);
           toast({
             title: 'Upload failed',
@@ -392,15 +384,11 @@ export function ChatView({
       socket.on('message:new', cleanup);
     } else {
       // Fallback: use server action if socket is disconnected
-      const { sendMessage } = await import(
-        '@/app/(dashboard)/dashboard/messages/[id]/actions'
-      );
+      const { sendMessage } = await import('@/app/(dashboard)/dashboard/messages/[id]/actions');
       const result = await sendMessage(conversation.id, content);
 
       if (result.success && result.message) {
-        setMessages((prev) =>
-          prev.map((msg) => (msg.id === tempId ? result.message! : msg))
-        );
+        setMessages((prev) => prev.map((msg) => (msg.id === tempId ? result.message! : msg)));
       } else {
         setMessages((prev) => prev.filter((msg) => msg.id !== tempId));
         setSendError(result.error || 'Failed to send message');
@@ -424,9 +412,7 @@ export function ChatView({
             <div className="flex flex-col items-center gap-3 rounded-xl border-2 border-dashed border-primary p-10">
               <Upload className="h-10 w-10 text-primary" />
               <p className="text-lg font-medium text-primary">Drop file to attach</p>
-              <p className="text-sm text-muted-foreground">
-                Images, PDFs, and documents up to 5MB
-              </p>
+              <p className="text-sm text-muted-foreground">Images, PDFs, and documents up to 5MB</p>
             </div>
           </div>
         )}
@@ -447,7 +433,10 @@ export function ChatView({
             <div className="flex items-center gap-2">
               <h1 className="truncate font-semibold">{conversation.otherUserName || 'User'}</h1>
               {otherUserOnline && (
-                <span className="h-2.5 w-2.5 rounded-full bg-[hsl(var(--brand-accent))]" title="Online" />
+                <span
+                  className="h-2.5 w-2.5 rounded-full bg-[hsl(var(--brand-accent))]"
+                  title="Online"
+                />
               )}
             </div>
             <p className="text-sm text-muted-foreground">

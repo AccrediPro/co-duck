@@ -214,13 +214,12 @@ describe('getRefundMessage', () => {
     const message = getRefundMessage(eligibility, 'EUR');
     expect(message.description).toContain('50.00');
   });
-
 });
 
 describe('fee calculation (platform fee logic)', () => {
   it('10% platform fee: 90% goes to coach', () => {
     const totalCents = 15000; // $150
-    const platformFeeCents = Math.round(totalCents * 0.10);
+    const platformFeeCents = Math.round(totalCents * 0.1);
     const coachPayoutCents = totalCents - platformFeeCents;
 
     expect(platformFeeCents).toBe(1500);
@@ -230,7 +229,7 @@ describe('fee calculation (platform fee logic)', () => {
 
   it('handles $0 sessions (no fee)', () => {
     const totalCents = 0;
-    const platformFeeCents = Math.round(totalCents * 0.10);
+    const platformFeeCents = Math.round(totalCents * 0.1);
     const coachPayoutCents = totalCents - platformFeeCents;
 
     expect(platformFeeCents).toBe(0);
@@ -239,7 +238,7 @@ describe('fee calculation (platform fee logic)', () => {
 
   it('handles small amounts where rounding matters', () => {
     const totalCents = 1; // $0.01
-    const platformFeeCents = Math.round(totalCents * 0.10);
+    const platformFeeCents = Math.round(totalCents * 0.1);
     const coachPayoutCents = totalCents - platformFeeCents;
 
     // 0.1 rounds to 0
@@ -249,7 +248,7 @@ describe('fee calculation (platform fee logic)', () => {
 
   it('handles amounts not evenly divisible by 10', () => {
     const totalCents = 9999; // $99.99
-    const platformFeeCents = Math.round(totalCents * 0.10);
+    const platformFeeCents = Math.round(totalCents * 0.1);
     const coachPayoutCents = totalCents - platformFeeCents;
 
     expect(platformFeeCents).toBe(1000); // Math.round(999.9) = 1000
@@ -258,7 +257,7 @@ describe('fee calculation (platform fee logic)', () => {
 
   it('handles large premium session amounts', () => {
     const totalCents = 50000; // $500
-    const platformFeeCents = Math.round(totalCents * 0.10);
+    const platformFeeCents = Math.round(totalCents * 0.1);
     const coachPayoutCents = totalCents - platformFeeCents;
 
     expect(platformFeeCents).toBe(5000);
@@ -268,7 +267,7 @@ describe('fee calculation (platform fee logic)', () => {
   it('fee + payout always equals total (no money lost)', () => {
     const testAmounts = [1, 50, 99, 100, 999, 1000, 5555, 9999, 15000, 50000, 99999999];
     for (const totalCents of testAmounts) {
-      const fee = Math.round(totalCents * 0.10);
+      const fee = Math.round(totalCents * 0.1);
       const payout = totalCents - fee;
       expect(fee + payout).toBe(totalCents);
     }

@@ -22,9 +22,24 @@ interface PendingCheckIn {
 type Mood = 'good' | 'okay' | 'struggling';
 
 const MOOD_OPTIONS: { mood: Mood; emoji: string; label: string; colorClass: string }[] = [
-  { mood: 'good', emoji: '😊', label: 'Good', colorClass: 'border-sage bg-sage/10 hover:bg-sage/20 ring-sage' },
-  { mood: 'okay', emoji: '😐', label: 'Okay', colorClass: 'border-gold bg-gold/10 hover:bg-gold/20 ring-gold' },
-  { mood: 'struggling', emoji: '😔', label: 'Struggling', colorClass: 'border-burgundy bg-burgundy/10 hover:bg-burgundy/20 ring-burgundy' },
+  {
+    mood: 'good',
+    emoji: '😊',
+    label: 'Good',
+    colorClass: 'border-sage bg-sage/10 hover:bg-sage/20 ring-sage',
+  },
+  {
+    mood: 'okay',
+    emoji: '😐',
+    label: 'Okay',
+    colorClass: 'border-gold bg-gold/10 hover:bg-gold/20 ring-gold',
+  },
+  {
+    mood: 'struggling',
+    emoji: '😔',
+    label: 'Struggling',
+    colorClass: 'border-burgundy bg-burgundy/10 hover:bg-burgundy/20 ring-burgundy',
+  },
 ];
 
 const NOTE_MAX = 280;
@@ -67,7 +82,11 @@ export function CheckInPrompt() {
       if (json.success) {
         setSubmitted(true);
       } else {
-        toast({ title: 'Error', description: json.error?.message || 'Please try again later', variant: 'destructive' });
+        toast({
+          title: 'Error',
+          description: json.error?.message || 'Please try again later',
+          variant: 'destructive',
+        });
       }
     } catch {
       toast({ title: 'Error', description: 'Unable to send check-in', variant: 'destructive' });
@@ -109,12 +128,8 @@ export function CheckInPrompt() {
   return (
     <Card>
       <CardHeader className="pb-3">
-        <CardTitle className="text-lg text-burgundy-dark">
-          How are you doing this week?
-        </CardTitle>
-        <p className="text-sm text-muted-foreground">
-          Weekly check-in for {pending.coachName}
-        </p>
+        <CardTitle className="text-lg text-burgundy-dark">How are you doing this week?</CardTitle>
+        <p className="text-sm text-muted-foreground">Weekly check-in for {pending.coachName}</p>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="grid grid-cols-3 gap-3">
@@ -127,7 +142,7 @@ export function CheckInPrompt() {
                 'flex flex-col items-center gap-2 rounded-lg border-2 p-4 transition-all',
                 option.colorClass,
                 selectedMood === option.mood
-                  ? 'ring-2 ring-offset-2 scale-105'
+                  ? 'scale-105 ring-2 ring-offset-2'
                   : 'opacity-80 hover:opacity-100'
               )}
             >

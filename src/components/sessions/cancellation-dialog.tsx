@@ -128,7 +128,9 @@ export function CancellationDialog({
         <div className="flex items-start gap-3 rounded-md border border-[hsl(var(--brand-border))] bg-[hsl(var(--brand-surface))] p-3">
           <CheckCircle className="mt-0.5 h-5 w-5 shrink-0 text-[hsl(var(--brand-warm))]" />
           <div className="text-sm">
-            <p className="font-medium text-[hsl(var(--brand-accent-dark))]">Full Refund Available</p>
+            <p className="font-medium text-[hsl(var(--brand-accent-dark))]">
+              Full Refund Available
+            </p>
             <p className="mt-1 text-[hsl(var(--brand-accent-hover))]">
               You will receive a full refund of {refundInfo.refundAmountFormatted}.
             </p>

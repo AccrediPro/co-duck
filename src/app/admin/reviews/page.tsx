@@ -154,9 +154,7 @@ function StarRating({ rating }: { rating: number }) {
       {Array.from({ length: 5 }, (_, i) => (
         <Star
           key={i}
-          className={`h-3.5 w-3.5 ${
-            i < rating ? 'fill-gold text-gold' : 'text-gray-300'
-          }`}
+          className={`h-3.5 w-3.5 ${i < rating ? 'fill-gold text-gold' : 'text-gray-300'}`}
         />
       ))}
     </div>
@@ -227,9 +225,7 @@ function ReviewRow({
         <div className="min-w-0 flex-1 space-y-1">
           <div className="flex flex-wrap items-center gap-2">
             <StarRating rating={review.rating} />
-            {review.title && (
-              <span className="font-medium">{truncateText(review.title, 60)}</span>
-            )}
+            {review.title && <span className="font-medium">{truncateText(review.title, 60)}</span>}
             <Badge variant={review.isPublic ? 'default' : 'secondary'}>
               {review.isPublic ? 'Public' : 'Hidden'}
             </Badge>
@@ -239,9 +235,7 @@ function ReviewRow({
             {' for '}
             <span className="font-medium">{review.coach.name || review.coach.email}</span>
           </p>
-          {review.content && (
-            <p className="text-sm">{truncateText(review.content, 200)}</p>
-          )}
+          {review.content && <p className="text-sm">{truncateText(review.content, 200)}</p>}
           {review.coachResponse && (
             <div className="mt-2 rounded-md bg-muted/50 p-2">
               <p className="text-xs font-medium text-muted-foreground">Coach response:</p>
@@ -357,95 +351,93 @@ export default async function AdminReviewsPage({
       </Card>
 
       <div className="space-y-6">
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>Total Reviews</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.total}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>Public</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-sage">{stats.public}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>Hidden</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-red-600">{stats.hidden}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>Average Rating</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-2">
-              <span className="text-2xl font-bold">{stats.averageRating}</span>
-              <Star className="h-5 w-5 fill-gold text-gold" />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <Card>
+            <CardHeader className="pb-2">
+              <CardDescription>Total Reviews</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.total}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardDescription>Public</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-sage">{stats.public}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardDescription>Hidden</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-red-600">{stats.hidden}</div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader className="pb-2">
+              <CardDescription>Average Rating</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex items-center gap-2">
+                <span className="text-2xl font-bold">{stats.averageRating}</span>
+                <Star className="h-5 w-5 fill-gold text-gold" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-lg">Filters</CardTitle>
-          <CardDescription>Filter reviews by rating or visibility status</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <SearchFilters currentRating={rating} currentVisibility={visibility} />
-        </CardContent>
-      </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-lg">Filters</CardTitle>
+            <CardDescription>Filter reviews by rating or visibility status</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <SearchFilters currentRating={rating} currentVisibility={visibility} />
+          </CardContent>
+        </Card>
 
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle>All Reviews</CardTitle>
-              <CardDescription>
-                {totalCount} review{totalCount !== 1 ? 's' : ''} found
-              </CardDescription>
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>All Reviews</CardTitle>
+                <CardDescription>
+                  {totalCount} review{totalCount !== 1 ? 's' : ''} found
+                </CardDescription>
+              </div>
+              <MessageSquare className="h-5 w-5 text-muted-foreground" />
             </div>
-            <MessageSquare className="h-5 w-5 text-muted-foreground" />
-          </div>
-        </CardHeader>
-        <CardContent>
-          {reviewList.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-8 text-center">
-              <MessageSquare className="mb-2 h-8 w-8 text-muted-foreground" />
-              <p className="text-muted-foreground">No reviews found</p>
-              <p className="text-xs text-muted-foreground">
-                Try adjusting your filter criteria
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-0">
-              {reviewList.map((review) => (
-                <ReviewRow
-                  key={review.id}
-                  review={review}
-                  onToggleVisibility={toggleReviewVisibility}
-                />
-              ))}
-            </div>
-          )}
+          </CardHeader>
+          <CardContent>
+            {reviewList.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-8 text-center">
+                <MessageSquare className="mb-2 h-8 w-8 text-muted-foreground" />
+                <p className="text-muted-foreground">No reviews found</p>
+                <p className="text-xs text-muted-foreground">Try adjusting your filter criteria</p>
+              </div>
+            ) : (
+              <div className="space-y-0">
+                {reviewList.map((review) => (
+                  <ReviewRow
+                    key={review.id}
+                    review={review}
+                    onToggleVisibility={toggleReviewVisibility}
+                  />
+                ))}
+              </div>
+            )}
 
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            rating={rating}
-            visibility={visibility}
-          />
-        </CardContent>
-      </Card>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              rating={rating}
+              visibility={visibility}
+            />
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

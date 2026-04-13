@@ -25,13 +25,17 @@ export default function BookingError({
     <div className="flex min-h-[60vh] flex-col items-center justify-center px-4">
       <div className="mx-auto max-w-md text-center">
         <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-amber-100 dark:bg-amber-950/30">
-          <AlertTriangle className="h-10 w-10 text-amber-600 dark:text-amber-400" aria-hidden="true" />
+          <AlertTriangle
+            className="h-10 w-10 text-amber-600 dark:text-amber-400"
+            aria-hidden="true"
+          />
         </div>
 
         <h2 className="mb-2 text-xl font-semibold">Booking unavailable</h2>
 
         <p className="mb-6 text-muted-foreground">
-          Something went wrong with the booking process. No payment has been charged — please try again.
+          Something went wrong with the booking process. No payment has been charged — please try
+          again.
         </p>
 
         {error.digest && (

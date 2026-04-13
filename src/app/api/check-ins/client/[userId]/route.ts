@@ -10,10 +10,7 @@ import { rateLimit, FREQUENT_LIMIT, rateLimitResponse } from '@/lib/rate-limit';
  * Coach endpoint: timeline of a single client's check-ins with this coach.
  * Query: ?limit=20
  */
-export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ userId: string }> }
-) {
+export async function GET(request: Request, { params }: { params: Promise<{ userId: string }> }) {
   const rl = rateLimit(request, FREQUENT_LIMIT, 'checkins-client-timeline');
   if (!rl.success) return rateLimitResponse(rl);
 
@@ -34,7 +31,10 @@ export async function GET(
 
     if (!coach) {
       return Response.json(
-        { success: false, error: { code: 'FORBIDDEN', message: 'Only coaches can access this endpoint' } },
+        {
+          success: false,
+          error: { code: 'FORBIDDEN', message: 'Only coaches can access this endpoint' },
+        },
         { status: 403 }
       );
     }
@@ -54,12 +54,7 @@ export async function GET(
         promptedAt: weeklyCheckIns.promptedAt,
       })
       .from(weeklyCheckIns)
-      .where(
-        and(
-          eq(weeklyCheckIns.userId, clientId),
-          eq(weeklyCheckIns.coachId, coachUserId)
-        )
-      )
+      .where(and(eq(weeklyCheckIns.userId, clientId), eq(weeklyCheckIns.coachId, coachUserId)))
       .orderBy(desc(weeklyCheckIns.weekYear), desc(weeklyCheckIns.weekNumber))
       .limit(limit);
 
@@ -67,7 +62,10 @@ export async function GET(
   } catch (error) {
     console.error('[check-ins/client/[userId]] Error:', error);
     return Response.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch client check-in timeline' } },
+      {
+        success: false,
+        error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch client check-in timeline' },
+      },
       { status: 500 }
     );
   }

@@ -23,7 +23,7 @@ function getSupabaseAdmin() {
   if (!url || !key) {
     console.error(
       'Missing SUPABASE_SERVICE_ROLE_KEY. File uploads require the service role key. ' +
-      'Get it from Supabase Dashboard → Settings → API → Service Role Key.'
+        'Get it from Supabase Dashboard → Settings → API → Service Role Key.'
     );
     return null;
   }
@@ -102,7 +102,8 @@ export async function POST(request: NextRequest) {
           success: false,
           error: {
             code: 'STORAGE_NOT_CONFIGURED',
-            message: 'File storage is not configured. SUPABASE_SERVICE_ROLE_KEY is missing from environment variables.',
+            message:
+              'File storage is not configured. SUPABASE_SERVICE_ROLE_KEY is missing from environment variables.',
           },
         },
         { status: 500 }

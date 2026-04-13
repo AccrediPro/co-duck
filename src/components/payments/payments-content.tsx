@@ -130,7 +130,10 @@ export function PaymentsContent({ initialData, setupStatus, earningsData }: Paym
     switch (onboardingStatus) {
       case 'complete':
         return (
-          <Badge variant="default" className="bg-[hsl(var(--brand-accent))] hover:bg-[hsl(var(--brand-warm))]">
+          <Badge
+            variant="default"
+            className="bg-[hsl(var(--brand-accent))] hover:bg-[hsl(var(--brand-warm))]"
+          >
             <CheckCircle className="mr-1 h-3 w-3" />
             Active
           </Badge>
@@ -256,7 +259,11 @@ export function PaymentsContent({ initialData, setupStatus, earningsData }: Paym
             )}
 
             {onboardingStatus === 'pending' && (
-              <Button onClick={handleContinueOnboarding} disabled={isLoading} className="min-h-[44px]">
+              <Button
+                onClick={handleContinueOnboarding}
+                disabled={isLoading}
+                className="min-h-[44px]"
+              >
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />

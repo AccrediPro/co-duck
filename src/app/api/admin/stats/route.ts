@@ -54,10 +54,7 @@ export async function GET(request: Request) {
         .select({ count: sql<number>`count(*)::int` })
         .from(coachProfiles)
         .where(
-          and(
-            eq(coachProfiles.isPublished, true),
-            eq(coachProfiles.verificationStatus, 'verified')
-          )
+          and(eq(coachProfiles.isPublished, true), eq(coachProfiles.verificationStatus, 'verified'))
         ),
 
       // Total bookings

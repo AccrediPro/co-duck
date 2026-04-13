@@ -50,7 +50,10 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error('[check-ins/history] Error:', error);
     return Response.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch check-in history' } },
+      {
+        success: false,
+        error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch check-in history' },
+      },
       { status: 500 }
     );
   }

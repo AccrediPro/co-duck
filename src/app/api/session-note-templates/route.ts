@@ -33,7 +33,10 @@ export async function GET(request: Request) {
 
     if (!currentUser || currentUser.role !== 'coach') {
       return Response.json(
-        { success: false, error: { code: 'FORBIDDEN', message: 'Only coaches can access session note templates' } },
+        {
+          success: false,
+          error: { code: 'FORBIDDEN', message: 'Only coaches can access session note templates' },
+        },
         { status: 403 }
       );
     }
@@ -85,7 +88,10 @@ export async function POST(request: Request) {
 
     if (!currentUser || currentUser.role !== 'coach') {
       return Response.json(
-        { success: false, error: { code: 'FORBIDDEN', message: 'Only coaches can create session note templates' } },
+        {
+          success: false,
+          error: { code: 'FORBIDDEN', message: 'Only coaches can create session note templates' },
+        },
         { status: 403 }
       );
     }
@@ -104,7 +110,13 @@ export async function POST(request: Request) {
 
     if (!sections || sections.length === 0) {
       return Response.json(
-        { success: false, error: { code: 'MISSING_FIELDS', message: 'sections is required and must have at least one item' } },
+        {
+          success: false,
+          error: {
+            code: 'MISSING_FIELDS',
+            message: 'sections is required and must have at least one item',
+          },
+        },
         { status: 400 }
       );
     }

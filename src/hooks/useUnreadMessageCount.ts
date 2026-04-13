@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { usePathname } from 'next/navigation';
 import { useSocket } from './useSocket';
 import { getUnreadMessageCount } from '@/app/(dashboard)/dashboard/messages/actions';
 
@@ -15,7 +14,6 @@ const POLL_INTERVAL = 600_000; // 10min safety net — real-time updates via Soc
 export function useUnreadMessageCount(initialCount: number) {
   const [count, setCount] = useState(initialCount);
   const { socket } = useSocket();
-  const pathname = usePathname();
   const hasFetchedRef = useRef(false);
   const lastDisconnectRef = useRef<number | null>(null);
 
@@ -35,7 +33,10 @@ export function useUnreadMessageCount(initialCount: number) {
   useEffect(() => {
     if (!socket) return;
 
-    const handleNewNotification = (data: { type: string }, ack?: (response: { received: boolean }) => void) => {
+    const handleNewNotification = (
+      data: { type: string },
+      ack?: (response: { received: boolean }) => void
+    ) => {
       if (data.type === 'new_message') {
         // If user is currently on a messages page, refetch the true count
         // (the message might be for the conversation they're viewing)
@@ -103,11 +104,6 @@ export function useUnreadMessageCount(initialCount: number) {
     const interval = setInterval(refetchCount, POLL_INTERVAL);
     return () => clearInterval(interval);
   }, [refetchCount]);
-
-  // Reconcile count from server when navigating (e.g., after reading messages)
-  useEffect(() => {
-    refetchCount();
-  }, [pathname, refetchCount]);
 
   return count;
 }

@@ -1,10 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import {
-  mockDbQueryFindFirst,
-  mockDbSelect,
-  makeRequest,
-  resetMocks,
-} from './setup';
+import { mockDbQueryFindFirst, mockDbSelect, makeRequest, resetMocks } from './setup';
 
 import { GET as GET_LIST } from '../coaches/route';
 import { GET as GET_BY_SLUG } from '../coaches/[slug]/route';
@@ -61,9 +56,7 @@ describe('GET /api/coaches', () => {
 
     mockDbSelect.mockReturnValueOnce(coachSelectChain).mockReturnValueOnce(countSelectChain);
 
-    const response = await GET_LIST(
-      makeRequest('https://example.com/api/coaches?page=1&limit=20')
-    );
+    const response = await GET_LIST(makeRequest('https://example.com/api/coaches?page=1&limit=20'));
     const body = await response.json();
 
     expect(response.status).toBe(200);
@@ -92,9 +85,7 @@ describe('GET /api/coaches', () => {
 
     mockDbSelect.mockReturnValueOnce(emptySelect).mockReturnValueOnce(countSelect);
 
-    const response = await GET_LIST(
-      makeRequest('https://example.com/api/coaches?limit=999')
-    );
+    const response = await GET_LIST(makeRequest('https://example.com/api/coaches?limit=999'));
     const body = await response.json();
 
     expect(response.status).toBe(200);
@@ -195,9 +186,11 @@ describe('GET /api/coaches/:slug', () => {
     const availSelect = {
       from: vi.fn().mockReturnThis(),
       where: vi.fn().mockReturnThis(),
-      orderBy: vi.fn().mockResolvedValue([
-        { dayOfWeek: 1, startTime: '09:00', endTime: '17:00', isAvailable: true },
-      ]),
+      orderBy: vi
+        .fn()
+        .mockResolvedValue([
+          { dayOfWeek: 1, startTime: '09:00', endTime: '17:00', isAvailable: true },
+        ]),
     };
 
     mockDbSelect.mockReturnValueOnce(coachSelect).mockReturnValueOnce(availSelect);
@@ -243,9 +236,11 @@ describe('GET /api/coaches/:slug/reviews', () => {
     const selectChain = {
       from: vi.fn().mockReturnThis(),
       where: vi.fn().mockReturnThis(),
-      limit: vi.fn().mockResolvedValue([
-        { userId: 'user_coach', isPublished: false, averageRating: null, reviewCount: 0 },
-      ]),
+      limit: vi
+        .fn()
+        .mockResolvedValue([
+          { userId: 'user_coach', isPublished: false, averageRating: null, reviewCount: 0 },
+        ]),
     };
     mockDbSelect.mockReturnValueOnce(selectChain);
 

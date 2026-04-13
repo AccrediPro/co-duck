@@ -36,7 +36,7 @@ const GROUPED_TIMEZONES = TIMEZONES.reduce(
     acc[region].push(tz);
     return acc;
   },
-  {} as Record<string, typeof TIMEZONES[number][]>
+  {} as Record<string, (typeof TIMEZONES)[number][]>
 );
 
 const REGION_ORDER = ['Americas', 'Europe', 'Asia', 'Australia & Pacific', 'Africa', 'Pacific'];
@@ -156,9 +156,7 @@ export function TimezoneSettings() {
           {saving && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
         </div>
         {currentLabel && !saving && (
-          <p className="text-xs text-muted-foreground">
-            Current: {currentLabel}
-          </p>
+          <p className="text-xs text-muted-foreground">Current: {currentLabel}</p>
         )}
       </CardContent>
     </Card>

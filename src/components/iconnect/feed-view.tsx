@@ -179,7 +179,7 @@ export function FeedView({
   return (
     <div className="mx-auto max-w-4xl">
       {/* Header */}
-      <div className="flex items-center gap-3 mb-6 min-w-0">
+      <div className="mb-6 flex min-w-0 items-center gap-3">
         <Button
           variant="ghost"
           size="icon"
@@ -191,12 +191,10 @@ export function FeedView({
         </Button>
         <Avatar className="h-10 w-10 shrink-0">
           <AvatarImage src={otherUser.avatarUrl || undefined} />
-          <AvatarFallback className="text-sm">
-            {getInitials(otherUser.name)}
-          </AvatarFallback>
+          <AvatarFallback className="text-sm">{getInitials(otherUser.name)}</AvatarFallback>
         </Avatar>
         <div className="min-w-0 flex-1">
-          <h1 className="text-base sm:text-lg font-semibold leading-tight truncate">
+          <h1 className="truncate text-base font-semibold leading-tight sm:text-lg">
             {otherUser.name || 'Unknown User'}
           </h1>
           <p className="text-xs text-muted-foreground">iConnect Feed</p>
@@ -204,10 +202,7 @@ export function FeedView({
       </div>
 
       {/* Create post */}
-      <CreatePostForm
-        conversationId={conversationId}
-        onPostCreated={prependPost}
-      />
+      <CreatePostForm conversationId={conversationId} onPostCreated={prependPost} />
 
       {/* Feed */}
       {posts.length === 0 ? (
@@ -239,15 +234,9 @@ export function FeedView({
 
           {/* Load older */}
           {hasMore && (
-            <div className="flex flex-col items-center gap-2 pt-2 pb-4">
-              {loadMoreError && (
-                <p className="text-sm text-destructive">Failed to load posts.</p>
-              )}
-              <Button
-                variant="outline"
-                onClick={loadOlderPosts}
-                disabled={loadingMore}
-              >
+            <div className="flex flex-col items-center gap-2 pb-4 pt-2">
+              {loadMoreError && <p className="text-sm text-destructive">Failed to load posts.</p>}
+              <Button variant="outline" onClick={loadOlderPosts} disabled={loadingMore}>
                 {loadingMore ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />

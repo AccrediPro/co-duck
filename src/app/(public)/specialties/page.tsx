@@ -109,10 +109,7 @@ export default async function SpecialtiesPage() {
         <div className="container mx-auto px-4 py-16 md:py-24">
           <div className="mx-auto max-w-3xl text-center">
             <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">
-              Explore Coaching{' '}
-              <span className="text-gold">
-                Specialties
-              </span>
+              Explore Coaching <span className="text-gold">Specialties</span>
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg text-white/80">
               Find the perfect coach for your unique goals. Browse our specialties and connect with
@@ -180,13 +177,22 @@ export default async function SpecialtiesPage() {
             Browse all our coaches and find someone who resonates with your goals and aspirations.
           </p>
           <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
-            <Button size="lg" className="h-12 bg-gold px-8 text-burgundy-dark hover:bg-gold-dark" asChild>
+            <Button
+              size="lg"
+              className="h-12 bg-gold px-8 text-burgundy-dark hover:bg-gold-dark"
+              asChild
+            >
               <Link href="/coaches">
                 Browse All Coaches
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
             </Button>
-            <Button size="lg" variant="outline" className="h-12 border-white/30 px-8 text-white hover:bg-white/10 hover:text-white" asChild>
+            <Button
+              size="lg"
+              variant="outline"
+              className="h-12 border-white/30 px-8 text-white hover:bg-white/10 hover:text-white"
+              asChild
+            >
               <Link href="/contact">Get Recommendations</Link>
             </Button>
           </div>

@@ -30,8 +30,18 @@ vi.mock('date-fns', () => ({
 
 // Mock next/link
 vi.mock('next/link', () => ({
-  default: ({ children, href, ...props }: { children: React.ReactNode; href: string; [key: string]: unknown }) => (
-    <a href={href} {...props}>{children}</a>
+  default: ({
+    children,
+    href,
+    ...props
+  }: {
+    children: React.ReactNode;
+    href: string;
+    [key: string]: unknown;
+  }) => (
+    <a href={href} {...props}>
+      {children}
+    </a>
   ),
 }));
 
@@ -151,10 +161,7 @@ describe('SessionsList', () => {
   });
 
   it('pluralizes session count text', () => {
-    const sessions = [
-      createMockSession({ id: 1 }),
-      createMockSession({ id: 2 }),
-    ];
+    const sessions = [createMockSession({ id: 1 }), createMockSession({ id: 2 })];
 
     render(
       <SessionsList
@@ -185,9 +192,7 @@ describe('SessionsList', () => {
   });
 
   it('shows pagination when multiple pages', () => {
-    const sessions = Array.from({ length: 10 }, (_, i) =>
-      createMockSession({ id: i + 1 })
-    );
+    const sessions = Array.from({ length: 10 }, (_, i) => createMockSession({ id: i + 1 }));
 
     render(
       <SessionsList

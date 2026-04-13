@@ -1,12 +1,6 @@
 'use client';
 
-import {
-  useState,
-  useRef,
-  useCallback,
-  useImperativeHandle,
-  forwardRef,
-} from 'react';
+import { useState, useRef, useCallback, useImperativeHandle, forwardRef } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -85,194 +79,189 @@ function PostTypeIcon({ type }: { type: string }) {
   return null;
 }
 
-export const PostCard = forwardRef<PostCardRef, PostCardProps>(
-  function PostCard({ post, currentUserId }, ref) {
-    const isOwnPost = post.sender?.id === currentUserId;
-    const [expanded, setExpanded] = useState(false);
-    const [imageBroken, setImageBroken] = useState(false);
+export const PostCard = forwardRef<PostCardRef, PostCardProps>(function PostCard(
+  { post, currentUserId },
+  ref
+) {
+  const isOwnPost = post.sender?.id === currentUserId;
+  const [expanded, setExpanded] = useState(false);
+  const [imageBroken, setImageBroken] = useState(false);
 
-    // Comments state
-    const [commentsOpen, setCommentsOpen] = useState(false);
-    const [comments, setComments] = useState<PostComment[]>([]);
-    const [commentCount, setCommentCount] = useState(0);
-    const [commentsLoaded, setCommentsLoaded] = useState(false);
-    const [commentsLoading, setCommentsLoading] = useState(false);
+  // Comments state
+  const [commentsOpen, setCommentsOpen] = useState(false);
+  const [comments, setComments] = useState<PostComment[]>([]);
+  const [commentCount, setCommentCount] = useState(0);
+  const [commentsLoaded, setCommentsLoaded] = useState(false);
+  const [commentsLoading, setCommentsLoading] = useState(false);
 
-    // Expose addComment/removeComment for Q4 real-time integration
-    useImperativeHandle(ref, () => ({
-      addComment: (comment: PostComment) => {
-        setComments((prev) => {
-          if (prev.some((c) => c.id === comment.id)) return prev;
-          return [...prev, comment];
-        });
-        setCommentCount((c) => c + 1);
-      },
-      removeComment: (commentId: number) => {
-        setComments((prev) => prev.filter((c) => c.id !== commentId));
-        setCommentCount((c) => Math.max(0, c - 1));
-      },
-    }));
-
-    const fetchComments = useCallback(async () => {
-      if (commentsLoaded || commentsLoading) return;
-      setCommentsLoading(true);
-      try {
-        const res = await fetch(`/api/iconnect/posts/${post.id}/comments`);
-        if (!res.ok) throw new Error('Failed to fetch');
-        const json = await res.json();
-        if (json.success && json.data) {
-          setComments(json.data.comments);
-          setCommentCount(json.data.comments.length);
-          setCommentsLoaded(true);
-        }
-      } catch {
-        // Will show empty — user can try toggling again
-      } finally {
-        setCommentsLoading(false);
-      }
-    }, [commentsLoaded, commentsLoading, post.id]);
-
-    const handleToggleComments = useCallback(() => {
-      const opening = !commentsOpen;
-      setCommentsOpen(opening);
-      if (opening && !commentsLoaded) {
-        fetchComments();
-      }
-    }, [commentsOpen, commentsLoaded, fetchComments]);
-
-    const handleCommentAdded = useCallback((comment: PostComment) => {
-      setComments((prev) => [...prev, comment]);
+  // Expose addComment/removeComment for Q4 real-time integration
+  useImperativeHandle(ref, () => ({
+    addComment: (comment: PostComment) => {
+      setComments((prev) => {
+        if (prev.some((c) => c.id === comment.id)) return prev;
+        return [...prev, comment];
+      });
       setCommentCount((c) => c + 1);
-    }, []);
-
-    const handleCommentDeleted = useCallback((commentId: number) => {
+    },
+    removeComment: (commentId: number) => {
       setComments((prev) => prev.filter((c) => c.id !== commentId));
       setCommentCount((c) => Math.max(0, c - 1));
-    }, []);
+    },
+  }));
 
-    const isLongContent =
-      post.content != null && post.content.length > CONTENT_COLLAPSE_THRESHOLD;
-    const displayContent =
-      post.content && isLongContent && !expanded
-        ? post.content.slice(0, CONTENT_COLLAPSE_THRESHOLD).trimEnd() + '\u2026'
-        : post.content;
+  const fetchComments = useCallback(async () => {
+    if (commentsLoaded || commentsLoading) return;
+    setCommentsLoading(true);
+    try {
+      const res = await fetch(`/api/iconnect/posts/${post.id}/comments`);
+      if (!res.ok) throw new Error('Failed to fetch');
+      const json = await res.json();
+      if (json.success && json.data) {
+        setComments(json.data.comments);
+        setCommentCount(json.data.comments.length);
+        setCommentsLoaded(true);
+      }
+    } catch {
+      // Will show empty — user can try toggling again
+    } finally {
+      setCommentsLoading(false);
+    }
+  }, [commentsLoaded, commentsLoading, post.id]);
 
-    return (
-      <Card
-        className={cn(
-          'overflow-hidden transition-colors',
-          isOwnPost ? 'bg-primary/[0.03] border-primary/10' : 'bg-card'
-        )}
-      >
-        <div className="p-3 sm:p-4">
-          {/* Header: avatar + name + timestamp */}
-          <div className="flex items-center gap-2 sm:gap-3 mb-3">
-            <Avatar className="h-9 w-9 flex-shrink-0">
-              <AvatarImage src={post.sender?.avatarUrl || undefined} />
-              <AvatarFallback className="text-xs">
-                {getInitials(post.sender?.name || null)}
-              </AvatarFallback>
-            </Avatar>
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2">
-                <span className="text-sm font-medium truncate">
-                  {post.sender?.name || 'Unknown'}
-                </span>
-                <PostTypeIcon type={post.type} />
-              </div>
-              <span className="text-xs text-muted-foreground">
-                {formatRelativeTime(post.createdAt)}
-              </span>
+  const handleToggleComments = useCallback(() => {
+    const opening = !commentsOpen;
+    setCommentsOpen(opening);
+    if (opening && !commentsLoaded) {
+      fetchComments();
+    }
+  }, [commentsOpen, commentsLoaded, fetchComments]);
+
+  const handleCommentAdded = useCallback((comment: PostComment) => {
+    setComments((prev) => [...prev, comment]);
+    setCommentCount((c) => c + 1);
+  }, []);
+
+  const handleCommentDeleted = useCallback((commentId: number) => {
+    setComments((prev) => prev.filter((c) => c.id !== commentId));
+    setCommentCount((c) => Math.max(0, c - 1));
+  }, []);
+
+  const isLongContent = post.content != null && post.content.length > CONTENT_COLLAPSE_THRESHOLD;
+  const displayContent =
+    post.content && isLongContent && !expanded
+      ? post.content.slice(0, CONTENT_COLLAPSE_THRESHOLD).trimEnd() + '\u2026'
+      : post.content;
+
+  return (
+    <Card
+      className={cn(
+        'overflow-hidden transition-colors',
+        isOwnPost ? 'border-primary/10 bg-primary/[0.03]' : 'bg-card'
+      )}
+    >
+      <div className="p-3 sm:p-4">
+        {/* Header: avatar + name + timestamp */}
+        <div className="mb-3 flex items-center gap-2 sm:gap-3">
+          <Avatar className="h-9 w-9 flex-shrink-0">
+            <AvatarImage src={post.sender?.avatarUrl || undefined} />
+            <AvatarFallback className="text-xs">
+              {getInitials(post.sender?.name || null)}
+            </AvatarFallback>
+          </Avatar>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2">
+              <span className="truncate text-sm font-medium">{post.sender?.name || 'Unknown'}</span>
+              <PostTypeIcon type={post.type} />
             </div>
+            <span className="text-xs text-muted-foreground">
+              {formatRelativeTime(post.createdAt)}
+            </span>
           </div>
-
-          {/* Content */}
-          {displayContent && (
-            <div className="mb-3">
-              <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">
-                {displayContent}
-              </p>
-              {isLongContent && (
-                <button
-                  onClick={() => setExpanded((v) => !v)}
-                  className="mt-1 text-sm font-medium text-primary hover:underline"
-                >
-                  {expanded ? 'Show less' : 'Read more'}
-                </button>
-              )}
-            </div>
-          )}
-
-          {/* Image */}
-          {post.type === 'image' && post.imageUrl && (
-            <div className="mb-3 overflow-hidden rounded-lg">
-              {imageBroken ? (
-                <div className="flex flex-col items-center justify-center bg-muted/30 rounded-lg py-12 text-muted-foreground">
-                  <ImageOff className="h-8 w-8 mb-2" />
-                  <span className="text-sm">Image could not be loaded</span>
-                </div>
-              ) : (
-                /* eslint-disable-next-line @next/next/no-img-element */
-                <img
-                  src={post.imageUrl}
-                  alt="Post image"
-                  className="max-h-96 w-full object-contain bg-muted/30 rounded-lg"
-                  loading="lazy"
-                  onError={() => setImageBroken(true)}
-                />
-              )}
-            </div>
-          )}
-
-          {/* Task items */}
-          {post.type === 'task' && post.taskItems && post.taskItems.length > 0 && (
-            <TaskChecklist items={post.taskItems} />
-          )}
         </div>
 
-        {/* Comments toggle + section */}
-        <div className="border-t border-border/50">
-          <button
-            onClick={handleToggleComments}
-            className="flex items-center gap-1.5 w-full px-3 sm:px-4 py-2.5 text-xs text-muted-foreground hover:text-foreground hover:bg-muted/30 transition-colors min-h-[44px]"
-          >
-            <MessageCircle className="h-3.5 w-3.5" />
-            {commentCount > 0
-              ? `${commentCount} comment${commentCount !== 1 ? 's' : ''}`
-              : 'Add a comment'}
-          </button>
+        {/* Content */}
+        {displayContent && (
+          <div className="mb-3">
+            <p className="whitespace-pre-wrap break-words text-sm leading-relaxed">
+              {displayContent}
+            </p>
+            {isLongContent && (
+              <button
+                onClick={() => setExpanded((v) => !v)}
+                className="mt-1 text-sm font-medium text-primary hover:underline"
+              >
+                {expanded ? 'Show less' : 'Read more'}
+              </button>
+            )}
+          </div>
+        )}
 
-          {commentsOpen && (
-            <div className="px-3 sm:px-4 pb-3 sm:pb-4">
-              {commentsLoading ? (
-                <CommentsSkeleton />
-              ) : (
-                <>
-                  {comments.length > 0 && (
-                    <div className="space-y-3 mb-3">
-                      {comments.map((comment) => (
-                        <CommentItem
-                          key={comment.id}
-                          comment={comment}
-                          currentUserId={currentUserId}
-                          onDeleted={handleCommentDeleted}
-                        />
-                      ))}
-                    </div>
-                  )}
-                  <CommentForm
-                    postId={post.id}
-                    onCommentAdded={handleCommentAdded}
-                  />
-                </>
-              )}
-            </div>
-          )}
-        </div>
-      </Card>
-    );
-  }
-);
+        {/* Image */}
+        {post.type === 'image' && post.imageUrl && (
+          <div className="mb-3 overflow-hidden rounded-lg">
+            {imageBroken ? (
+              <div className="flex flex-col items-center justify-center rounded-lg bg-muted/30 py-12 text-muted-foreground">
+                <ImageOff className="mb-2 h-8 w-8" />
+                <span className="text-sm">Image could not be loaded</span>
+              </div>
+            ) : (
+              /* eslint-disable-next-line @next/next/no-img-element */
+              <img
+                src={post.imageUrl}
+                alt="Post image"
+                className="max-h-96 w-full rounded-lg bg-muted/30 object-contain"
+                loading="lazy"
+                onError={() => setImageBroken(true)}
+              />
+            )}
+          </div>
+        )}
+
+        {/* Task items */}
+        {post.type === 'task' && post.taskItems && post.taskItems.length > 0 && (
+          <TaskChecklist items={post.taskItems} />
+        )}
+      </div>
+
+      {/* Comments toggle + section */}
+      <div className="border-t border-border/50">
+        <button
+          onClick={handleToggleComments}
+          className="flex min-h-[44px] w-full items-center gap-1.5 px-3 py-2.5 text-xs text-muted-foreground transition-colors hover:bg-muted/30 hover:text-foreground sm:px-4"
+        >
+          <MessageCircle className="h-3.5 w-3.5" />
+          {commentCount > 0
+            ? `${commentCount} comment${commentCount !== 1 ? 's' : ''}`
+            : 'Add a comment'}
+        </button>
+
+        {commentsOpen && (
+          <div className="px-3 pb-3 sm:px-4 sm:pb-4">
+            {commentsLoading ? (
+              <CommentsSkeleton />
+            ) : (
+              <>
+                {comments.length > 0 && (
+                  <div className="mb-3 space-y-3">
+                    {comments.map((comment) => (
+                      <CommentItem
+                        key={comment.id}
+                        comment={comment}
+                        currentUserId={currentUserId}
+                        onDeleted={handleCommentDeleted}
+                      />
+                    ))}
+                  </div>
+                )}
+                <CommentForm postId={post.id} onCommentAdded={handleCommentAdded} />
+              </>
+            )}
+          </div>
+        )}
+      </div>
+    </Card>
+  );
+});
 
 function CommentItem({
   comment,
@@ -314,7 +303,7 @@ function CommentItem({
 
   return (
     <div className="group flex gap-2">
-      <Avatar className="h-6 w-6 flex-shrink-0 mt-0.5">
+      <Avatar className="mt-0.5 h-6 w-6 flex-shrink-0">
         <AvatarImage src={comment.sender?.avatarUrl || undefined} />
         <AvatarFallback className="text-[10px]">
           {getInitials(comment.sender?.name || null)}
@@ -322,24 +311,22 @@ function CommentItem({
       </Avatar>
       <div className="min-w-0 flex-1">
         <div className="flex items-baseline gap-2">
-          <span className="text-xs font-medium truncate">
-            {comment.sender?.name || 'Unknown'}
-          </span>
-          <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+          <span className="truncate text-xs font-medium">{comment.sender?.name || 'Unknown'}</span>
+          <span className="whitespace-nowrap text-[10px] text-muted-foreground">
             {formatRelativeTime(comment.createdAt)}
           </span>
           {isOwn && (
             <button
               onClick={handleDelete}
               disabled={deleting}
-              className="opacity-0 group-hover:opacity-100 focus:opacity-100 transition-opacity ml-auto p-1 text-muted-foreground hover:text-destructive min-h-[24px] min-w-[24px] flex items-center justify-center"
+              className="ml-auto flex min-h-[24px] min-w-[24px] items-center justify-center p-1 text-muted-foreground opacity-0 transition-opacity hover:text-destructive focus:opacity-100 group-hover:opacity-100"
               aria-label="Delete comment"
             >
               <Trash2 className="h-3 w-3" />
             </button>
           )}
         </div>
-        <p className="text-sm leading-relaxed break-words">{comment.content}</p>
+        <p className="break-words text-sm leading-relaxed">{comment.content}</p>
       </div>
     </div>
   );
@@ -408,7 +395,7 @@ function CommentForm({
         onKeyDown={handleKeyDown}
         placeholder="Write a comment..."
         disabled={submitting}
-        className="flex-1 h-9 text-sm"
+        className="h-9 flex-1 text-sm"
       />
       <Button
         size="icon"
@@ -418,11 +405,7 @@ function CommentForm({
         className="h-9 w-9 shrink-0"
         aria-label="Post comment"
       >
-        {submitting ? (
-          <Loader2 className="h-4 w-4 animate-spin" />
-        ) : (
-          <Send className="h-4 w-4" />
-        )}
+        {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
       </Button>
     </div>
   );
@@ -433,7 +416,7 @@ function CommentsSkeleton() {
     <div className="space-y-3">
       {[1, 2].map((i) => (
         <div key={i} className="flex gap-2">
-          <Skeleton className="h-6 w-6 rounded-full shrink-0" />
+          <Skeleton className="h-6 w-6 shrink-0 rounded-full" />
           <div className="flex-1 space-y-1.5">
             <Skeleton className="h-3 w-24" />
             <Skeleton className="h-4 w-full" />
@@ -499,7 +482,7 @@ function TaskChecklistItem({ item }: { item: FeedTaskItem }) {
   return (
     <label
       className={cn(
-        'flex items-center gap-2.5 cursor-pointer group min-h-[44px] py-1',
+        'group flex min-h-[44px] cursor-pointer items-center gap-2.5 py-1',
         toggling && 'opacity-70'
       )}
     >
@@ -510,14 +493,12 @@ function TaskChecklistItem({ item }: { item: FeedTaskItem }) {
           disabled={toggling}
           className="h-5 w-5"
         />
-        {toggling && (
-          <Loader2 className="absolute inset-0 h-5 w-5 animate-spin text-primary" />
-        )}
+        {toggling && <Loader2 className="absolute inset-0 h-5 w-5 animate-spin text-primary" />}
       </div>
       <span
         className={cn(
-          'text-sm leading-snug break-words min-w-0',
-          completed && 'line-through text-muted-foreground'
+          'min-w-0 break-words text-sm leading-snug',
+          completed && 'text-muted-foreground line-through'
         )}
       >
         {item.label}

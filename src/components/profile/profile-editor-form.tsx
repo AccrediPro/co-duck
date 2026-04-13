@@ -813,11 +813,17 @@ export function ProfileEditorForm({ initialData }: ProfileEditorFormProps) {
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="min-w-0">
                     <p className="text-base font-medium leading-none">Session Types *</p>
-                    <p className="text-sm text-muted-foreground break-words">
+                    <p className="break-words text-sm text-muted-foreground">
                       Define the types of sessions you offer. At least one is required.
                     </p>
                   </div>
-                  <Button type="button" variant="outline" size="sm" onClick={addSessionType} className="shrink-0">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={addSessionType}
+                    className="shrink-0"
+                  >
                     <Plus className="mr-1 h-4 w-4" />
                     Add Session
                   </Button>
@@ -826,9 +832,7 @@ export function ProfileEditorForm({ initialData }: ProfileEditorFormProps) {
                 {fields.map((field, index) => (
                   <Card key={field.id} className="overflow-hidden border-border">
                     <div className="flex items-center justify-between border-b bg-muted/50 px-4 py-2">
-                      <span className="text-sm font-semibold">
-                        Session {index + 1}
-                      </span>
+                      <span className="text-sm font-semibold">Session {index + 1}</span>
                       {fields.length > 1 && (
                         <Button
                           type="button"
@@ -843,7 +847,6 @@ export function ProfileEditorForm({ initialData }: ProfileEditorFormProps) {
                       )}
                     </div>
                     <div className="space-y-4 p-4">
-
                       <div className="grid gap-4 sm:grid-cols-3">
                         {/* Session Name */}
                         <FormField

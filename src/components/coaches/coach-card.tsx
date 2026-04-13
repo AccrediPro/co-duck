@@ -76,16 +76,12 @@ export function CoachCard({
 
             {/* Name */}
             <div className="mt-4 flex items-center gap-1">
-              <h3 className="text-lg font-semibold text-white">
-                {name}
-              </h3>
+              <h3 className="text-lg font-semibold text-white">{name}</h3>
               {isVerified && <VerifiedBadge size="sm" />}
             </div>
 
             {/* Headline */}
-            {headline && (
-              <p className="mt-1 line-clamp-2 text-sm text-cream/80">{headline}</p>
-            )}
+            {headline && <p className="mt-1 line-clamp-2 text-sm text-cream/80">{headline}</p>}
 
             {/* Rating */}
             {reviewCount && reviewCount > 0 ? (
@@ -101,7 +97,11 @@ export function CoachCard({
             {displaySpecialties.length > 0 && (
               <div className="mt-4 flex flex-wrap justify-center gap-1">
                 {displaySpecialties.map((specialty, index) => (
-                  <Badge key={index} variant="secondary" className="border border-white/20 bg-white/15 text-xs text-white hover:bg-white/25">
+                  <Badge
+                    key={index}
+                    variant="secondary"
+                    className="border border-white/20 bg-white/15 text-xs text-white hover:bg-white/25"
+                  >
                     {specialty}
                   </Badge>
                 ))}

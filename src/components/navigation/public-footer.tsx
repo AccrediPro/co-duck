@@ -51,7 +51,10 @@ export function PublicFooter() {
                 <span>Thanks for subscribing!</span>
               </div>
             ) : (
-              <form onSubmit={handleNewsletterSubmit} className="flex w-full max-w-md flex-col gap-2 sm:flex-row">
+              <form
+                onSubmit={handleNewsletterSubmit}
+                className="flex w-full max-w-md flex-col gap-2 sm:flex-row"
+              >
                 <input
                   type="email"
                   placeholder="Enter your email"

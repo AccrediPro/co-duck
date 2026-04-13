@@ -428,10 +428,12 @@ export async function getRescheduleAvailableSlots(
       if (!override.isAvailable) {
         return { success: true, data: [] };
       }
-      ranges = [{
-        startTime: override.startTime?.substring(0, 5) || '09:00',
-        endTime: override.endTime?.substring(0, 5) || '17:00',
-      }];
+      ranges = [
+        {
+          startTime: override.startTime?.substring(0, 5) || '09:00',
+          endTime: override.endTime?.substring(0, 5) || '17:00',
+        },
+      ];
     } else {
       // Get regular weekly availability (multiple ranges per day possible)
       const weeklyAvail = await db

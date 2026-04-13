@@ -84,10 +84,7 @@ export async function POST(request: Request) {
           .select({ checkInDay: weeklyCheckIns.checkInDay })
           .from(weeklyCheckIns)
           .where(
-            and(
-              eq(weeklyCheckIns.userId, pair.clientId),
-              eq(weeklyCheckIns.coachId, pair.coachId)
-            )
+            and(eq(weeklyCheckIns.userId, pair.clientId), eq(weeklyCheckIns.coachId, pair.coachId))
           )
           .orderBy(sql`${weeklyCheckIns.weekYear} DESC, ${weeklyCheckIns.weekNumber} DESC`)
           .limit(1);
@@ -140,9 +137,7 @@ export async function POST(request: Request) {
       }
     }
 
-    console.log(
-      `[CreateCheckIns] Completed. Created: ${created}, Skipped: ${skipped}`
-    );
+    console.log(`[CreateCheckIns] Completed. Created: ${created}, Skipped: ${skipped}`);
 
     return NextResponse.json({
       success: true,

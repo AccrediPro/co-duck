@@ -48,7 +48,10 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error('Error fetching iConnect unread count:', error);
     return Response.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch unread count' } },
+      {
+        success: false,
+        error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch unread count' },
+      },
       { status: 500 }
     );
   }

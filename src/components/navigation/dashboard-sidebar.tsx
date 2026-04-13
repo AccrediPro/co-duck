@@ -53,14 +53,26 @@ const coachLinks: NavLink[] = [
   { href: '/dashboard/clients', label: 'My Clients', icon: Users, roles: ['coach'] },
   { href: '/dashboard/availability', label: 'Availability', icon: Clock, roles: ['coach'] },
   { href: '/dashboard/payments', label: 'Payments', icon: CreditCard, roles: ['coach'] },
-  { href: '/dashboard/iconnect', label: 'iConnect', icon: LayoutList, roles: ['coach'], showBadge: true },
+  {
+    href: '/dashboard/iconnect',
+    label: 'iConnect',
+    icon: LayoutList,
+    roles: ['coach'],
+    showBadge: true,
+  },
 ];
 
 // Client-specific links
 const clientLinks: NavLink[] = [
   { href: '/dashboard/my-coaches', label: 'My Coach', icon: UserCheck, roles: ['client'] },
   { href: '/dashboard/my-sessions', label: 'My Sessions', icon: CalendarDays, roles: ['client'] },
-  { href: '/dashboard/iconnect', label: 'iConnect', icon: LayoutList, roles: ['client'], showBadge: true },
+  {
+    href: '/dashboard/iconnect',
+    label: 'iConnect',
+    icon: LayoutList,
+    roles: ['client'],
+    showBadge: true,
+  },
 ];
 
 // Get navigation links based on user role
@@ -113,72 +125,69 @@ export function DashboardSidebar({
     return pathname.startsWith(href);
   };
 
-  const NavContent = () => (
-    <>
-      {/* Logo + Notification Bell */}
-      <div className="flex h-16 items-center justify-between px-6">
-        <Link href="/" className="min-w-0 flex-1 truncate min-h-[44px] flex items-center text-sm font-bold">
-          AccrediPro CoachHub
-        </Link>
-        <NotificationBell />
-      </div>
-
-      <Separator />
-
-      {/* Navigation Links */}
-      <nav className="flex-1 space-y-1 px-3 py-4">
-        {navLinks.map((link) => {
-          const Icon = link.icon;
-          const badgeCount =
-            link.href === '/dashboard/messages'
-              ? unreadMessageCount
-              : link.href === '/dashboard/iconnect'
-                ? iconnectUnreadCount
-                : 0;
-          const showBadge = link.showBadge && badgeCount > 0;
-          return (
-            <Link
-              key={link.href}
-              href={link.href}
-              className={cn(
-                'flex min-h-[44px] items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-                isActiveLink(link.href)
-                  ? 'bg-primary text-primary-foreground'
-                  : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-              )}
-            >
-              <Icon className="h-4 w-4" />
-              <span className="flex-1">{link.label}</span>
-              {showBadge && (
-                <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-xs font-medium text-destructive-foreground">
-                  {badgeCount > 99 ? '99+' : badgeCount}
-                </span>
-              )}
-            </Link>
-          );
-        })}
-      </nav>
-
-      <Separator />
-
-      {/* User Info */}
-      <div className="p-4">
-        <div className="flex items-center gap-3">
-          <UserButton afterSignOutUrl="/" />
-          <div className="flex-1 overflow-hidden">
-            <p className="truncate text-sm font-medium">{userName || 'User'}</p>
-            <p className="truncate text-xs text-muted-foreground">{userEmail}</p>
-          </div>
-        </div>
-      </div>
-    </>
-  );
-
   return (
     <>
       {/* Desktop Sidebar */}
       <aside className="hidden w-64 flex-col border-r bg-background md:flex">
-        <NavContent />
+        {/* Logo + Notification Bell */}
+        <div className="flex h-16 items-center justify-between px-6">
+          <Link
+            href="/"
+            className="flex min-h-[44px] min-w-0 flex-1 items-center truncate text-sm font-bold"
+          >
+            AccrediPro CoachHub
+          </Link>
+          <NotificationBell />
+        </div>
+
+        <Separator />
+
+        {/* Navigation Links */}
+        <nav className="flex-1 space-y-1 px-3 py-4">
+          {navLinks.map((link) => {
+            const Icon = link.icon;
+            const badgeCount =
+              link.href === '/dashboard/messages'
+                ? unreadMessageCount
+                : link.href === '/dashboard/iconnect'
+                  ? iconnectUnreadCount
+                  : 0;
+            const showBadge = link.showBadge && badgeCount > 0;
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={cn(
+                  'flex min-h-[44px] items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+                  isActiveLink(link.href)
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                )}
+              >
+                <Icon className="h-4 w-4" />
+                <span className="flex-1">{link.label}</span>
+                {showBadge && (
+                  <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-xs font-medium text-destructive-foreground">
+                    {badgeCount > 99 ? '99+' : badgeCount}
+                  </span>
+                )}
+              </Link>
+            );
+          })}
+        </nav>
+
+        <Separator />
+
+        {/* User Info */}
+        <div className="p-4">
+          <div className="flex items-center gap-3">
+            <UserButton afterSignOutUrl="/" />
+            <div className="flex-1 overflow-hidden">
+              <p className="truncate text-sm font-medium">{userName || 'User'}</p>
+              <p className="truncate text-xs text-muted-foreground">{userEmail}</p>
+            </div>
+          </div>
+        </div>
       </aside>
     </>
   );
@@ -206,7 +215,7 @@ export function DashboardMobileHeader({
 
   return (
     <header className="sticky top-0 z-50 flex h-16 items-center justify-between border-b bg-background px-4 md:hidden">
-      <Link href="/" className="flex min-h-[44px] items-center text-xl font-bold whitespace-nowrap">
+      <Link href="/" className="flex min-h-[44px] items-center whitespace-nowrap text-xl font-bold">
         AccrediPro CoachHub
       </Link>
 
@@ -214,7 +223,10 @@ export function DashboardMobileHeader({
         <NotificationBell />
         {/* Unread badge indicator on mobile header */}
         {unreadMessageCount > 0 && (
-          <Link href="/dashboard/messages" className="relative flex min-h-[44px] min-w-[44px] items-center justify-center">
+          <Link
+            href="/dashboard/messages"
+            className="relative flex min-h-[44px] min-w-[44px] items-center justify-center"
+          >
             <MessageSquare className="h-5 w-5 text-muted-foreground" />
             <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-medium text-destructive-foreground">
               {unreadMessageCount > 99 ? '99+' : unreadMessageCount}
@@ -222,7 +234,10 @@ export function DashboardMobileHeader({
           </Link>
         )}
         {iconnectUnreadCount > 0 && (
-          <Link href="/dashboard/iconnect" className="relative flex min-h-[44px] min-w-[44px] items-center justify-center">
+          <Link
+            href="/dashboard/iconnect"
+            className="relative flex min-h-[44px] min-w-[44px] items-center justify-center"
+          >
             <LayoutList className="h-5 w-5 text-muted-foreground" />
             <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[hsl(var(--brand-accent))] px-1 text-[10px] font-medium text-white">
               {iconnectUnreadCount > 99 ? '99+' : iconnectUnreadCount}
@@ -231,11 +246,7 @@ export function DashboardMobileHeader({
         )}
         <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen} modal={false}>
           <SheetTrigger asChild>
-            <Button
-              variant="ghost"
-              className="h-11 w-11 p-0"
-              aria-label="Open navigation menu"
-            >
+            <Button variant="ghost" className="h-11 w-11 p-0" aria-label="Open navigation menu">
               <Menu className="h-6 w-6" />
             </Button>
           </SheetTrigger>

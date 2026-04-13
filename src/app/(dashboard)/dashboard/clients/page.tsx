@@ -53,7 +53,8 @@ export default async function ClientsPage() {
               </div>
               <CardTitle>No clients yet</CardTitle>
               <CardDescription className="mx-auto max-w-md">
-                You don&apos;t have any clients yet. Clients will appear here after their first confirmed session.
+                You don&apos;t have any clients yet. Clients will appear here after their first
+                confirmed session.
               </CardDescription>
             </CardHeader>
           </Card>

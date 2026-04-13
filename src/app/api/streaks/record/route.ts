@@ -11,7 +11,7 @@ const VALID_ACTION_TYPES = [
   'session_prep_completed',
 ] as const;
 
-type ActionType = typeof VALID_ACTION_TYPES[number];
+type ActionType = (typeof VALID_ACTION_TYPES)[number];
 
 /**
  * POST /api/streaks/record
@@ -23,9 +23,10 @@ export async function POST(request: Request) {
   // Check CRON_SECRET first for internal calls
   const authHeader = request.headers.get('authorization');
   const cronSecret = process.env.CRON_SECRET;
-  const isCron = cronSecret && authHeader && (
-    authHeader === cronSecret || authHeader === `Bearer ${cronSecret}`
-  );
+  const isCron =
+    cronSecret &&
+    authHeader &&
+    (authHeader === cronSecret || authHeader === `Bearer ${cronSecret}`);
 
   if (!isCron) {
     const rl = rateLimit(request, WRITE_LIMIT, 'streaks-record');
@@ -53,7 +54,13 @@ export async function POST(request: Request) {
 
     if (!actionType || !VALID_ACTION_TYPES.includes(actionType as ActionType)) {
       return Response.json(
-        { success: false, error: { code: 'INVALID_ACTION', message: `actionType must be one of: ${VALID_ACTION_TYPES.join(', ')}` } },
+        {
+          success: false,
+          error: {
+            code: 'INVALID_ACTION',
+            message: `actionType must be one of: ${VALID_ACTION_TYPES.join(', ')}`,
+          },
+        },
         { status: 400 }
       );
     }

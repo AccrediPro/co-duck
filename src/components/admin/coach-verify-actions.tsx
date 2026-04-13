@@ -71,11 +71,7 @@ export function CoachVerifyActions({ coachId, currentStatus }: CoachVerifyAction
         <p className="text-xs text-muted-foreground">{notes.length}/2000 characters</p>
       </div>
 
-      {error && (
-        <div className="rounded-md bg-red-50 p-3 text-sm text-red-700">
-          {error}
-        </div>
-      )}
+      {error && <div className="rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</div>}
 
       {success && (
         <div className="rounded-md bg-[hsl(var(--brand-surface))] p-3 text-sm text-[hsl(var(--brand-accent-hover))]">
@@ -130,10 +126,6 @@ export function VerificationBadge({ status }: { status: string }) {
         </Badge>
       );
     default:
-      return (
-        <Badge variant="secondary">
-          Pending
-        </Badge>
-      );
+      return <Badge variant="secondary">Pending</Badge>;
   }
 }

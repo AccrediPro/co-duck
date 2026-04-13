@@ -94,7 +94,11 @@ export function ClientGroupBadges({ clientId }: ClientGroupBadgesProps) {
           setClientGroups((prev) => [...prev, group].sort((a, b) => a.name.localeCompare(b.name)));
         }
       } else {
-        toast({ title: 'Error', description: json.error?.message || 'Failed to add to group', variant: 'destructive' });
+        toast({
+          title: 'Error',
+          description: json.error?.message || 'Failed to add to group',
+          variant: 'destructive',
+        });
       }
     } catch {
       toast({ title: 'Error', description: 'Failed to add to group', variant: 'destructive' });
@@ -114,7 +118,11 @@ export function ClientGroupBadges({ clientId }: ClientGroupBadgesProps) {
       if (json.success) {
         setClientGroups((prev) => prev.filter((g) => g.id !== removeTarget.id));
       } else {
-        toast({ title: 'Error', description: json.error?.message || 'Failed to remove from group', variant: 'destructive' });
+        toast({
+          title: 'Error',
+          description: json.error?.message || 'Failed to remove from group',
+          variant: 'destructive',
+        });
       }
     } catch {
       toast({ title: 'Error', description: 'Failed to remove from group', variant: 'destructive' });
@@ -184,16 +192,11 @@ export function ClientGroupBadges({ clientId }: ClientGroupBadgesProps) {
         <DropdownMenuContent align="start" className="w-48">
           {availableGroups.length === 0 ? (
             <div className="px-2 py-1.5 text-xs text-muted-foreground">
-              {allGroups.length === 0
-                ? 'No groups yet'
-                : 'Client is in all groups'}
+              {allGroups.length === 0 ? 'No groups yet' : 'Client is in all groups'}
             </div>
           ) : (
             availableGroups.map((group) => (
-              <DropdownMenuItem
-                key={group.id}
-                onClick={() => handleAddToGroup(group.id)}
-              >
+              <DropdownMenuItem key={group.id} onClick={() => handleAddToGroup(group.id)}>
                 {group.name}
               </DropdownMenuItem>
             ))
@@ -215,12 +218,18 @@ export function ClientGroupBadges({ clientId }: ClientGroupBadgesProps) {
       />
 
       {/* Remove confirmation */}
-      <AlertDialog open={!!removeTarget} onOpenChange={(open) => { if (!open) setRemoveTarget(null); }}>
+      <AlertDialog
+        open={!!removeTarget}
+        onOpenChange={(open) => {
+          if (!open) setRemoveTarget(null);
+        }}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Remove from Group</AlertDialogTitle>
             <AlertDialogDescription>
-              Remove this client from &quot;{removeTarget?.name}&quot;? You can add them back any time.
+              Remove this client from &quot;{removeTarget?.name}&quot;? You can add them back any
+              time.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

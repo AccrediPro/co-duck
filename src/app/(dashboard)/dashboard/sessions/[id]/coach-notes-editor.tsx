@@ -50,14 +50,10 @@ export function CoachNotesEditor({
   );
 
   // Notes state — free-text mode
-  const [freeText, setFreeText] = useState(
-    initialTemplateId ? '' : (initialNotes || '')
-  );
+  const [freeText, setFreeText] = useState(initialTemplateId ? '' : initialNotes || '');
 
   // Notes state — structured mode
-  const [sectionData, setSectionData] = useState<Record<string, string>>(
-    initialSections ?? {}
-  );
+  const [sectionData, setSectionData] = useState<Record<string, string>>(initialSections ?? {});
 
   const [isSaving, setIsSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
@@ -178,7 +174,9 @@ export function CoachNotesEditor({
         <div className="flex items-center justify-between">
           <div>
             <CardTitle>Your Notes</CardTitle>
-            <CardDescription>Private notes about this session (only visible to you)</CardDescription>
+            <CardDescription>
+              Private notes about this session (only visible to you)
+            </CardDescription>
           </div>
           <Button
             variant="outline"
@@ -217,13 +215,15 @@ export function CoachNotesEditor({
               </SelectContent>
             </Select>
           </div>
-          <TemplateManagerDialog onTemplatesChanged={() => {
-            getSessionNoteTemplates().then((result) => {
-              if (result.success && result.templates) {
-                setTemplates(result.templates as Template[]);
-              }
-            });
-          }} />
+          <TemplateManagerDialog
+            onTemplatesChanged={() => {
+              getSessionNoteTemplates().then((result) => {
+                if (result.success && result.templates) {
+                  setTemplates(result.templates as Template[]);
+                }
+              });
+            }}
+          />
         </div>
 
         {/* Notes area */}

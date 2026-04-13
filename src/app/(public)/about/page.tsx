@@ -71,14 +71,11 @@ export default function AboutPage() {
         <div className="container mx-auto px-4 py-20 md:py-28">
           <div className="mx-auto max-w-3xl text-center">
             <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl md:text-6xl">
-              Empowering Growth Through{' '}
-              <span className="text-gold">
-                Expert Coaching
-              </span>
+              Empowering Growth Through <span className="text-gold">Expert Coaching</span>
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg text-white/80 md:text-xl">
-              At AccrediPro CoachHub, we connect individuals with world-class coaches to unlock their
-              potential, achieve their goals, and transform their lives.
+              At AccrediPro CoachHub, we connect individuals with world-class coaches to unlock
+              their potential, achieve their goals, and transform their lives.
             </p>
           </div>
         </div>
@@ -104,7 +101,9 @@ export default function AboutPage() {
       <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="mx-auto max-w-3xl text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-burgundy-dark md:text-4xl">Our Mission</h2>
+            <h2 className="text-3xl font-bold tracking-tight text-burgundy-dark md:text-4xl">
+              Our Mission
+            </h2>
             <p className="mt-6 text-lg text-muted-foreground">
               We believe that everyone has the potential to achieve extraordinary things. Our
               mission is to make professional coaching accessible, affordable, and effective for
@@ -120,7 +119,9 @@ export default function AboutPage() {
       <section className="border-y border-burgundy/10 bg-cream py-20">
         <div className="container mx-auto px-4">
           <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-burgundy-dark md:text-4xl">Our Values</h2>
+            <h2 className="text-3xl font-bold tracking-tight text-burgundy-dark md:text-4xl">
+              Our Values
+            </h2>
             <p className="mt-4 text-muted-foreground">
               The principles that guide everything we do at AccrediPro CoachHub.
             </p>
@@ -145,8 +146,12 @@ export default function AboutPage() {
       <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-burgundy-dark md:text-4xl">Our Journey</h2>
-            <p className="mt-4 text-muted-foreground">Key milestones in the AccrediPro CoachHub story.</p>
+            <h2 className="text-3xl font-bold tracking-tight text-burgundy-dark md:text-4xl">
+              Our Journey
+            </h2>
+            <p className="mt-4 text-muted-foreground">
+              Key milestones in the AccrediPro CoachHub story.
+            </p>
           </div>
           <div className="mx-auto mt-16 max-w-3xl">
             <div className="space-y-8">
@@ -208,7 +213,11 @@ export default function AboutPage() {
                   coaching.
                 </p>
                 <div className="mt-8 flex flex-col gap-4 sm:flex-row">
-                  <Button size="lg" className="h-11 bg-gold font-semibold text-burgundy-dark hover:bg-gold-dark" asChild>
+                  <Button
+                    size="lg"
+                    className="h-11 bg-gold font-semibold text-burgundy-dark hover:bg-gold-dark"
+                    asChild
+                  >
                     <Link href="/coaches">
                       Find a Coach
                       <ArrowRight className="ml-2 h-4 w-4" />
@@ -234,7 +243,9 @@ export default function AboutPage() {
       {/* CTA Section */}
       <section className="py-20">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-burgundy-dark md:text-4xl">Start Your Journey</h2>
+          <h2 className="text-3xl font-bold tracking-tight text-burgundy-dark md:text-4xl">
+            Start Your Journey
+          </h2>
           <p className="mx-auto mt-4 max-w-xl text-muted-foreground">
             Find the right coach and take the first step toward achieving your goals.
           </p>

@@ -37,9 +37,7 @@ describe('POST /api/auth/sync', () => {
   it('returns 401 when not authenticated', async () => {
     mockAuth.mockResolvedValueOnce({ userId: null });
 
-    const response = await POST(
-      makeJsonRequest('https://example.com/api/auth/sync', {})
-    );
+    const response = await POST(makeJsonRequest('https://example.com/api/auth/sync', {}));
     const body = await response.json();
 
     expect(response.status).toBe(401);
@@ -51,9 +49,7 @@ describe('POST /api/auth/sync', () => {
     mockAuth.mockResolvedValueOnce({ userId: 'user_123' });
     mockCurrentUser.mockResolvedValueOnce(null);
 
-    const response = await POST(
-      makeJsonRequest('https://example.com/api/auth/sync', {})
-    );
+    const response = await POST(makeJsonRequest('https://example.com/api/auth/sync', {}));
     const body = await response.json();
 
     expect(response.status).toBe(500);
@@ -69,9 +65,7 @@ describe('POST /api/auth/sync', () => {
       imageUrl: null,
     });
 
-    const response = await POST(
-      makeJsonRequest('https://example.com/api/auth/sync', {})
-    );
+    const response = await POST(makeJsonRequest('https://example.com/api/auth/sync', {}));
     const body = await response.json();
 
     expect(response.status).toBe(400);
@@ -93,9 +87,7 @@ describe('POST /api/auth/sync', () => {
       role: 'coach',
     });
 
-    const response = await POST(
-      makeJsonRequest('https://example.com/api/auth/sync', {})
-    );
+    const response = await POST(makeJsonRequest('https://example.com/api/auth/sync', {}));
     const body = await response.json();
 
     expect(response.status).toBe(200);
@@ -115,9 +107,7 @@ describe('POST /api/auth/sync', () => {
     });
     mockDbQueryFindFirst.mockResolvedValueOnce(null);
 
-    const response = await POST(
-      makeJsonRequest('https://example.com/api/auth/sync', {})
-    );
+    const response = await POST(makeJsonRequest('https://example.com/api/auth/sync', {}));
     const body = await response.json();
 
     expect(response.status).toBe(200);

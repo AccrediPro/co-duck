@@ -25,10 +25,7 @@ async function verifyPostMembership(postId: number, userId: string) {
   return { post, conversation };
 }
 
-export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const rl = rateLimit(request, FREQUENT_LIMIT, 'iconnect-comments-list');
   if (!rl.success) return rateLimitResponse(rl);
 
@@ -53,7 +50,10 @@ export async function GET(
     const membership = await verifyPostMembership(postId, userId);
     if (!membership) {
       return Response.json(
-        { success: false, error: { code: 'FORBIDDEN', message: 'Not a member of this conversation' } },
+        {
+          success: false,
+          error: { code: 'FORBIDDEN', message: 'Not a member of this conversation' },
+        },
         { status: 403 }
       );
     }
@@ -90,10 +90,7 @@ export async function GET(
   }
 }
 
-export async function POST(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const rl = rateLimit(request, WRITE_LIMIT, 'iconnect-comments-create');
   if (!rl.success) return rateLimitResponse(rl);
 
@@ -118,7 +115,10 @@ export async function POST(
     const membership = await verifyPostMembership(postId, userId);
     if (!membership) {
       return Response.json(
-        { success: false, error: { code: 'FORBIDDEN', message: 'Not a member of this conversation' } },
+        {
+          success: false,
+          error: { code: 'FORBIDDEN', message: 'Not a member of this conversation' },
+        },
         { status: 403 }
       );
     }
@@ -156,9 +156,7 @@ export async function POST(
       content: comment.content,
       createdAt: comment.createdAt,
       updatedAt: comment.updatedAt,
-      sender: sender
-        ? { id: sender.id, name: sender.name, avatarUrl: sender.avatarUrl }
-        : null,
+      sender: sender ? { id: sender.id, name: sender.name, avatarUrl: sender.avatarUrl } : null,
     };
 
     // Emit real-time event to the other user (fire-and-forget)

@@ -48,7 +48,10 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
     if (!currentUser || currentUser.role !== 'coach') {
       return Response.json(
-        { success: false, error: { code: 'FORBIDDEN', message: 'Only coaches can update client groups' } },
+        {
+          success: false,
+          error: { code: 'FORBIDDEN', message: 'Only coaches can update client groups' },
+        },
         { status: 403 }
       );
     }
@@ -72,7 +75,10 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
     if (duplicate) {
       return Response.json(
-        { success: false, error: { code: 'DUPLICATE_NAME', message: 'A group with this name already exists' } },
+        {
+          success: false,
+          error: { code: 'DUPLICATE_NAME', message: 'A group with this name already exists' },
+        },
         { status: 409 }
       );
     }
@@ -90,11 +96,17 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       );
     }
 
-    return Response.json({ success: true, data: { group: { id: updated.id, name: updated.name, updatedAt: updated.updatedAt } } });
+    return Response.json({
+      success: true,
+      data: { group: { id: updated.id, name: updated.name, updatedAt: updated.updatedAt } },
+    });
   } catch (error) {
     console.error('Error updating client group:', error);
     return Response.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to update client group' } },
+      {
+        success: false,
+        error: { code: 'INTERNAL_ERROR', message: 'Failed to update client group' },
+      },
       { status: 500 }
     );
   }
@@ -138,7 +150,10 @@ export async function DELETE(request: Request, { params }: RouteParams) {
 
     if (!currentUser || currentUser.role !== 'coach') {
       return Response.json(
-        { success: false, error: { code: 'FORBIDDEN', message: 'Only coaches can delete client groups' } },
+        {
+          success: false,
+          error: { code: 'FORBIDDEN', message: 'Only coaches can delete client groups' },
+        },
         { status: 403 }
       );
     }
@@ -159,7 +174,10 @@ export async function DELETE(request: Request, { params }: RouteParams) {
   } catch (error) {
     console.error('Error deleting client group:', error);
     return Response.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to delete client group' } },
+      {
+        success: false,
+        error: { code: 'INTERNAL_ERROR', message: 'Failed to delete client group' },
+      },
       { status: 500 }
     );
   }

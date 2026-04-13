@@ -90,9 +90,7 @@ export function SessionPrepForm({ prepId, questions, onComplete }: SessionPrepFo
         <CardContent className="flex items-center gap-3 p-6">
           <CheckCircle2 className="h-6 w-6 text-sage" />
           <div>
-            <p className="font-semibold text-burgundy-dark">
-              Preparation submitted!
-            </p>
+            <p className="font-semibold text-burgundy-dark">Preparation submitted!</p>
             <p className="text-sm text-muted-foreground">
               Your coach will be able to read your answers before the session.
             </p>
@@ -105,9 +103,7 @@ export function SessionPrepForm({ prepId, questions, onComplete }: SessionPrepFo
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg text-burgundy-dark">
-          Session Preparation
-        </CardTitle>
+        <CardTitle className="text-lg text-burgundy-dark">Session Preparation</CardTitle>
       </CardHeader>
       <CardContent className="space-y-5">
         {questions.map((question, index) => (

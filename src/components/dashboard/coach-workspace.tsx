@@ -28,12 +28,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ReviewForm } from '@/components/reviews';
@@ -118,11 +113,13 @@ function getInitials(name: string | null): string {
 
 function getStatusBadge(status: string) {
   const styles: Record<string, string> = {
-    active: 'bg-[hsl(var(--brand-accent-light))] text-[hsl(var(--brand-accent-dark))] dark:bg-[hsl(var(--brand-accent-darker))]/30 dark:text-[hsl(var(--brand-accent-muted))]',
+    active:
+      'bg-[hsl(var(--brand-accent-light))] text-[hsl(var(--brand-accent-dark))] dark:bg-[hsl(var(--brand-accent-darker))]/30 dark:text-[hsl(var(--brand-accent-muted))]',
     completed: 'bg-sage/15 text-sage dark:bg-sage/20 dark:text-sage',
     archived: 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400',
     pending: 'bg-gold/15 text-gold-dark dark:bg-gold/20 dark:text-gold',
-    in_progress: 'bg-[hsl(var(--brand-accent-light))] text-[hsl(var(--brand-accent-dark))] dark:bg-[hsl(var(--brand-accent-darker))]/30 dark:text-[hsl(var(--brand-accent-muted))]',
+    in_progress:
+      'bg-[hsl(var(--brand-accent-light))] text-[hsl(var(--brand-accent-dark))] dark:bg-[hsl(var(--brand-accent-darker))]/30 dark:text-[hsl(var(--brand-accent-muted))]',
   };
   const labels: Record<string, string> = {
     active: 'Active',
@@ -337,8 +334,12 @@ function ProgramsList({ programs, coachId }: { programs: Program[]; coachId: str
   const [uploading, setUploading] = useState<Record<number, boolean>>({});
   const [deletingIds, setDeletingIds] = useState<Set<number>>(new Set());
   // Track locally updated goal counts for progress recalculation
-  const [localGoalCounts, setLocalGoalCounts] = useState<Record<number, { total: number; completed: number }>>({});
-  const [localTaskCounts, setLocalTaskCounts] = useState<Record<number, { total: number; completed: number }>>({});
+  const [localGoalCounts, setLocalGoalCounts] = useState<
+    Record<number, { total: number; completed: number }>
+  >({});
+  const [localTaskCounts, setLocalTaskCounts] = useState<
+    Record<number, { total: number; completed: number }>
+  >({});
 
   const fetchGoals = useCallback(async (programId: number) => {
     setLoadingGoals((prev) => ({ ...prev, [programId]: true }));
@@ -823,12 +824,8 @@ function ProgramsList({ programs, coachId }: { programs: Program[]; coachId: str
                     </p>
                   )}
                   <div className="mt-3 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-                    {program.startDate && (
-                      <span>From {formatDate(program.startDate)}</span>
-                    )}
-                    {program.endDate && (
-                      <span>To {formatDate(program.endDate)}</span>
-                    )}
+                    {program.startDate && <span>From {formatDate(program.startDate)}</span>}
+                    {program.endDate && <span>To {formatDate(program.endDate)}</span>}
                   </div>
                   {/* Progress bar */}
                   <div className="mt-3 space-y-1">
@@ -840,7 +837,10 @@ function ProgramsList({ programs, coachId }: { programs: Program[]; coachId: str
                     </div>
                     <Progress
                       value={progressPct}
-                      className={cn('h-2', progressPct === 100 && '[&>div]:bg-[hsl(var(--brand-accent))]')}
+                      className={cn(
+                        'h-2',
+                        progressPct === 100 && '[&>div]:bg-[hsl(var(--brand-accent))]'
+                      )}
                     />
                   </div>
                 </div>
@@ -917,8 +917,7 @@ function ProgramsList({ programs, coachId }: { programs: Program[]; coachId: str
                                       <span
                                         className={cn(
                                           'font-medium',
-                                          isCompleted &&
-                                            'text-muted-foreground line-through'
+                                          isCompleted && 'text-muted-foreground line-through'
                                         )}
                                       >
                                         {goal.title}
@@ -934,15 +933,13 @@ function ProgramsList({ programs, coachId }: { programs: Program[]; coachId: str
                                       {goal.dueDate && (
                                         <span className="flex items-center gap-1">
                                           <Clock className="h-3 w-3" />
-                                          Due{' '}
-                                          {formatDate(goal.dueDate)}
+                                          Due {formatDate(goal.dueDate)}
                                         </span>
                                       )}
                                       {goal.completedAt && (
                                         <span className="flex items-center gap-1 text-[hsl(var(--brand-warm))]">
                                           <CheckCircle2 className="h-3 w-3" />
-                                          Completed{' '}
-                                          {formatDateShort(goal.completedAt)}
+                                          Completed {formatDateShort(goal.completedAt)}
                                         </span>
                                       )}
                                     </div>
@@ -989,11 +986,7 @@ function ProgramsList({ programs, coachId }: { programs: Program[]; coachId: str
                                       <Checkbox
                                         checked={task.isCompleted}
                                         onCheckedChange={() =>
-                                          handleTaskToggle(
-                                            task.id,
-                                            program.id,
-                                            task.isCompleted
-                                          )
+                                          handleTaskToggle(task.id, program.id, task.isCompleted)
                                         }
                                       />
                                     )}
@@ -1002,8 +995,7 @@ function ProgramsList({ programs, coachId }: { programs: Program[]; coachId: str
                                     <span
                                       className={cn(
                                         'font-medium',
-                                        task.isCompleted &&
-                                          'text-muted-foreground line-through'
+                                        task.isCompleted && 'text-muted-foreground line-through'
                                       )}
                                     >
                                       {task.title}
@@ -1022,15 +1014,13 @@ function ProgramsList({ programs, coachId }: { programs: Program[]; coachId: str
                                           )}
                                         >
                                           <Clock className="h-3 w-3" />
-                                          Due{' '}
-                                          {formatDate(task.dueDate)}
+                                          Due {formatDate(task.dueDate)}
                                         </span>
                                       )}
                                       {task.isCompleted && task.completedAt && (
                                         <span className="flex items-center gap-1 text-[hsl(var(--brand-warm))]">
                                           <CheckCircle2 className="h-3 w-3" />
-                                          Completed{' '}
-                                          {formatDateShort(task.completedAt)}
+                                          Completed {formatDateShort(task.completedAt)}
                                         </span>
                                       )}
                                     </div>
@@ -1093,25 +1083,16 @@ function ProgramsList({ programs, coachId }: { programs: Program[]; coachId: str
                                 >
                                   {getFileIcon(att.fileType)}
                                   <div className="min-w-0 flex-1">
-                                    <p className="truncate text-sm font-medium">
-                                      {att.fileName}
-                                    </p>
+                                    <p className="truncate text-sm font-medium">{att.fileName}</p>
                                     <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                                       {att.fileSize != null && (
                                         <span>{formatFileSize(att.fileSize)}</span>
                                       )}
-                                      <span>
-                                        {formatDate(att.createdAt)}
-                                      </span>
+                                      <span>{formatDate(att.createdAt)}</span>
                                     </div>
                                   </div>
                                   <div className="flex items-center gap-1">
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      className="h-8 w-8"
-                                      asChild
-                                    >
+                                    <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
                                       <a
                                         href={att.fileUrl}
                                         target="_blank"

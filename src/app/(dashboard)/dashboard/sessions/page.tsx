@@ -123,7 +123,8 @@ export default async function SessionsPage({ searchParams }: PageProps) {
             <CardHeader>
               <CardTitle>Coach Access Required</CardTitle>
               <CardDescription>
-                You need a coach account to view your sessions. Please contact an administrator to get started.
+                You need a coach account to view your sessions. Please contact an administrator to
+                get started.
               </CardDescription>
             </CardHeader>
           </Card>

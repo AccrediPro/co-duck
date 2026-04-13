@@ -54,7 +54,7 @@ export function StreakWidget() {
         </CardHeader>
         <CardContent className="space-y-4">
           <Skeleton className="mx-auto h-16 w-16 rounded-full" />
-          <Skeleton className="h-4 w-48 mx-auto" />
+          <Skeleton className="mx-auto h-4 w-48" />
           <Skeleton className="h-2 w-full" />
           <Skeleton className="h-4 w-24" />
         </CardContent>
@@ -72,7 +72,9 @@ export function StreakWidget() {
     <Card
       className={cn(
         'relative overflow-hidden',
-        data.isAtRisk && !isZero && 'border-gold shadow-[0_0_0_1px_rgba(212,175,55,0.3)] animate-pulse'
+        data.isAtRisk &&
+          !isZero &&
+          'animate-pulse border-gold shadow-[0_0_0_1px_rgba(212,175,55,0.3)]'
       )}
     >
       <CardHeader className="pb-2">
@@ -82,13 +84,11 @@ export function StreakWidget() {
       </CardHeader>
       <CardContent className="space-y-4">
         {isZero ? (
-          <div className="text-center py-4">
+          <div className="py-4 text-center">
             <span className="text-4xl" role="img" aria-label="fire">
               🔥
             </span>
-            <p className="mt-2 text-base font-medium text-muted-foreground">
-              Start your streak!
-            </p>
+            <p className="mt-2 text-base font-medium text-muted-foreground">Start your streak!</p>
             <p className="text-sm text-muted-foreground">
               Complete an activity this week to get started.
             </p>
@@ -100,9 +100,7 @@ export function StreakWidget() {
                 🔥
               </span>
               <div>
-                <p className="text-4xl font-bold text-burgundy-dark">
-                  {data.currentStreak}
-                </p>
+                <p className="text-4xl font-bold text-burgundy-dark">{data.currentStreak}</p>
                 <p className="text-sm text-muted-foreground">
                   {data.currentStreak === 1 ? 'week' : 'weeks'}
                 </p>
@@ -118,18 +116,16 @@ export function StreakWidget() {
             <div className="space-y-1.5">
               <div className="flex items-center justify-between text-xs text-muted-foreground">
                 <span>Next milestone: {nextMilestone} wks.</span>
-                <span>{data.currentStreak}/{nextMilestone}</span>
+                <span>
+                  {data.currentStreak}/{nextMilestone}
+                </span>
               </div>
-              <Progress
-                value={progress}
-                className="h-2 bg-cream"
-              />
+              <Progress value={progress} className="h-2 bg-cream" />
             </div>
 
             <div className="flex justify-center">
               <Badge variant="secondary" className="gap-1.5 bg-cream text-burgundy">
-                Record: {data.longestStreak}{' '}
-                {data.longestStreak === 1 ? 'week' : 'weeks'}
+                Record: {data.longestStreak} {data.longestStreak === 1 ? 'week' : 'weeks'}
               </Badge>
             </div>
           </>

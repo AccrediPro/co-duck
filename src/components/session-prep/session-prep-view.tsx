@@ -51,7 +51,7 @@ export function SessionPrepView({ bookingId }: SessionPrepViewProps) {
   const markViewed = async (prepId: number) => {
     try {
       await fetch(`/api/session-prep/${prepId}/viewed`, { method: 'PATCH' });
-      setPrep((prev) => prev ? { ...prev, viewedByCoach: true } : prev);
+      setPrep((prev) => (prev ? { ...prev, viewedByCoach: true } : prev));
     } catch {
       // Non-critical — silently fail
     }
@@ -101,12 +101,8 @@ export function SessionPrepView({ bookingId }: SessionPrepViewProps) {
           <div className="space-y-4">
             {prep.responses.map((item, index) => (
               <div key={index} className="space-y-1">
-                <p className="text-sm font-medium text-burgundy-dark">
-                  {item.question}
-                </p>
-                <p className="whitespace-pre-wrap text-sm text-muted-foreground">
-                  {item.answer}
-                </p>
+                <p className="text-sm font-medium text-burgundy-dark">{item.question}</p>
+                <p className="whitespace-pre-wrap text-sm text-muted-foreground">{item.answer}</p>
               </div>
             ))}
           </div>

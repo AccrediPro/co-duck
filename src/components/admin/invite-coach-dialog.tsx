@@ -88,7 +88,8 @@ export function InviteCoachDialog() {
           <DialogHeader>
             <DialogTitle>Invite a Coach</DialogTitle>
             <DialogDescription>
-              Enter the email address of the person you want to invite as a coach. If they already have an account, they will be promoted immediately.
+              Enter the email address of the person you want to invite as a coach. If they already
+              have an account, they will be promoted immediately.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
@@ -110,7 +111,12 @@ export function InviteCoachDialog() {
             </div>
           </div>
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setOpen(false)} disabled={loading}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setOpen(false)}
+              disabled={loading}
+            >
               Cancel
             </Button>
             <Button type="submit" disabled={loading || !email.trim()}>

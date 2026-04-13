@@ -11,11 +11,14 @@ export function WelcomeEmail({ name, unsubscribeUrl }: WelcomeEmailProps) {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://accredipro-coachhub.com';
 
   return (
-    <EmailLayout preview={`Welcome to AccrediPro CoachHub, ${name}!`} unsubscribeUrl={unsubscribeUrl}>
+    <EmailLayout
+      preview={`Welcome to AccrediPro CoachHub, ${name}!`}
+      unsubscribeUrl={unsubscribeUrl}
+    >
       <Text style={heading}>Welcome to AccrediPro CoachHub!</Text>
       <Text style={paragraph}>
-        Hi {name}, thanks for joining AccrediPro CoachHub. You now have access to a network of expert coaches
-        ready to help you grow.
+        Hi {name}, thanks for joining AccrediPro CoachHub. You now have access to a network of
+        expert coaches ready to help you grow.
       </Text>
 
       <Text style={paragraph}>Here&apos;s how to get started:</Text>

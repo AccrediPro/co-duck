@@ -32,7 +32,10 @@ export async function GET(request: Request) {
 
     if (!coachProfile) {
       return Response.json(
-        { success: false, error: { code: 'FORBIDDEN', message: 'Only coaches can access this endpoint' } },
+        {
+          success: false,
+          error: { code: 'FORBIDDEN', message: 'Only coaches can access this endpoint' },
+        },
         { status: 403 }
       );
     }
@@ -55,12 +58,7 @@ export async function GET(request: Request) {
     const defaultQuestions = await db
       .select({ questions: sessionPrepQuestions.questions })
       .from(sessionPrepQuestions)
-      .where(
-        and(
-          isNull(sessionPrepQuestions.coachId),
-          eq(sessionPrepQuestions.isDefault, true)
-        )
-      )
+      .where(and(isNull(sessionPrepQuestions.coachId), eq(sessionPrepQuestions.isDefault, true)))
       .limit(1);
 
     return Response.json({
@@ -106,7 +104,10 @@ export async function PUT(request: Request) {
 
     if (!coachProfile) {
       return Response.json(
-        { success: false, error: { code: 'FORBIDDEN', message: 'Only coaches can access this endpoint' } },
+        {
+          success: false,
+          error: { code: 'FORBIDDEN', message: 'Only coaches can access this endpoint' },
+        },
         { status: 403 }
       );
     }
@@ -116,7 +117,10 @@ export async function PUT(request: Request) {
 
     if (!Array.isArray(questions)) {
       return Response.json(
-        { success: false, error: { code: 'MISSING_FIELDS', message: 'questions array is required' } },
+        {
+          success: false,
+          error: { code: 'MISSING_FIELDS', message: 'questions array is required' },
+        },
         { status: 400 }
       );
     }
@@ -128,7 +132,10 @@ export async function PUT(request: Request) {
 
     if (cleaned.length < 2 || cleaned.length > 5) {
       return Response.json(
-        { success: false, error: { code: 'VALIDATION_ERROR', message: 'Must have between 2 and 5 questions' } },
+        {
+          success: false,
+          error: { code: 'VALIDATION_ERROR', message: 'Must have between 2 and 5 questions' },
+        },
         { status: 400 }
       );
     }

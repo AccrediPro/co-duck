@@ -37,17 +37,17 @@ export async function GET(request: Request, { params }: RouteParams) {
 
     if (!currentUser || currentUser.role !== 'coach') {
       return Response.json(
-        { success: false, error: { code: 'FORBIDDEN', message: 'Only coaches can view client profiles' } },
+        {
+          success: false,
+          error: { code: 'FORBIDDEN', message: 'Only coaches can view client profiles' },
+        },
         { status: 403 }
       );
     }
 
     // Check that the coach has at least one booking with this user
     const sharedBooking = await db.query.bookings.findFirst({
-      where: and(
-        eq(bookings.coachId, userId),
-        eq(bookings.clientId, targetUserId)
-      ),
+      where: and(eq(bookings.coachId, userId), eq(bookings.clientId, targetUserId)),
     });
 
     if (!sharedBooking) {

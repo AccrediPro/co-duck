@@ -50,10 +50,7 @@ export async function GET(request: Request) {
         .select({ total: sql<number>`count(distinct ${bookings.coachId})::int` })
         .from(bookings)
         .where(
-          and(
-            eq(bookings.clientId, userId),
-            inArray(bookings.status, ['confirmed', 'completed'])
-          )
+          and(eq(bookings.clientId, userId), inArray(bookings.status, ['confirmed', 'completed']))
         ),
       db
         .select({
@@ -63,10 +60,7 @@ export async function GET(request: Request) {
         })
         .from(bookings)
         .where(
-          and(
-            eq(bookings.clientId, userId),
-            inArray(bookings.status, ['confirmed', 'completed'])
-          )
+          and(eq(bookings.clientId, userId), inArray(bookings.status, ['confirmed', 'completed']))
         )
         .groupBy(bookings.coachId)
         .orderBy(desc(sql`max(${bookings.startTime})`))

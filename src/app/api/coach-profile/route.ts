@@ -30,7 +30,10 @@ const PROFILE_SAVE_LIMIT: RateLimitConfig = { limit: 10, windowMs: 60_000 };
  */
 const apiSessionTypeSchema = z.object({
   id: z.string().min(1),
-  name: z.string().min(1, 'Session name is required').max(100, 'Name must be less than 100 characters'),
+  name: z
+    .string()
+    .min(1, 'Session name is required')
+    .max(100, 'Name must be less than 100 characters'),
   duration: z.number().refine((val) => SESSION_DURATIONS.includes(val as SessionDuration), {
     message: 'Please select a valid duration',
   }),
@@ -148,7 +151,10 @@ export async function PATCH(request: Request) {
       return Response.json(
         {
           success: false,
-          error: { code: 'NOT_FOUND', message: 'Profile not found. Please complete onboarding first.' },
+          error: {
+            code: 'NOT_FOUND',
+            message: 'Profile not found. Please complete onboarding first.',
+          },
         },
         { status: 404 }
       );

@@ -65,13 +65,9 @@ describe('GET /api/notifications', () => {
       where: vi.fn().mockResolvedValue([{ count: 1 }]),
     };
 
-    mockDbSelect
-      .mockReturnValueOnce(notifChain)
-      .mockReturnValueOnce(countChain);
+    mockDbSelect.mockReturnValueOnce(notifChain).mockReturnValueOnce(countChain);
 
-    const response = await GET(
-      makeRequest('https://example.com/api/notifications?limit=30')
-    );
+    const response = await GET(makeRequest('https://example.com/api/notifications?limit=30'));
     const body = await response.json();
 
     expect(response.status).toBe(200);

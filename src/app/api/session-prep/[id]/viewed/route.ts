@@ -10,10 +10,7 @@ import { rateLimit, WRITE_LIMIT, rateLimitResponse } from '@/lib/rate-limit';
  * Marks a session prep response as viewed by coach.
  * Coach auth required.
  */
-export async function PATCH(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const rl = rateLimit(request, WRITE_LIMIT, 'session-prep-viewed');
   if (!rl.success) return rateLimitResponse(rl);
 
@@ -34,7 +31,10 @@ export async function PATCH(
 
     if (!coachProfile) {
       return Response.json(
-        { success: false, error: { code: 'FORBIDDEN', message: 'Only coaches can access this endpoint' } },
+        {
+          success: false,
+          error: { code: 'FORBIDDEN', message: 'Only coaches can access this endpoint' },
+        },
         { status: 403 }
       );
     }
@@ -51,10 +51,7 @@ export async function PATCH(
 
     // Find the prep record — must belong to this coach
     const prep = await db.query.sessionPrepResponses.findFirst({
-      where: and(
-        eq(sessionPrepResponses.id, prepId),
-        eq(sessionPrepResponses.coachId, userId)
-      ),
+      where: and(eq(sessionPrepResponses.id, prepId), eq(sessionPrepResponses.coachId, userId)),
       columns: { id: true },
     });
 
@@ -69,7 +66,10 @@ export async function PATCH(
       .update(sessionPrepResponses)
       .set({ viewedByCoach: true })
       .where(eq(sessionPrepResponses.id, prepId))
-      .returning({ id: sessionPrepResponses.id, viewedByCoach: sessionPrepResponses.viewedByCoach });
+      .returning({
+        id: sessionPrepResponses.id,
+        viewedByCoach: sessionPrepResponses.viewedByCoach,
+      });
 
     return Response.json({
       success: true,

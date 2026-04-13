@@ -77,10 +77,7 @@ function extractStoragePath(fileUrl: string): string | null {
   return fileUrl.slice(idx + marker.length);
 }
 
-export async function GET(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const rl = rateLimit(request, DEFAULT_LIMIT, 'attachments-get');
   if (!rl.success) return rateLimitResponse(rl);
 

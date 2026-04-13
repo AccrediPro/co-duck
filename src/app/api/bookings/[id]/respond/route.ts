@@ -188,8 +188,8 @@ export async function POST(request: Request, { params }: RouteParams) {
 interface HandleParams {
   bookingId: number;
   booking: typeof bookings.$inferSelect;
-  coachUser: (typeof users.$inferSelect) | undefined;
-  clientUser: (typeof users.$inferSelect) | undefined;
+  coachUser: typeof users.$inferSelect | undefined;
+  clientUser: typeof users.$inferSelect | undefined;
   sessionType: BookingSessionType;
   sessionName: string;
   formattedDate: string;
@@ -197,7 +197,7 @@ interface HandleParams {
 }
 
 interface HandleRejectParams extends HandleParams {
-  transaction: (typeof transactions.$inferSelect) | null | undefined;
+  transaction: typeof transactions.$inferSelect | null | undefined;
   reason?: string;
   coachId: string;
 }
@@ -331,7 +331,9 @@ async function handleReject({
 
       refundAmountCents = transaction.amountCents;
       refundStatus = 'full';
-      console.log(`Refund of ${transaction.amountCents} cents processed for rejected booking ${bookingId}`);
+      console.log(
+        `Refund of ${transaction.amountCents} cents processed for rejected booking ${bookingId}`
+      );
     } catch (stripeError) {
       console.error('Stripe refund failed for rejected booking:', stripeError);
     }

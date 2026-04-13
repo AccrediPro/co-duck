@@ -1,10 +1,6 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
-import {
-  resolveMiddlewareRateLimit,
-  rateLimitByIp,
-  extractIp,
-} from '@/lib/rate-limit';
+import { resolveMiddlewareRateLimit, rateLimitByIp, extractIp } from '@/lib/rate-limit';
 
 // Define routes that require authentication
 const isProtectedRoute = createRouteMatcher(['/dashboard(.*)', '/onboarding(.*)']);

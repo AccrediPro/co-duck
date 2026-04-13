@@ -8,7 +8,7 @@ function PostCardSkeleton() {
   return (
     <Card className="overflow-hidden">
       <div className="p-4">
-        <div className="flex items-center gap-3 mb-3">
+        <div className="mb-3 flex items-center gap-3">
           <SkeletonPulse className="h-9 w-9 flex-shrink-0 rounded-full" />
           <div className="space-y-1.5">
             <SkeletonPulse className="h-4 w-24" />
@@ -28,7 +28,7 @@ export default function IConnectFeedLoading() {
   return (
     <div className="mx-auto max-w-4xl">
       {/* Header skeleton */}
-      <div className="flex items-center gap-3 mb-6">
+      <div className="mb-6 flex items-center gap-3">
         <SkeletonPulse className="h-9 w-9 rounded" />
         <SkeletonPulse className="h-10 w-10 rounded-full" />
         <div className="space-y-1.5">
@@ -40,7 +40,7 @@ export default function IConnectFeedLoading() {
       {/* Create post form skeleton */}
       <Card className="mb-6">
         <div className="p-4">
-          <SkeletonPulse className="h-9 w-full rounded-md mb-3" />
+          <SkeletonPulse className="mb-3 h-9 w-full rounded-md" />
           <SkeletonPulse className="h-20 w-full rounded-md" />
         </div>
       </Card>

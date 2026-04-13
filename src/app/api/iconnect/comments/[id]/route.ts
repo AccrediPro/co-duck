@@ -5,10 +5,7 @@ import { eq } from 'drizzle-orm';
 import { rateLimit, WRITE_LIMIT, rateLimitResponse } from '@/lib/rate-limit';
 import { getSocketServer } from '@/lib/socket-server';
 
-export async function DELETE(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const rl = rateLimit(request, WRITE_LIMIT, 'iconnect-comments-delete');
   if (!rl.success) return rateLimitResponse(rl);
 
@@ -43,7 +40,10 @@ export async function DELETE(
 
     if (comment.senderUserId !== userId) {
       return Response.json(
-        { success: false, error: { code: 'FORBIDDEN', message: 'Only the sender can delete this comment' } },
+        {
+          success: false,
+          error: { code: 'FORBIDDEN', message: 'Only the sender can delete this comment' },
+        },
         { status: 403 }
       );
     }
@@ -64,9 +64,7 @@ export async function DELETE(
           });
           if (conversation) {
             const recipientId =
-              conversation.coachId === userId
-                ? conversation.clientId
-                : conversation.coachId;
+              conversation.coachId === userId ? conversation.clientId : conversation.coachId;
             io.to(`user:${recipientId}`).emit('iconnect:comment_deleted', {
               commentId,
               postId,

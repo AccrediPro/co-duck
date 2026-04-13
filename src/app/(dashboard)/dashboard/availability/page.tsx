@@ -46,7 +46,8 @@ export default async function AvailabilityPage() {
             <CardHeader>
               <CardTitle>Coach Access Required</CardTitle>
               <CardDescription>
-                You need a coach account to set your availability. Please contact an administrator to get started.
+                You need a coach account to set your availability. Please contact an administrator
+                to get started.
               </CardDescription>
             </CardHeader>
           </Card>

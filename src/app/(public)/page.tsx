@@ -7,14 +7,7 @@ import { db, coachProfiles, users } from '@/db';
 import { eq } from 'drizzle-orm';
 import { SUPPORTED_CURRENCIES } from '@/lib/validators/coach-onboarding';
 import type { SessionType } from '@/db/schema';
-import {
-  Users,
-  Calendar,
-  Shield,
-  Star,
-  ArrowRight,
-  User,
-} from 'lucide-react';
+import { Users, Calendar, Shield, Star, ArrowRight, User } from 'lucide-react';
 
 async function getFeaturedCoaches() {
   try {
@@ -113,23 +106,28 @@ export default async function HomePage() {
               Trusted by 1,000+ clients worldwide
             </Badge>
             <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">
-              Find Your{' '}
-              <span className="text-gold">
-                Perfect Coach
-              </span>
+              Find Your <span className="text-gold">Perfect Coach</span>
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg text-white/80 md:text-xl">
               Connect with expert coaches for personalized guidance on your personal and
               professional journey. Transform your life with one-on-one coaching that works.
             </p>
             <div className="mt-10 flex flex-col justify-center gap-4 sm:flex-row">
-              <Button size="lg" className="h-12 bg-gold px-8 text-base text-burgundy-dark hover:bg-gold-dark" asChild>
+              <Button
+                size="lg"
+                className="h-12 bg-gold px-8 text-base text-burgundy-dark hover:bg-gold-dark"
+                asChild
+              >
                 <Link href="/coaches">
                   Find a Coach
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
-              <Button size="lg" className="h-12 bg-gold px-8 text-base text-white hover:bg-gold-dark" asChild>
+              <Button
+                size="lg"
+                className="h-12 bg-gold px-8 text-base text-white hover:bg-gold-dark"
+                asChild
+              >
                 <Link href="/sign-up">Get Started</Link>
               </Button>
             </div>
@@ -144,14 +142,19 @@ export default async function HomePage() {
       <section className="border-y border-burgundy/10 bg-cream py-20">
         <div className="container mx-auto px-4">
           <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-burgundy-dark md:text-4xl">Why Choose AccrediPro CoachHub?</h2>
+            <h2 className="text-3xl font-bold tracking-tight text-burgundy-dark md:text-4xl">
+              Why Choose AccrediPro CoachHub?
+            </h2>
             <p className="mt-4 text-muted-foreground">
               Everything you need to find the right coach and achieve your goals.
             </p>
           </div>
           <div className="mt-16 grid gap-8 md:grid-cols-3">
             {valueProps.map((prop) => (
-              <Card key={prop.title} className="border border-burgundy/10 bg-white shadow-lg transition-all duration-200 hover:border-burgundy/30 hover:shadow-xl">
+              <Card
+                key={prop.title}
+                className="border border-burgundy/10 bg-white shadow-lg transition-all duration-200 hover:border-burgundy/30 hover:shadow-xl"
+              >
                 <CardContent className="p-8">
                   <div className="mb-6 inline-flex h-14 w-14 items-center justify-center rounded-xl bg-burgundy/10">
                     <prop.icon className="h-7 w-7 text-burgundy" />
@@ -169,7 +172,9 @@ export default async function HomePage() {
       <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-burgundy-dark md:text-4xl">How It Works</h2>
+            <h2 className="text-3xl font-bold tracking-tight text-burgundy-dark md:text-4xl">
+              How It Works
+            </h2>
             <p className="mt-4 text-muted-foreground">
               Get started in three simple steps and begin your transformation journey.
             </p>
@@ -197,7 +202,9 @@ export default async function HomePage() {
       <section className="border-y border-burgundy/10 bg-cream py-20">
         <div className="container mx-auto px-4">
           <div className="mx-auto max-w-2xl text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-burgundy-dark md:text-4xl">Featured Coaches</h2>
+            <h2 className="text-3xl font-bold tracking-tight text-burgundy-dark md:text-4xl">
+              Featured Coaches
+            </h2>
             <p className="mt-4 text-muted-foreground">
               Meet some of the amazing coaches ready to help you succeed.
             </p>
@@ -301,7 +308,11 @@ export default async function HomePage() {
             Find the right coach and start your journey toward personal and professional growth.
           </p>
           <div className="mt-8 flex justify-center">
-            <Button size="lg" className="h-12 bg-gold px-8 text-base text-burgundy-dark hover:bg-gold-dark" asChild>
+            <Button
+              size="lg"
+              className="h-12 bg-gold px-8 text-base text-burgundy-dark hover:bg-gold-dark"
+              asChild
+            >
               <Link href="/coaches">
                 Browse Coaches
                 <ArrowRight className="ml-2 h-4 w-4" />

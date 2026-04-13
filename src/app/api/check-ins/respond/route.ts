@@ -46,24 +46,27 @@ export async function POST(request: Request) {
 
     if (!mood || !VALID_MOODS.includes(mood as Mood)) {
       return Response.json(
-        { success: false, error: { code: 'INVALID_MOOD', message: 'mood must be one of: good, okay, struggling' } },
+        {
+          success: false,
+          error: { code: 'INVALID_MOOD', message: 'mood must be one of: good, okay, struggling' },
+        },
         { status: 400 }
       );
     }
 
     if (note !== undefined && note !== null && typeof note === 'string' && note.length > 280) {
       return Response.json(
-        { success: false, error: { code: 'NOTE_TOO_LONG', message: 'note must be 280 characters or less' } },
+        {
+          success: false,
+          error: { code: 'NOTE_TOO_LONG', message: 'note must be 280 characters or less' },
+        },
         { status: 400 }
       );
     }
 
     // Verify check-in belongs to this user and is not yet responded
     const existing = await db.query.weeklyCheckIns.findFirst({
-      where: and(
-        eq(weeklyCheckIns.id, checkInId),
-        eq(weeklyCheckIns.userId, userId)
-      ),
+      where: and(eq(weeklyCheckIns.id, checkInId), eq(weeklyCheckIns.userId, userId)),
     });
 
     if (!existing) {
@@ -75,7 +78,10 @@ export async function POST(request: Request) {
 
     if (existing.respondedAt) {
       return Response.json(
-        { success: false, error: { code: 'ALREADY_RESPONDED', message: 'This check-in has already been answered' } },
+        {
+          success: false,
+          error: { code: 'ALREADY_RESPONDED', message: 'This check-in has already been answered' },
+        },
         { status: 409 }
       );
     }
@@ -151,7 +157,10 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('[check-ins/respond] Error:', error);
     return Response.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to respond to check-in' } },
+      {
+        success: false,
+        error: { code: 'INTERNAL_ERROR', message: 'Failed to respond to check-in' },
+      },
       { status: 500 }
     );
   }

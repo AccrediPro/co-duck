@@ -51,7 +51,8 @@ export default async function PaymentsPage({ searchParams }: PaymentsPageProps) 
             <CardHeader>
               <CardTitle>Coach Access Required</CardTitle>
               <CardDescription>
-                You need a coach account to set up payment processing. Please contact an administrator to get started.
+                You need a coach account to set up payment processing. Please contact an
+                administrator to get started.
               </CardDescription>
             </CardHeader>
           </Card>

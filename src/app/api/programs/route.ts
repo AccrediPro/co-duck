@@ -53,9 +53,7 @@ export async function GET(request: Request) {
     const paginatedPrograms = allPrograms.slice(offset, offset + limit);
 
     // Get user info for coaches and clients
-    const userIds = Array.from(
-      new Set(paginatedPrograms.flatMap((p) => [p.coachId, p.clientId]))
-    );
+    const userIds = Array.from(new Set(paginatedPrograms.flatMap((p) => [p.coachId, p.clientId])));
     const usersData = userIds.length
       ? await db.select().from(users).where(inArray(users.id, userIds))
       : [];
@@ -92,12 +90,8 @@ export async function GET(request: Request) {
         endDate: program.endDate,
         createdAt: program.createdAt,
         updatedAt: program.updatedAt,
-        coach: coach
-          ? { id: coach.id, name: coach.name, avatarUrl: coach.avatarUrl }
-          : null,
-        client: client
-          ? { id: client.id, name: client.name, avatarUrl: client.avatarUrl }
-          : null,
+        coach: coach ? { id: coach.id, name: coach.name, avatarUrl: coach.avatarUrl } : null,
+        client: client ? { id: client.id, name: client.name, avatarUrl: client.avatarUrl } : null,
         goalsCount: goalStats ? Number(goalStats.total) : 0,
         goalsCompleted: goalStats ? Number(goalStats.completed) : 0,
         isCoach: program.coachId === userId,

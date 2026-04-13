@@ -31,16 +31,30 @@ export async function POST(request: Request) {
 
     if (!prepId || !Array.isArray(responses) || responses.length === 0) {
       return Response.json(
-        { success: false, error: { code: 'MISSING_FIELDS', message: 'prepId and responses array are required' } },
+        {
+          success: false,
+          error: { code: 'MISSING_FIELDS', message: 'prepId and responses array are required' },
+        },
         { status: 400 }
       );
     }
 
     // Validate each response has question + answer
     for (const r of responses) {
-      if (typeof r.question !== 'string' || typeof r.answer !== 'string' || !r.question.trim() || !r.answer.trim()) {
+      if (
+        typeof r.question !== 'string' ||
+        typeof r.answer !== 'string' ||
+        !r.question.trim() ||
+        !r.answer.trim()
+      ) {
         return Response.json(
-          { success: false, error: { code: 'INVALID_RESPONSE', message: 'Each response must have a non-empty question and answer' } },
+          {
+            success: false,
+            error: {
+              code: 'INVALID_RESPONSE',
+              message: 'Each response must have a non-empty question and answer',
+            },
+          },
           { status: 400 }
         );
       }
@@ -57,7 +71,10 @@ export async function POST(request: Request) {
 
     if (!prep) {
       return Response.json(
-        { success: false, error: { code: 'NOT_FOUND', message: 'Pending prep not found or already completed' } },
+        {
+          success: false,
+          error: { code: 'NOT_FOUND', message: 'Pending prep not found or already completed' },
+        },
         { status: 404 }
       );
     }

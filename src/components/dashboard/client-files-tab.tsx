@@ -88,7 +88,7 @@ export function ClientFilesTab({ programs }: ClientFilesTabProps) {
     } finally {
       setLoading(false);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [programs.length]);
 
   useEffect(() => {
@@ -100,7 +100,11 @@ export function ClientFilesTab({ programs }: ClientFilesTabProps) {
     if (!file) return;
 
     if (!uploadProgramId) {
-      toast({ title: 'Select a program', description: 'You must select a program before uploading a file.', variant: 'destructive' });
+      toast({
+        title: 'Select a program',
+        description: 'You must select a program before uploading a file.',
+        variant: 'destructive',
+      });
       return;
     }
 
@@ -223,9 +227,7 @@ export function ClientFilesTab({ programs }: ClientFilesTabProps) {
           <CardContent className="flex flex-col items-center py-12 text-center">
             <Paperclip className="mb-4 h-12 w-12 text-muted-foreground" />
             <p className="text-lg font-medium">No files</p>
-            <p className="text-sm text-muted-foreground">
-              Upload the first file for this client.
-            </p>
+            <p className="text-sm text-muted-foreground">Upload the first file for this client.</p>
           </CardContent>
         </Card>
       ) : (
@@ -245,18 +247,11 @@ export function ClientFilesTab({ programs }: ClientFilesTabProps) {
                           {programTitle}
                         </Badge>
                       )}
-                      <span>
-                        {formatDate(attachment.createdAt)}
-                      </span>
+                      <span>{formatDate(attachment.createdAt)}</span>
                     </div>
                   </div>
                   <div className="flex items-center gap-1">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      asChild
-                    >
+                    <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
                       <a href={attachment.fileUrl} target="_blank" rel="noopener noreferrer">
                         <Download className="h-4 w-4" />
                       </a>

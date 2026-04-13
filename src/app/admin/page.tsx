@@ -23,15 +23,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { db, users, coachProfiles, bookings, reviews, conversations } from '@/db';
 import { formatDateTime } from '@/lib/date-utils';
-import {
-  Users,
-  UserCheck,
-  Calendar,
-  Star,
-  MessageSquare,
-  UserPlus,
-  Clock,
-} from 'lucide-react';
+import { Users, UserCheck, Calendar, Star, MessageSquare, UserPlus, Clock } from 'lucide-react';
 
 // ============================================================================
 // DATA FETCHING
@@ -80,10 +72,7 @@ async function getPlatformStats() {
         .select({ count: sql<number>`count(*)` })
         .from(coachProfiles)
         .where(
-          and(
-            eq(coachProfiles.isPublished, true),
-            eq(coachProfiles.verificationStatus, 'verified')
-          )
+          and(eq(coachProfiles.isPublished, true), eq(coachProfiles.verificationStatus, 'verified'))
         ),
 
       // Total bookings
@@ -253,163 +242,163 @@ export default async function AdminOverviewPage() {
       </Card>
 
       <div className="space-y-6">
-      {/* Stats Grid — Row 1 */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {/* Total Users */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalUsers.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground">Registered on the platform</p>
-          </CardContent>
-        </Card>
+        {/* Stats Grid — Row 1 */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {/* Total Users */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.totalUsers.toLocaleString()}</div>
+              <p className="text-xs text-muted-foreground">Registered on the platform</p>
+            </CardContent>
+          </Card>
 
-        {/* New Users This Month */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">New Users This Month</CardTitle>
-            <UserPlus className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.newUsersThisMonth.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground">Signed up this month</p>
-          </CardContent>
-        </Card>
+          {/* New Users This Month */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">New Users This Month</CardTitle>
+              <UserPlus className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.newUsersThisMonth.toLocaleString()}</div>
+              <p className="text-xs text-muted-foreground">Signed up this month</p>
+            </CardContent>
+          </Card>
 
-        {/* Active Coaches */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Coaches</CardTitle>
-            <UserCheck className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.activeCoaches.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground">Published &amp; verified</p>
-          </CardContent>
-        </Card>
+          {/* Active Coaches */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Active Coaches</CardTitle>
+              <UserCheck className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.activeCoaches.toLocaleString()}</div>
+              <p className="text-xs text-muted-foreground">Published &amp; verified</p>
+            </CardContent>
+          </Card>
 
-        {/* Total Reviews */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Reviews</CardTitle>
-            <Star className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalReviews.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground">
-              {stats.averageRating > 0
-                ? `${stats.averageRating.toFixed(1)} avg rating`
-                : 'No ratings yet'}
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Stats Grid — Row 2: Sessions & Conversations */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {/* Total Sessions */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Sessions</CardTitle>
-            <Calendar className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.totalBookings.toLocaleString()}</div>
-            <div className="mt-2 flex flex-wrap gap-1.5">
-              {stats.bookingsByStatus.confirmed > 0 && (
-                <Badge variant="default" className="text-xs">
-                  {stats.bookingsByStatus.confirmed} confirmed
-                </Badge>
-              )}
-              {stats.bookingsByStatus.completed > 0 && (
-                <Badge variant="secondary" className="text-xs">
-                  {stats.bookingsByStatus.completed} completed
-                </Badge>
-              )}
-              {stats.bookingsByStatus.pending > 0 && (
-                <Badge variant="outline" className="text-xs">
-                  {stats.bookingsByStatus.pending} pending
-                </Badge>
-              )}
-              {stats.bookingsByStatus.cancelled > 0 && (
-                <Badge variant="destructive" className="text-xs">
-                  {stats.bookingsByStatus.cancelled} cancelled
-                </Badge>
-              )}
-              {stats.bookingsByStatus.no_show > 0 && (
-                <Badge variant="destructive" className="text-xs">
-                  {stats.bookingsByStatus.no_show} no-show
-                </Badge>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Active Conversations */}
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Conversations</CardTitle>
-            <MessageSquare className="h-4 w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats.activeConversations.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground">With messages in the last 30 days</p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Recent Bookings */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Bookings</CardTitle>
-          <CardDescription>Latest session bookings on the platform</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {recentBookings.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-8 text-center">
-              <Clock className="mb-2 h-8 w-8 text-muted-foreground" />
-              <p className="text-muted-foreground">No bookings yet</p>
+          {/* Total Reviews */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Reviews</CardTitle>
+              <Star className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.totalReviews.toLocaleString()}</div>
               <p className="text-xs text-muted-foreground">
-                Bookings will appear here as they are created
+                {stats.averageRating > 0
+                  ? `${stats.averageRating.toFixed(1)} avg rating`
+                  : 'No ratings yet'}
               </p>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {recentBookings.map((booking) => (
-                <div
-                  key={booking.id}
-                  className="flex flex-col gap-2 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between"
-                >
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">
-                        {(booking.sessionType as { name?: string })?.name || 'Session'}
-                      </span>
-                      <Badge variant={getStatusVariant(booking.status)}>{booking.status}</Badge>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Stats Grid — Row 2: Sessions & Conversations */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {/* Total Sessions */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Sessions</CardTitle>
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.totalBookings.toLocaleString()}</div>
+              <div className="mt-2 flex flex-wrap gap-1.5">
+                {stats.bookingsByStatus.confirmed > 0 && (
+                  <Badge variant="default" className="text-xs">
+                    {stats.bookingsByStatus.confirmed} confirmed
+                  </Badge>
+                )}
+                {stats.bookingsByStatus.completed > 0 && (
+                  <Badge variant="secondary" className="text-xs">
+                    {stats.bookingsByStatus.completed} completed
+                  </Badge>
+                )}
+                {stats.bookingsByStatus.pending > 0 && (
+                  <Badge variant="outline" className="text-xs">
+                    {stats.bookingsByStatus.pending} pending
+                  </Badge>
+                )}
+                {stats.bookingsByStatus.cancelled > 0 && (
+                  <Badge variant="destructive" className="text-xs">
+                    {stats.bookingsByStatus.cancelled} cancelled
+                  </Badge>
+                )}
+                {stats.bookingsByStatus.no_show > 0 && (
+                  <Badge variant="destructive" className="text-xs">
+                    {stats.bookingsByStatus.no_show} no-show
+                  </Badge>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Active Conversations */}
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Active Conversations</CardTitle>
+              <MessageSquare className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.activeConversations.toLocaleString()}</div>
+              <p className="text-xs text-muted-foreground">With messages in the last 30 days</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Recent Bookings */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Recent Bookings</CardTitle>
+            <CardDescription>Latest session bookings on the platform</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {recentBookings.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-8 text-center">
+                <Clock className="mb-2 h-8 w-8 text-muted-foreground" />
+                <p className="text-muted-foreground">No bookings yet</p>
+                <p className="text-xs text-muted-foreground">
+                  Bookings will appear here as they are created
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {recentBookings.map((booking) => (
+                  <div
+                    key={booking.id}
+                    className="flex flex-col gap-2 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between"
+                  >
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">
+                          {(booking.sessionType as { name?: string })?.name || 'Session'}
+                        </span>
+                        <Badge variant={getStatusVariant(booking.status)}>{booking.status}</Badge>
+                      </div>
+                      <p className="text-sm text-muted-foreground">
+                        <span className="font-medium">
+                          {booking.client.name || booking.client.email}
+                        </span>
+                        {' with '}
+                        <span className="font-medium">
+                          {booking.coach.name || booking.coach.email}
+                        </span>
+                      </p>
                     </div>
-                    <p className="text-sm text-muted-foreground">
-                      <span className="font-medium">
-                        {booking.client.name || booking.client.email}
-                      </span>
-                      {' with '}
-                      <span className="font-medium">
-                        {booking.coach.name || booking.coach.email}
-                      </span>
-                    </p>
+                    <div className="text-sm text-muted-foreground sm:text-right">
+                      <p>{formatDateTime(booking.startTime)}</p>
+                      <p className="text-xs">Booked {formatDateTime(booking.createdAt)}</p>
+                    </div>
                   </div>
-                  <div className="text-sm text-muted-foreground sm:text-right">
-                    <p>{formatDateTime(booking.startTime)}</p>
-                    <p className="text-xs">Booked {formatDateTime(booking.createdAt)}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

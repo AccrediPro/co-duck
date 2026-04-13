@@ -32,9 +32,7 @@ function getSupabaseAdmin() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !key) {
-    console.error(
-      'Missing SUPABASE_SERVICE_ROLE_KEY. File uploads require the service role key.'
-    );
+    console.error('Missing SUPABASE_SERVICE_ROLE_KEY. File uploads require the service role key.');
     return null;
   }
   return createClient(url, key);
@@ -103,7 +101,9 @@ export async function uploadMessageAttachment(
     });
     if (bucketError) {
       console.error('Failed to create message attachments bucket:', bucketError);
-      return { error: { code: 'BUCKET_CREATION_FAILED', message: 'File storage is not configured' } };
+      return {
+        error: { code: 'BUCKET_CREATION_FAILED', message: 'File storage is not configured' },
+      };
     }
   }
 

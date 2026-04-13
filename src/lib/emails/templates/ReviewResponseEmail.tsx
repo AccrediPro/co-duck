@@ -20,10 +20,7 @@ export function ReviewResponseEmail({
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://accredipro-coachhub.com';
 
   return (
-    <EmailLayout
-      preview={`${coachName} responded to your review`}
-      unsubscribeUrl={unsubscribeUrl}
-    >
+    <EmailLayout preview={`${coachName} responded to your review`} unsubscribeUrl={unsubscribeUrl}>
       <Text style={heading}>Coach Responded to Your Review</Text>
       <Text style={paragraph}>
         Hi {clientName}, {coachName} has responded to your review.

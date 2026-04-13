@@ -40,10 +40,7 @@ const BATCH_SIZE = 100; // Expo recommends max 100 per request
  * Send push notification to all devices belonging to a single user.
  * Fire-and-forget — logs errors but never throws.
  */
-export async function sendPushNotification(
-  userId: string,
-  payload: PushPayload
-): Promise<void> {
+export async function sendPushNotification(userId: string, payload: PushPayload): Promise<void> {
   try {
     const tokens = await db
       .select({ id: pushTokens.id, token: pushTokens.token })
@@ -60,7 +57,10 @@ export async function sendPushNotification(
       ...(payload.data ? { data: payload.data } : {}),
     }));
 
-    await sendBatched(messages, tokens.map((t) => ({ id: t.id, token: t.token })));
+    await sendBatched(
+      messages,
+      tokens.map((t) => ({ id: t.id, token: t.token }))
+    );
   } catch (error) {
     console.error('[push] Failed to send push notification:', error);
   }
@@ -92,7 +92,10 @@ export async function sendPushNotifications(
       ...(payload.data ? { data: payload.data } : {}),
     }));
 
-    await sendBatched(messages, tokens.map((t) => ({ id: t.id, token: t.token })));
+    await sendBatched(
+      messages,
+      tokens.map((t) => ({ id: t.id, token: t.token }))
+    );
   } catch (error) {
     console.error('[push] Failed to send push notifications:', error);
   }
@@ -116,7 +119,7 @@ async function sendBatched(
       const response = await fetch(EXPO_PUSH_URL, {
         method: 'POST',
         headers: {
-          'Accept': 'application/json',
+          Accept: 'application/json',
           'Accept-Encoding': 'gzip, deflate',
           'Content-Type': 'application/json',
         },

@@ -8,11 +8,7 @@ interface ClientStreakBadgeProps {
 export function ClientStreakBadge({ currentStreak, isAtRisk }: ClientStreakBadgeProps) {
   if (currentStreak === 0 && !isAtRisk) return null;
 
-  const color = isAtRisk
-    ? 'text-burgundy'
-    : currentStreak >= 4
-      ? 'text-sage'
-      : 'text-gold-dark';
+  const color = isAtRisk ? 'text-burgundy' : currentStreak >= 4 ? 'text-sage' : 'text-gold-dark';
 
   return (
     <span

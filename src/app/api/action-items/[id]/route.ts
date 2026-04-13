@@ -210,7 +210,9 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
     // Record streak activity when action item is completed (fire-and-forget)
     if (body.isCompleted === true) {
-      recordStreakActivity(item.clientId, 'action_item_completed', String(item.id)).catch(console.error);
+      recordStreakActivity(item.clientId, 'action_item_completed', String(item.id)).catch(
+        console.error
+      );
     }
 
     if (Object.keys(updateData).length === 0) {

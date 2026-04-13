@@ -249,21 +249,14 @@ vi.mock('@/db/schema', () => ({
 }));
 
 // ─── Helpers ──────────────────────────────────────────────────────
-export function makeRequest(
-  url: string,
-  options?: RequestInit
-): Request {
+export function makeRequest(url: string, options?: RequestInit): Request {
   return new Request(url, {
     headers: { 'x-forwarded-for': '127.0.0.1' },
     ...options,
   });
 }
 
-export function makeJsonRequest(
-  url: string,
-  body: unknown,
-  method = 'POST'
-): Request {
+export function makeJsonRequest(url: string, body: unknown, method = 'POST'): Request {
   return new Request(url, {
     method,
     headers: {

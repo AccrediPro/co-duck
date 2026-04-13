@@ -82,7 +82,10 @@ export function PaymentSection({
     switch (paymentStatus) {
       case 'paid':
         return (
-          <Badge variant="outline" className="border-[hsl(var(--brand-accent))] bg-[hsl(var(--brand-surface))] text-[hsl(var(--brand-accent-hover))]">
+          <Badge
+            variant="outline"
+            className="border-[hsl(var(--brand-accent))] bg-[hsl(var(--brand-surface))] text-[hsl(var(--brand-accent-hover))]"
+          >
             <CheckCircle className="mr-1 h-3 w-3" />
             Paid
           </Badge>
@@ -136,9 +139,7 @@ export function PaymentSection({
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">Payment Date</span>
-              <span className="font-medium">
-                {formatDateTime(transaction.createdAt)}
-              </span>
+              <span className="font-medium">{formatDateTime(transaction.createdAt)}</span>
             </div>
             {/* Only show payout info to coach */}
             {!isClientView && (

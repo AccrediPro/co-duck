@@ -28,7 +28,11 @@ import { getOrCreateConversationInternal, sendSystemMessage } from '@/lib/conver
 import type { BookingSessionType } from '@/db/schema';
 import { createNotification } from '@/lib/notifications';
 import { sendEmail } from '@/lib/email';
-import { PaymentReceiptEmail, BookingRequestCoachEmail, BookingRequestClientEmail } from '@/lib/emails';
+import {
+  PaymentReceiptEmail,
+  BookingRequestCoachEmail,
+  BookingRequestClientEmail,
+} from '@/lib/emails';
 import { getUnsubscribeUrl } from '@/lib/unsubscribe';
 import { formatDateLong, formatTime } from '@/lib/date-utils';
 
@@ -233,7 +237,9 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
   // Booking approval flow: keep booking as 'pending' after payment.
   // The coach must explicitly accept or reject the booking.
   if (booking.status !== 'pending') {
-    console.log(`Stripe webhook: Booking ${bookingIdNum} already has status '${booking.status}', skipping`);
+    console.log(
+      `Stripe webhook: Booking ${bookingIdNum} already has status '${booking.status}', skipping`
+    );
   } else {
     console.log(`Stripe webhook: Booking ${bookingIdNum} paid — awaiting coach approval`);
   }

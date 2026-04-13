@@ -63,14 +63,15 @@ export async function GET(request: Request) {
     const row = pending[0];
     return Response.json({
       success: true,
-      data: row
-        ? { ...row, mood: null, note: null }
-        : null,
+      data: row ? { ...row, mood: null, note: null } : null,
     });
   } catch (error) {
     console.error('[check-ins/pending] Error:', error);
     return Response.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch pending check-in' } },
+      {
+        success: false,
+        error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch pending check-in' },
+      },
       { status: 500 }
     );
   }

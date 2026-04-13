@@ -36,7 +36,10 @@ export async function GET(request: Request, { params }: RouteParams) {
 
     if (!currentUser || currentUser.role !== 'coach') {
       return Response.json(
-        { success: false, error: { code: 'FORBIDDEN', message: 'Only coaches can view client groups' } },
+        {
+          success: false,
+          error: { code: 'FORBIDDEN', message: 'Only coaches can view client groups' },
+        },
         { status: 403 }
       );
     }
@@ -50,19 +53,17 @@ export async function GET(request: Request, { params }: RouteParams) {
       })
       .from(clientGroupMembers)
       .innerJoin(clientGroups, eq(clientGroups.id, clientGroupMembers.groupId))
-      .where(
-        and(
-          eq(clientGroupMembers.clientId, clientId),
-          eq(clientGroups.coachId, userId)
-        )
-      )
+      .where(and(eq(clientGroupMembers.clientId, clientId), eq(clientGroups.coachId, userId)))
       .orderBy(clientGroups.name);
 
     return Response.json({ success: true, data: { groups } });
   } catch (error) {
     console.error('Error fetching client groups:', error);
     return Response.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch client groups' } },
+      {
+        success: false,
+        error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch client groups' },
+      },
       { status: 500 }
     );
   }

@@ -61,10 +61,7 @@ export default function SecuritySettingsPage() {
                 variant="outline"
                 size="sm"
                 onClick={() =>
-                  window.open(
-                    `https://${window.location.host}/sign-in#/user/security`,
-                    '_blank'
-                  )
+                  window.open(`https://${window.location.host}/sign-in#/user/security`, '_blank')
                 }
               >
                 {hasPassword ? 'Change Password' : 'Set Password'}
@@ -81,9 +78,7 @@ export default function SecuritySettingsPage() {
               <Smartphone className="h-5 w-5" />
               Two-Factor Authentication
             </CardTitle>
-            <CardDescription>
-              Add an extra layer of security with 2FA
-            </CardDescription>
+            <CardDescription>Add an extra layer of security with 2FA</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
@@ -91,18 +86,13 @@ export default function SecuritySettingsPage() {
                 <div
                   className={`h-2.5 w-2.5 rounded-full ${hasTwoFactor ? 'bg-sage' : 'bg-gold'}`}
                 />
-                <span className="text-sm">
-                  {hasTwoFactor ? '2FA enabled' : '2FA not enabled'}
-                </span>
+                <span className="text-sm">{hasTwoFactor ? '2FA enabled' : '2FA not enabled'}</span>
               </div>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() =>
-                  window.open(
-                    `https://${window.location.host}/sign-in#/user/security`,
-                    '_blank'
-                  )
+                  window.open(`https://${window.location.host}/sign-in#/user/security`, '_blank')
                 }
               >
                 {hasTwoFactor ? 'Manage 2FA' : 'Enable 2FA'}
@@ -119,9 +109,7 @@ export default function SecuritySettingsPage() {
               <Mail className="h-5 w-5" />
               Email Addresses
             </CardTitle>
-            <CardDescription>
-              Email addresses associated with your account
-            </CardDescription>
+            <CardDescription>Email addresses associated with your account</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
             {emailAddresses.map((email) => (
@@ -150,27 +138,15 @@ export default function SecuritySettingsPage() {
               <Shield className="h-5 w-5" />
               Security Overview
             </CardTitle>
-            <CardDescription>
-              Summary of your account security status
-            </CardDescription>
+            <CardDescription>Summary of your account security status</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              <SecurityItem
-                label="Password protection"
-                enabled={!!hasPassword}
-              />
-              <SecurityItem
-                label="Two-factor authentication"
-                enabled={!!hasTwoFactor}
-              />
+              <SecurityItem label="Password protection" enabled={!!hasPassword} />
+              <SecurityItem label="Two-factor authentication" enabled={!!hasTwoFactor} />
               <SecurityItem
                 label="Email verified"
-                enabled={
-                  emailAddresses.some(
-                    (e) => e.verification?.status === 'verified'
-                  )
-                }
+                enabled={emailAddresses.some((e) => e.verification?.status === 'verified')}
               />
             </div>
           </CardContent>
@@ -183,13 +159,9 @@ export default function SecuritySettingsPage() {
 function SecurityItem({ label, enabled }: { label: string; enabled: boolean }) {
   return (
     <div className="flex items-center gap-3">
-      <div
-        className={`h-2 w-2 rounded-full ${enabled ? 'bg-sage' : 'bg-gold'}`}
-      />
+      <div className={`h-2 w-2 rounded-full ${enabled ? 'bg-sage' : 'bg-gold'}`} />
       <span className="text-sm">{label}</span>
-      <span
-        className={`ml-auto text-xs ${enabled ? 'text-sage' : 'text-gold-dark'}`}
-      >
+      <span className={`ml-auto text-xs ${enabled ? 'text-sage' : 'text-gold-dark'}`}>
         {enabled ? 'Active' : 'Not set'}
       </span>
     </div>

@@ -10,11 +10,7 @@ import {
 } from './setup';
 
 import { GET, POST } from '../action-items/route';
-import {
-  GET as GET_BY_ID,
-  PATCH,
-  DELETE,
-} from '../action-items/[id]/route';
+import { GET as GET_BY_ID, PATCH, DELETE } from '../action-items/[id]/route';
 
 function makeRouteParams(id: string) {
   return { params: Promise.resolve({ id }) };

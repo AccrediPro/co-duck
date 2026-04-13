@@ -28,7 +28,8 @@ export default function DashboardHomeError({
         <h2 className="mb-2 text-xl font-semibold">Unable to load your dashboard</h2>
 
         <p className="mb-6 text-muted-foreground">
-          Something went wrong while loading your dashboard overview. Your data is safe — please try again.
+          Something went wrong while loading your dashboard overview. Your data is safe — please try
+          again.
         </p>
 
         {error.digest && (

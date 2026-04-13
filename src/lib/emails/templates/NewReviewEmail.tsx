@@ -47,9 +47,7 @@ export function NewReviewEmail({
         </Button>
       </Section>
 
-      <Text style={paragraph}>
-        You can respond to this review from your dashboard.
-      </Text>
+      <Text style={paragraph}>You can respond to this review from your dashboard.</Text>
     </EmailLayout>
   );
 }

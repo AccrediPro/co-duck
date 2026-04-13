@@ -24,7 +24,15 @@
 
 import { auth } from '@clerk/nextjs/server';
 import { eq, and, or, gte, lt, desc, asc, sql } from 'drizzle-orm';
-import { db, bookings, users, transactions, coachProfiles, sessionNotes, sessionNoteTemplates } from '@/db';
+import {
+  db,
+  bookings,
+  users,
+  transactions,
+  coachProfiles,
+  sessionNotes,
+  sessionNoteTemplates,
+} from '@/db';
 import type { BookingSessionType } from '@/db/schema';
 import { stripe } from '@/lib/stripe';
 import { formatRefundAmount } from '@/lib/refunds';

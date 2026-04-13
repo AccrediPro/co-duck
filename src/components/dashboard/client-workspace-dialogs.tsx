@@ -43,7 +43,12 @@ interface CreateProgramDialogProps {
   }) => void;
 }
 
-export function CreateProgramDialog({ open, onOpenChange, clientId, onCreated }: CreateProgramDialogProps) {
+export function CreateProgramDialog({
+  open,
+  onOpenChange,
+  clientId,
+  onCreated,
+}: CreateProgramDialogProps) {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [title, setTitle] = useState('');
@@ -102,13 +107,17 @@ export function CreateProgramDialog({ open, onOpenChange, clientId, onCreated }:
   };
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { onOpenChange(v); if (!v) resetForm(); }}>
+    <Dialog
+      open={open}
+      onOpenChange={(v) => {
+        onOpenChange(v);
+        if (!v) resetForm();
+      }}
+    >
       <DialogContent>
         <DialogHeader>
           <DialogTitle>New Program</DialogTitle>
-          <DialogDescription>
-            Create a new coaching program for this client.
-          </DialogDescription>
+          <DialogDescription>Create a new coaching program for this client.</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="space-y-4 py-4">
@@ -135,19 +144,11 @@ export function CreateProgramDialog({ open, onOpenChange, clientId, onCreated }:
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Start Date</Label>
-                <DatePicker
-                  value={startDate}
-                  onChange={setStartDate}
-                  placeholder="Start date"
-                />
+                <DatePicker value={startDate} onChange={setStartDate} placeholder="Start date" />
               </div>
               <div className="space-y-2">
                 <Label>End Date</Label>
-                <DatePicker
-                  value={endDate}
-                  onChange={setEndDate}
-                  placeholder="End date"
-                />
+                <DatePicker value={endDate} onChange={setEndDate} placeholder="End date" />
               </div>
             </div>
           </div>
@@ -185,7 +186,13 @@ interface CreateGoalDialogProps {
   }) => void;
 }
 
-export function CreateGoalDialog({ open, onOpenChange, programs, selectedProgramId, onCreated }: CreateGoalDialogProps) {
+export function CreateGoalDialog({
+  open,
+  onOpenChange,
+  programs,
+  selectedProgramId,
+  onCreated,
+}: CreateGoalDialogProps) {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [programId, setProgramId] = useState<string>(selectedProgramId?.toString() || '');
@@ -245,22 +252,23 @@ export function CreateGoalDialog({ open, onOpenChange, programs, selectedProgram
   };
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { onOpenChange(v); if (!v) resetForm(); }}>
+    <Dialog
+      open={open}
+      onOpenChange={(v) => {
+        onOpenChange(v);
+        if (!v) resetForm();
+      }}
+    >
       <DialogContent>
         <DialogHeader>
           <DialogTitle>New Goal</DialogTitle>
-          <DialogDescription>
-            Add a goal to a coaching program.
-          </DialogDescription>
+          <DialogDescription>Add a goal to a coaching program.</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
               <Label htmlFor="goal-program">Program *</Label>
-              <Select
-                value={effectiveProgramId}
-                onValueChange={setProgramId}
-              >
+              <Select value={effectiveProgramId} onValueChange={setProgramId}>
                 <SelectTrigger id="goal-program">
                   <SelectValue placeholder="Select program" />
                 </SelectTrigger>
@@ -309,11 +317,7 @@ export function CreateGoalDialog({ open, onOpenChange, programs, selectedProgram
               </div>
               <div className="space-y-2">
                 <Label>Due Date</Label>
-                <DatePicker
-                  value={dueDate}
-                  onChange={setDueDate}
-                  placeholder="Due date"
-                />
+                <DatePicker value={dueDate} onChange={setDueDate} placeholder="Due date" />
               </div>
             </div>
           </div>
@@ -341,7 +345,12 @@ interface CreateTaskDialogProps {
   onCreated: () => void;
 }
 
-export function CreateTaskDialog({ open, onOpenChange, clientId, onCreated }: CreateTaskDialogProps) {
+export function CreateTaskDialog({
+  open,
+  onOpenChange,
+  clientId,
+  onCreated,
+}: CreateTaskDialogProps) {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [title, setTitle] = useState('');
@@ -393,13 +402,17 @@ export function CreateTaskDialog({ open, onOpenChange, clientId, onCreated }: Cr
   };
 
   return (
-    <Dialog open={open} onOpenChange={(v) => { onOpenChange(v); if (!v) resetForm(); }}>
+    <Dialog
+      open={open}
+      onOpenChange={(v) => {
+        onOpenChange(v);
+        if (!v) resetForm();
+      }}
+    >
       <DialogContent>
         <DialogHeader>
           <DialogTitle>New Task</DialogTitle>
-          <DialogDescription>
-            Assign a new task to this client.
-          </DialogDescription>
+          <DialogDescription>Assign a new task to this client.</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="space-y-4 py-4">
@@ -425,11 +438,7 @@ export function CreateTaskDialog({ open, onOpenChange, clientId, onCreated }: Cr
             </div>
             <div className="space-y-2">
               <Label>Due Date</Label>
-              <DatePicker
-                value={dueDate}
-                onChange={setDueDate}
-                placeholder="Due date"
-              />
+              <DatePicker value={dueDate} onChange={setDueDate} placeholder="Due date" />
             </div>
           </div>
           <DialogFooter>

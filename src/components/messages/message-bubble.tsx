@@ -4,7 +4,10 @@ import Image from 'next/image';
 import { ExternalLink, FileText, Download } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { formatDateShort, formatTime } from '@/lib/date-utils';
-import type { MessageWithSender, MessageAttachment } from '@/app/(dashboard)/dashboard/messages/[id]/actions';
+import type {
+  MessageWithSender,
+  MessageAttachment,
+} from '@/app/(dashboard)/dashboard/messages/[id]/actions';
 import type { LinkPreviewData } from '@/db/schema';
 
 interface MessageBubbleProps {
@@ -97,7 +100,9 @@ function AttachmentDocument({
           isOwn ? 'bg-primary-foreground/20' : 'bg-muted'
         )}
       >
-        <FileText className={cn('h-5 w-5', isOwn ? 'text-primary-foreground' : 'text-muted-foreground')} />
+        <FileText
+          className={cn('h-5 w-5', isOwn ? 'text-primary-foreground' : 'text-muted-foreground')}
+        />
       </div>
       <div className="min-w-0 flex-1">
         <p
@@ -146,13 +151,7 @@ function MessageAttachmentDisplay({
 // LINK PREVIEW CARD
 // ============================================================================
 
-function LinkPreviewCard({
-  preview,
-  isOwn,
-}: {
-  preview: LinkPreviewData;
-  isOwn: boolean;
-}) {
+function LinkPreviewCard({ preview, isOwn }: { preview: LinkPreviewData; isOwn: boolean }) {
   return (
     <a
       href={preview.url}

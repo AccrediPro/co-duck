@@ -32,7 +32,10 @@ export async function GET(request: Request) {
 
     if (!currentUser || currentUser.role !== 'coach') {
       return Response.json(
-        { success: false, error: { code: 'FORBIDDEN', message: 'Only coaches can access client groups' } },
+        {
+          success: false,
+          error: { code: 'FORBIDDEN', message: 'Only coaches can access client groups' },
+        },
         { status: 403 }
       );
     }
@@ -76,7 +79,10 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error('Error fetching client groups:', error);
     return Response.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch client groups' } },
+      {
+        success: false,
+        error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch client groups' },
+      },
       { status: 500 }
     );
   }
@@ -112,7 +118,10 @@ export async function POST(request: Request) {
 
     if (!currentUser || currentUser.role !== 'coach') {
       return Response.json(
-        { success: false, error: { code: 'FORBIDDEN', message: 'Only coaches can create client groups' } },
+        {
+          success: false,
+          error: { code: 'FORBIDDEN', message: 'Only coaches can create client groups' },
+        },
         { status: 403 }
       );
     }
@@ -135,21 +144,32 @@ export async function POST(request: Request) {
 
     if (existing) {
       return Response.json(
-        { success: false, error: { code: 'DUPLICATE_NAME', message: 'A group with this name already exists' } },
+        {
+          success: false,
+          error: { code: 'DUPLICATE_NAME', message: 'A group with this name already exists' },
+        },
         { status: 409 }
       );
     }
 
-    const [group] = await db
-      .insert(clientGroups)
-      .values({ coachId: userId, name })
-      .returning();
+    const [group] = await db.insert(clientGroups).values({ coachId: userId, name }).returning();
 
-    return Response.json({ success: true, data: { group: { id: group.id, name: group.name, createdAt: group.createdAt, memberCount: 0 } } }, { status: 201 });
+    return Response.json(
+      {
+        success: true,
+        data: {
+          group: { id: group.id, name: group.name, createdAt: group.createdAt, memberCount: 0 },
+        },
+      },
+      { status: 201 }
+    );
   } catch (error) {
     console.error('Error creating client group:', error);
     return Response.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to create client group' } },
+      {
+        success: false,
+        error: { code: 'INTERNAL_ERROR', message: 'Failed to create client group' },
+      },
       { status: 500 }
     );
   }

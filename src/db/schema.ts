@@ -245,8 +245,12 @@ export const checkInMoodEnum = pgEnum('check_in_mood', ['good', 'okay', 'struggl
  * @property {'session_prep_completed'} session_prep_completed - Completed session prep
  */
 export const streakActionTypeEnum = pgEnum('streak_action_type', [
-  'session_completed', 'action_item_completed', 'iconnect_post',
-  'message_sent', 'check_in_completed', 'session_prep_completed',
+  'session_completed',
+  'action_item_completed',
+  'iconnect_post',
+  'message_sent',
+  'check_in_completed',
+  'session_prep_completed',
 ]);
 
 // ============================================================================
@@ -1509,7 +1513,9 @@ export const sessionNoteTemplates = pgTable(
     coachId: text('coach_id').references(() => users.id, { onDelete: 'cascade' }), // null = system template
     name: text('name').notNull(),
     description: text('description'),
-    sections: jsonb('sections').notNull().$type<Array<{ title: string; placeholder: string; type: 'text' | 'textarea' }>>(),
+    sections: jsonb('sections')
+      .notNull()
+      .$type<Array<{ title: string; placeholder: string; type: 'text' | 'textarea' }>>(),
     isSystem: boolean('is_system').notNull().default(false),
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true })
@@ -1586,7 +1592,9 @@ export const sessionNotes = pgTable(
      * Optional template used to structure this note
      * @type {number | null}
      */
-    templateId: integer('template_id').references(() => sessionNoteTemplates.id, { onDelete: 'set null' }),
+    templateId: integer('template_id').references(() => sessionNoteTemplates.id, {
+      onDelete: 'set null',
+    }),
 
     /**
      * Structured section content when a template was used
@@ -2472,9 +2480,7 @@ export const iconnectTaskItems = pgTable(
     /** When this item was marked complete */
     completedAt: timestamp('completed_at', { withTimezone: true }),
   },
-  (table) => [
-    index('iconnect_task_items_post_id_idx').on(table.postId),
-  ]
+  (table) => [index('iconnect_task_items_post_id_idx').on(table.postId)]
 );
 
 /** Type for selecting an iConnect task item record */
@@ -2524,9 +2530,7 @@ export const iconnectComments = pgTable(
       .defaultNow()
       .$onUpdate(() => new Date()),
   },
-  (table) => [
-    index('iconnect_comments_post_id_idx').on(table.postId),
-  ]
+  (table) => [index('iconnect_comments_post_id_idx').on(table.postId)]
 );
 
 /** Type for selecting an iConnect comment record */
@@ -2856,19 +2860,16 @@ export const groupSessionsRelations = relations(groupSessions, ({ one, many }) =
   participants: many(groupSessionParticipants),
 }));
 
-export const groupSessionParticipantsRelations = relations(
-  groupSessionParticipants,
-  ({ one }) => ({
-    groupSession: one(groupSessions, {
-      fields: [groupSessionParticipants.groupSessionId],
-      references: [groupSessions.id],
-    }),
-    client: one(users, {
-      fields: [groupSessionParticipants.clientId],
-      references: [users.id],
-    }),
-  })
-);
+export const groupSessionParticipantsRelations = relations(groupSessionParticipants, ({ one }) => ({
+  groupSession: one(groupSessions, {
+    fields: [groupSessionParticipants.groupSessionId],
+    references: [groupSessions.id],
+  }),
+  client: one(users, {
+    fields: [groupSessionParticipants.clientId],
+    references: [users.id],
+  }),
+}));
 
 export const iconnectPostsRelations = relations(iconnectPosts, ({ one, many }) => ({
   conversation: one(conversations, {
@@ -3086,9 +3087,7 @@ export const coachingStreaks = pgTable(
       .defaultNow()
       .$onUpdate(() => new Date()),
   },
-  (table) => [
-    uniqueIndex('coaching_streaks_user_id_idx').on(table.userId),
-  ]
+  (table) => [uniqueIndex('coaching_streaks_user_id_idx').on(table.userId)]
 );
 
 /** Type for selecting a coaching streak record */
@@ -3210,7 +3209,10 @@ export const weeklyCheckIns = pgTable(
   },
   (table) => [
     uniqueIndex('weekly_check_ins_user_coach_week_idx').on(
-      table.userId, table.coachId, table.weekYear, table.weekNumber
+      table.userId,
+      table.coachId,
+      table.weekYear,
+      table.weekNumber
     ),
     index('weekly_check_ins_coach_id_idx').on(table.coachId),
   ]
@@ -3309,8 +3311,7 @@ export const sessionPrepQuestions = pgTable(
     id: serial('id').primaryKey(),
 
     /** The coach who configured these questions (null = global default) */
-    coachId: text('coach_id')
-      .references(() => users.id, { onDelete: 'cascade' }),
+    coachId: text('coach_id').references(() => users.id, { onDelete: 'cascade' }),
 
     /** Array of 2-5 prep questions */
     questions: jsonb('questions').notNull().$type<string[]>(),
@@ -3324,9 +3325,7 @@ export const sessionPrepQuestions = pgTable(
       .defaultNow()
       .$onUpdate(() => new Date()),
   },
-  (table) => [
-    uniqueIndex('session_prep_questions_coach_id_idx').on(table.coachId),
-  ]
+  (table) => [uniqueIndex('session_prep_questions_coach_id_idx').on(table.coachId)]
 );
 
 /** Type for selecting a session prep questions record */

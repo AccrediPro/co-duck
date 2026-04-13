@@ -17,8 +17,18 @@ vi.mock('@/hooks/use-toast', () => ({
 
 // Mock next/link
 vi.mock('next/link', () => ({
-  default: ({ children, href, ...props }: { children: React.ReactNode; href: string; [key: string]: unknown }) => (
-    <a href={href} {...props}>{children}</a>
+  default: ({
+    children,
+    href,
+    ...props
+  }: {
+    children: React.ReactNode;
+    href: string;
+    [key: string]: unknown;
+  }) => (
+    <a href={href} {...props}>
+      {children}
+    </a>
   ),
 }));
 
@@ -91,9 +101,7 @@ describe('Integration: SessionsList with SessionCard', () => {
   it('marks a session as complete and shows success toast', async () => {
     mockMarkComplete.mockResolvedValue({ success: true });
 
-    const sessions = [
-      createSession({ id: 1, clientName: 'Alice', status: 'confirmed' }),
-    ];
+    const sessions = [createSession({ id: 1, clientName: 'Alice', status: 'confirmed' })];
 
     render(
       <SessionsList
@@ -149,9 +157,7 @@ describe('Integration: SessionsList with SessionCard', () => {
     });
     global.fetch = mockFetch;
 
-    const sessions = [
-      createSession({ id: 5, status: 'pending', clientName: 'Pending Client' }),
-    ];
+    const sessions = [createSession({ id: 5, status: 'pending', clientName: 'Pending Client' })];
 
     render(
       <SessionsList
@@ -185,9 +191,7 @@ describe('Integration: SessionsList with SessionCard', () => {
     });
     global.fetch = mockFetch;
 
-    const sessions = [
-      createSession({ id: 7, status: 'pending', clientName: 'Rejected Client' }),
-    ];
+    const sessions = [createSession({ id: 7, status: 'pending', clientName: 'Rejected Client' })];
 
     render(
       <SessionsList

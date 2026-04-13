@@ -21,7 +21,11 @@ interface ClientCheckIn {
 const MOOD_DISPLAY = {
   good: { emoji: '😊', label: 'Good', badgeClass: 'bg-sage/15 text-sage border-sage/30' },
   okay: { emoji: '😐', label: 'Okay', badgeClass: 'bg-gold/15 text-gold-dark border-gold/30' },
-  struggling: { emoji: '😔', label: 'Struggling', badgeClass: 'bg-burgundy/15 text-burgundy border-burgundy/30' },
+  struggling: {
+    emoji: '😔',
+    label: 'Struggling',
+    badgeClass: 'bg-burgundy/15 text-burgundy border-burgundy/30',
+  },
 } as const;
 
 function timeAgo(dateStr: string): string {
@@ -78,9 +82,7 @@ export function CheckInOverview() {
       </CardHeader>
       <CardContent>
         {clients.length === 0 ? (
-          <p className="py-6 text-center text-sm text-muted-foreground">
-            No check-ins this week
-          </p>
+          <p className="py-6 text-center text-sm text-muted-foreground">No check-ins this week</p>
         ) : (
           <div className="space-y-1">
             {clients.map((client) => {
@@ -98,9 +100,9 @@ export function CheckInOverview() {
                   <div className="flex h-9 w-9 items-center justify-center rounded-full bg-cream text-sm font-medium text-burgundy">
                     {getInitials(client.name)}
                   </div>
-                  <div className="flex-1 min-w-0">
+                  <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium truncate">{client.name}</span>
+                      <span className="truncate text-sm font-medium">{client.name}</span>
                       {client.currentStreak > 0 && (
                         <span className="text-xs text-muted-foreground">
                           🔥 {client.currentStreak}
@@ -108,10 +110,10 @@ export function CheckInOverview() {
                       )}
                     </div>
                     {client.note && (
-                      <p className="text-xs text-muted-foreground truncate">{client.note}</p>
+                      <p className="truncate text-xs text-muted-foreground">{client.note}</p>
                     )}
                   </div>
-                  <div className="flex items-center gap-2 shrink-0">
+                  <div className="flex shrink-0 items-center gap-2">
                     {moodInfo ? (
                       <Badge variant="outline" className={moodInfo.badgeClass}>
                         {moodInfo.emoji} {moodInfo.label}

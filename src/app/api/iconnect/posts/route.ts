@@ -67,11 +67,7 @@ function emitIConnectPostEvents(
         const recipientConvos = await db
           .select({ id: conversations.id })
           .from(conversations)
-          .where(
-            and(
-              eq(conversations.coachId, recipientUserId)
-            )
-          );
+          .where(and(eq(conversations.coachId, recipientUserId)));
         const recipientConvosAsClient = await db
           .select({ id: conversations.id })
           .from(conversations)
@@ -139,7 +135,10 @@ export async function GET(request: Request) {
     const conversation = await verifyConversationMembership(conversationId, userId);
     if (!conversation) {
       return Response.json(
-        { success: false, error: { code: 'FORBIDDEN', message: 'Not a member of this conversation' } },
+        {
+          success: false,
+          error: { code: 'FORBIDDEN', message: 'Not a member of this conversation' },
+        },
         { status: 403 }
       );
     }
@@ -178,9 +177,7 @@ export async function GET(request: Request) {
     // Fetch sender info
     const senderIds = Array.from(new Set(paginatedPosts.map((p) => p.senderUserId)));
     const senders =
-      senderIds.length > 0
-        ? await db.select().from(users).where(inArray(users.id, senderIds))
-        : [];
+      senderIds.length > 0 ? await db.select().from(users).where(inArray(users.id, senderIds)) : [];
     const sendersMap = new Map(senders.map((u) => [u.id, u]));
 
     const formattedPosts = paginatedPosts.map((post) => {
@@ -194,10 +191,8 @@ export async function GET(request: Request) {
         isRead: post.isRead,
         createdAt: post.createdAt,
         updatedAt: post.updatedAt,
-        sender: sender
-          ? { id: sender.id, name: sender.name, avatarUrl: sender.avatarUrl }
-          : null,
-        taskItems: post.type === 'task' ? (taskItemsByPost.get(post.id) || []) : undefined,
+        sender: sender ? { id: sender.id, name: sender.name, avatarUrl: sender.avatarUrl } : null,
+        taskItems: post.type === 'task' ? taskItemsByPost.get(post.id) || [] : undefined,
       };
     });
 
@@ -247,7 +242,10 @@ export async function POST(request: Request) {
     const conversation = await verifyConversationMembership(conversationId, userId);
     if (!conversation) {
       return Response.json(
-        { success: false, error: { code: 'FORBIDDEN', message: 'Not a member of this conversation' } },
+        {
+          success: false,
+          error: { code: 'FORBIDDEN', message: 'Not a member of this conversation' },
+        },
         { status: 403 }
       );
     }
@@ -285,9 +283,7 @@ export async function POST(request: Request) {
         isRead: result.post.isRead,
         createdAt: result.post.createdAt,
         updatedAt: result.post.updatedAt,
-        sender: sender
-          ? { id: sender.id, name: sender.name, avatarUrl: sender.avatarUrl }
-          : null,
+        sender: sender ? { id: sender.id, name: sender.name, avatarUrl: sender.avatarUrl } : null,
         taskItems: result.taskItems,
       };
 
@@ -325,9 +321,7 @@ export async function POST(request: Request) {
       isRead: post.isRead,
       createdAt: post.createdAt,
       updatedAt: post.updatedAt,
-      sender: sender
-        ? { id: sender.id, name: sender.name, avatarUrl: sender.avatarUrl }
-        : null,
+      sender: sender ? { id: sender.id, name: sender.name, avatarUrl: sender.avatarUrl } : null,
       taskItems: undefined,
     };
 

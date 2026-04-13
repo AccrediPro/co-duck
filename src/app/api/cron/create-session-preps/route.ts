@@ -37,12 +37,7 @@ async function getQuestionsForCoach(coachId: string): Promise<string[]> {
   const defaults = await db
     .select({ questions: sessionPrepQuestions.questions })
     .from(sessionPrepQuestions)
-    .where(
-      and(
-        isNull(sessionPrepQuestions.coachId),
-        eq(sessionPrepQuestions.isDefault, true)
-      )
-    )
+    .where(and(isNull(sessionPrepQuestions.coachId), eq(sessionPrepQuestions.isDefault, true)))
     .limit(1);
 
   return defaults.length > 0 ? defaults[0].questions : [];
@@ -101,7 +96,9 @@ export async function POST(request: Request) {
         const questions = await getQuestionsForCoach(booking.coachId);
 
         if (questions.length === 0) {
-          console.warn(`[CreateSessionPreps] No questions found for coach ${booking.coachId}, skipping booking ${booking.id}`);
+          console.warn(
+            `[CreateSessionPreps] No questions found for coach ${booking.coachId}, skipping booking ${booking.id}`
+          );
           skipped++;
           continue;
         }

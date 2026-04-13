@@ -11,13 +11,11 @@ const statusConfig: Record<BookingStatus, { label: string; className: string }> 
   },
   pending: {
     label: 'Pending',
-    className:
-      'bg-gold/15 text-gold-dark hover:bg-gold/25 border-transparent',
+    className: 'bg-gold/15 text-gold-dark hover:bg-gold/25 border-transparent',
   },
   completed: {
     label: 'Completed',
-    className:
-      'border-[hsl(var(--brand-accent))] text-[hsl(var(--brand-warm))] bg-transparent',
+    className: 'border-[hsl(var(--brand-accent))] text-[hsl(var(--brand-warm))] bg-transparent',
   },
   cancelled: {
     label: 'Cancelled',
@@ -42,9 +40,5 @@ export function StatusBadge({ status, label, className }: StatusBadgeProps) {
   const statusClassName =
     config?.className ?? 'bg-secondary text-secondary-foreground border-transparent';
 
-  return (
-    <Badge className={cn(statusClassName, className)}>
-      {displayLabel}
-    </Badge>
-  );
+  return <Badge className={cn(statusClassName, className)}>{displayLabel}</Badge>;
 }

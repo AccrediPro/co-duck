@@ -5,7 +5,7 @@ import { ClientWorkspace } from '@/components/dashboard/client-workspace';
 
 export const metadata = {
   title: 'Client Details | Coaching Platform',
-  description: 'View and manage your client\'s coaching journey',
+  description: "View and manage your client's coaching journey",
 };
 
 interface PageProps {

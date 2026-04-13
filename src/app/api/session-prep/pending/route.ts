@@ -73,12 +73,7 @@ export async function GET(request: Request) {
       const defaultQuestions = await db
         .select({ questions: sessionPrepQuestions.questions })
         .from(sessionPrepQuestions)
-        .where(
-          and(
-            isNull(sessionPrepQuestions.coachId),
-            eq(sessionPrepQuestions.isDefault, true)
-          )
-        )
+        .where(and(isNull(sessionPrepQuestions.coachId), eq(sessionPrepQuestions.isDefault, true)))
         .limit(1);
 
       questions = defaultQuestions.length > 0 ? defaultQuestions[0].questions : [];
@@ -99,7 +94,10 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error('[SessionPrep] Error fetching pending prep:', error);
     return Response.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch pending prep' } },
+      {
+        success: false,
+        error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch pending prep' },
+      },
       { status: 500 }
     );
   }

@@ -3,12 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 
 interface CheckInEntry {
@@ -64,22 +59,17 @@ export function CheckInHistory() {
       </CardHeader>
       <CardContent className="space-y-4">
         {chartEntries.length === 0 ? (
-          <p className="py-6 text-center text-sm text-muted-foreground">
-            No check-ins completed.
-          </p>
+          <p className="py-6 text-center text-sm text-muted-foreground">No check-ins completed.</p>
         ) : (
           <>
             <MoodChart entries={chartEntries} />
             <div className="space-y-2">
               {respondedEntries.map((entry) => (
-                <div
-                  key={entry.id}
-                  className="flex items-start gap-3 rounded-lg border p-3"
-                >
+                <div key={entry.id} className="flex items-start gap-3 rounded-lg border p-3">
                   <span className="text-xl" role="img" aria-label={entry.mood ?? ''}>
                     {entry.mood ? MOOD_CONFIG[entry.mood].emoji : '—'}
                   </span>
-                  <div className="flex-1 min-w-0">
+                  <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-medium">
                         Wk. {entry.weekNumber}, {entry.weekYear}
@@ -94,7 +84,7 @@ export function CheckInHistory() {
                       />
                     </div>
                     {entry.note && (
-                      <p className="mt-0.5 text-sm text-muted-foreground line-clamp-2">
+                      <p className="mt-0.5 line-clamp-2 text-sm text-muted-foreground">
                         {entry.note}
                       </p>
                     )}
@@ -122,18 +112,14 @@ function MoodChart({ entries }: { entries: CheckInEntry[] }) {
     const config = MOOD_CONFIG[mood];
     return {
       x: padding.left + i * step,
-      y: padding.top + config.y * (height - padding.top - padding.bottom) / 100,
+      y: padding.top + (config.y * (height - padding.top - padding.bottom)) / 100,
       color: config.color,
       entry,
     };
   });
 
   const linePath =
-    points.length > 1
-      ? points
-          .map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`)
-          .join(' ')
-      : '';
+    points.length > 1 ? points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ') : '';
 
   return (
     <TooltipProvider>
@@ -144,13 +130,31 @@ function MoodChart({ entries }: { entries: CheckInEntry[] }) {
         aria-label="Mood chart last few weeks"
       >
         {/* Y-axis labels */}
-        <text x={padding.left - 4} y={padding.top + 2} className="fill-muted-foreground" fontSize="8" textAnchor="end">
+        <text
+          x={padding.left - 4}
+          y={padding.top + 2}
+          className="fill-muted-foreground"
+          fontSize="8"
+          textAnchor="end"
+        >
           😊
         </text>
-        <text x={padding.left - 4} y={padding.top + (height - padding.top - padding.bottom) * 0.5 + 2} className="fill-muted-foreground" fontSize="8" textAnchor="end">
+        <text
+          x={padding.left - 4}
+          y={padding.top + (height - padding.top - padding.bottom) * 0.5 + 2}
+          className="fill-muted-foreground"
+          fontSize="8"
+          textAnchor="end"
+        >
           😐
         </text>
-        <text x={padding.left - 4} y={padding.top + (height - padding.top - padding.bottom) * 0.8 + 2} className="fill-muted-foreground" fontSize="8" textAnchor="end">
+        <text
+          x={padding.left - 4}
+          y={padding.top + (height - padding.top - padding.bottom) * 0.8 + 2}
+          className="fill-muted-foreground"
+          fontSize="8"
+          textAnchor="end"
+        >
           😔
         </text>
 
@@ -159,9 +163,9 @@ function MoodChart({ entries }: { entries: CheckInEntry[] }) {
           <line
             key={pct}
             x1={padding.left}
-            y1={padding.top + pct * (height - padding.top - padding.bottom) / 100}
+            y1={padding.top + (pct * (height - padding.top - padding.bottom)) / 100}
             x2={width - padding.right}
-            y2={padding.top + pct * (height - padding.top - padding.bottom) / 100}
+            y2={padding.top + (pct * (height - padding.top - padding.bottom)) / 100}
             stroke="currentColor"
             strokeOpacity={0.1}
             strokeDasharray="4 4"
@@ -184,15 +188,16 @@ function MoodChart({ entries }: { entries: CheckInEntry[] }) {
                 fill={p.color}
                 stroke="white"
                 strokeWidth={2}
-                className="cursor-pointer transition-all hover:r-[7]"
+                className="hover:r-[7] cursor-pointer transition-all"
               />
             </TooltipTrigger>
             <TooltipContent side="top" className="max-w-[200px]">
               <p className="font-medium">
-                Wk. {p.entry.weekNumber} — {MOOD_CONFIG[p.entry.mood as 'good' | 'okay' | 'struggling'].label}
+                Wk. {p.entry.weekNumber} —{' '}
+                {MOOD_CONFIG[p.entry.mood as 'good' | 'okay' | 'struggling'].label}
               </p>
               {p.entry.note && (
-                <p className="mt-1 text-xs text-muted-foreground line-clamp-3">{p.entry.note}</p>
+                <p className="mt-1 line-clamp-3 text-xs text-muted-foreground">{p.entry.note}</p>
               )}
             </TooltipContent>
           </Tooltip>

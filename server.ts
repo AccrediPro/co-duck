@@ -23,12 +23,16 @@ app.prepare().then(async () => {
   const io = new SocketIOServer(httpServer, {
     path: '/api/socketio',
     transports: ['websocket', 'polling'],
+    pingTimeout: 60000,
+    connectTimeout: 45000,
     cors: {
-      origin: [
-        `http://localhost:${port}`,
-        `https://localhost:${port}`,
-        process.env.NEXT_PUBLIC_APP_URL,
-      ].filter(Boolean) as string[],
+      origin: dev
+        ? true // Allow all origins in dev (mobile connects from LAN IP)
+        : [
+            `http://localhost:${port}`,
+            `https://localhost:${port}`,
+            process.env.NEXT_PUBLIC_APP_URL,
+          ].filter(Boolean) as string[],
       methods: ['GET', 'POST'],
       credentials: true,
     },

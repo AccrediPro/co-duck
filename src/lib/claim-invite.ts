@@ -18,12 +18,12 @@ import { eq, sql } from 'drizzle-orm';
 export async function claimCoachInvite(
   userId: string,
   email: string,
-  name: string | null,
+  name: string | null
 ): Promise<boolean> {
   try {
     // Check for pending invite matching this email (raw SQL — table may not be in Drizzle schema yet)
     const result = await db.execute(
-      sql`SELECT id FROM coach_invites WHERE LOWER(email) = LOWER(${email}) AND status = 'pending' LIMIT 1`,
+      sql`SELECT id FROM coach_invites WHERE LOWER(email) = LOWER(${email}) AND status = 'pending' LIMIT 1`
     );
 
     const rows = result as unknown as { id: number }[];
@@ -36,14 +36,11 @@ export async function claimCoachInvite(
 
     // Create minimal coach profile (slug from name or email prefix)
     const slug = generateSlug(name, email);
-    await db
-      .insert(coachProfiles)
-      .values({ userId, slug })
-      .onConflictDoNothing();
+    await db.insert(coachProfiles).values({ userId, slug }).onConflictDoNothing();
 
     // Mark invite as claimed
     await db.execute(
-      sql`UPDATE coach_invites SET status = 'claimed', claimed_at = NOW() WHERE id = ${inviteId}`,
+      sql`UPDATE coach_invites SET status = 'claimed', claimed_at = NOW() WHERE id = ${inviteId}`
     );
 
     return true;

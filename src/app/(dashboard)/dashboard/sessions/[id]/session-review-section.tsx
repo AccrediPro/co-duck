@@ -51,7 +51,10 @@ export function SessionReviewSection({ review, isCoachView }: SessionReviewSecti
       setCoachResponse(response.trim());
       setShowForm(false);
       setResponse('');
-      toast({ title: 'Response submitted', description: 'Your response is now visible to the client.' });
+      toast({
+        title: 'Response submitted',
+        description: 'Your response is now visible to the client.',
+      });
     } catch (err) {
       toast({
         title: 'Error',
@@ -81,9 +84,7 @@ export function SessionReviewSection({ review, isCoachView }: SessionReviewSecti
               <p>{formattedDate}</p>
             </div>
           </div>
-          {review.content && (
-            <p className="text-sm text-muted-foreground">{review.content}</p>
-          )}
+          {review.content && <p className="text-sm text-muted-foreground">{review.content}</p>}
         </div>
 
         {/* Coach response display */}

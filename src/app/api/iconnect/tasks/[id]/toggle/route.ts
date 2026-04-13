@@ -4,10 +4,7 @@ import { iconnectTaskItems, iconnectPosts, conversations } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 import { rateLimit, WRITE_LIMIT, rateLimitResponse } from '@/lib/rate-limit';
 
-export async function PATCH(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const rl = rateLimit(request, WRITE_LIMIT, 'iconnect-tasks-toggle');
   if (!rl.success) return rateLimitResponse(rl);
 
@@ -58,7 +55,10 @@ export async function PATCH(
 
     if (!conversation || (conversation.coachId !== userId && conversation.clientId !== userId)) {
       return Response.json(
-        { success: false, error: { code: 'FORBIDDEN', message: 'Not a member of this conversation' } },
+        {
+          success: false,
+          error: { code: 'FORBIDDEN', message: 'Not a member of this conversation' },
+        },
         { status: 403 }
       );
     }

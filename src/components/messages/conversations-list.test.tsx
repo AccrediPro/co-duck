@@ -10,8 +10,18 @@ vi.mock('next/navigation', () => ({
 
 // Mock next/link
 vi.mock('next/link', () => ({
-  default: ({ children, href, ...props }: { children: React.ReactNode; href: string; [key: string]: unknown }) => (
-    <a href={href} {...props}>{children}</a>
+  default: ({
+    children,
+    href,
+    ...props
+  }: {
+    children: React.ReactNode;
+    href: string;
+    [key: string]: unknown;
+  }) => (
+    <a href={href} {...props}>
+      {children}
+    </a>
   ),
 }));
 
@@ -36,7 +46,9 @@ interface ConversationWithDetails {
   isCoach: boolean;
 }
 
-function createConversation(overrides: Partial<ConversationWithDetails> = {}): ConversationWithDetails {
+function createConversation(
+  overrides: Partial<ConversationWithDetails> = {}
+): ConversationWithDetails {
   return {
     id: 1,
     otherUserId: 'user_456',
@@ -79,7 +91,9 @@ describe('ConversationsList', () => {
     render(<ConversationsList initialConversations={[]} userRole="coach" />);
 
     expect(screen.getByText('No conversations yet')).toBeInTheDocument();
-    expect(screen.getByText('Your conversations with clients will appear here.')).toBeInTheDocument();
+    expect(
+      screen.getByText('Your conversations with clients will appear here.')
+    ).toBeInTheDocument();
   });
 
   it('does not show Browse Coaches button for coach role', () => {

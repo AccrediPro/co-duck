@@ -46,7 +46,10 @@ export async function POST(request: Request) {
 
     if (!conversation || (conversation.coachId !== userId && conversation.clientId !== userId)) {
       return Response.json(
-        { success: false, error: { code: 'FORBIDDEN', message: 'Not a member of this conversation' } },
+        {
+          success: false,
+          error: { code: 'FORBIDDEN', message: 'Not a member of this conversation' },
+        },
         { status: 403 }
       );
     }
@@ -86,7 +89,10 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('Error marking iConnect posts as read:', error);
     return Response.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to mark posts as read' } },
+      {
+        success: false,
+        error: { code: 'INTERNAL_ERROR', message: 'Failed to mark posts as read' },
+      },
       { status: 500 }
     );
   }

@@ -12,11 +12,7 @@ import {
   CheckCheck,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
@@ -181,15 +177,18 @@ export function NotificationBell() {
   useEffect(() => {
     if (!socket || !isConnected) return;
 
-    function handleNewNotification(data: {
-      id: number;
-      type: NotificationType;
-      title: string;
-      body: string | null;
-      link: string | null;
-      isRead: boolean;
-      createdAt: string;
-    }, ack?: (response: { received: boolean }) => void) {
+    function handleNewNotification(
+      data: {
+        id: number;
+        type: NotificationType;
+        title: string;
+        body: string | null;
+        link: string | null;
+        isRead: boolean;
+        createdAt: string;
+      },
+      ack?: (response: { received: boolean }) => void
+    ) {
       // Prepend to list (avoid duplicates)
       setNotifications((prev) => {
         if (prev.some((n) => n.id === data.id)) return prev;
@@ -308,11 +307,7 @@ export function NotificationBell() {
           variant="ghost"
           size="icon"
           className="relative min-h-[44px] min-w-[44px]"
-          aria-label={
-            unreadCount > 0
-              ? `Notifications, ${unreadCount} unread`
-              : 'Notifications'
-          }
+          aria-label={unreadCount > 0 ? `Notifications, ${unreadCount} unread` : 'Notifications'}
         >
           <Bell className={cn('h-5 w-5', pulse && 'animate-pulse text-primary')} />
           {unreadCount > 0 && (
@@ -355,11 +350,7 @@ export function NotificationBell() {
         <Separator />
 
         {/* Notification List */}
-        <div
-          className="max-h-80 overflow-y-auto"
-          role="list"
-          aria-label="Notification list"
-        >
+        <div className="max-h-80 overflow-y-auto" role="list" aria-label="Notification list">
           {loading && notifications.length === 0 ? (
             <div className="space-y-3 p-4">
               {[1, 2, 3].map((i) => (
@@ -394,12 +385,7 @@ export function NotificationBell() {
                     <Icon className="h-4 w-4 text-muted-foreground" />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p
-                      className={cn(
-                        'truncate text-sm',
-                        !notification.isRead && 'font-semibold'
-                      )}
-                    >
+                    <p className={cn('truncate text-sm', !notification.isRead && 'font-semibold')}>
                       {notification.title}
                     </p>
                     {notification.body && (
@@ -412,7 +398,10 @@ export function NotificationBell() {
                     </p>
                   </div>
                   {!notification.isRead && (
-                    <div className="mt-2 h-2 w-2 shrink-0 rounded-full bg-burgundy" aria-hidden="true" />
+                    <div
+                      className="mt-2 h-2 w-2 shrink-0 rounded-full bg-burgundy"
+                      aria-hidden="true"
+                    />
                   )}
                 </button>
               );

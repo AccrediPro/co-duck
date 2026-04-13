@@ -241,10 +241,7 @@ export async function POST(request: Request, { params }: RouteParams) {
     if (file) {
       const uploadResult = await uploadMessageAttachment(file, conversationId, userId);
       if ('error' in uploadResult) {
-        return Response.json(
-          { success: false, error: uploadResult.error },
-          { status: 400 }
-        );
+        return Response.json({ success: false, error: uploadResult.error }, { status: 400 });
       }
       attachmentUrl = uploadResult.data.url;
       attachmentName = uploadResult.data.fileName;
@@ -302,9 +299,7 @@ export async function POST(request: Request, { params }: RouteParams) {
       where: eq(users.id, recipientId),
     });
     if (recipient?.email && sender) {
-      const emailPreview = attachmentName
-        ? `Sent a file: ${attachmentName}`
-        : content || '';
+      const emailPreview = attachmentName ? `Sent a file: ${attachmentName}` : content || '';
 
       sendEmailWithPreferences(
         recipientId,
@@ -347,9 +342,7 @@ export async function POST(request: Request, { params }: RouteParams) {
         isRead: newMessage.isRead,
         createdAt: newMessage.createdAt,
         conversationId,
-        sender: sender
-          ? { id: sender.id, name: sender.name, avatarUrl: sender.avatarUrl }
-          : null,
+        sender: sender ? { id: sender.id, name: sender.name, avatarUrl: sender.avatarUrl } : null,
         senderId: userId,
         attachment,
         metadata: null,
@@ -371,10 +364,7 @@ export async function POST(request: Request, { params }: RouteParams) {
           .then(async (preview) => {
             if (!preview) return;
             const metadata = { linkPreview: preview };
-            await db
-              .update(messages)
-              .set({ metadata })
-              .where(eq(messages.id, newMessage.id));
+            await db.update(messages).set({ metadata }).where(eq(messages.id, newMessage.id));
             // Notify connected clients of the updated metadata
             if (io) {
               const room = `conversation:${conversationId}`;

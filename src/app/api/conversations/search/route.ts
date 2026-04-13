@@ -48,7 +48,11 @@ export async function GET(request: Request) {
 
     // Get user's conversation IDs first
     const userConversations = await db
-      .select({ id: conversations.id, coachId: conversations.coachId, clientId: conversations.clientId })
+      .select({
+        id: conversations.id,
+        coachId: conversations.coachId,
+        clientId: conversations.clientId,
+      })
       .from(conversations)
       .where(or(eq(conversations.coachId, userId), eq(conversations.clientId, userId)));
 
@@ -111,11 +115,7 @@ export async function GET(request: Request) {
     // Build results
     const results: MessageSearchResult[] = matchingMessages.map((msg) => {
       const conv = conversationMap.get(msg.conversationId);
-      const otherUserId = conv
-        ? conv.coachId === userId
-          ? conv.clientId
-          : conv.coachId
-        : '';
+      const otherUserId = conv ? (conv.coachId === userId ? conv.clientId : conv.coachId) : '';
       const otherUser = usersMap.get(otherUserId);
       const sender = usersMap.get(msg.senderId);
 

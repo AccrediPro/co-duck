@@ -89,7 +89,11 @@ export default async function MySessionsPage({ searchParams }: PageProps) {
                 </CardDescription>
               </CardHeader>
               <CardContent className="flex justify-center pb-8">
-                <Button asChild size="lg" className="bg-burgundy text-white hover:bg-burgundy-light">
+                <Button
+                  asChild
+                  size="lg"
+                  className="bg-burgundy text-white hover:bg-burgundy-light"
+                >
                   <Link href="/coaches">Browse Coaches</Link>
                 </Button>
               </CardContent>

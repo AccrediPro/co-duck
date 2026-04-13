@@ -100,9 +100,7 @@ export default async function IConnectFeedPage({
       isRead: post.isRead,
       createdAt: post.createdAt.toISOString(),
       updatedAt: post.updatedAt.toISOString(),
-      sender: sender
-        ? { id: sender.id, name: sender.name, avatarUrl: sender.avatarUrl }
-        : null,
+      sender: sender ? { id: sender.id, name: sender.name, avatarUrl: sender.avatarUrl } : null,
       taskItems: post.type === 'task' ? taskItemsByPost.get(post.id) || [] : undefined,
     };
   });

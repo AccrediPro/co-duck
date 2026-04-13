@@ -11,9 +11,7 @@ function getSupabaseAdmin() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !key) {
-    console.error(
-      'Missing SUPABASE_SERVICE_ROLE_KEY. File uploads require the service role key.'
-    );
+    console.error('Missing SUPABASE_SERVICE_ROLE_KEY. File uploads require the service role key.');
     return null;
   }
   return createClient(url, key);

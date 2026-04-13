@@ -91,9 +91,7 @@ export function ContactList({ contacts: initialContacts, userRole }: ContactList
             ...c,
             unreadCount: c.unreadCount + 1,
             lastPostContent:
-              data.post.type === 'task'
-                ? 'New task checklist'
-                : data.post.content || 'New post',
+              data.post.type === 'task' ? 'New task checklist' : data.post.content || 'New post',
             lastPostAt: new Date(data.post.createdAt),
           };
         });
@@ -144,7 +142,7 @@ export function ContactList({ contacts: initialContacts, userRole }: ContactList
               });
             }}
             className={cn(
-              'flex w-full items-center gap-3 rounded-lg border p-3 sm:p-4 text-left transition-colors hover:bg-muted/50 min-h-[72px]',
+              'flex min-h-[72px] w-full items-center gap-3 rounded-lg border p-3 text-left transition-colors hover:bg-muted/50 sm:p-4',
               hasUnread && 'bg-primary/5'
             )}
           >
@@ -162,21 +160,23 @@ export function ContactList({ contacts: initialContacts, userRole }: ContactList
 
             <div className="min-w-0 flex-1">
               <div className="flex items-center justify-between gap-1.5 sm:gap-2">
-                <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-                  <span className={cn('truncate text-sm font-medium', hasUnread && 'font-semibold')}>
+                <div className="flex min-w-0 items-center gap-1.5 sm:gap-2">
+                  <span
+                    className={cn('truncate text-sm font-medium', hasUnread && 'font-semibold')}
+                  >
                     {contact.otherUserName || 'Unknown User'}
                   </span>
-                  <Badge variant="secondary" className="flex-shrink-0 text-[10px] px-1.5 py-0">
+                  <Badge variant="secondary" className="flex-shrink-0 px-1.5 py-0 text-[10px]">
                     {roleLabel}
                   </Badge>
                 </div>
-                <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
                   {hasUnread && (
                     <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-[hsl(var(--brand-accent))] px-1.5 text-xs font-medium text-white">
                       {contact.unreadCount > 99 ? '99+' : contact.unreadCount}
                     </span>
                   )}
-                  <span className="text-xs text-muted-foreground whitespace-nowrap">
+                  <span className="whitespace-nowrap text-xs text-muted-foreground">
                     {formatRelativeTime(contact.lastPostAt)}
                   </span>
                 </div>

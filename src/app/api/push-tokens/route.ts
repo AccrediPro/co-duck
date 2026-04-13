@@ -49,14 +49,20 @@ export async function POST(request: NextRequest) {
       (!token.startsWith('ExponentPushToken[') && !token.startsWith('ExpoPushToken['))
     ) {
       return NextResponse.json(
-        { success: false, error: { code: 'INVALID_TOKEN', message: 'Invalid Expo push token format' } },
+        {
+          success: false,
+          error: { code: 'INVALID_TOKEN', message: 'Invalid Expo push token format' },
+        },
         { status: 400 }
       );
     }
 
     if (!platform || !['ios', 'android', 'web'].includes(platform)) {
       return NextResponse.json(
-        { success: false, error: { code: 'INVALID_PLATFORM', message: 'Platform must be ios, android, or web' } },
+        {
+          success: false,
+          error: { code: 'INVALID_PLATFORM', message: 'Platform must be ios, android, or web' },
+        },
         { status: 400 }
       );
     }
@@ -94,7 +100,10 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Error registering push token:', error);
     return NextResponse.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to register push token' } },
+      {
+        success: false,
+        error: { code: 'INTERNAL_ERROR', message: 'Failed to register push token' },
+      },
       { status: 500 }
     );
   }
@@ -128,7 +137,10 @@ export async function DELETE(request: NextRequest) {
 
     if (!deviceId) {
       return NextResponse.json(
-        { success: false, error: { code: 'MISSING_DEVICE_ID', message: 'deviceId query parameter is required' } },
+        {
+          success: false,
+          error: { code: 'MISSING_DEVICE_ID', message: 'deviceId query parameter is required' },
+        },
         { status: 400 }
       );
     }
@@ -141,7 +153,10 @@ export async function DELETE(request: NextRequest) {
   } catch (error) {
     console.error('Error unregistering push token:', error);
     return NextResponse.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to unregister push token' } },
+      {
+        success: false,
+        error: { code: 'INTERNAL_ERROR', message: 'Failed to unregister push token' },
+      },
       { status: 500 }
     );
   }

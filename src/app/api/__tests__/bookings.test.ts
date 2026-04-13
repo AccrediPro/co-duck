@@ -1,11 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import {
-  mockAuth,
-  mockDbQueryFindFirst,
-  makeRequest,
-  makeJsonRequest,
-  resetMocks,
-} from './setup';
+import { mockAuth, mockDbQueryFindFirst, makeRequest, makeJsonRequest, resetMocks } from './setup';
 
 import { GET, PATCH } from '../bookings/[id]/route';
 
@@ -129,7 +123,12 @@ describe('GET /api/bookings/:id', () => {
         updatedAt: new Date().toISOString(),
       })
       .mockResolvedValueOnce({ id: 'user_coach', name: 'Coach', email: 'c@e.com', avatarUrl: null })
-      .mockResolvedValueOnce({ id: 'user_client', name: 'Client', email: 'cl@e.com', avatarUrl: null });
+      .mockResolvedValueOnce({
+        id: 'user_client',
+        name: 'Client',
+        email: 'cl@e.com',
+        avatarUrl: null,
+      });
 
     const response = await GET(
       makeRequest('https://example.com/api/bookings/1'),
@@ -151,7 +150,11 @@ describe('PATCH /api/bookings/:id', () => {
     mockAuth.mockResolvedValueOnce({ userId: null });
 
     const response = await PATCH(
-      makeJsonRequest('https://example.com/api/bookings/1', { meetingLink: 'https://zoom.us' }, 'PATCH'),
+      makeJsonRequest(
+        'https://example.com/api/bookings/1',
+        { meetingLink: 'https://zoom.us' },
+        'PATCH'
+      ),
       makeRouteParams('1')
     );
     const body = await response.json();
@@ -164,7 +167,11 @@ describe('PATCH /api/bookings/:id', () => {
     mockAuth.mockResolvedValueOnce({ userId: 'user_coach' });
 
     const response = await PATCH(
-      makeJsonRequest('https://example.com/api/bookings/abc', { meetingLink: 'https://zoom.us' }, 'PATCH'),
+      makeJsonRequest(
+        'https://example.com/api/bookings/abc',
+        { meetingLink: 'https://zoom.us' },
+        'PATCH'
+      ),
       makeRouteParams('abc')
     );
     const body = await response.json();
@@ -178,7 +185,11 @@ describe('PATCH /api/bookings/:id', () => {
     mockDbQueryFindFirst.mockResolvedValueOnce(null);
 
     const response = await PATCH(
-      makeJsonRequest('https://example.com/api/bookings/999', { meetingLink: 'https://zoom.us' }, 'PATCH'),
+      makeJsonRequest(
+        'https://example.com/api/bookings/999',
+        { meetingLink: 'https://zoom.us' },
+        'PATCH'
+      ),
       makeRouteParams('999')
     );
     const body = await response.json();
@@ -197,7 +208,11 @@ describe('PATCH /api/bookings/:id', () => {
     });
 
     const response = await PATCH(
-      makeJsonRequest('https://example.com/api/bookings/1', { meetingLink: 'https://zoom.us' }, 'PATCH'),
+      makeJsonRequest(
+        'https://example.com/api/bookings/1',
+        { meetingLink: 'https://zoom.us' },
+        'PATCH'
+      ),
       makeRouteParams('1')
     );
     const body = await response.json();
@@ -216,7 +231,11 @@ describe('PATCH /api/bookings/:id', () => {
     });
 
     const response = await PATCH(
-      makeJsonRequest('https://example.com/api/bookings/1', { meetingLink: 'https://zoom.us' }, 'PATCH'),
+      makeJsonRequest(
+        'https://example.com/api/bookings/1',
+        { meetingLink: 'https://zoom.us' },
+        'PATCH'
+      ),
       makeRouteParams('1')
     );
     const body = await response.json();

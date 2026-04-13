@@ -151,9 +151,7 @@ export function CalendarView() {
                 <div className="space-y-2">
                   {selectedSessions.map((s) => (
                     <div key={s.id} className="flex items-center gap-2 text-sm">
-                      <span className="text-muted-foreground">
-                        {formatTime(s.startTime)}
-                      </span>
+                      <span className="text-muted-foreground">{formatTime(s.startTime)}</span>
                       <span className="font-medium">{s.otherUserName || 'User'}</span>
                       <Badge variant="outline" className="text-xs">
                         {s.sessionType.name}

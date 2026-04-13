@@ -19,8 +19,11 @@ export async function POST(request: Request) {
 
     if (!email || !EMAIL_REGEX.test(email)) {
       return Response.json(
-        { success: false, error: { code: 'INVALID_EMAIL', message: 'Please provide a valid email address' } },
-        { status: 400 },
+        {
+          success: false,
+          error: { code: 'INVALID_EMAIL', message: 'Please provide a valid email address' },
+        },
+        { status: 400 }
       );
     }
 
@@ -35,12 +38,13 @@ export async function POST(request: Request) {
           success: false,
           error: {
             code: 'ALREADY_INVITED',
-            message: existingInvite.status === 'claimed'
-              ? 'This email has already been invited and claimed'
-              : 'This email has already been invited',
+            message:
+              existingInvite.status === 'claimed'
+                ? 'This email has already been invited and claimed'
+                : 'This email has already been invited',
           },
         },
-        { status: 409 },
+        { status: 409 }
       );
     }
 
@@ -53,8 +57,11 @@ export async function POST(request: Request) {
       // User exists — change role to coach directly
       if (existingUser.role === 'coach') {
         return Response.json(
-          { success: false, error: { code: 'ALREADY_COACH', message: 'This user is already a coach' } },
-          { status: 409 },
+          {
+            success: false,
+            error: { code: 'ALREADY_COACH', message: 'This user is already a coach' },
+          },
+          { status: 409 }
         );
       }
 
@@ -67,7 +74,10 @@ export async function POST(request: Request) {
 
       if (!existingProfile) {
         const slug = generateSlug(existingUser.name, email);
-        await db.insert(coachProfiles).values({ userId: existingUser.id, slug }).onConflictDoNothing();
+        await db
+          .insert(coachProfiles)
+          .values({ userId: existingUser.id, slug })
+          .onConflictDoNothing();
       }
 
       // Record the invite as already claimed
@@ -88,28 +98,34 @@ export async function POST(request: Request) {
     }
 
     // User doesn't exist yet — create pending invite
-    const [invite] = await db.insert(coachInvites).values({
-      email,
-      invitedBy: auth.userId!,
-    }).returning();
+    const [invite] = await db
+      .insert(coachInvites)
+      .values({
+        email,
+        invitedBy: auth.userId!,
+      })
+      .returning();
 
-    return Response.json({
-      success: true,
-      data: {
-        type: 'invite_created',
-        invite: {
-          id: invite.id,
-          email: invite.email,
-          status: invite.status,
-          createdAt: invite.createdAt,
+    return Response.json(
+      {
+        success: true,
+        data: {
+          type: 'invite_created',
+          invite: {
+            id: invite.id,
+            email: invite.email,
+            status: invite.status,
+            createdAt: invite.createdAt,
+          },
         },
       },
-    }, { status: 201 });
+      { status: 201 }
+    );
   } catch (error) {
     console.error('Error creating coach invite:', error);
     return Response.json(
       { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to create invite' } },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

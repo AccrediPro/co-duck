@@ -31,7 +31,11 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
-import { CreateProgramDialog, CreateGoalDialog, CreateTaskDialog } from './client-workspace-dialogs';
+import {
+  CreateProgramDialog,
+  CreateGoalDialog,
+  CreateTaskDialog,
+} from './client-workspace-dialogs';
 import { ClientFilesTab } from './client-files-tab';
 import { ClientGroupBadges } from './client-group-badges';
 import { ClientCheckInTimeline } from '@/components/check-ins/client-check-in-timeline';
@@ -101,18 +105,38 @@ const statusConfig = {
 } as const;
 
 const priorityConfig = {
-  high: { label: 'High', className: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400' },
-  medium: { label: 'Medium', className: 'bg-gold/15 text-gold-dark dark:bg-gold/20 dark:text-gold' },
+  high: {
+    label: 'High',
+    className: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
+  },
+  medium: {
+    label: 'Medium',
+    className: 'bg-gold/15 text-gold-dark dark:bg-gold/20 dark:text-gold',
+  },
   low: { label: 'Low', className: 'bg-sage/10 text-sage dark:bg-sage/20 dark:text-sage' },
 } as const;
 
 const goalStatusConfig = {
-  pending: { label: 'Pending', className: 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400' },
-  in_progress: { label: 'In Progress', className: 'bg-burgundy/10 text-burgundy dark:bg-burgundy/20 dark:text-burgundy-light' },
-  completed: { label: 'Completed', className: 'bg-sage/10 text-sage dark:bg-sage/20 dark:text-sage' },
+  pending: {
+    label: 'Pending',
+    className: 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400',
+  },
+  in_progress: {
+    label: 'In Progress',
+    className: 'bg-burgundy/10 text-burgundy dark:bg-burgundy/20 dark:text-burgundy-light',
+  },
+  completed: {
+    label: 'Completed',
+    className: 'bg-sage/10 text-sage dark:bg-sage/20 dark:text-sage',
+  },
 } as const;
 
-export function ClientWorkspace({ client, initialPrograms, initialActionItems, clientId }: ClientWorkspaceProps) {
+export function ClientWorkspace({
+  client,
+  initialPrograms,
+  initialActionItems,
+  clientId,
+}: ClientWorkspaceProps) {
   const router = useRouter();
   const { toast } = useToast();
   const [programs, setPrograms] = useState<Program[]>(initialPrograms);
@@ -129,21 +153,24 @@ export function ClientWorkspace({ client, initialPrograms, initialActionItems, c
     router.refresh();
   }, [router]);
 
-  const fetchGoalsForProgram = useCallback(async (programId: number) => {
-    if (loadingGoals[programId]) return;
-    setLoadingGoals((prev) => ({ ...prev, [programId]: true }));
-    try {
-      const res = await fetch(`/api/programs/${programId}/goals`);
-      const json = await res.json();
-      if (json.success) {
-        setProgramGoals((prev) => ({ ...prev, [programId]: json.data.goals }));
+  const fetchGoalsForProgram = useCallback(
+    async (programId: number) => {
+      if (loadingGoals[programId]) return;
+      setLoadingGoals((prev) => ({ ...prev, [programId]: true }));
+      try {
+        const res = await fetch(`/api/programs/${programId}/goals`);
+        const json = await res.json();
+        if (json.success) {
+          setProgramGoals((prev) => ({ ...prev, [programId]: json.data.goals }));
+        }
+      } catch {
+        // Silent fail
+      } finally {
+        setLoadingGoals((prev) => ({ ...prev, [programId]: false }));
       }
-    } catch {
-      // Silent fail
-    } finally {
-      setLoadingGoals((prev) => ({ ...prev, [programId]: false }));
-    }
-  }, [loadingGoals]);
+    },
+    [loadingGoals]
+  );
 
   const toggleProgram = (programId: number) => {
     setExpandedPrograms((prev) => {
@@ -219,42 +246,48 @@ export function ClientWorkspace({ client, initialPrograms, initialActionItems, c
   };
 
   // Get action items for a specific program
-  const getTasksForProgram = useCallback((programId: number) => {
-    const goals = programGoals[programId] || [];
-    const goalIds = new Set(goals.map((g) => g.id));
-    return actionItems.filter((item) => item.goalId && goalIds.has(item.goalId));
-  }, [programGoals, actionItems]);
+  const getTasksForProgram = useCallback(
+    (programId: number) => {
+      const goals = programGoals[programId] || [];
+      const goalIds = new Set(goals.map((g) => g.id));
+      return actionItems.filter((item) => item.goalId && goalIds.has(item.goalId));
+    },
+    [programGoals, actionItems]
+  );
 
   // Calculate progress for a program: (completed goals + completed tasks) / (total goals + total tasks)
-  const getProgramProgress = useCallback((program: Program) => {
-    const goals = programGoals[program.id] || [];
-    const tasks = getTasksForProgram(program.id);
+  const getProgramProgress = useCallback(
+    (program: Program) => {
+      const goals = programGoals[program.id] || [];
+      const tasks = getTasksForProgram(program.id);
 
-    const completedGoals = goals.filter((g) => g.status === 'completed').length;
-    const completedTasks = tasks.filter((t) => t.isCompleted).length;
-    const totalGoals = goals.length;
-    const totalTasks = tasks.length;
-    const total = totalGoals + totalTasks;
+      const completedGoals = goals.filter((g) => g.status === 'completed').length;
+      const completedTasks = tasks.filter((t) => t.isCompleted).length;
+      const totalGoals = goals.length;
+      const totalTasks = tasks.length;
+      const total = totalGoals + totalTasks;
 
-    if (total === 0) {
-      // Fallback to API-provided goal counts when goals aren't loaded yet
-      if (program.goalsCount > 0) {
-        return {
-          percent: Math.round((program.goalsCompleted / program.goalsCount) * 100),
-          completed: program.goalsCompleted,
-          total: program.goalsCount,
-        };
+      if (total === 0) {
+        // Fallback to API-provided goal counts when goals aren't loaded yet
+        if (program.goalsCount > 0) {
+          return {
+            percent: Math.round((program.goalsCompleted / program.goalsCount) * 100),
+            completed: program.goalsCompleted,
+            total: program.goalsCount,
+          };
+        }
+        return { percent: 0, completed: 0, total: 0 };
       }
-      return { percent: 0, completed: 0, total: 0 };
-    }
 
-    const completed = completedGoals + completedTasks;
-    return {
-      percent: Math.round((completed / total) * 100),
-      completed,
-      total,
-    };
-  }, [programGoals, getTasksForProgram]);
+      const completed = completedGoals + completedTasks;
+      return {
+        percent: Math.round((completed / total) * 100),
+        completed,
+        total,
+      };
+    },
+    [programGoals, getTasksForProgram]
+  );
 
   return (
     <div className="space-y-6">
@@ -330,21 +363,15 @@ export function ClientWorkspace({ client, initialPrograms, initialActionItems, c
                         </p>
                       )}
                       <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-                        {program.startDate && (
-                          <span>
-                            From {formatDate(program.startDate)}
-                          </span>
-                        )}
-                        {program.endDate && (
-                          <span>
-                            to {formatDate(program.endDate)}
-                          </span>
-                        )}
+                        {program.startDate && <span>From {formatDate(program.startDate)}</span>}
+                        {program.endDate && <span>to {formatDate(program.endDate)}</span>}
                       </div>
                       {/* Progress bar */}
                       <div className="mt-2">
                         <div className="mb-1 flex items-center justify-between text-xs text-muted-foreground">
-                          <span>{progress.completed}/{progress.total} completed</span>
+                          <span>
+                            {progress.completed}/{progress.total} completed
+                          </span>
                           <span>{progress.percent}%</span>
                         </div>
                         <Progress
@@ -361,7 +388,11 @@ export function ClientWorkspace({ client, initialPrograms, initialActionItems, c
                         className="h-8 w-8"
                         onClick={() => toggleProgram(program.id)}
                       >
-                        {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                        {isExpanded ? (
+                          <ChevronUp className="h-4 w-4" />
+                        ) : (
+                          <ChevronDown className="h-4 w-4" />
+                        )}
                       </Button>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -516,11 +547,7 @@ function ProgramContent({
           ) : (
             <div className="space-y-2">
               {goals.map((goal) => (
-                <GoalCard
-                  key={goal.id}
-                  goal={goal}
-                  onDelete={() => onDeleteGoal(goal.id)}
-                />
+                <GoalCard key={goal.id} goal={goal} onDelete={() => onDeleteGoal(goal.id)} />
               ))}
             </div>
           )}
@@ -565,10 +592,14 @@ function GoalCard({ goal, onDelete }: { goal: Goal; onDelete: () => void }) {
       <div className="flex-1">
         <div className="flex flex-wrap items-center gap-2">
           <span className="font-medium">{goal.title}</span>
-          <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${status.className}`}>
+          <span
+            className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${status.className}`}
+          >
             {status.label}
           </span>
-          <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${priority.className}`}>
+          <span
+            className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${priority.className}`}
+          >
             {priority.label}
           </span>
         </div>
@@ -601,10 +632,14 @@ function GoalCard({ goal, onDelete }: { goal: Goal; onDelete: () => void }) {
 
 function TaskCard({ item }: { item: ActionItem }) {
   return (
-    <div className={`flex items-start gap-3 rounded-lg border p-3 ${item.isCompleted ? 'opacity-70' : ''}`}>
+    <div
+      className={`flex items-start gap-3 rounded-lg border p-3 ${item.isCompleted ? 'opacity-70' : ''}`}
+    >
       <div className="flex-1">
         <div className="flex items-center gap-2">
-          <h4 className={`font-medium ${item.isCompleted ? 'line-through text-muted-foreground' : ''}`}>
+          <h4
+            className={`font-medium ${item.isCompleted ? 'text-muted-foreground line-through' : ''}`}
+          >
             {item.title}
           </h4>
           {item.isCompleted ? (
@@ -616,9 +651,7 @@ function TaskCard({ item }: { item: ActionItem }) {
           )}
         </div>
         {item.description && (
-          <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
-            {item.description}
-          </p>
+          <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">{item.description}</p>
         )}
         {item.dueDate && (
           <p className="mt-1 flex items-center gap-1 text-xs text-muted-foreground">

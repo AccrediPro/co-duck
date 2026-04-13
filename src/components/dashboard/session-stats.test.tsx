@@ -4,20 +4,24 @@ import { SessionStats } from './session-stats';
 
 // Mock next/link
 vi.mock('next/link', () => ({
-  default: ({ children, href, ...props }: { children: React.ReactNode; href: string; [key: string]: unknown }) => (
-    <a href={href} {...props}>{children}</a>
+  default: ({
+    children,
+    href,
+    ...props
+  }: {
+    children: React.ReactNode;
+    href: string;
+    [key: string]: unknown;
+  }) => (
+    <a href={href} {...props}>
+      {children}
+    </a>
   ),
 }));
 
 describe('SessionStats', () => {
   it('renders all stat values', () => {
-    render(
-      <SessionStats
-        distinctClients={12}
-        sessionsThisMonth={5}
-        totalSessions={48}
-      />
-    );
+    render(<SessionStats distinctClients={12} sessionsThisMonth={5} totalSessions={48} />);
 
     expect(screen.getByText('Session Stats')).toBeInTheDocument();
     expect(screen.getByText('12')).toBeInTheDocument();
@@ -26,13 +30,7 @@ describe('SessionStats', () => {
   });
 
   it('renders stat labels', () => {
-    render(
-      <SessionStats
-        distinctClients={0}
-        sessionsThisMonth={0}
-        totalSessions={0}
-      />
-    );
+    render(<SessionStats distinctClients={0} sessionsThisMonth={0} totalSessions={0} />);
 
     expect(screen.getByText('Total Clients')).toBeInTheDocument();
     expect(screen.getByText('This Month')).toBeInTheDocument();
@@ -70,13 +68,7 @@ describe('SessionStats', () => {
   });
 
   it('does not show pending requests when prop is omitted', () => {
-    render(
-      <SessionStats
-        distinctClients={3}
-        sessionsThisMonth={1}
-        totalSessions={10}
-      />
-    );
+    render(<SessionStats distinctClients={3} sessionsThisMonth={1} totalSessions={10} />);
 
     expect(screen.queryByText('Pending Requests')).not.toBeInTheDocument();
   });

@@ -299,10 +299,12 @@ export async function getAvailableSlots(
       if (!override.isAvailable) {
         return { success: true, data: [] };
       }
-      ranges = [{
-        startTime: override.startTime?.substring(0, 5) || '09:00',
-        endTime: override.endTime?.substring(0, 5) || '17:00',
-      }];
+      ranges = [
+        {
+          startTime: override.startTime?.substring(0, 5) || '09:00',
+          endTime: override.endTime?.substring(0, 5) || '17:00',
+        },
+      ];
     } else {
       // Get all weekly availability records for this day (multiple rows possible)
       const weeklyAvail = await db

@@ -38,13 +38,13 @@ export function TodaysSchedule({ sessions }: TodaysScheduleProps) {
                 <div
                   key={session.id}
                   className={`flex items-center gap-4 rounded-lg border p-3 ${
-                    isNow ? 'border-[hsl(var(--brand-accent))] bg-[hsl(var(--brand-surface))] dark:bg-[hsl(var(--brand-accent-deep))]' : ''
+                    isNow
+                      ? 'border-[hsl(var(--brand-accent))] bg-[hsl(var(--brand-surface))] dark:bg-[hsl(var(--brand-accent-deep))]'
+                      : ''
                   } ${isPast ? 'opacity-60' : ''}`}
                 >
                   <div className="text-center">
-                    <p className="text-sm font-semibold">
-                      {formatTime(session.startTime)}
-                    </p>
+                    <p className="text-sm font-semibold">{formatTime(session.startTime)}</p>
                     <p className="text-xs text-muted-foreground">
                       {session.sessionType.duration}min
                     </p>

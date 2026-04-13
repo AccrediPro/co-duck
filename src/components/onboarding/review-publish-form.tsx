@@ -311,7 +311,9 @@ export function ReviewPublishForm({
               </AvatarFallback>
             </Avatar>
             <div className="flex-1">
-              <h3 className="text-xl font-semibold text-burgundy-dark">{profile.displayName || 'No name set'}</h3>
+              <h3 className="text-xl font-semibold text-burgundy-dark">
+                {profile.displayName || 'No name set'}
+              </h3>
               <p className="text-muted-foreground">{profile.headline || 'No headline set'}</p>
               {profile.timezone && (
                 <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
@@ -411,7 +413,11 @@ export function ReviewPublishForm({
                 'Save as Draft'
               )}
             </Button>
-            <Button onClick={handlePublish} disabled={isPublishing || isSavingDraft} className="bg-burgundy text-white hover:bg-burgundy-light">
+            <Button
+              onClick={handlePublish}
+              disabled={isPublishing || isSavingDraft}
+              className="bg-burgundy text-white hover:bg-burgundy-light"
+            >
               {isPublishing ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />

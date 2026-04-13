@@ -31,7 +31,10 @@ export async function PATCH(request: Request) {
 
     if (!coach) {
       return Response.json(
-        { success: false, error: { code: 'FORBIDDEN', message: 'Only coaches can update check-in settings' } },
+        {
+          success: false,
+          error: { code: 'FORBIDDEN', message: 'Only coaches can update check-in settings' },
+        },
         { status: 403 }
       );
     }
@@ -46,9 +49,17 @@ export async function PATCH(request: Request) {
       );
     }
 
-    if (checkInDay === undefined || typeof checkInDay !== 'number' || checkInDay < 0 || checkInDay > 6) {
+    if (
+      checkInDay === undefined ||
+      typeof checkInDay !== 'number' ||
+      checkInDay < 0 ||
+      checkInDay > 6
+    ) {
       return Response.json(
-        { success: false, error: { code: 'INVALID_DAY', message: 'checkInDay must be 0 (Sun) through 6 (Sat)' } },
+        {
+          success: false,
+          error: { code: 'INVALID_DAY', message: 'checkInDay must be 0 (Sun) through 6 (Sat)' },
+        },
         { status: 400 }
       );
     }
@@ -59,12 +70,7 @@ export async function PATCH(request: Request) {
     const latestCheckIn = await db
       .select({ id: weeklyCheckIns.id })
       .from(weeklyCheckIns)
-      .where(
-        and(
-          eq(weeklyCheckIns.coachId, userId),
-          eq(weeklyCheckIns.userId, clientId)
-        )
-      )
+      .where(and(eq(weeklyCheckIns.coachId, userId), eq(weeklyCheckIns.userId, clientId)))
       .orderBy(desc(weeklyCheckIns.weekYear), desc(weeklyCheckIns.weekNumber))
       .limit(1);
 
@@ -82,7 +88,10 @@ export async function PATCH(request: Request) {
   } catch (error) {
     console.error('[check-ins/settings] Error:', error);
     return Response.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to update check-in settings' } },
+      {
+        success: false,
+        error: { code: 'INTERNAL_ERROR', message: 'Failed to update check-in settings' },
+      },
       { status: 500 }
     );
   }

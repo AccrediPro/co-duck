@@ -164,7 +164,9 @@ export default function ContactPage() {
       <section className="relative overflow-hidden bg-gradient-to-br from-burgundy-dark to-burgundy">
         <div className="container mx-auto px-4 py-16 md:py-24">
           <div className="mx-auto max-w-3xl text-center">
-            <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">Get in Touch</h1>
+            <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">
+              Get in Touch
+            </h1>
             <p className="mx-auto mt-4 max-w-xl text-lg text-white/80">
               Have a question or need assistance? We are here to help. Fill out the form below and
               we will get back to you as soon as possible.
@@ -239,7 +241,9 @@ export default function ContactPage() {
                     value={formState.subject}
                     onValueChange={(value) => handleInputChange('subject', value)}
                   >
-                    <SelectTrigger className={cn('min-h-[44px]', errors.subject ? 'border-red-500' : '')}>
+                    <SelectTrigger
+                      className={cn('min-h-[44px]', errors.subject ? 'border-red-500' : '')}
+                    >
                       <SelectValue placeholder="Select a topic" />
                     </SelectTrigger>
                     <SelectContent>

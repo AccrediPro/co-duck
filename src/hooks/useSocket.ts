@@ -9,6 +9,8 @@ export type ConnectionHealth = 'healthy' | 'reconnecting' | 'disconnected';
 
 export function useSocket() {
   const { getToken } = useAuth();
+  const getTokenRef = useRef(getToken);
+  getTokenRef.current = getToken;
   const [isConnected, setIsConnected] = useState(false);
   const [connectionHealth, setConnectionHealth] = useState<ConnectionHealth>('disconnected');
   const [socket, setSocket] = useState<Socket | null>(null);
@@ -25,9 +27,9 @@ export function useSocket() {
     async function connect() {
       try {
         // Store the token getter so the socket can refresh on reconnection
-        setTokenGetter(getToken);
+        setTokenGetter(getTokenRef.current);
 
-        const token = await getToken();
+        const token = await getTokenRef.current();
         if (!token || !mounted) return;
 
         const s = initSocket(token);
@@ -76,7 +78,8 @@ export function useSocket() {
       releaseSocket();
       initializedRef.current = false;
     };
-  }, [getToken]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Reconnect stale socket when tab regains focus
   const handleVisibilityReconnect = useCallback(async () => {
@@ -94,7 +97,7 @@ export function useSocket() {
     // If socket disconnected while backgrounded, force reconnect with fresh token
     if (!socket.connected && backgroundDuration > 5_000) {
       try {
-        const token = await getToken();
+        const token = await getTokenRef.current();
         if (token) {
           socket.auth = { token };
           socket.connect();
@@ -103,7 +106,7 @@ export function useSocket() {
         // Token refresh failed — socket.io will retry automatically
       }
     }
-  }, [socket, getToken]);
+  }, [socket]);
 
   useEffect(() => {
     if (typeof document === 'undefined') return;

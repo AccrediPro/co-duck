@@ -28,7 +28,10 @@ export default async function DashboardLayout({ children }: { children: React.Re
   let userRole: 'admin' | 'coach' | 'client' = 'client';
   let dbUserName: string | null = null;
   try {
-    const dbUser = await db.select({ role: users.role, name: users.name }).from(users).where(eq(users.id, userId));
+    const dbUser = await db
+      .select({ role: users.role, name: users.name })
+      .from(users)
+      .where(eq(users.id, userId));
     if (dbUser.length > 0 && dbUser[0].role) {
       userRole = dbUser[0].role;
       dbUserName = dbUser[0].name ?? null;
@@ -60,11 +63,19 @@ export default async function DashboardLayout({ children }: { children: React.Re
           dbUserName = newUser.name ?? null;
         } else if (!newUser) {
           // Email might exist with a different Clerk ID (account was recreated)
-          const existingByEmail = await db.select().from(users).where(eq(users.email, email)).limit(1);
+          const existingByEmail = await db
+            .select()
+            .from(users)
+            .where(eq(users.email, email))
+            .limit(1);
           if (existingByEmail.length > 0 && existingByEmail[0].id !== userId) {
             // Re-link: update old Clerk ID to current one
             await db.update(users).set({ id: userId }).where(eq(users.email, email));
-            const [relinked] = await db.select({ role: users.role, name: users.name }).from(users).where(eq(users.id, userId)).limit(1);
+            const [relinked] = await db
+              .select({ role: users.role, name: users.name })
+              .from(users)
+              .where(eq(users.id, userId))
+              .limit(1);
             if (relinked?.role) {
               userRole = relinked.role;
               dbUserName = relinked.name ?? null;
@@ -86,7 +97,12 @@ export default async function DashboardLayout({ children }: { children: React.Re
   const userName = dbUserName || user?.firstName || user?.username;
 
   // For coaches, check profile completeness (for banner)
-  let coachProfileData: { hasBio: boolean; hasSessionTypes: boolean; isPublished: boolean; profileExists: boolean } = {
+  let coachProfileData: {
+    hasBio: boolean;
+    hasSessionTypes: boolean;
+    isPublished: boolean;
+    profileExists: boolean;
+  } = {
     profileExists: false,
     hasBio: false,
     hasSessionTypes: false,

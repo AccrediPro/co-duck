@@ -18,7 +18,12 @@ interface TimelineEntry {
 const MOOD_CONFIG = {
   good: { emoji: '😊', label: 'Good', dotClass: 'bg-sage', lineClass: 'border-sage/40' },
   okay: { emoji: '😐', label: 'Okay', dotClass: 'bg-gold', lineClass: 'border-gold/40' },
-  struggling: { emoji: '😔', label: 'Struggling', dotClass: 'bg-burgundy', lineClass: 'border-burgundy/40' },
+  struggling: {
+    emoji: '😔',
+    label: 'Struggling',
+    dotClass: 'bg-burgundy',
+    lineClass: 'border-burgundy/40',
+  },
 } as const;
 
 function formatDate(dateStr: string): string {
@@ -56,7 +61,7 @@ export function ClientCheckInTimeline({ clientId }: ClientCheckInTimelineProps) 
         <CardContent className="space-y-4">
           {[1, 2, 3].map((i) => (
             <div key={i} className="flex gap-3">
-              <Skeleton className="h-6 w-6 rounded-full shrink-0" />
+              <Skeleton className="h-6 w-6 shrink-0 rounded-full" />
               <div className="flex-1 space-y-1">
                 <Skeleton className="h-4 w-32" />
                 <Skeleton className="h-3 w-48" />
@@ -75,9 +80,7 @@ export function ClientCheckInTimeline({ clientId }: ClientCheckInTimelineProps) 
       </CardHeader>
       <CardContent>
         {entries.length === 0 ? (
-          <p className="py-6 text-center text-sm text-muted-foreground">
-            No check-ins available.
-          </p>
+          <p className="py-6 text-center text-sm text-muted-foreground">No check-ins available.</p>
         ) : (
           <div className="relative">
             {entries.map((entry, i) => {
@@ -99,7 +102,7 @@ export function ClientCheckInTimeline({ clientId }: ClientCheckInTimelineProps) 
                   {/* Timeline dot */}
                   <div
                     className={cn(
-                      'relative z-10 mt-0.5 h-6 w-6 shrink-0 rounded-full border-2 border-background flex items-center justify-center',
+                      'relative z-10 mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 border-background',
                       moodConfig?.dotClass ?? 'bg-muted'
                     )}
                   >
@@ -111,15 +114,13 @@ export function ClientCheckInTimeline({ clientId }: ClientCheckInTimelineProps) 
                   </div>
 
                   {/* Content */}
-                  <div className="flex-1 min-w-0">
+                  <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
                       <span className="text-sm font-medium">
                         Wk. {entry.weekNumber}, {entry.weekYear}
                       </span>
                       {moodConfig && (
-                        <span className="text-xs text-muted-foreground">
-                          {moodConfig.label}
-                        </span>
+                        <span className="text-xs text-muted-foreground">{moodConfig.label}</span>
                       )}
                     </div>
                     {entry.respondedAt ? (
@@ -130,7 +131,7 @@ export function ClientCheckInTimeline({ clientId }: ClientCheckInTimelineProps) 
                       <p className="text-xs text-gold-dark">Awaiting response</p>
                     )}
                     {entry.note && (
-                      <p className="mt-1 text-sm text-muted-foreground rounded bg-muted/50 p-2">
+                      <p className="mt-1 rounded bg-muted/50 p-2 text-sm text-muted-foreground">
                         {entry.note}
                       </p>
                     )}

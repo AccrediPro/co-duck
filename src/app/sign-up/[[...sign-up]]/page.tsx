@@ -43,7 +43,9 @@ export default function SignUpPage() {
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold">{benefit.title}</h3>
-                  <p className="text-sm text-[hsl(var(--brand-accent-light))]">{benefit.description}</p>
+                  <p className="text-sm text-[hsl(var(--brand-accent-light))]">
+                    {benefit.description}
+                  </p>
                 </div>
               </div>
             ))}
@@ -65,7 +67,9 @@ export default function SignUpPage() {
           {/* Mobile-only header */}
           <div className="mb-8 text-center lg:hidden">
             <h1 className="text-2xl font-bold text-burgundy-dark">Start Your Journey</h1>
-            <p className="mt-2 text-muted-foreground">Create an account to find your perfect coach</p>
+            <p className="mt-2 text-muted-foreground">
+              Create an account to find your perfect coach
+            </p>
           </div>
 
           <SignUp
@@ -77,8 +81,10 @@ export default function SignUpPage() {
                 headerTitle: 'text-xl font-bold',
                 headerSubtitle: 'text-muted-foreground',
                 socialButtonsBlockButton: 'border border-burgundy/20 hover:bg-cream',
-                formButtonPrimary: 'bg-[hsl(var(--brand-warm))] hover:bg-[hsl(var(--brand-accent-hover))]',
-                footerActionLink: 'text-[hsl(var(--brand-warm))] hover:text-[hsl(var(--brand-accent-hover))]',
+                formButtonPrimary:
+                  'bg-[hsl(var(--brand-warm))] hover:bg-[hsl(var(--brand-accent-hover))]',
+                footerActionLink:
+                  'text-[hsl(var(--brand-warm))] hover:text-[hsl(var(--brand-accent-hover))]',
               },
             }}
           />

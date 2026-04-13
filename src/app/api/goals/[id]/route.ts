@@ -33,10 +33,7 @@ export async function GET(request: Request, { params }: RouteParams) {
     }
 
     const goal = await db.query.goals.findFirst({
-      where: and(
-        eq(goals.id, goalId),
-        or(eq(goals.coachId, userId), eq(goals.clientId, userId))
-      ),
+      where: and(eq(goals.id, goalId), or(eq(goals.coachId, userId), eq(goals.clientId, userId))),
     });
 
     if (!goal) {
@@ -77,12 +74,8 @@ export async function GET(request: Request, { params }: RouteParams) {
         completedAt: goal.completedAt,
         createdAt: goal.createdAt,
         updatedAt: goal.updatedAt,
-        coach: coach
-          ? { id: coach.id, name: coach.name, avatarUrl: coach.avatarUrl }
-          : null,
-        client: client
-          ? { id: client.id, name: client.name, avatarUrl: client.avatarUrl }
-          : null,
+        coach: coach ? { id: coach.id, name: coach.name, avatarUrl: coach.avatarUrl } : null,
+        client: client ? { id: client.id, name: client.name, avatarUrl: client.avatarUrl } : null,
         attachments: goalAttachments.map((a) => ({
           id: a.id,
           fileName: a.fileName,
@@ -200,7 +193,10 @@ export async function PATCH(request: Request, { params }: RouteParams) {
         return Response.json(
           {
             success: false,
-            error: { code: 'INVALID_STATUS', message: 'Status must be pending, in_progress, or completed' },
+            error: {
+              code: 'INVALID_STATUS',
+              message: 'Status must be pending, in_progress, or completed',
+            },
           },
           { status: 400 }
         );

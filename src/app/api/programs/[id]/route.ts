@@ -77,12 +77,8 @@ export async function GET(request: Request, { params }: RouteParams) {
         endDate: program.endDate,
         createdAt: program.createdAt,
         updatedAt: program.updatedAt,
-        coach: coach
-          ? { id: coach.id, name: coach.name, avatarUrl: coach.avatarUrl }
-          : null,
-        client: client
-          ? { id: client.id, name: client.name, avatarUrl: client.avatarUrl }
-          : null,
+        coach: coach ? { id: coach.id, name: coach.name, avatarUrl: coach.avatarUrl } : null,
+        client: client ? { id: client.id, name: client.name, avatarUrl: client.avatarUrl } : null,
         goalsCount: Number(goalsStats[0]?.total ?? 0),
         goalsCompleted: Number(goalsStats[0]?.completed ?? 0),
         attachmentCount: Number(attachmentCount[0]?.count ?? 0),
@@ -156,7 +152,10 @@ export async function PATCH(request: Request, { params }: RouteParams) {
         return Response.json(
           {
             success: false,
-            error: { code: 'INVALID_STATUS', message: 'Status must be active, completed, or archived' },
+            error: {
+              code: 'INVALID_STATUS',
+              message: 'Status must be active, completed, or archived',
+            },
           },
           { status: 400 }
         );

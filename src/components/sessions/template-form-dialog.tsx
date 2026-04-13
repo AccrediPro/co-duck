@@ -71,9 +71,7 @@ export function TemplateFormDialog({
   };
 
   const updateSection = (index: number, field: keyof Section, value: string) => {
-    setSections((prev) =>
-      prev.map((s, i) => (i === index ? { ...s, [field]: value } : s))
-    );
+    setSections((prev) => prev.map((s, i) => (i === index ? { ...s, [field]: value } : s)));
   };
 
   const handleSave = async () => {

@@ -54,18 +54,14 @@ describe('MessageBubble', () => {
   });
 
   it('aligns own messages to the right', () => {
-    const { container } = render(
-      <MessageBubble message={createMockMessage({ isOwn: true })} />
-    );
+    const { container } = render(<MessageBubble message={createMockMessage({ isOwn: true })} />);
 
     const wrapper = container.querySelector('.justify-end');
     expect(wrapper).toBeInTheDocument();
   });
 
   it('aligns other messages to the left', () => {
-    const { container } = render(
-      <MessageBubble message={createMockMessage({ isOwn: false })} />
-    );
+    const { container } = render(<MessageBubble message={createMockMessage({ isOwn: false })} />);
 
     const wrapper = container.querySelector('.justify-start');
     expect(wrapper).toBeInTheDocument();
@@ -74,10 +70,7 @@ describe('MessageBubble', () => {
   it('hides timestamp when showTimestamp is false', () => {
     const now = new Date();
     const { container } = render(
-      <MessageBubble
-        message={createMockMessage({ createdAt: now })}
-        showTimestamp={false}
-      />
+      <MessageBubble message={createMockMessage({ createdAt: now })} showTimestamp={false} />
     );
 
     // The message content should still be there
@@ -89,10 +82,7 @@ describe('MessageBubble', () => {
 
   it('shows timestamp when showTimestamp is true', () => {
     const { container } = render(
-      <MessageBubble
-        message={createMockMessage({ createdAt: new Date() })}
-        showTimestamp={true}
-      />
+      <MessageBubble message={createMockMessage({ createdAt: new Date() })} showTimestamp={true} />
     );
 
     const timestampSpans = container.querySelectorAll('.text-xs');

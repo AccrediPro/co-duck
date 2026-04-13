@@ -4,10 +4,7 @@ import { eq, sql, or } from 'drizzle-orm';
 import { requireAdmin } from '@/lib/admin-auth';
 import { rateLimit, FREQUENT_LIMIT, rateLimitResponse } from '@/lib/rate-limit';
 
-export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const rl = rateLimit(request, FREQUENT_LIMIT, 'admin-user-detail');
   if (!rl.success) return rateLimitResponse(rl);
 
@@ -116,7 +113,10 @@ export async function GET(
   } catch (error) {
     console.error('Error fetching admin user detail:', error);
     return Response.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch user details' } },
+      {
+        success: false,
+        error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch user details' },
+      },
       { status: 500 }
     );
   }

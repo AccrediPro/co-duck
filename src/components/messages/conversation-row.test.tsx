@@ -13,7 +13,9 @@ interface ConversationWithDetails {
   isCoach: boolean;
 }
 
-function createMockConversation(overrides: Partial<ConversationWithDetails> = {}): ConversationWithDetails {
+function createMockConversation(
+  overrides: Partial<ConversationWithDetails> = {}
+): ConversationWithDetails {
   return {
     id: 1,
     otherUserId: 'user_456',
@@ -57,7 +59,8 @@ describe('ConversationRow', () => {
   });
 
   it('truncates long messages to 50 characters', () => {
-    const longMessage = 'This is a very long message that should be truncated because it exceeds fifty characters';
+    const longMessage =
+      'This is a very long message that should be truncated because it exceeds fifty characters';
     render(
       <ConversationRow
         conversation={createMockConversation({ lastMessageContent: longMessage })}

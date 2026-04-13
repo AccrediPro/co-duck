@@ -123,7 +123,12 @@ export default async function SessionDetailPage({ params }: PageProps) {
 
   const clientQueryPromise = !isCoachView
     ? db
-        .select({ name: users.name, avatar: users.avatarUrl, email: users.email, slug: coachProfiles.slug })
+        .select({
+          name: users.name,
+          avatar: users.avatarUrl,
+          email: users.email,
+          slug: coachProfiles.slug,
+        })
         .from(users)
         .innerJoin(coachProfiles, eq(users.id, coachProfiles.userId))
         .where(eq(users.id, session.coachId))
@@ -261,7 +266,6 @@ export default async function SessionDetailPage({ params }: PageProps) {
       .slice(0, 2);
   };
 
-
   const formatPrice = (cents: number) => {
     return `$${(cents / 100).toFixed(2)}`;
   };
@@ -287,7 +291,10 @@ export default async function SessionDetailPage({ params }: PageProps) {
         <CardHeader>
           <div className="flex flex-wrap items-center gap-3">
             <CardTitle className="text-2xl font-bold">Session Details</CardTitle>
-            <StatusBadge status={session.status} label={session.status === 'pending' ? 'Pending Approval' : undefined} />
+            <StatusBadge
+              status={session.status}
+              label={session.status === 'pending' ? 'Pending Approval' : undefined}
+            />
           </div>
           <CardDescription>
             Booking #{session.id} - Created {formatDate(session.createdAt)}
@@ -306,7 +313,8 @@ export default async function SessionDetailPage({ params }: PageProps) {
                   Booking Request from {otherParty?.name || 'a client'}
                 </h3>
                 <p className="mt-1 text-sm text-burgundy dark:text-gold/80">
-                  This client has requested a session. Accept to confirm or reject to cancel and refund.
+                  This client has requested a session. Accept to confirm or reject to cancel and
+                  refund.
                 </p>
               </div>
               <BookingResponseActions
@@ -362,198 +370,187 @@ export default async function SessionDetailPage({ params }: PageProps) {
         </Card>
 
         {/* Session Details Card */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Session Information</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                <FileText className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Session Type</p>
+                <p className="font-medium">{session.sessionType.name}</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                <Calendar className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Date</p>
+                <p className="font-medium">{formatDateLong(session.startTime)}</p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                <Clock className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Time</p>
+                <p className="font-medium">
+                  {formatTime(session.startTime)} - {formatTime(session.endTime)} (
+                  {session.sessionType.duration} minutes)
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                <DollarSign className="h-5 w-5 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Price</p>
+                <p className="font-medium">{formatPrice(session.sessionType.price)}</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Meeting Link Section */}
+        <MeetingLinkSection
+          sessionId={session.id}
+          initialMeetingLink={session.meetingLink}
+          isCoachView={isCoachView}
+          isUpcoming={isUpcoming}
+          isConfirmed={session.status === 'confirmed'}
+        />
+
+        {/* Payment Information Card */}
+        <PaymentSection
+          sessionId={session.id}
+          paymentStatus={paymentStatus}
+          transaction={transaction}
+          sessionPrice={session.sessionType.price}
+          isUpcoming={isUpcoming}
+          isClientView={isClientView}
+        />
+
+        {/* Client Notes Card */}
+        {session.clientNotes && (
           <Card>
             <CardHeader>
-              <CardTitle>Session Information</CardTitle>
+              <CardTitle>{isCoachView ? 'Client Notes' : 'Your Notes'}</CardTitle>
+              <CardDescription>
+                {isCoachView
+                  ? 'Notes provided by the client when booking'
+                  : 'Notes you provided when booking'}
+              </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                  <FileText className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Session Type</p>
-                  <p className="font-medium">{session.sessionType.name}</p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                  <Calendar className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Date</p>
-                  <p className="font-medium">
-                    {formatDateLong(session.startTime)}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                  <Clock className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Time</p>
-                  <p className="font-medium">
-                    {formatTime(session.startTime)} -{' '}
-                    {formatTime(session.endTime)} ({session.sessionType.duration}{' '}
-                    minutes)
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
-                  <DollarSign className="h-5 w-5 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Price</p>
-                  <p className="font-medium">{formatPrice(session.sessionType.price)}</p>
-                </div>
-              </div>
+            <CardContent>
+              <p className="whitespace-pre-wrap text-muted-foreground">{session.clientNotes}</p>
             </CardContent>
           </Card>
+        )}
 
-          {/* Meeting Link Section */}
-          <MeetingLinkSection
+        {/* Client Session Prep - Only visible to coach */}
+        {isCoachView && <SessionPrepView bookingId={session.id} />}
+
+        {/* Editable Coach Notes - Only visible to coach */}
+        {isCoachView && (
+          <CoachNotesEditor
             sessionId={session.id}
-            initialMeetingLink={session.meetingLink}
-            isCoachView={isCoachView}
-            isUpcoming={isUpcoming}
-            isConfirmed={session.status === 'confirmed'}
+            initialNotes={sessionNoteContent}
+            initialTemplateId={sessionNoteTemplateId}
+            initialSections={sessionNoteSections}
           />
+        )}
 
-          {/* Payment Information Card */}
-          <PaymentSection
-            sessionId={session.id}
-            paymentStatus={paymentStatus}
-            transaction={transaction}
-            sessionPrice={session.sessionType.price}
-            isUpcoming={isUpcoming}
-            isClientView={isClientView}
-          />
+        {/* Review Section */}
+        {reviewForDisplay && (
+          <SessionReviewSection review={reviewForDisplay} isCoachView={isCoachView} />
+        )}
 
-          {/* Client Notes Card */}
-          {session.clientNotes && (
-            <Card>
-              <CardHeader>
-                <CardTitle>{isCoachView ? 'Client Notes' : 'Your Notes'}</CardTitle>
-                <CardDescription>
-                  {isCoachView
-                    ? 'Notes provided by the client when booking'
-                    : 'Notes you provided when booking'}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="whitespace-pre-wrap text-muted-foreground">{session.clientNotes}</p>
-              </CardContent>
-            </Card>
-          )}
+        {/* Cancellation Info */}
+        {session.status === 'cancelled' && (
+          <Card className="border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950">
+            <CardHeader>
+              <CardTitle className="text-red-800 dark:text-red-200">Cancellation Details</CardTitle>
+            </CardHeader>
+            <CardContent className="text-red-700 dark:text-red-300">
+              {session.cancelledAt && (
+                <p>
+                  <strong>Cancelled on:</strong> {formatDateWithTime(session.cancelledAt)}
+                </p>
+              )}
+              {session.cancellationReason && (
+                <p className="mt-2">
+                  <strong>Reason:</strong> {session.cancellationReason}
+                </p>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
-          {/* Client Session Prep - Only visible to coach */}
-          {isCoachView && (
-            <SessionPrepView bookingId={session.id} />
-          )}
+        {/* Actions Card for Client - Upcoming sessions only */}
+        {isClientView && canTakeAction && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Actions</CardTitle>
+              <CardDescription>Manage your session</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <SessionDetailActions
+                sessionId={session.id}
+                coachId={session.coachId}
+                clientId={session.clientId}
+                coachName={otherParty?.name || 'the coach'}
+                sessionTime={session.startTime}
+                hasPaidTransaction={paymentStatus === 'paid'}
+              />
+            </CardContent>
+          </Card>
+        )}
 
-          {/* Editable Coach Notes - Only visible to coach */}
-          {isCoachView && (
-            <CoachNotesEditor
-              sessionId={session.id}
-              initialNotes={sessionNoteContent}
-              initialTemplateId={sessionNoteTemplateId}
-              initialSections={sessionNoteSections}
-            />
-          )}
+        {/* Actions Card for Coach - Pending approval */}
+        {isPendingApproval && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Respond to Request</CardTitle>
+              <CardDescription>Accept or reject this booking request</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <BookingResponseActions
+                sessionId={session.id}
+                clientName={otherParty?.name || 'the client'}
+              />
+            </CardContent>
+          </Card>
+        )}
 
-          {/* Review Section */}
-          {reviewForDisplay && (
-            <SessionReviewSection
-              review={reviewForDisplay}
-              isCoachView={isCoachView}
-            />
-          )}
-
-          {/* Cancellation Info */}
-          {session.status === 'cancelled' && (
-            <Card className="border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950">
-              <CardHeader>
-                <CardTitle className="text-red-800 dark:text-red-200">
-                  Cancellation Details
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="text-red-700 dark:text-red-300">
-                {session.cancelledAt && (
-                  <p>
-                    <strong>Cancelled on:</strong>{' '}
-                    {formatDateWithTime(session.cancelledAt)}
-                  </p>
-                )}
-                {session.cancellationReason && (
-                  <p className="mt-2">
-                    <strong>Reason:</strong> {session.cancellationReason}
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Actions Card for Client - Upcoming sessions only */}
-          {isClientView && canTakeAction && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Actions</CardTitle>
-                <CardDescription>Manage your session</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <SessionDetailActions
-                  sessionId={session.id}
-                  coachId={session.coachId}
-                  clientId={session.clientId}
-                  coachName={otherParty?.name || 'the coach'}
-                  sessionTime={session.startTime}
-                  hasPaidTransaction={paymentStatus === 'paid'}
-                />
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Actions Card for Coach - Pending approval */}
-          {isPendingApproval && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Respond to Request</CardTitle>
-                <CardDescription>Accept or reject this booking request</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <BookingResponseActions
-                  sessionId={session.id}
-                  clientName={otherParty?.name || 'the client'}
-                />
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Actions Card for Coach - Confirmed/upcoming sessions only */}
-          {isCoachView && isUpcoming && !isPendingApproval && session.status !== 'cancelled' && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Actions</CardTitle>
-                <CardDescription>Manage this session</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <CoachSessionActions
-                  sessionId={session.id}
-                  coachId={session.coachId}
-                  clientId={session.clientId}
-                  canCancel={canTakeAction}
-                  clientName={otherParty?.name || 'the client'}
-                  sessionTime={session.startTime}
-                  hasPaidTransaction={paymentStatus === 'paid'}
-                />
-              </CardContent>
-            </Card>
-          )}
+        {/* Actions Card for Coach - Confirmed/upcoming sessions only */}
+        {isCoachView && isUpcoming && !isPendingApproval && session.status !== 'cancelled' && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Actions</CardTitle>
+              <CardDescription>Manage this session</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <CoachSessionActions
+                sessionId={session.id}
+                coachId={session.coachId}
+                clientId={session.clientId}
+                canCancel={canTakeAction}
+                clientName={otherParty?.name || 'the client'}
+                sessionTime={session.startTime}
+                hasPaidTransaction={paymentStatus === 'paid'}
+              />
+            </CardContent>
+          </Card>
+        )}
       </div>
     </div>
   );

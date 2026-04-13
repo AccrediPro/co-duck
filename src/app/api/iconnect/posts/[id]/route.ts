@@ -9,10 +9,7 @@ const updatePostSchema = z.object({
   content: z.string().min(1).max(5000),
 });
 
-export async function PATCH(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const rl = rateLimit(request, WRITE_LIMIT, 'iconnect-posts-update');
   if (!rl.success) return rateLimitResponse(rl);
 
@@ -47,7 +44,10 @@ export async function PATCH(
 
     if (post.senderUserId !== userId) {
       return Response.json(
-        { success: false, error: { code: 'FORBIDDEN', message: 'Only the sender can edit this post' } },
+        {
+          success: false,
+          error: { code: 'FORBIDDEN', message: 'Only the sender can edit this post' },
+        },
         { status: 403 }
       );
     }
@@ -97,10 +97,7 @@ export async function PATCH(
   }
 }
 
-export async function DELETE(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const rl = rateLimit(request, WRITE_LIMIT, 'iconnect-posts-delete');
   if (!rl.success) return rateLimitResponse(rl);
 
@@ -135,7 +132,10 @@ export async function DELETE(
 
     if (post.senderUserId !== userId) {
       return Response.json(
-        { success: false, error: { code: 'FORBIDDEN', message: 'Only the sender can delete this post' } },
+        {
+          success: false,
+          error: { code: 'FORBIDDEN', message: 'Only the sender can delete this post' },
+        },
         { status: 403 }
       );
     }

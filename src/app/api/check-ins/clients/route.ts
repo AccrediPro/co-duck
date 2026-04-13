@@ -45,7 +45,10 @@ export async function GET(request: Request) {
 
     if (!coach) {
       return Response.json(
-        { success: false, error: { code: 'FORBIDDEN', message: 'Only coaches can access this endpoint' } },
+        {
+          success: false,
+          error: { code: 'FORBIDDEN', message: 'Only coaches can access this endpoint' },
+        },
         { status: 403 }
       );
     }
@@ -96,7 +99,12 @@ export async function GET(request: Request) {
       })
       .from(users)
       .leftJoin(coachingStreaks, eq(coachingStreaks.userId, users.id))
-      .where(sql`${users.id} IN (${sql.join(clientIds.map(id => sql`${id}`), sql`, `)})`);
+      .where(
+        sql`${users.id} IN (${sql.join(
+          clientIds.map((id) => sql`${id}`),
+          sql`, `
+        )})`
+      );
 
     // Build response with check-in data
     const result = clientsData.map((client) => {
@@ -124,7 +132,10 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error('[check-ins/clients] Error:', error);
     return Response.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch client check-ins' } },
+      {
+        success: false,
+        error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch client check-ins' },
+      },
       { status: 500 }
     );
   }

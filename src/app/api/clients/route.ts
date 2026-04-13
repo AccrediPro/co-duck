@@ -43,10 +43,7 @@ export async function GET(request: Request) {
       })
       .from(bookings)
       .where(
-        and(
-          eq(bookings.coachId, userId),
-          inArray(bookings.status, ['confirmed', 'completed'])
-        )
+        and(eq(bookings.coachId, userId), inArray(bookings.status, ['confirmed', 'completed']))
       )
       .groupBy(bookings.clientId)
       .orderBy(desc(sql`max(${bookings.startTime})`));
@@ -66,10 +63,7 @@ export async function GET(request: Request) {
 
     // Get user info for clients
     const clientIds = paginatedRows.map((r) => r.clientId);
-    const clientUsers = await db
-      .select()
-      .from(users)
-      .where(inArray(users.id, clientIds));
+    const clientUsers = await db.select().from(users).where(inArray(users.id, clientIds));
     const clientsMap = new Map(clientUsers.map((u) => [u.id, u]));
 
     // Get active programs count per client

@@ -77,7 +77,7 @@ export async function POST(request: Request) {
     if (existingUser) {
       // Preserve custom Supabase avatar — don't overwrite with Clerk's CDN URL
       const hasCustomAvatar = existingUser.avatarUrl?.includes('supabase.co/storage');
-      const avatarUrl = hasCustomAvatar ? existingUser.avatarUrl : (clerkUser.imageUrl || null);
+      const avatarUrl = hasCustomAvatar ? existingUser.avatarUrl : clerkUser.imageUrl || null;
 
       // Update existing user
       await db

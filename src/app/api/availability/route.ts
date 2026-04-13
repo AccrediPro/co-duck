@@ -60,7 +60,10 @@ export async function GET() {
 
     if (!currentUser || currentUser.role !== 'coach') {
       return Response.json(
-        { success: false, error: { code: 'FORBIDDEN', message: 'Only coaches can access availability settings' } },
+        {
+          success: false,
+          error: { code: 'FORBIDDEN', message: 'Only coaches can access availability settings' },
+        },
         { status: 403 }
       );
     }
@@ -119,7 +122,10 @@ export async function GET() {
   } catch (error) {
     console.error('GET /api/availability error:', error);
     return Response.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch availability settings' } },
+      {
+        success: false,
+        error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch availability settings' },
+      },
       { status: 500 }
     );
   }
@@ -144,7 +150,10 @@ export async function POST(request: Request) {
 
     if (!currentUser || currentUser.role !== 'coach') {
       return Response.json(
-        { success: false, error: { code: 'FORBIDDEN', message: 'Only coaches can update availability settings' } },
+        {
+          success: false,
+          error: { code: 'FORBIDDEN', message: 'Only coaches can update availability settings' },
+        },
         { status: 403 }
       );
     }
@@ -180,7 +189,13 @@ export async function POST(request: Request) {
 
     if (profiles.length === 0) {
       return Response.json(
-        { success: false, error: { code: 'NOT_FOUND', message: 'Coach profile not found. Please complete onboarding first.' } },
+        {
+          success: false,
+          error: {
+            code: 'NOT_FOUND',
+            message: 'Coach profile not found. Please complete onboarding first.',
+          },
+        },
         { status: 404 }
       );
     }
@@ -232,7 +247,10 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('POST /api/availability error:', error);
     return Response.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to save availability settings' } },
+      {
+        success: false,
+        error: { code: 'INTERNAL_ERROR', message: 'Failed to save availability settings' },
+      },
       { status: 500 }
     );
   }

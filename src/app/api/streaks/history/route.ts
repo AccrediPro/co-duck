@@ -12,7 +12,10 @@ function getISOWeek(date: Date): { weekNumber: number; weekYear: number } {
   return { weekNumber, weekYear: d.getUTCFullYear() };
 }
 
-function getPreviousISOWeek(weekNumber: number, weekYear: number): { weekNumber: number; weekYear: number } {
+function getPreviousISOWeek(
+  weekNumber: number,
+  weekYear: number
+): { weekNumber: number; weekYear: number } {
   if (weekNumber > 1) {
     return { weekNumber: weekNumber - 1, weekYear };
   }
@@ -91,7 +94,10 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error('Error fetching streak history:', error);
     return Response.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch streak history' } },
+      {
+        success: false,
+        error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch streak history' },
+      },
       { status: 500 }
     );
   }

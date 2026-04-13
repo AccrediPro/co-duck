@@ -11,9 +11,7 @@ function getSupabaseAdmin() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !key) {
-    console.error(
-      'Missing SUPABASE_SERVICE_ROLE_KEY. File uploads require the service role key.'
-    );
+    console.error('Missing SUPABASE_SERVICE_ROLE_KEY. File uploads require the service role key.');
     return null;
   }
   return createClient(url, key);
@@ -52,7 +50,10 @@ export async function POST(request: NextRequest) {
 
     if (!ALLOWED_TYPES.includes(file.type)) {
       return NextResponse.json(
-        { success: false, error: { code: 'INVALID_FILE_TYPE', message: 'Allowed: JPG, PNG, WebP' } },
+        {
+          success: false,
+          error: { code: 'INVALID_FILE_TYPE', message: 'Allowed: JPG, PNG, WebP' },
+        },
         { status: 400 }
       );
     }
@@ -77,7 +78,10 @@ export async function POST(request: NextRequest) {
       if (bucketError) {
         console.error('Failed to create iconnect-images bucket:', bucketError);
         return NextResponse.json(
-          { success: false, error: { code: 'STORAGE_ERROR', message: 'File storage is not configured' } },
+          {
+            success: false,
+            error: { code: 'STORAGE_ERROR', message: 'File storage is not configured' },
+          },
           { status: 500 }
         );
       }
@@ -116,7 +120,10 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('iConnect image upload error:', error);
     return NextResponse.json(
-      { success: false, error: { code: 'INTERNAL_ERROR', message: 'An error occurred during upload' } },
+      {
+        success: false,
+        error: { code: 'INTERNAL_ERROR', message: 'An error occurred during upload' },
+      },
       { status: 500 }
     );
   }

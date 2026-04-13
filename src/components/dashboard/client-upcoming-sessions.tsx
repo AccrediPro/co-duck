@@ -31,7 +31,12 @@ export function ClientUpcomingSessions({ sessions }: ClientUpcomingSessionsProps
           <Calendar className="h-5 w-5" />
           Upcoming Sessions
         </CardTitle>
-        <Button variant="ghost" size="sm" asChild className="text-burgundy hover:text-burgundy-light">
+        <Button
+          variant="ghost"
+          size="sm"
+          asChild
+          className="text-burgundy hover:text-burgundy-light"
+        >
           <Link href="/dashboard/my-sessions">
             View All
             <ArrowRight className="ml-1 h-4 w-4" />
@@ -63,9 +68,7 @@ export function ClientUpcomingSessions({ sessions }: ClientUpcomingSessionsProps
                     <p className="text-xs text-muted-foreground">
                       {formatDateShort(session.startTime)}
                     </p>
-                    <p className="text-sm font-semibold">
-                      {formatTime(session.startTime)}
-                    </p>
+                    <p className="text-sm font-semibold">{formatTime(session.startTime)}</p>
                   </div>
                   <Avatar className="h-8 w-8">
                     <AvatarImage src={session.coachAvatar || undefined} />

@@ -72,13 +72,17 @@ describe('getStripePublishableKey', () => {
     delete process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
 
     const { getStripePublishableKey } = await import('./stripe');
-    expect(() => getStripePublishableKey()).toThrow('NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY is not set');
+    expect(() => getStripePublishableKey()).toThrow(
+      'NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY is not set'
+    );
   });
 
   it('throws if NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY is empty string', async () => {
     process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY = '';
 
     const { getStripePublishableKey } = await import('./stripe');
-    expect(() => getStripePublishableKey()).toThrow('NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY is not set');
+    expect(() => getStripePublishableKey()).toThrow(
+      'NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY is not set'
+    );
   });
 });

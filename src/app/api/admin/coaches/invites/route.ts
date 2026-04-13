@@ -35,7 +35,7 @@ export async function GET(request: Request) {
     console.error('Error fetching coach invites:', error);
     return Response.json(
       { success: false, error: { code: 'INTERNAL_ERROR', message: 'Failed to fetch invites' } },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

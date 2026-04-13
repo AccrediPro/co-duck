@@ -22,13 +22,17 @@ export default function MessagesError({
     <div className="flex min-h-[60vh] flex-col items-center justify-center px-4">
       <div className="mx-auto max-w-md text-center">
         <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-burgundy/10 dark:bg-burgundy-dark/20">
-          <AlertTriangle className="h-10 w-10 text-burgundy dark:text-burgundy-light" aria-hidden="true" />
+          <AlertTriangle
+            className="h-10 w-10 text-burgundy dark:text-burgundy-light"
+            aria-hidden="true"
+          />
         </div>
 
         <h2 className="mb-2 text-xl font-semibold">Unable to load messages</h2>
 
         <p className="mb-6 text-muted-foreground">
-          Something went wrong loading your conversations. Your messages are safe — please try again.
+          Something went wrong loading your conversations. Your messages are safe — please try
+          again.
         </p>
 
         {error.digest && (

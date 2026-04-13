@@ -7,15 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import {
-  Loader2,
-  Send,
-  ImagePlus,
-  X,
-  Plus,
-  ListChecks,
-  Type,
-} from 'lucide-react';
+import { Loader2, Send, ImagePlus, X, Plus, ListChecks, Type } from 'lucide-react';
 import type { FeedPost } from './feed-view';
 
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -265,11 +257,8 @@ export function CreatePostForm({ conversationId, onPostCreated }: CreatePostForm
 
   return (
     <Card className="mb-6">
-      <CardContent className="pt-4 pb-3 px-3 sm:px-6">
-        <Tabs
-          value={activeTab}
-          onValueChange={(v) => setActiveTab(v as 'text' | 'image' | 'task')}
-        >
+      <CardContent className="px-3 pb-3 pt-4 sm:px-6">
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'text' | 'image' | 'task')}>
           <TabsList className="mb-3 w-full">
             <TabsTrigger value="text" className="flex-1 gap-1.5">
               <Type className="h-4 w-4" />
@@ -316,7 +305,7 @@ export function CreatePostForm({ conversationId, onPostCreated }: CreatePostForm
                   <img
                     src={imagePreview}
                     alt="Preview"
-                    className="max-h-64 w-full object-contain bg-muted"
+                    className="max-h-64 w-full bg-muted object-contain"
                   />
                   {isSubmitting && activeTab === 'image' && (
                     <div className="absolute inset-0 flex items-center justify-center bg-background/60">
@@ -367,9 +356,7 @@ export function CreatePostForm({ conversationId, onPostCreated }: CreatePostForm
                 }}
               >
                 <ImagePlus className="mb-2 h-8 w-8 text-muted-foreground" />
-                <p className="text-sm font-medium text-muted-foreground">
-                  Click or drag an image
-                </p>
+                <p className="text-sm font-medium text-muted-foreground">Click or drag an image</p>
                 <p className="mt-1 text-xs text-muted-foreground">
                   JPG, PNG, WebP &middot; Max 5MB
                 </p>

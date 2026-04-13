@@ -221,7 +221,9 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
     // Record streak activity on session completion (fire-and-forget)
     if (updateData.status === 'completed') {
-      recordStreakActivity(booking.clientId, 'session_completed', String(booking.id)).catch(console.error);
+      recordStreakActivity(booking.clientId, 'session_completed', String(booking.id)).catch(
+        console.error
+      );
     }
 
     // Notify client when session is completed and send review request email

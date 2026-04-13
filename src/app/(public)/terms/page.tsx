@@ -285,10 +285,10 @@ export default function TermsPage() {
               <Scale className="mr-2 h-4 w-4" />
               Legal Document
             </div>
-            <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">Terms of Service</h1>
-            <p className="mx-auto mt-4 max-w-xl text-white/70">
-              Last updated: January 31, 2026
-            </p>
+            <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">
+              Terms of Service
+            </h1>
+            <p className="mx-auto mt-4 max-w-xl text-white/70">Last updated: January 31, 2026</p>
             <p className="mx-auto mt-2 text-sm text-white/70">
               Please read these terms carefully before using AccrediPro CoachHub.
             </p>
@@ -357,9 +357,9 @@ export default function TermsPage() {
               {/* Introduction */}
               <div className="mb-8 rounded-lg border bg-cream p-6">
                 <p className="text-muted-foreground">
-                  Welcome to AccrediPro CoachHub. These Terms of Service govern your use of our platform and
-                  services. By accessing or using AccrediPro CoachHub, you agree to be bound by these terms.
-                  Please read them carefully.
+                  Welcome to AccrediPro CoachHub. These Terms of Service govern your use of our
+                  platform and services. By accessing or using AccrediPro CoachHub, you agree to be
+                  bound by these terms. Please read them carefully.
                 </p>
               </div>
 
@@ -396,8 +396,8 @@ export default function TermsPage() {
               {/* Footer Note */}
               <div className="mt-12 rounded-lg border bg-cream p-6 text-center">
                 <p className="text-sm text-muted-foreground">
-                  By using AccrediPro CoachHub, you acknowledge that you have read, understood, and agree to be
-                  bound by these Terms of Service.
+                  By using AccrediPro CoachHub, you acknowledge that you have read, understood, and
+                  agree to be bound by these Terms of Service.
                 </p>
                 <div className="mt-4 flex justify-center gap-4">
                   <Button variant="outline" asChild>

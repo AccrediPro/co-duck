@@ -10,8 +10,18 @@ vi.mock('next/navigation', () => ({
 
 // Mock next/link
 vi.mock('next/link', () => ({
-  default: ({ children, href, ...props }: { children: React.ReactNode; href: string; [key: string]: unknown }) => (
-    <a href={href} {...props}>{children}</a>
+  default: ({
+    children,
+    href,
+    ...props
+  }: {
+    children: React.ReactNode;
+    href: string;
+    [key: string]: unknown;
+  }) => (
+    <a href={href} {...props}>
+      {children}
+    </a>
   ),
 }));
 
@@ -111,10 +121,7 @@ describe('BookingConfirmation', () => {
 
   it('shows "Confirm Booking" for free sessions when authenticated', () => {
     render(
-      <BookingConfirmation
-        {...defaultProps}
-        sessionType={{ ...defaultSessionType, price: 0 }}
-      />
+      <BookingConfirmation {...defaultProps} sessionType={{ ...defaultSessionType, price: 0 }} />
     );
 
     expect(screen.getByText('Confirm Booking')).toBeInTheDocument();
@@ -156,9 +163,7 @@ describe('BookingConfirmation', () => {
     fireEvent.click(screen.getByText('Sign in to Pay & Book'));
 
     await waitFor(() => {
-      expect(mockPush).toHaveBeenCalledWith(
-        expect.stringContaining('/sign-in?redirect_url=')
-      );
+      expect(mockPush).toHaveBeenCalledWith(expect.stringContaining('/sign-in?redirect_url='));
     });
   });
 
@@ -189,7 +194,10 @@ describe('BookingConfirmation', () => {
   });
 
   it('calls createCheckoutSession for paid sessions', async () => {
-    mockCreateCheckoutSession.mockResolvedValue({ success: true, checkoutUrl: 'https://checkout.stripe.com/test' });
+    mockCreateCheckoutSession.mockResolvedValue({
+      success: true,
+      checkoutUrl: 'https://checkout.stripe.com/test',
+    });
 
     // Mock window.location
     const originalLocation = window.location;

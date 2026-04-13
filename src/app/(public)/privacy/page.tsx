@@ -384,10 +384,10 @@ export default function PrivacyPage() {
               <Shield className="mr-2 h-4 w-4" />
               Your Privacy Matters
             </div>
-            <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">Privacy Policy</h1>
-            <p className="mx-auto mt-4 max-w-xl text-white/70">
-              Last updated: January 31, 2026
-            </p>
+            <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">
+              Privacy Policy
+            </h1>
+            <p className="mx-auto mt-4 max-w-xl text-white/70">Last updated: January 31, 2026</p>
             <p className="mx-auto mt-2 text-sm text-white/70">
               Learn how we collect, use, and protect your personal information.
             </p>
@@ -456,10 +456,10 @@ export default function PrivacyPage() {
               {/* Introduction */}
               <div className="mb-8 rounded-lg border bg-cream p-6">
                 <p className="text-muted-foreground">
-                  At AccrediPro CoachHub, we take your privacy seriously. This Privacy Policy describes how we
-                  collect, use, share, and protect your personal information when you use our
-                  platform. We believe in transparency and want you to understand exactly how your
-                  data is handled.
+                  At AccrediPro CoachHub, we take your privacy seriously. This Privacy Policy
+                  describes how we collect, use, share, and protect your personal information when
+                  you use our platform. We believe in transparency and want you to understand
+                  exactly how your data is handled.
                 </p>
               </div>
 

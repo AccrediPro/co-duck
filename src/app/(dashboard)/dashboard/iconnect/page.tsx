@@ -28,12 +28,22 @@ export default async function IConnectPage() {
         const name = [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(' ') || null;
         await db
           .insert(users)
-          .values({ id: userId, email, name, avatarUrl: clerkUser.imageUrl || null, role: 'client' })
+          .values({
+            id: userId,
+            email,
+            name,
+            avatarUrl: clerkUser.imageUrl || null,
+            role: 'client',
+          })
           .onConflictDoNothing();
         userRecords = await db.select().from(users).where(eq(users.id, userId)).limit(1);
         if (userRecords.length === 0) {
           // Email might exist with a different Clerk ID (account was recreated)
-          const existingByEmail = await db.select().from(users).where(eq(users.email, email)).limit(1);
+          const existingByEmail = await db
+            .select()
+            .from(users)
+            .where(eq(users.email, email))
+            .limit(1);
           if (existingByEmail.length > 0 && existingByEmail[0].id !== userId) {
             // Re-link: update old Clerk ID to current one
             await db.update(users).set({ id: userId }).where(eq(users.email, email));
@@ -110,7 +120,10 @@ export default async function IConnectPage() {
     .orderBy(desc(iconnectPosts.createdAt));
 
   // Deduplicate: keep only the first (newest) post per conversation
-  const latestPostMap = new Map<number, { content: string | null; type: string; createdAt: Date }>();
+  const latestPostMap = new Map<
+    number,
+    { content: string | null; type: string; createdAt: Date }
+  >();
   for (const post of latestPostsRaw) {
     if (!latestPostMap.has(post.conversationId)) {
       latestPostMap.set(post.conversationId, {

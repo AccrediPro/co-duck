@@ -32,8 +32,8 @@ export function VerificationEmail({
       {isApproved ? (
         <>
           <Text style={paragraph}>
-            Hi {coachName}, great news! Your coach profile on AccrediPro CoachHub has been verified. You now
-            have a verification badge visible on your profile.
+            Hi {coachName}, great news! Your coach profile on AccrediPro CoachHub has been verified.
+            You now have a verification badge visible on your profile.
           </Text>
           <Text style={paragraph}>
             Verified coaches tend to receive more bookings and build trust faster with potential

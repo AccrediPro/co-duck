@@ -29,11 +29,15 @@ export function emitNotification(
 ): void {
   try {
     if (!io) return;
-    io.to(`user:${userId}`).timeout(5000).emit('notification:new', notification, (err: Error | null) => {
-      if (err) {
-        console.warn(`[socket] Notification not acknowledged by ${userId} within 5s (type: ${notification.type})`);
-      }
-    });
+    io.to(`user:${userId}`)
+      .timeout(5000)
+      .emit('notification:new', notification, (err: Error | null) => {
+        if (err) {
+          console.warn(
+            `[socket] Notification not acknowledged by ${userId} within 5s (type: ${notification.type})`
+          );
+        }
+      });
   } catch {
     // Fire-and-forget — notification emit failures must not break the caller
   }

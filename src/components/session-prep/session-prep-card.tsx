@@ -73,9 +73,7 @@ export function SessionPrepCard() {
             <ClipboardList className="h-5 w-5 text-gold-dark" />
           </div>
           <div className="min-w-0 flex-1">
-            <h3 className="font-semibold text-burgundy-dark">
-              Prepare for your session
-            </h3>
+            <h3 className="font-semibold text-burgundy-dark">Prepare for your session</h3>
             <div className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
               <Calendar className="h-3.5 w-3.5" />
               <span>

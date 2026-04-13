@@ -33,7 +33,10 @@ export async function GET(
 
     if (!coachProfile) {
       return Response.json(
-        { success: false, error: { code: 'FORBIDDEN', message: 'Only coaches can access this endpoint' } },
+        {
+          success: false,
+          error: { code: 'FORBIDDEN', message: 'Only coaches can access this endpoint' },
+        },
         { status: 403 }
       );
     }
@@ -50,10 +53,7 @@ export async function GET(
 
     // Verify this booking belongs to this coach
     const booking = await db.query.bookings.findFirst({
-      where: and(
-        eq(bookings.id, bookingIdNum),
-        eq(bookings.coachId, userId)
-      ),
+      where: and(eq(bookings.id, bookingIdNum), eq(bookings.coachId, userId)),
       columns: { id: true },
     });
 

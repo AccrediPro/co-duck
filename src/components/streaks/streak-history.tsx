@@ -2,12 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 
@@ -66,17 +61,13 @@ export function StreakHistory() {
   return (
     <Card>
       <CardHeader className="pb-2">
-        <CardTitle className="text-lg text-burgundy-dark">
-          Last 12 Weeks
-        </CardTitle>
+        <CardTitle className="text-lg text-burgundy-dark">Last 12 Weeks</CardTitle>
       </CardHeader>
       <CardContent>
         <TooltipProvider delayDuration={200}>
           <div className="grid grid-cols-12 gap-1.5">
             {reversed.map((week) => {
-              const activityTypes = Array.from(
-                new Set(week.activities.map((a) => a.type))
-              );
+              const activityTypes = Array.from(new Set(week.activities.map((a) => a.type)));
               const tooltipText = week.hasActivity
                 ? activityTypes.map(getActionLabel).join(', ')
                 : 'No activity';
@@ -87,9 +78,7 @@ export function StreakHistory() {
                     <div
                       className={cn(
                         'aspect-square rounded-sm transition-colors',
-                        week.hasActivity
-                          ? 'bg-sage'
-                          : 'bg-muted'
+                        week.hasActivity ? 'bg-sage' : 'bg-muted'
                       )}
                     />
                   </TooltipTrigger>

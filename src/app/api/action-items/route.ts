@@ -268,9 +268,7 @@ export async function POST(request: Request) {
           coachName: currentUser.name || 'Your Coach',
           title,
           description: description || undefined,
-          dueDate: parsedDueDate
-            ? formatDateLong(parsedDueDate)
-            : undefined,
+          dueDate: parsedDueDate ? formatDateLong(parsedDueDate) : undefined,
           unsubscribeUrl: getUnsubscribeUrl(clientId, 'bookings'),
         })
       ).catch((err) => console.error('Failed to send action item email:', err));

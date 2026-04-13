@@ -51,7 +51,6 @@ export function ClientSessionCard({
       .slice(0, 2);
   };
 
-
   const getPaymentBadge = (status: PaymentStatus, price: number) => {
     // No badge for free sessions
     if (status === 'free' || price === 0) return null;
@@ -123,8 +122,7 @@ export function ClientSessionCard({
                 </span>
                 <span className="flex items-center gap-1">
                   <Clock className="h-3.5 w-3.5" />
-                  {formatTime(session.startTime)} -{' '}
-                  {formatTime(session.endTime)}
+                  {formatTime(session.startTime)} - {formatTime(session.endTime)}
                 </span>
               </div>
 
