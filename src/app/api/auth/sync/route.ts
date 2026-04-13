@@ -75,13 +75,17 @@ export async function POST(request: Request) {
     });
 
     if (existingUser) {
+      // Preserve custom Supabase avatar — don't overwrite with Clerk's CDN URL
+      const hasCustomAvatar = existingUser.avatarUrl?.includes('supabase.co/storage');
+      const avatarUrl = hasCustomAvatar ? existingUser.avatarUrl : (clerkUser.imageUrl || null);
+
       // Update existing user
       await db
         .update(users)
         .set({
           email,
           name,
-          avatarUrl: clerkUser.imageUrl || null,
+          avatarUrl,
         })
         .where(eq(users.id, userId));
 
@@ -98,7 +102,7 @@ export async function POST(request: Request) {
           id: userId,
           email,
           name,
-          avatarUrl: clerkUser.imageUrl || null,
+          avatarUrl,
           role,
           isNew: false,
         },

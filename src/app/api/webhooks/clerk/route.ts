@@ -219,6 +219,10 @@ export async function POST(req: Request) {
     }
 
     try {
+      // Check if user has a custom avatar uploaded to Supabase — preserve it
+      const existingUser = await db.query.users.findFirst({ where: eq(users.id, id) });
+      const hasCustomAvatar = existingUser?.avatarUrl?.includes('supabase.co/storage');
+
       // Update user fields that are managed by Clerk
       // We explicitly don't update 'role' here as it's application-managed
       await db
@@ -226,7 +230,7 @@ export async function POST(req: Request) {
         .set({
           email,
           name,
-          avatarUrl: image_url || null,
+          avatarUrl: hasCustomAvatar ? existingUser!.avatarUrl : (image_url || null),
         })
         .where(eq(users.id, id));
 
