@@ -1,6 +1,9 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
+
+// This page queries the DB at request time; skip static prerender (CI has no DB).
+export const dynamic = 'force-dynamic';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Users } from 'lucide-react';
 import {

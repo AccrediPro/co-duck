@@ -2,6 +2,9 @@ import { Suspense } from 'react';
 import { Metadata } from 'next';
 import { eq, and, or, ilike, sql, desc, asc } from 'drizzle-orm';
 import { db, users, coachProfiles } from '@/db';
+
+// This page queries the DB at request time; skip static prerender (CI has no DB).
+export const dynamic = 'force-dynamic';
 import {
   CoachesGrid,
   CoachGridSkeleton,
