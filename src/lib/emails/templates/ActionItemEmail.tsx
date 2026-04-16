@@ -19,7 +19,7 @@ export function ActionItemEmail({
   dueDate,
   unsubscribeUrl,
 }: ActionItemEmailProps) {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://accredipro-coachhub.com';
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://co-duck.com';
 
   return (
     <EmailLayout
