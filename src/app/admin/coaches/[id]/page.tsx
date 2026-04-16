@@ -10,7 +10,9 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { CoachVerifyActions, VerificationBadge } from '@/components/admin/coach-verify-actions';
-import { ArrowLeft, Star, Clock, Calendar, DollarSign, Globe, ExternalLink } from 'lucide-react';
+import { CredentialVerifyActions } from '@/components/admin/credential-verify-actions';
+import type { Credential } from '@/db/schema';
+import { ArrowLeft, Award, Star, Clock, Calendar, DollarSign, Globe, ExternalLink } from 'lucide-react';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -57,6 +59,7 @@ async function getCoachDetail(coachId: string) {
       reviewCount: coachProfiles.reviewCount,
       stripeOnboardingComplete: coachProfiles.stripeOnboardingComplete,
       profileCompletionPercentage: coachProfiles.profileCompletionPercentage,
+      credentials: coachProfiles.credentials,
       createdAt: coachProfiles.createdAt,
       userName: users.name,
       userEmail: users.email,
@@ -79,7 +82,7 @@ export default async function AdminCoachDetailPage({ params }: PageProps) {
     notFound();
   }
 
-  const specialties = (coach.specialties || []) as string[];
+  const specialties = (coach.specialties || []) as unknown as string[];
   const sessionTypes = (coach.sessionTypes || []) as SessionType[];
 
   return (
@@ -255,6 +258,22 @@ export default async function AdminCoachDetailPage({ params }: PageProps) {
                     No session types configured
                   </p>
                 )}
+              </CardContent>
+            </Card>
+            {/* Credentials */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Award className="h-5 w-5 text-muted-foreground" />
+                  <CardTitle>Credentials</CardTitle>
+                </div>
+                <CardDescription>Verify individual credentials submitted by this coach</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <CredentialVerifyActions
+                  coachId={coach.userId}
+                  credentials={(coach.credentials as Credential[]) || []}
+                />
               </CardContent>
             </Card>
           </div>
