@@ -25,6 +25,7 @@ async function getCoachProfile(slug: string) {
       sessionTypes: coachProfiles.sessionTypes,
       isPublished: coachProfiles.isPublished,
       verificationStatus: coachProfiles.verificationStatus,
+      credentials: coachProfiles.credentials,
       name: users.name,
       avatarUrl: users.avatarUrl,
     })
@@ -100,8 +101,21 @@ export default async function CoachProfilePage({ params }: PageProps) {
         availability={availability}
         coachId={coach.userId}
         currentUserId={userId}
-        isVerified={coach.verificationStatus === 'verified'}
+        isVerified={
+          coach.verificationStatus === 'verified' &&
+          Array.isArray(coach.credentials) &&
+          coach.credentials.some((c) => c.verifiedAt)
+        }
+        credentials={coach.credentials}
       />
+
+      {/* Not Medical Advice disclaimer */}
+      <div className="mx-auto mt-8 max-w-4xl rounded-lg border border-muted bg-muted/30 px-5 py-4 text-sm text-muted-foreground">
+        <span className="font-medium text-foreground">Not medical advice:</span> Coaches on Co-duck
+        are not licensed medical providers. Nothing shared in a session constitutes medical advice,
+        diagnosis, or treatment. If you have an urgent medical concern, contact your physician or
+        call 911.
+      </div>
     </div>
   );
 }
