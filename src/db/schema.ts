@@ -253,6 +253,26 @@ export const streakActionTypeEnum = pgEnum('streak_action_type', [
   'session_prep_completed',
 ]);
 
+/**
+ * AI processing status for session notes (P0-10).
+ *
+ * Tracks the lifecycle of the AI Session Notes pipeline:
+ * - idle       → no processing yet
+ * - uploading  → audio is being uploaded to storage
+ * - transcribing → Whisper is transcribing the audio
+ * - generating → GPT-4o is generating the structured SOAP notes
+ * - ready      → AI output is stored; coach can edit + send
+ * - failed     → something went wrong; error is captured in processing_error
+ */
+export const aiProcessingStatusEnum = pgEnum('ai_processing_status', [
+  'idle',
+  'uploading',
+  'transcribing',
+  'generating',
+  'ready',
+  'failed',
+]);
+
 // ============================================================================
 // JSONB TYPE DEFINITIONS
 // ============================================================================
@@ -1583,10 +1603,11 @@ export const sessionNotes = pgTable(
       .references(() => users.id, { onDelete: 'cascade' }),
 
     /**
-     * The note content
-     * @type {string}
+     * The note content (human-written OR concatenated AI SOAP summary).
+     * Defaults to empty string so AI-in-flight rows can exist while
+     * processing is still running (P0-10).
      */
-    content: text('content').notNull(),
+    content: text('content').notNull().default(''),
 
     /**
      * Optional template used to structure this note
@@ -1602,6 +1623,61 @@ export const sessionNotes = pgTable(
      */
     sections: jsonb('sections').$type<Record<string, string>>(),
 
+    // --------------------------------------------------------------------
+    // P0-10: AI Session Notes (Whisper + GPT-4o)
+    // --------------------------------------------------------------------
+
+    /** Supabase storage path of the uploaded audio (null after processing). */
+    transcriptUrl: text('transcript_url'),
+
+    /** Full transcript text (from Whisper or pasted by coach). */
+    transcript: text('transcript'),
+
+    /** True when AI generated the structured notes below. */
+    aiGenerated: boolean('ai_generated').notNull().default(false),
+
+    /** Model used to generate the notes (e.g. 'gpt-4o'). */
+    aiModel: text('ai_model'),
+
+    /** When the AI output was finalized. */
+    aiGeneratedAt: timestamp('ai_generated_at', { withTimezone: true }),
+
+    /** SOAP — Subjective (what the client said / felt). */
+    soapSubjective: text('soap_subjective'),
+
+    /** SOAP — Objective (observations). */
+    soapObjective: text('soap_objective'),
+
+    /** SOAP — Assessment (coach interpretation). */
+    soapAssessment: text('soap_assessment'),
+
+    /** SOAP — Plan (next steps agreed). */
+    soapPlan: text('soap_plan'),
+
+    /** Key topics discussed during the session (3-7 items). */
+    keyTopics: jsonb('key_topics').$type<string[]>(),
+
+    /** AI-suggested action items (coach reviews before persisting). */
+    actionItemsSuggested: jsonb('action_items_suggested').$type<string[]>(),
+
+    /** AI suggestions for the next session. */
+    nextSessionSuggestions: text('next_session_suggestions'),
+
+    /** Draft subject for the follow-up email. */
+    followUpEmailSubject: text('follow_up_email_subject'),
+
+    /** Draft body for the follow-up email. */
+    followUpEmailBody: text('follow_up_email_body'),
+
+    /** Current stage of the AI pipeline. */
+    processingStatus: aiProcessingStatusEnum('processing_status').notNull().default('idle'),
+
+    /** Error message when processing_status = 'failed'. */
+    processingError: text('processing_error'),
+
+    /** OpenAI tokens used for cost tracking. */
+    aiTokensUsed: integer('ai_tokens_used'),
+
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true })
       .notNull()
@@ -1613,6 +1689,8 @@ export const sessionNotes = pgTable(
     index('session_notes_booking_id_idx').on(table.bookingId),
     // Index for coach's note history
     index('session_notes_coach_id_idx').on(table.coachId),
+    // Index for locating in-flight AI jobs
+    index('session_notes_processing_status_idx').on(table.processingStatus),
   ]
 );
 

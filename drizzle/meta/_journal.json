@@ -190,6 +190,13 @@
       "when": 1774285085635,
       "tag": "0026_long_alice",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1745550000000,
+      "tag": "0033_ai_session_notes",
+      "breakpoints": true
     }
   ]
 }
