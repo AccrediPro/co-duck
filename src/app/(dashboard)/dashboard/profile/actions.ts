@@ -10,16 +10,23 @@ import {
   sessionTypeSchema,
   SUPPORTED_CURRENCIES,
   generateSlug,
+  flattenSpecialties,
 } from '@/lib/validators/coach-onboarding';
 
-// Schema for the full profile update
+// Schema for the full profile update.
+// Specialties uses the LEGACY flat `string[]` shape here — see the comment
+// on `profileEditorSchema` in profile-editor-form.tsx for the rationale.
+// The DB column accepts either shape during the 2-level taxonomy transition
+// (it is converted to `{category, subNiches}[]` before writing to the DB below).
 const fullProfileSchema = z.object({
   displayName: coachBasicInfoSchema.shape.displayName,
   headline: coachBasicInfoSchema.shape.headline,
   profilePhotoUrl: coachBasicInfoSchema.shape.profilePhotoUrl,
   timezone: coachBasicInfoSchema.shape.timezone,
   bio: coachBioSpecialtiesSchema.shape.bio,
-  specialties: coachBioSpecialtiesSchema.shape.specialties,
+  specialties: z
+    .array(z.string().min(1, 'Specialty cannot be empty'))
+    .min(1, 'Please select at least one specialty'),
   hourlyRate: z.number().min(0).optional().nullable(),
   currency: z.string().refine((val) => SUPPORTED_CURRENCIES.some((c) => c.code === val)),
   sessionTypes: z.array(sessionTypeSchema).min(1, 'At least one session type is required'),
@@ -104,7 +111,7 @@ export async function saveProfile(data: FullProfileFormData): Promise<SaveProfil
         slug,
         headline: data.headline,
         bio: data.bio || null,
-        specialties: data.specialties,
+        specialties: data.specialties.map((s) => ({ category: s, subNiches: [] })),
         timezone: data.timezone,
         hourlyRate: data.hourlyRate ? Math.round(data.hourlyRate * 100) : null,
         currency: data.currency,
@@ -212,7 +219,9 @@ export async function getFullProfile() {
         profilePhotoUrl: user?.avatarUrl || '',
         headline: profile.headline || '',
         bio: profile.bio || '',
-        specialties: profile.specialties || [],
+        // Normalize from the JSONB union (legacy `string[]` or new
+        // `{category, subNiches}[]`) to the flat string[] the editor expects.
+        specialties: flattenSpecialties(profile.specialties),
         timezone: profile.timezone || '',
         hourlyRate: profile.hourlyRate ? profile.hourlyRate / 100 : null, // Convert from cents
         currency: profile.currency || 'USD',

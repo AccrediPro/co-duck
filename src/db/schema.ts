@@ -271,6 +271,35 @@ export const streakActionTypeEnum = pgEnum('streak_action_type', [
   'session_prep_completed',
 ]);
 
+/**
+ * AI Processing Status Enum
+ *
+ * Tracks the state of AI-assisted session note generation (P0-10).
+ *
+ * @enum {string}
+ * @property {'idle'} idle - No AI processing active (default)
+ * @property {'uploading'} uploading - Audio recording is being uploaded to storage
+ * @property {'transcribing'} transcribing - Whisper is transcribing the recording
+ * @property {'generating'} generating - LLM is generating structured notes
+ * @property {'ready'} ready - Notes are generated and ready for coach review
+ * @property {'failed'} failed - Processing failed; see processingError
+ *
+ * @remarks
+ * State transitions:
+ * - idle → uploading → transcribing → generating → ready
+ * - idle → generating → ready (when coach pastes a transcript directly)
+ * - any → failed (sets processingError)
+ * - failed/ready → idle (coach retries)
+ */
+export const aiProcessingStatusEnum = pgEnum('ai_processing_status', [
+  'idle',
+  'uploading',
+  'transcribing',
+  'generating',
+  'ready',
+  'failed',
+]);
+
 // ============================================================================
 // JSONB TYPE DEFINITIONS
 // ============================================================================
@@ -332,6 +361,26 @@ export interface LinkPreviewData {
  */
 export interface MessageMetadata {
   linkPreview?: LinkPreviewData;
+}
+
+/**
+ * Credential Interface
+ *
+ * Represents a professional credential, certification, degree, or membership.
+ * Stored in coach_profiles.credentials JSONB array.
+ */
+export interface Credential {
+  id: string;
+  type: 'certification' | 'degree' | 'license' | 'membership';
+  title: string;
+  issuer: string;
+  issuedYear: number;
+  expiresYear?: number;
+  credentialId?: string;
+  verificationUrl?: string;
+  documentUrl?: string;
+  verifiedAt?: string; // ISO date when admin verified
+  verifiedBy?: string; // admin user id
 }
 
 /**
@@ -553,16 +602,22 @@ export const coachProfiles = pgTable(
     bio: text('bio'),
 
     /**
-     * Array of coaching specialties/focus areas
-     * @type {string[]}
+     * Coaching specialties in the 2-level taxonomy format (or legacy flat strings).
+     * @type {Array<{category: string; subNiches: string[]}> | string[]}
      * @default []
-     * @example ["Career Coaching", "Executive Coaching", "Work-Life Balance"]
+     * @example [{"category":"Health & Wellness","subNiches":["Functional Medicine","Gut Health"]},{"category":"Life","subNiches":[]}]
      *
      * @remarks
-     * Can include predefined values from COACH_SPECIALTIES constant
-     * or custom specialties added by the coach.
+     * Evolved from a flat string[] to a 2-level tree in migration 0027.
+     * The column remains a union during the transition: legacy coaches still
+     * hold `string[]`, new onboarders hold `{category, subNiches}[]`.
+     * Use `flattenSpecialties` (in coach-onboarding.ts) to normalize either
+     * shape into a flat label array for display or filtering.
+     * Use COACH_CATEGORIES from coach-onboarding.ts for the canonical list.
      */
-    specialties: jsonb('specialties').$type<string[]>().default([]),
+    specialties: jsonb('specialties')
+      .$type<Array<{ category: string; subNiches: string[] }> | string[]>()
+      .default([]),
 
     /**
      * Default hourly rate in CENTS
@@ -736,6 +791,18 @@ export const coachProfiles = pgTable(
      * Null if never verified or if status is pending/rejected.
      */
     verifiedAt: timestamp('verified_at', { withTimezone: true }),
+
+    /**
+     * Professional credentials, certifications, degrees, and memberships.
+     * @type {Credential[]}
+     * @default []
+     *
+     * @remarks
+     * Each credential can be individually verified by an admin (verifiedAt/verifiedBy).
+     * The "Verified Coach" badge displays when verificationStatus === 'verified' AND
+     * at least one credential has a verifiedAt date set.
+     */
+    credentials: jsonb('credentials').$type<Credential[]>().default([]),
 
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true })
@@ -1136,6 +1203,9 @@ export const bookings = pgTable(
      */
     googleCalendarEventId: text('google_calendar_event_id'),
 
+    /** Package purchase used to redeem this session. Null for direct Stripe bookings. */
+    packagePurchaseId: integer('package_purchase_id'),
+
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true })
       .notNull()
@@ -1151,6 +1221,8 @@ export const bookings = pgTable(
     index('bookings_start_time_idx').on(table.startTime),
     // Index for filtering by status (tabs: upcoming, past, cancelled)
     index('bookings_status_idx').on(table.status),
+    // Index for package-redeemed bookings
+    index('bookings_package_purchase_id_idx').on(table.packagePurchaseId),
   ]
 );
 
@@ -1601,10 +1673,11 @@ export const sessionNotes = pgTable(
       .references(() => users.id, { onDelete: 'cascade' }),
 
     /**
-     * The note content
+     * The note content (plain text or concatenated SOAP body when AI-generated).
+     * Defaults to empty string for AI-processing rows that haven't finished yet.
      * @type {string}
      */
-    content: text('content').notNull(),
+    content: text('content').notNull().default(''),
 
     /**
      * Optional template used to structure this note
@@ -1620,6 +1693,115 @@ export const sessionNotes = pgTable(
      */
     sections: jsonb('sections').$type<Record<string, string>>(),
 
+    // ==========================================================================
+    // AI Session Notes (P0-10) — Whisper transcription + GPT-4o summarization
+    // ==========================================================================
+
+    /**
+     * Path in Supabase Storage to the uploaded audio recording.
+     * Private bucket `session-recordings`, 7-day lifecycle.
+     * @type {string | null}
+     */
+    transcriptUrl: text('transcript_url'),
+
+    /**
+     * Raw transcript text (from Whisper or pasted by coach).
+     * @type {string | null}
+     */
+    transcript: text('transcript'),
+
+    /**
+     * True when the structured note content was produced by an LLM.
+     * Coach is expected to review/edit before finalizing.
+     * @type {boolean}
+     */
+    aiGenerated: boolean('ai_generated').notNull().default(false),
+
+    /**
+     * Identifier of the LLM that generated the notes (e.g. 'gpt-4o').
+     * @type {string | null}
+     */
+    aiModel: text('ai_model'),
+
+    /**
+     * Timestamp when the AI generation completed.
+     * @type {Date | null}
+     */
+    aiGeneratedAt: timestamp('ai_generated_at', { withTimezone: true }),
+
+    /**
+     * SOAP — Subjective: client's self-reported state/concerns/symptoms.
+     * @type {string | null}
+     */
+    soapSubjective: text('soap_subjective'),
+
+    /**
+     * SOAP — Objective: observable data, tracked metrics, behavioral observations.
+     * @type {string | null}
+     */
+    soapObjective: text('soap_objective'),
+
+    /**
+     * SOAP — Assessment: coach's impression, patterns, what's working/stuck.
+     * @type {string | null}
+     */
+    soapAssessment: text('soap_assessment'),
+
+    /**
+     * SOAP — Plan: plan for client until next session.
+     * @type {string | null}
+     */
+    soapPlan: text('soap_plan'),
+
+    /**
+     * Suggested topic tags extracted from the session.
+     * @type {string[] | null}
+     */
+    keyTopics: jsonb('key_topics').$type<string[]>(),
+
+    /**
+     * AI-suggested action items the coach can convert into real `action_items` rows.
+     * Array of short strings.
+     * @type {string[] | null}
+     */
+    actionItemsSuggested: jsonb('action_items_suggested').$type<string[]>(),
+
+    /**
+     * Free-text suggestions for the next session (topics to revisit, questions to probe).
+     * @type {string | null}
+     */
+    nextSessionSuggestions: text('next_session_suggestions'),
+
+    /**
+     * AI-drafted follow-up email subject. Coach reviews before sending.
+     * @type {string | null}
+     */
+    followUpEmailSubject: text('follow_up_email_subject'),
+
+    /**
+     * AI-drafted follow-up email body. Coach reviews before sending.
+     * @type {string | null}
+     */
+    followUpEmailBody: text('follow_up_email_body'),
+
+    /**
+     * Current AI processing state (upload → transcribe → generate → ready).
+     * @type {'idle' | 'uploading' | 'transcribing' | 'generating' | 'ready' | 'failed'}
+     */
+    processingStatus: aiProcessingStatusEnum('processing_status').notNull().default('idle'),
+
+    /**
+     * Error message when processingStatus === 'failed'.
+     * @type {string | null}
+     */
+    processingError: text('processing_error'),
+
+    /**
+     * Tokens consumed by the LLM call (for cost tracking).
+     * @type {number | null}
+     */
+    aiTokensUsed: integer('ai_tokens_used'),
+
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true })
       .notNull()
@@ -1631,6 +1813,8 @@ export const sessionNotes = pgTable(
     index('session_notes_booking_id_idx').on(table.bookingId),
     // Index for coach's note history
     index('session_notes_coach_id_idx').on(table.coachId),
+    // Index for polling status lookups
+    index('session_notes_processing_status_idx').on(table.processingStatus),
   ]
 );
 
@@ -3577,6 +3761,273 @@ export const sessionPrepResponsesRelations = relations(sessionPrepResponses, ({ 
 export const sessionPrepQuestionsRelations = relations(sessionPrepQuestions, ({ one }) => ({
   coach: one(users, {
     fields: [sessionPrepQuestions.coachId],
+    references: [users.id],
+  }),
+}));
+
+// ============================================================================
+// ENUMS — PACKAGES & SUBSCRIPTIONS (P0-05 + P0-07)
+// ============================================================================
+
+export const packagePurchaseStatusEnum = pgEnum('package_purchase_status', [
+  'active',
+  'expired',
+  'completed',
+  'refunded',
+]);
+
+export const billingIntervalEnum = pgEnum('billing_interval', ['monthly', 'yearly']);
+
+export const subscriptionStatusEnum = pgEnum('subscription_status', [
+  'trialing',
+  'active',
+  'past_due',
+  'canceled',
+  'incomplete',
+]);
+
+// ============================================================================
+// PACKAGES TABLE (P0-05)
+// ============================================================================
+
+/**
+ * Packages Table
+ *
+ * Multi-session coaching bundles coaches can sell at a discounted rate.
+ * Clients purchase upfront and redeem sessions over time.
+ */
+export const packages = pgTable(
+  'packages',
+  {
+    id: serial('id').primaryKey(),
+
+    /** The coach offering this package */
+    coachId: text('coach_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+
+    /** Display name, e.g. "6-Session Functional Medicine Reset" */
+    title: text('title').notNull(),
+
+    /** Full description shown on coach profile */
+    description: text('description'),
+
+    /** Number of sessions included */
+    sessionCount: integer('session_count').notNull(),
+
+    /** Duration per session in minutes */
+    sessionDuration: integer('session_duration').notNull(),
+
+    /** Total bundle price in CENTS */
+    priceCents: integer('price_cents').notNull(),
+
+    /** Original (undiscounted) price in CENTS — for "save X" badge */
+    originalPriceCents: integer('original_price_cents'),
+
+    /** Days from purchase date within which sessions must be used */
+    validityDays: integer('validity_days').notNull().default(180),
+
+    /** Whether this package is publicly listed on the coach's profile */
+    isPublished: boolean('is_published').notNull().default(false),
+
+    /** Optional link to an existing session type on coach_profiles */
+    sessionTypeId: text('session_type_id'),
+
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
+  },
+  (table) => [
+    index('packages_coach_id_idx').on(table.coachId),
+    index('packages_is_published_idx').on(table.isPublished),
+  ]
+);
+
+export type Package = typeof packages.$inferSelect;
+export type NewPackage = typeof packages.$inferInsert;
+
+// ============================================================================
+// PACKAGE PURCHASES TABLE (P0-05)
+// ============================================================================
+
+/**
+ * Package Purchases Table
+ *
+ * Records when a client buys a coaching package.
+ * Tracks session consumption and expiration.
+ */
+export const packagePurchases = pgTable(
+  'package_purchases',
+  {
+    id: serial('id').primaryKey(),
+
+    /** The package that was purchased */
+    packageId: integer('package_id')
+      .notNull()
+      .references(() => packages.id, { onDelete: 'restrict' }),
+
+    /** The client who purchased */
+    clientId: text('client_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+
+    /** The coach (denormalized for query convenience) */
+    coachId: text('coach_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+
+    /** When the package was paid for */
+    purchasedAt: timestamp('purchased_at', { withTimezone: true }).notNull().defaultNow(),
+
+    /** When the package expires (purchasedAt + validityDays) */
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+
+    /** Total sessions in this purchase (snapshot of package.sessionCount) */
+    totalSessions: integer('total_sessions').notNull(),
+
+    /** Sessions already used */
+    usedSessions: integer('used_sessions').notNull().default(0),
+
+    /** Total amount paid in CENTS */
+    totalPaidCents: integer('total_paid_cents').notNull(),
+
+    /** Platform fee in CENTS (varies by coach subscription plan) */
+    platformFeeCents: integer('platform_fee_cents').notNull(),
+
+    /** Coach payout in CENTS */
+    coachPayoutCents: integer('coach_payout_cents').notNull(),
+
+    /** Purchase lifecycle status */
+    status: packagePurchaseStatusEnum('status').notNull().default('active'),
+
+    /** Stripe Payment Intent ID */
+    stripePaymentIntentId: text('stripe_payment_intent_id'),
+
+    /** Stripe Checkout Session ID */
+    stripeCheckoutSessionId: text('stripe_checkout_session_id'),
+
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
+  },
+  (table) => [
+    index('package_purchases_client_id_idx').on(table.clientId),
+    index('package_purchases_coach_id_idx').on(table.coachId),
+    index('package_purchases_package_id_idx').on(table.packageId),
+    index('package_purchases_status_idx').on(table.status),
+  ]
+);
+
+export type PackagePurchase = typeof packagePurchases.$inferSelect;
+export type NewPackagePurchase = typeof packagePurchases.$inferInsert;
+
+// ============================================================================
+// COACH SUBSCRIPTIONS TABLE (P0-07)
+// ============================================================================
+
+/**
+ * Coach Subscriptions Table
+ *
+ * SaaS subscription for coaches. Determines platform fee percentage and
+ * feature limits. One row per coach (unique constraint on coachId).
+ *
+ * Plans: starter (10% fee, $39/mo) | pro (5% fee, $79/mo) | scale (3% fee, $149/mo)
+ */
+export const coachSubscriptions = pgTable(
+  'coach_subscriptions',
+  {
+    id: serial('id').primaryKey(),
+
+    /** The coach this subscription belongs to (unique — one plan per coach) */
+    coachId: text('coach_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+
+    /** Plan identifier: 'starter' | 'pro' | 'scale' */
+    planId: text('plan_id').notNull().default('starter'),
+
+    /** Billing cycle */
+    billingInterval: billingIntervalEnum('billing_interval').notNull().default('monthly'),
+
+    /** Stripe Subscription ID */
+    stripeSubscriptionId: text('stripe_subscription_id'),
+
+    /** Stripe Customer ID */
+    stripeCustomerId: text('stripe_customer_id'),
+
+    /** Subscription lifecycle status */
+    status: subscriptionStatusEnum('status').notNull().default('trialing'),
+
+    /** Start of current billing period */
+    currentPeriodStart: timestamp('current_period_start', { withTimezone: true }),
+
+    /** End of current billing period */
+    currentPeriodEnd: timestamp('current_period_end', { withTimezone: true }),
+
+    /** When the 14-day free trial ends */
+    trialEndsAt: timestamp('trial_ends_at', { withTimezone: true }),
+
+    /** Whether subscription cancels at end of period */
+    cancelAtPeriodEnd: boolean('cancel_at_period_end').notNull().default(false),
+
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
+  },
+  (table) => [
+    uniqueIndex('coach_subscriptions_coach_id_idx').on(table.coachId),
+    index('coach_subscriptions_status_idx').on(table.status),
+    index('coach_subscriptions_stripe_sub_id_idx').on(table.stripeSubscriptionId),
+  ]
+);
+
+export type CoachSubscription = typeof coachSubscriptions.$inferSelect;
+export type NewCoachSubscription = typeof coachSubscriptions.$inferInsert;
+
+// ============================================================================
+// BOOKINGS — add packagePurchaseId FK (P0-05)
+// NOTE: The column is added via migration 0030. The Drizzle relation below
+// references it for ORM queries once the column exists in the DB.
+// ============================================================================
+
+// ============================================================================
+// PACKAGES + SUBSCRIPTIONS RELATIONS
+// ============================================================================
+
+export const packagesRelations = relations(packages, ({ one, many }) => ({
+  coach: one(users, {
+    fields: [packages.coachId],
+    references: [users.id],
+  }),
+  purchases: many(packagePurchases),
+}));
+
+export const packagePurchasesRelations = relations(packagePurchases, ({ one }) => ({
+  package: one(packages, {
+    fields: [packagePurchases.packageId],
+    references: [packages.id],
+  }),
+  client: one(users, {
+    fields: [packagePurchases.clientId],
+    references: [users.id],
+    relationName: 'clientPackagePurchases',
+  }),
+  coach: one(users, {
+    fields: [packagePurchases.coachId],
+    references: [users.id],
+    relationName: 'coachPackagePurchases',
+  }),
+}));
+
+export const coachSubscriptionsRelations = relations(coachSubscriptions, ({ one }) => ({
+  coach: one(users, {
+    fields: [coachSubscriptions.coachId],
     references: [users.id],
   }),
 }));

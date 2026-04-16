@@ -23,6 +23,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { db, users, coachProfiles, bookings, reviews, conversations } from '@/db';
 import { formatDateTime } from '@/lib/date-utils';
+
+// This page queries the DB at request time; skip static prerender (CI has no DB).
+export const dynamic = 'force-dynamic';
 import { Users, UserCheck, Calendar, Star, MessageSquare, UserPlus, Clock } from 'lucide-react';
 
 // ============================================================================

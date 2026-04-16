@@ -34,7 +34,7 @@ export default async function CoachOnboardingStep4Page() {
       </div>
 
       {/* Step Indicator */}
-      <StepIndicator currentStep={4} totalSteps={4} />
+      <StepIndicator currentStep={5} totalSteps={5} />
 
       {/* Review Form */}
       <ReviewPublishForm
