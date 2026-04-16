@@ -584,16 +584,22 @@ export const coachProfiles = pgTable(
     bio: text('bio'),
 
     /**
-     * Coaching specialties in the 2-level taxonomy format.
-     * @type {Array<{category: string; subNiches: string[]}>}
+     * Coaching specialties in the 2-level taxonomy format (or legacy flat strings).
+     * @type {Array<{category: string; subNiches: string[]}> | string[]}
      * @default []
      * @example [{"category":"Health & Wellness","subNiches":["Functional Medicine","Gut Health"]},{"category":"Life","subNiches":[]}]
      *
      * @remarks
      * Evolved from a flat string[] to a 2-level tree in migration 0027.
+     * The column remains a union during the transition: legacy coaches still
+     * hold `string[]`, new onboarders hold `{category, subNiches}[]`.
+     * Use `flattenSpecialties` (in coach-onboarding.ts) to normalize either
+     * shape into a flat label array for display or filtering.
      * Use COACH_CATEGORIES from coach-onboarding.ts for the canonical list.
      */
-    specialties: jsonb('specialties').$type<Array<{ category: string; subNiches: string[] }>>().default([]),
+    specialties: jsonb('specialties')
+      .$type<Array<{ category: string; subNiches: string[] }> | string[]>()
+      .default([]),
 
     /**
      * Default hourly rate in CENTS

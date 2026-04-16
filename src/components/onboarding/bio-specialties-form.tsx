@@ -113,7 +113,11 @@ export function BioSpecialtiesForm({ initialData }: BioSpecialtiesFormProps) {
       });
       // Auto-expand if it has sub-niches
       if (hasSubNiches) {
-        setExpandedCategories((prev) => new Set([...prev, categoryLabel]));
+        setExpandedCategories((prev) => {
+          const next = new Set(prev);
+          next.add(categoryLabel);
+          return next;
+        });
       }
     }
   }
@@ -250,7 +254,9 @@ export function BioSpecialtiesForm({ initialData }: BioSpecialtiesFormProps) {
                                 type="button"
                                 onClick={() => toggleExpandCategory(cat.label)}
                                 className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
-                                aria-label={isExpanded ? 'Collapse sub-niches' : 'Expand sub-niches'}
+                                aria-label={
+                                  isExpanded ? 'Collapse sub-niches' : 'Expand sub-niches'
+                                }
                               >
                                 {isExpanded ? (
                                   <ChevronDown className="h-4 w-4" />

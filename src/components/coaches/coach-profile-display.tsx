@@ -10,7 +10,17 @@ import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { SUPPORTED_CURRENCIES, COACH_CATEGORIES } from '@/lib/validators/coach-onboarding';
 import type { SessionType } from '@/db/schema';
-import { Award, BadgeCheck, Calendar, Check, Clock, Copy, ExternalLink, Globe, User } from 'lucide-react';
+import {
+  Award,
+  BadgeCheck,
+  Calendar,
+  Check,
+  Clock,
+  Copy,
+  ExternalLink,
+  Globe,
+  User,
+} from 'lucide-react';
 import type { Credential } from '@/db/schema';
 import { AvailabilitySection } from './availability-section';
 import { MessageButton } from '@/components/messages';
@@ -262,22 +272,20 @@ export function CoachProfileDisplay({
                           </Badge>
                         );
                       })
-                    ) : (
-                      // Top-level category badge — link to category page
-                      catSlug ? (
-                        <Link key={i} href={`/coaches/specialty/${catSlug}`}>
-                          <Badge
-                            variant="secondary"
-                            className="cursor-pointer text-sm transition-colors hover:bg-secondary/70"
-                          >
-                            {entry.category}
-                          </Badge>
-                        </Link>
-                      ) : (
-                        <Badge key={i} variant="secondary" className="text-sm">
+                    ) : // Top-level category badge — link to category page
+                    catSlug ? (
+                      <Link key={i} href={`/coaches/specialty/${catSlug}`}>
+                        <Badge
+                          variant="secondary"
+                          className="cursor-pointer text-sm transition-colors hover:bg-secondary/70"
+                        >
                           {entry.category}
                         </Badge>
-                      )
+                      </Link>
+                    ) : (
+                      <Badge key={i} variant="secondary" className="text-sm">
+                        {entry.category}
+                      </Badge>
                     );
                   })}
                 </div>
@@ -297,9 +305,9 @@ export function CoachProfileDisplay({
               <CardContent className="space-y-4">
                 {credentials.map((cred) => (
                   <div key={cred.id} className="flex items-start gap-3 rounded-lg border p-3">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <p className="font-medium text-sm">{cred.title}</p>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="text-sm font-medium">{cred.title}</p>
                         {cred.verifiedAt && (
                           <span className="inline-flex items-center gap-1 rounded-full bg-green-50 px-2 py-0.5 text-xs font-medium text-green-700">
                             <BadgeCheck className="h-3 w-3" />
@@ -308,7 +316,7 @@ export function CoachProfileDisplay({
                         )}
                       </div>
                       <p className="mt-0.5 text-sm text-muted-foreground">{cred.issuer}</p>
-                      <p className="mt-0.5 text-xs text-muted-foreground capitalize">
+                      <p className="mt-0.5 text-xs capitalize text-muted-foreground">
                         {cred.type} · {cred.issuedYear}
                         {cred.expiresYear ? ` – ${cred.expiresYear}` : ''}
                       </p>

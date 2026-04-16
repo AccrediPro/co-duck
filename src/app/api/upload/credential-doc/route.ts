@@ -24,24 +24,36 @@ export async function POST(request: NextRequest) {
   try {
     const { userId } = await auth();
     if (!userId) {
-      return NextResponse.json({ success: false, error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } }, { status: 401 });
+      return NextResponse.json(
+        { success: false, error: { code: 'UNAUTHORIZED', message: 'Unauthorized' } },
+        { status: 401 }
+      );
     }
 
     const supabase = getSupabaseAdmin();
     if (!supabase) {
-      return NextResponse.json({ success: false, error: { code: 'STORAGE_ERROR', message: 'Storage not configured' } }, { status: 500 });
+      return NextResponse.json(
+        { success: false, error: { code: 'STORAGE_ERROR', message: 'Storage not configured' } },
+        { status: 500 }
+      );
     }
 
     const formData = await request.formData();
     const file = formData.get('file') as File | null;
 
     if (!file) {
-      return NextResponse.json({ success: false, error: { code: 'NO_FILE', message: 'No file provided' } }, { status: 400 });
+      return NextResponse.json(
+        { success: false, error: { code: 'NO_FILE', message: 'No file provided' } },
+        { status: 400 }
+      );
     }
 
     if (!ALLOWED_TYPES.includes(file.type)) {
       return NextResponse.json(
-        { success: false, error: { code: 'INVALID_TYPE', message: 'Allowed types: JPG, PNG, WebP, PDF' } },
+        {
+          success: false,
+          error: { code: 'INVALID_TYPE', message: 'Allowed types: JPG, PNG, WebP, PDF' },
+        },
         { status: 400 }
       );
     }
@@ -65,7 +77,10 @@ export async function POST(request: NextRequest) {
       if (bucketError) {
         console.error('Failed to create credentials bucket:', bucketError);
         return NextResponse.json(
-          { success: false, error: { code: 'STORAGE_ERROR', message: 'Storage configuration error' } },
+          {
+            success: false,
+            error: { code: 'STORAGE_ERROR', message: 'Storage configuration error' },
+          },
           { status: 500 }
         );
       }

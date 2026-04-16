@@ -6,6 +6,21 @@ import { db, users, coachProfiles } from '@/db';
 import { CoachProfileDisplay } from '@/components/coaches/coach-profile-display';
 import { getCoachAvailabilityForProfile } from './availability-actions';
 
+/**
+ * Normalize the coach_profiles.specialties JSONB union to the 2-level shape
+ * consumed by <CoachProfileDisplay>. Legacy flat `string[]` entries are
+ * promoted to categories with empty sub-niches.
+ */
+function toTwoLevelSpecialties(
+  value: string[] | Array<{ category: string; subNiches: string[] }> | null
+): Array<{ category: string; subNiches: string[] }> {
+  if (!value || value.length === 0) return [];
+  if (typeof value[0] === 'string') {
+    return (value as string[]).map((label) => ({ category: label, subNiches: [] }));
+  }
+  return value as Array<{ category: string; subNiches: string[] }>;
+}
+
 interface PageProps {
   params: Promise<{ slug: string }>;
 }
@@ -91,7 +106,7 @@ export default async function CoachProfilePage({ params }: PageProps) {
         avatarUrl={coach.avatarUrl}
         headline={coach.headline}
         bio={coach.bio}
-        specialties={coach.specialties as unknown as string[]}
+        specialties={toTwoLevelSpecialties(coach.specialties)}
         timezone={coach.timezone}
         hourlyRate={coach.hourlyRate}
         currency={coach.currency}

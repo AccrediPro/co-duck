@@ -9,6 +9,7 @@ import {
   type CoachListItem,
   type SortOption,
 } from '@/components/coaches';
+import { flattenSpecialties } from '@/lib/validators/coach-onboarding';
 
 export const metadata: Metadata = {
   title: 'Find a Coach | Coaching Platform',
@@ -115,11 +116,14 @@ async function getCoaches(
 
   let coaches = await query;
 
-  // Filter by specialties in application layer (JSONB array contains is complex in Drizzle)
+  // Filter by specialties in application layer (JSONB array contains is complex in Drizzle).
+  // The DB column holds either the legacy `string[]` or the new `{category, subNiches}[]`
+  // shape — `flattenSpecialties` normalizes both to a flat label array for filtering.
   if (filters.specialties && filters.specialties.length > 0) {
     coaches = coaches.filter((coach) => {
-      if (!coach.specialties || coach.specialties.length === 0) return false;
-      return filters.specialties!.some((spec) => coach.specialties!.includes(spec));
+      const flat = flattenSpecialties(coach.specialties);
+      if (flat.length === 0) return false;
+      return filters.specialties!.some((spec) => flat.includes(spec));
     });
   }
 
@@ -163,16 +167,18 @@ async function getCoaches(
 
     if (filters.specialties && filters.specialties.length > 0) {
       filteredCount = allCoaches.filter((coach) => {
-        if (!coach.specialties || coach.specialties.length === 0) return false;
-        return filters.specialties!.some((spec) => coach.specialties!.includes(spec));
+        const flat = flattenSpecialties(coach.specialties);
+        if (flat.length === 0) return false;
+        return filters.specialties!.some((spec) => flat.includes(spec));
       }).length;
     }
 
     if (filters.minPrice !== undefined || filters.maxPrice !== undefined) {
       const tempFiltered = allCoaches.filter((coach) => {
         if (filters.specialties && filters.specialties.length > 0) {
-          if (!coach.specialties || coach.specialties.length === 0) return false;
-          if (!filters.specialties.some((spec) => coach.specialties!.includes(spec))) {
+          const flat = flattenSpecialties(coach.specialties);
+          if (flat.length === 0) return false;
+          if (!filters.specialties.some((spec) => flat.includes(spec))) {
             return false;
           }
         }
@@ -189,7 +195,13 @@ async function getCoaches(
     totalCount = filteredCount;
   }
 
-  return { coaches, totalCount };
+  // Normalize each coach's specialties to flat `string[]` for CoachListItem.
+  const coachesNormalized: CoachListItem[] = coaches.map((c) => ({
+    ...c,
+    specialties: flattenSpecialties(c.specialties),
+  }));
+
+  return { coaches: coachesNormalized, totalCount };
 }
 
 async function CoachesContent({ searchParams }: PageProps) {

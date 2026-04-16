@@ -182,7 +182,9 @@ export const COACH_CATEGORIES: CoachCategory[] = [
  * Flat list of all category labels (for backward-compat references).
  * @deprecated Use COACH_CATEGORIES for new code.
  */
-export const COACH_SPECIALTIES = COACH_CATEGORIES.map((c) => c.label) as unknown as readonly string[];
+export const COACH_SPECIALTIES = COACH_CATEGORIES.map(
+  (c) => c.label
+) as unknown as readonly string[];
 
 /**
  * Resolve a category or sub-niche slug to its display label.
@@ -203,6 +205,41 @@ export function resolveCategoryLabel(slug: string): string | undefined {
  */
 export function findParentCategory(subNicheSlug: string): CoachCategory | undefined {
   return COACH_CATEGORIES.find((cat) => cat.subNiches.some((s) => s.slug === subNicheSlug));
+}
+
+/**
+ * Normalize a coach_profiles.specialties JSONB value to a flat string array.
+ *
+ * The column has two shapes during the taxonomy transition:
+ *   - Legacy: `string[]` (flat labels)
+ *   - New:    `Array<{ category: string; subNiches: string[] }>` (2-level)
+ *
+ * This helper folds either shape down to `string[]` for display, filtering,
+ * and form consumption. For the 2-level shape, sub-niches (if any) are emitted
+ * and the category falls back when no sub-niches are selected.
+ */
+export function flattenSpecialties(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  const out: string[] = [];
+  for (const entry of value) {
+    if (typeof entry === 'string') {
+      if (entry.length > 0) out.push(entry);
+      continue;
+    }
+    if (entry && typeof entry === 'object') {
+      const obj = entry as { category?: unknown; subNiches?: unknown };
+      const category = typeof obj.category === 'string' ? obj.category : '';
+      const subs = Array.isArray(obj.subNiches)
+        ? (obj.subNiches.filter((s) => typeof s === 'string') as string[])
+        : [];
+      if (subs.length > 0) {
+        out.push(...subs);
+      } else if (category) {
+        out.push(category);
+      }
+    }
+  }
+  return out;
 }
 
 /* =============================================================================
@@ -255,9 +292,7 @@ export const coachBioSpecialtiesSchema = z.object({
    * Coaching specialties in the 2-level taxonomy format.
    * Must include at least one category entry.
    */
-  specialties: z
-    .array(specialtyEntrySchema)
-    .min(1, 'Please select at least one specialty area'),
+  specialties: z.array(specialtyEntrySchema).min(1, 'Please select at least one specialty area'),
 });
 
 /**
@@ -547,15 +582,14 @@ export const credentialSchema = z.object({
     .int()
     .min(1900)
     .max(new Date().getFullYear(), 'Issued year cannot be in the future'),
-  expiresYear: z
-    .number()
-    .int()
-    .min(1900)
-    .max(2100)
-    .optional()
-    .nullable(),
+  expiresYear: z.number().int().min(1900).max(2100).optional().nullable(),
   credentialId: z.string().max(100).optional().nullable(),
-  verificationUrl: z.string().url('Please enter a valid URL').optional().nullable().or(z.literal('')),
+  verificationUrl: z
+    .string()
+    .url('Please enter a valid URL')
+    .optional()
+    .nullable()
+    .or(z.literal('')),
   documentUrl: z.string().optional().nullable(),
   verifiedAt: z.string().optional().nullable(),
   verifiedBy: z.string().optional().nullable(),

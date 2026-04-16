@@ -29,9 +29,18 @@ export default async function CoachOnboardingStep2Page() {
   }
 
   const profile = existingProfile[0];
+
+  // Normalize specialties from the DB JSONB union (legacy `string[]` or new
+  // `{category, subNiches}[]`) to the 2-level shape expected by the form.
+  const rawSpecialties = profile.specialties ?? [];
+  const specialties: Array<{ category: string; subNiches: string[] }> =
+    rawSpecialties.length > 0 && typeof rawSpecialties[0] === 'string'
+      ? (rawSpecialties as string[]).map((label) => ({ category: label, subNiches: [] }))
+      : (rawSpecialties as Array<{ category: string; subNiches: string[] }>);
+
   const initialData = {
     bio: profile.bio,
-    specialties: profile.specialties || [],
+    specialties,
   };
 
   return (
