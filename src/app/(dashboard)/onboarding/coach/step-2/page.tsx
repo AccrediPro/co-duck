@@ -45,7 +45,7 @@ export default async function CoachOnboardingStep2Page() {
       </div>
 
       {/* Step Indicator */}
-      <StepIndicator currentStep={2} totalSteps={4} />
+      <StepIndicator currentStep={2} totalSteps={5} />
 
       {/* Form */}
       <BioSpecialtiesForm initialData={initialData} />
