@@ -25,7 +25,6 @@ async function getCoachProfile(slug: string) {
       sessionTypes: coachProfiles.sessionTypes,
       isPublished: coachProfiles.isPublished,
       verificationStatus: coachProfiles.verificationStatus,
-      credentials: coachProfiles.credentials,
       name: users.name,
       avatarUrl: users.avatarUrl,
     })
@@ -101,12 +100,7 @@ export default async function CoachProfilePage({ params }: PageProps) {
         availability={availability}
         coachId={coach.userId}
         currentUserId={userId}
-        isVerified={
-          coach.verificationStatus === 'verified' &&
-          Array.isArray(coach.credentials) &&
-          coach.credentials.some((c) => c.verifiedAt)
-        }
-        credentials={coach.credentials}
+        isVerified={coach.verificationStatus === 'verified'}
       />
 
       {/* Not Medical Advice disclaimer */}

@@ -357,9 +357,9 @@ export default function TermsPage() {
               {/* Introduction */}
               <div className="mb-8 rounded-lg border bg-cream p-6">
                 <p className="text-muted-foreground">
-                  Welcome to Co-duck. These Terms of Service govern your use of our
-                  platform and services. By accessing or using Co-duck, you agree to be
-                  bound by these terms. Please read them carefully.
+                  Welcome to Co-duck. These Terms of Service govern your use of our platform and
+                  services. By accessing or using Co-duck, you agree to be bound by these terms.
+                  Please read them carefully.
                 </p>
               </div>
 
@@ -396,8 +396,8 @@ export default function TermsPage() {
               {/* Footer Note */}
               <div className="mt-12 rounded-lg border bg-cream p-6 text-center">
                 <p className="text-sm text-muted-foreground">
-                  By using Co-duck, you acknowledge that you have read, understood, and
-                  agree to be bound by these Terms of Service.
+                  By using Co-duck, you acknowledge that you have read, understood, and agree to be
+                  bound by these Terms of Service.
                 </p>
                 <div className="mt-4 flex justify-center gap-4">
                   <Button variant="outline" asChild>

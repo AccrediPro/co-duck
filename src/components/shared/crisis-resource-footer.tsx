@@ -11,7 +11,10 @@ export function CrisisResourceFooter({ compact = false }: CrisisResourceFooterPr
         <PhoneCall className="h-4 w-4 flex-shrink-0 text-amber-700" />
         <span>
           If you&apos;re in crisis, help is available 24/7:{' '}
-          <a href="tel:988" className="font-semibold underline underline-offset-2 hover:no-underline">
+          <a
+            href="tel:988"
+            className="font-semibold underline underline-offset-2 hover:no-underline"
+          >
             Call or text 988
           </a>{' '}
           &middot;{' '}
@@ -30,7 +33,9 @@ export function CrisisResourceFooter({ compact = false }: CrisisResourceFooterPr
     <div className="rounded-xl border border-amber-200 bg-amber-50 p-5">
       <div className="mb-3 flex items-center gap-2">
         <PhoneCall className="h-5 w-5 text-amber-700" />
-        <h3 className="font-semibold text-amber-900">If you&apos;re in crisis, help is available 24/7</h3>
+        <h3 className="font-semibold text-amber-900">
+          If you&apos;re in crisis, help is available 24/7
+        </h3>
       </div>
       <ul className="space-y-1.5 text-sm text-amber-900">
         <li>
