@@ -8,6 +8,11 @@ import { SPECIALTY_COPY } from '@/lib/specialty-copy';
 import { CoachCard } from '@/components/coaches/coach-card';
 import { ChevronRight } from 'lucide-react';
 
+// This page queries the DB at build time via generateStaticParams-backed
+// static params, but the DB isn't reachable in CI. Mark as dynamic so the
+// page renders at request time instead of being prerendered.
+export const dynamic = 'force-dynamic';
+
 interface PageProps {
   params: Promise<{ slug: string }>;
 }
