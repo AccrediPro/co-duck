@@ -244,6 +244,24 @@ export const checkInMoodEnum = pgEnum('check_in_mood', ['good', 'okay', 'struggl
  * @property {'check_in_completed'} check_in_completed - Completed a weekly check-in
  * @property {'session_prep_completed'} session_prep_completed - Completed session prep
  */
+/**
+ * Form Type Enum (P0-08)
+ *
+ * Classifies the intent of a generic form created by a coach.
+ *
+ * @enum {string}
+ * @property {'intake'} intake - Pre-engagement questionnaire (client onboarding)
+ * @property {'session_feedback'} session_feedback - Post-session feedback
+ * @property {'progress_check'} progress_check - Periodic check-ins
+ * @property {'custom'} custom - Free-form / uncategorized (default)
+ */
+export const formTypeEnum = pgEnum('form_type', [
+  'intake',
+  'session_feedback',
+  'progress_check',
+  'custom',
+]);
+
 export const streakActionTypeEnum = pgEnum('streak_action_type', [
   'session_completed',
   'action_item_completed',
@@ -3517,6 +3535,175 @@ export type SessionPrepQuestion = typeof sessionPrepQuestions.$inferSelect;
 
 /** Type for inserting a new session prep questions record */
 export type NewSessionPrepQuestion = typeof sessionPrepQuestions.$inferInsert;
+
+// ============================================================================
+// FORMS TABLE (P0-08)
+// ============================================================================
+
+/**
+ * Question shape stored inside `forms.questions` JSONB.
+ *
+ * Mirrors the Zod `formQuestionSchema` in `src/lib/validators/forms.ts`.
+ * Kept minimal here to avoid a runtime dependency on the validators module.
+ */
+export interface FormQuestion {
+  id: string;
+  order: number;
+  type: 'short_text' | 'long_text' | 'single_choice' | 'multi_choice' | 'rating' | 'yes_no';
+  label: string;
+  required: boolean;
+  options?: string[];
+}
+
+/**
+ * Forms Table (P0-08)
+ *
+ * Generic form primitive authored by coaches. Replaces the older session-prep
+ * specific logic with a reusable structure for intake, feedback, progress
+ * checks, and custom coach-authored questionnaires.
+ *
+ * ## Key Fields
+ * - `coachId` - Owning coach (cascade delete)
+ * - `formType` - Classification (intake | session_feedback | progress_check | custom)
+ * - `questions` - Ordered array of typed questions (JSONB)
+ * - `isPublished` - When true, the form is exposed via the public endpoint and
+ *   accepts responses. Questions cannot be edited while published.
+ *
+ * ## Relationships
+ * - Belongs to users (as coach)
+ * - Has many form_responses
+ */
+export const forms = pgTable(
+  'forms',
+  {
+    id: serial('id').primaryKey(),
+
+    /** Coach who owns this form */
+    coachId: text('coach_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+
+    /** Display title */
+    title: text('title').notNull(),
+
+    /** Optional description shown to respondents */
+    description: text('description'),
+
+    /** Form classification */
+    formType: formTypeEnum('form_type').notNull().default('custom'),
+
+    /** Ordered list of typed questions */
+    questions: jsonb('questions').notNull().default([]).$type<FormQuestion[]>(),
+
+    /** When true, form accepts responses */
+    isPublished: boolean('is_published').notNull().default(false),
+
+    /** First time the form was published */
+    publishedAt: timestamp('published_at', { withTimezone: true }),
+
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
+  },
+  (table) => [
+    index('forms_coach_id_idx').on(table.coachId),
+    index('forms_form_type_idx').on(table.formType),
+  ]
+);
+
+/** Type for selecting a form record */
+export type Form = typeof forms.$inferSelect;
+
+/** Type for inserting a new form record */
+export type NewForm = typeof forms.$inferInsert;
+
+// ============================================================================
+// FORM RESPONSES TABLE (P0-08)
+// ============================================================================
+
+/**
+ * Form Responses Table (P0-08)
+ *
+ * Submitted answers to a published form. One row per submission.
+ *
+ * ## Key Fields
+ * - `formId` - The form being answered (cascade delete)
+ * - `respondentId` - User who submitted the response (cascade delete)
+ * - `bookingId` - Optional link to a session (set null on booking delete)
+ * - `answers` - Map of `questionId -> answer` (string | string[] | number | boolean)
+ *
+ * ## Relationships
+ * - Belongs to forms
+ * - Belongs to users (as respondent)
+ * - Optionally belongs to bookings
+ */
+export const formResponses = pgTable(
+  'form_responses',
+  {
+    id: serial('id').primaryKey(),
+
+    /** The form this response belongs to */
+    formId: integer('form_id')
+      .notNull()
+      .references(() => forms.id, { onDelete: 'cascade' }),
+
+    /** User who submitted the response */
+    respondentId: text('respondent_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+
+    /** Optional booking this response is associated with */
+    bookingId: integer('booking_id').references(() => bookings.id, { onDelete: 'set null' }),
+
+    /** Map of questionId -> answer value */
+    answers: jsonb('answers')
+      .notNull()
+      .default({})
+      .$type<Record<string, string | string[] | number | boolean>>(),
+
+    submittedAt: timestamp('submitted_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('form_responses_form_id_idx').on(table.formId),
+    index('form_responses_respondent_id_idx').on(table.respondentId),
+    index('form_responses_booking_id_idx').on(table.bookingId),
+  ]
+);
+
+/** Type for selecting a form response record */
+export type FormResponse = typeof formResponses.$inferSelect;
+
+/** Type for inserting a new form response record */
+export type NewFormResponse = typeof formResponses.$inferInsert;
+
+// ============================================================================
+// FORMS RELATIONS (P0-08)
+// ============================================================================
+
+export const formsRelations = relations(forms, ({ one, many }) => ({
+  coach: one(users, {
+    fields: [forms.coachId],
+    references: [users.id],
+  }),
+  responses: many(formResponses),
+}));
+
+export const formResponsesRelations = relations(formResponses, ({ one }) => ({
+  form: one(forms, {
+    fields: [formResponses.formId],
+    references: [forms.id],
+  }),
+  respondent: one(users, {
+    fields: [formResponses.respondentId],
+    references: [users.id],
+  }),
+  booking: one(bookings, {
+    fields: [formResponses.bookingId],
+    references: [bookings.id],
+  }),
+}));
 
 // ============================================================================
 // RETENTION FEATURES RELATIONS (S18)
