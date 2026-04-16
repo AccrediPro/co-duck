@@ -3435,10 +3435,7 @@ export const forms = pgTable(
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
-  (t) => [
-    index('forms_coach_id_idx').on(t.coachId),
-    index('forms_form_type_idx').on(t.formType),
-  ]
+  (t) => [index('forms_coach_id_idx').on(t.coachId), index('forms_form_type_idx').on(t.formType)]
 );
 
 export type Form = typeof forms.$inferSelect;

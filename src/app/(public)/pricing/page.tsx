@@ -144,11 +144,7 @@ export default function PricingPage() {
               </CardContent>
 
               <CardFooter>
-                <Button
-                  asChild
-                  className="w-full"
-                  variant={plan.highlight ? 'default' : 'outline'}
-                >
+                <Button asChild className="w-full" variant={plan.highlight ? 'default' : 'outline'}>
                   <Link href={`/sign-up?plan=${plan.id}`}>{plan.cta}</Link>
                 </Button>
               </CardFooter>
@@ -161,9 +157,7 @@ export default function PricingPage() {
       <section className="bg-muted/30 py-12">
         <div className="mx-auto max-w-2xl px-4 text-center">
           <h2 className="mb-3 text-2xl font-bold">Transaction fee comparison</h2>
-          <p className="mb-8 text-muted-foreground">
-            The more you grow, the more you keep.
-          </p>
+          <p className="mb-8 text-muted-foreground">The more you grow, the more you keep.</p>
           <div className="overflow-hidden rounded-lg border bg-background">
             <table className="w-full text-sm">
               <thead>

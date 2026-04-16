@@ -23,10 +23,7 @@ const createPackageSchema = z.object({
   sessionTypeId: z.string().optional(),
 });
 
-export async function GET(
-  _req: NextRequest,
-  { params }: { params: Promise<{ slug: string }> }
-) {
+export async function GET(_req: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
 
   const coach = await db
@@ -51,10 +48,7 @@ export async function GET(
   return Response.json({ success: true, data: result });
 }
 
-export async function POST(
-  req: NextRequest,
-  { params }: { params: Promise<{ slug: string }> }
-) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ slug: string }> }) {
   const { userId } = await auth();
   if (!userId) {
     return Response.json(

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import {
   Card,
   CardContent,
@@ -42,7 +43,10 @@ function formatDate(dateStr: string) {
   });
 }
 
-function statusVariant(status: string, isExpired: boolean): 'default' | 'secondary' | 'destructive' | 'outline' {
+function statusVariant(
+  status: string,
+  isExpired: boolean
+): 'default' | 'secondary' | 'destructive' | 'outline' {
   if (isExpired || status === 'expired') return 'destructive';
   if (status === 'completed') return 'secondary';
   if (status === 'refunded') return 'outline';
@@ -102,9 +106,7 @@ export default function MyPackagesPage() {
                       {displayStatus}
                     </Badge>
                   </div>
-                  <CardDescription>
-                    {pkg.packageSessionDuration}-min sessions
-                  </CardDescription>
+                  <CardDescription>{pkg.packageSessionDuration}-min sessions</CardDescription>
                 </CardHeader>
 
                 <CardContent className="space-y-3 pb-2">
@@ -117,15 +119,14 @@ export default function MyPackagesPage() {
                     </div>
                     <Progress value={progressPct} className="h-2" />
                     <p className="mt-1 text-xs text-muted-foreground">
-                      {pkg.remainingSessions} session{pkg.remainingSessions !== 1 ? 's' : ''} remaining
+                      {pkg.remainingSessions} session{pkg.remainingSessions !== 1 ? 's' : ''}{' '}
+                      remaining
                     </p>
                   </div>
 
                   <div className="flex items-center gap-1 text-xs text-muted-foreground">
                     <CalendarIcon className="h-3 w-3" />
-                    <span>
-                      Expires {formatDate(pkg.expiresAt)}
-                    </span>
+                    <span>Expires {formatDate(pkg.expiresAt)}</span>
                   </div>
 
                   <p className="text-sm font-medium">{formatPrice(pkg.totalPaidCents)} paid</p>
@@ -134,7 +135,7 @@ export default function MyPackagesPage() {
                 {pkg.remainingSessions > 0 && !pkg.isExpired && pkg.status === 'active' && (
                   <CardFooter>
                     <Button asChild size="sm" className="w-full">
-                      <a href="/coaches">Book a session</a>
+                      <Link href="/coaches">Book a session</Link>
                     </Button>
                   </CardFooter>
                 )}

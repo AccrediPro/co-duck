@@ -24,10 +24,7 @@ const updatePackageSchema = z.object({
   sessionTypeId: z.string().optional().nullable(),
 });
 
-export async function GET(
-  _req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const packageId = parseInt(id);
   if (isNaN(packageId)) {
@@ -49,10 +46,7 @@ export async function GET(
   return Response.json({ success: true, data: pkg });
 }
 
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { userId } = await auth();
   if (!userId) {
     return Response.json(
@@ -119,10 +113,7 @@ export async function PATCH(
   return Response.json({ success: true, data: updated });
 }
 
-export async function DELETE(
-  _req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { userId } = await auth();
   if (!userId) {
     return Response.json(
@@ -164,9 +155,7 @@ export async function DELETE(
   const [{ value: activePurchases }] = await db
     .select({ value: count() })
     .from(packagePurchases)
-    .where(
-      and(eq(packagePurchases.packageId, packageId), eq(packagePurchases.status, 'active'))
-    );
+    .where(and(eq(packagePurchases.packageId, packageId), eq(packagePurchases.status, 'active')));
 
   if (activePurchases > 0) {
     return Response.json(

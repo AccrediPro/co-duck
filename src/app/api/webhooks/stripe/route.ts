@@ -663,7 +663,12 @@ async function handleConnectDeauthorized(stripeAccountId: string) {
 // ============================================================================
 
 async function handlePackageCheckoutCompleted(session: Stripe.Checkout.Session) {
-  const { packageId: packageIdStr, coachId, clientId, feeRate: feeRateStr } = session.metadata ?? {};
+  const {
+    packageId: packageIdStr,
+    coachId,
+    clientId,
+    feeRate: feeRateStr,
+  } = session.metadata ?? {};
 
   if (!packageIdStr || !coachId || !clientId) {
     console.error('Stripe webhook [package]: Missing metadata fields', session.metadata);
@@ -733,12 +738,55 @@ async function handlePackageCheckoutCompleted(session: Stripe.Checkout.Session) 
     stripeCheckoutSessionId: session.id,
   });
 
-  console.log(`Stripe webhook [package]: Purchase recorded for package ${packageId}, client ${clientId}`);
+  console.log(
+    `Stripe webhook [package]: Purchase recorded for package ${packageId}, client ${clientId}`
+  );
 }
 
 // ============================================================================
 // SUBSCRIPTION HANDLERS (P0-07)
 // ============================================================================
+
+/**
+ * Stripe's Subscription object exposes `current_period_start`, `current_period_end`
+ * and `trial_end` as Unix timestamps on the raw payload, but the SDK typings
+ * sometimes omit them at the top level (they are declared on subscription items
+ * in newer API versions). We narrow the type locally instead of reaching for `any`.
+ */
+type SubscriptionWithPeriod = Stripe.Subscription & {
+  current_period_start: number;
+  current_period_end: number;
+  trial_end: number | null;
+};
+
+type DbSubscriptionStatus = 'trialing' | 'active' | 'past_due' | 'canceled' | 'incomplete';
+
+/**
+ * Maps a Stripe subscription status onto the subset of statuses tracked in our DB.
+ * Stripe statuses we don't model (`unpaid`, `incomplete_expired`, `paused`) collapse
+ * to their nearest equivalent so the column remains a strict enum.
+ */
+function mapStripeStatusToDb(status: Stripe.Subscription.Status): DbSubscriptionStatus {
+  switch (status) {
+    case 'trialing':
+    case 'active':
+    case 'past_due':
+    case 'canceled':
+    case 'incomplete':
+      return status;
+    case 'unpaid':
+      return 'past_due';
+    case 'incomplete_expired':
+      return 'canceled';
+    case 'paused':
+      return 'active';
+    default: {
+      const _exhaustive: never = status;
+      void _exhaustive;
+      return 'incomplete';
+    }
+  }
+}
 
 async function handleSubscriptionUpserted(sub: Stripe.Subscription) {
   const coachId = sub.metadata?.coachId;
@@ -751,11 +799,13 @@ async function handleSubscriptionUpserted(sub: Stripe.Subscription) {
   }
 
   const stripeCustomerId =
-    typeof sub.customer === 'string' ? sub.customer : sub.customer?.id ?? null;
+    typeof sub.customer === 'string' ? sub.customer : (sub.customer?.id ?? null);
 
-  const currentPeriodStart = new Date((sub as any).current_period_start * 1000);
-  const currentPeriodEnd = new Date((sub as any).current_period_end * 1000);
-  const trialEnd = (sub as any).trial_end ? new Date((sub as any).trial_end * 1000) : null;
+  const typedSub = sub as SubscriptionWithPeriod;
+  const currentPeriodStart = new Date(typedSub.current_period_start * 1000);
+  const currentPeriodEnd = new Date(typedSub.current_period_end * 1000);
+  const trialEnd = typedSub.trial_end ? new Date(typedSub.trial_end * 1000) : null;
+  const status = mapStripeStatusToDb(sub.status);
 
   await db
     .insert(coachSubscriptions)
@@ -765,7 +815,7 @@ async function handleSubscriptionUpserted(sub: Stripe.Subscription) {
       billingInterval,
       stripeSubscriptionId: sub.id,
       stripeCustomerId,
-      status: sub.status as any,
+      status,
       currentPeriodStart,
       currentPeriodEnd,
       trialEnd: trialEnd ?? undefined,
@@ -778,7 +828,7 @@ async function handleSubscriptionUpserted(sub: Stripe.Subscription) {
         billingInterval,
         stripeSubscriptionId: sub.id,
         stripeCustomerId,
-        status: sub.status as any,
+        status,
         currentPeriodStart,
         currentPeriodEnd,
         trialEnd: trialEnd ?? undefined,
@@ -786,7 +836,9 @@ async function handleSubscriptionUpserted(sub: Stripe.Subscription) {
       },
     });
 
-  console.log(`Stripe webhook [subscription]: Upserted plan=${planId} status=${sub.status} for coach ${coachId}`);
+  console.log(
+    `Stripe webhook [subscription]: Upserted plan=${planId} status=${sub.status} for coach ${coachId}`
+  );
 }
 
 async function handleSubscriptionDeleted(sub: Stripe.Subscription) {

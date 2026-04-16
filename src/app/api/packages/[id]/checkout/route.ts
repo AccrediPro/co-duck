@@ -13,10 +13,7 @@ import { and, eq } from 'drizzle-orm';
 import { stripe } from '@/lib/stripe';
 import { getCoachPlatformFeeRate } from '@/lib/plan-limits';
 
-export async function POST(
-  _req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
+export async function POST(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { userId } = await auth();
   if (!userId) {
     return Response.json(
@@ -58,7 +55,10 @@ export async function POST(
 
   if (pkg.coachId === userId) {
     return Response.json(
-      { success: false, error: { code: 'BAD_REQUEST', message: 'You cannot buy your own package' } },
+      {
+        success: false,
+        error: { code: 'BAD_REQUEST', message: 'You cannot buy your own package' },
+      },
       { status: 400 }
     );
   }

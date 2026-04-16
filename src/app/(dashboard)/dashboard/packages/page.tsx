@@ -171,7 +171,11 @@ export default function PackagesDashboardPage() {
   }
 
   async function handleDelete(id: number) {
-    if (!slug || !confirm('Delete this package? This cannot be undone if there are no active purchases.')) return;
+    if (
+      !slug ||
+      !confirm('Delete this package? This cannot be undone if there are no active purchases.')
+    )
+      return;
     const res = await fetch(`/api/packages/${id}`, { method: 'DELETE' });
     const data = await res.json();
     if (!res.ok) {
@@ -274,13 +278,18 @@ export default function PackagesDashboardPage() {
                   />
                 </div>
                 <div className="space-y-1">
-                  <Label>Original price ($) <span className="text-muted-foreground text-xs">(optional)</span></Label>
+                  <Label>
+                    Original price ($){' '}
+                    <span className="text-xs text-muted-foreground">(optional)</span>
+                  </Label>
                   <Input
                     type="number"
                     min={1}
                     step={0.01}
                     placeholder="for save badge"
-                    value={form.originalPriceCents ? (form.originalPriceCents / 100).toFixed(2) : ''}
+                    value={
+                      form.originalPriceCents ? (form.originalPriceCents / 100).toFixed(2) : ''
+                    }
                     onChange={(e) =>
                       setForm((f) => ({
                         ...f,
