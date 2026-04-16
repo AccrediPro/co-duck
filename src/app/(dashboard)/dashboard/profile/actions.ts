@@ -16,7 +16,8 @@ import {
 // Schema for the full profile update.
 // Specialties uses the LEGACY flat `string[]` shape here — see the comment
 // on `profileEditorSchema` in profile-editor-form.tsx for the rationale.
-// The DB column accepts either shape during the 2-level taxonomy transition.
+// The DB column accepts either shape during the 2-level taxonomy transition
+// (it is converted to `{category, subNiches}[]` before writing to the DB below).
 const fullProfileSchema = z.object({
   displayName: coachBasicInfoSchema.shape.displayName,
   headline: coachBasicInfoSchema.shape.headline,
@@ -110,7 +111,7 @@ export async function saveProfile(data: FullProfileFormData): Promise<SaveProfil
         slug,
         headline: data.headline,
         bio: data.bio || null,
-        specialties: data.specialties,
+        specialties: data.specialties.map((s) => ({ category: s, subNiches: [] })),
         timezone: data.timezone,
         hourlyRate: data.hourlyRate ? Math.round(data.hourlyRate * 100) : null,
         currency: data.currency,
@@ -218,6 +219,8 @@ export async function getFullProfile() {
         profilePhotoUrl: user?.avatarUrl || '',
         headline: profile.headline || '',
         bio: profile.bio || '',
+        // Normalize from the JSONB union (legacy `string[]` or new
+        // `{category, subNiches}[]`) to the flat string[] the editor expects.
         specialties: flattenSpecialties(profile.specialties),
         timezone: profile.timezone || '',
         hourlyRate: profile.hourlyRate ? profile.hourlyRate / 100 : null, // Convert from cents

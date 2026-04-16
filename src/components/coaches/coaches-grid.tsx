@@ -10,7 +10,7 @@ export interface CoachListItem {
   userId: string;
   slug: string;
   headline: string | null;
-  specialties: string[] | null;
+  specialties: Array<{ category: string; subNiches: string[] }> | null;
   currency: string | null;
   sessionTypes: SessionType[] | null;
   averageRating: string | null;

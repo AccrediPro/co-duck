@@ -243,14 +243,14 @@ export function CoachProfileDisplay({
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-2">
-                  {specialties.map((entry, i) => {
-                    // Find the category slug for the link
+                  {specialties.flatMap((entry, entryIndex) => {
+                    // Find the category definition for slug-based links
                     const catDef = COACH_CATEGORIES.find((c) => c.label === entry.category);
                     const catSlug = catDef?.slug;
 
-                    return entry.subNiches.length > 0 ? (
+                    if (entry.subNiches && entry.subNiches.length > 0) {
                       // Render each sub-niche as a linked badge
-                      entry.subNiches.map((sub) => {
+                      return entry.subNiches.map((sub, subIndex) => {
                         const subDef = catDef?.subNiches.find((s) => s.label === sub);
                         const href = subDef
                           ? `/coaches/specialty/${subDef.slug}`
@@ -258,7 +258,7 @@ export function CoachProfileDisplay({
                             ? `/coaches/specialty/${catSlug}`
                             : null;
                         return href ? (
-                          <Link key={sub} href={href}>
+                          <Link key={`${entryIndex}-${subIndex}`} href={href}>
                             <Badge
                               variant="secondary"
                               className="cursor-pointer text-sm transition-colors hover:bg-secondary/70"
@@ -267,26 +267,34 @@ export function CoachProfileDisplay({
                             </Badge>
                           </Link>
                         ) : (
-                          <Badge key={sub} variant="secondary" className="text-sm">
+                          <Badge
+                            key={`${entryIndex}-${subIndex}`}
+                            variant="secondary"
+                            className="text-sm"
+                          >
                             {sub}
                           </Badge>
                         );
-                      })
-                    ) : // Top-level category badge — link to category page
-                    catSlug ? (
-                      <Link key={i} href={`/coaches/specialty/${catSlug}`}>
-                        <Badge
-                          variant="secondary"
-                          className="cursor-pointer text-sm transition-colors hover:bg-secondary/70"
-                        >
+                      });
+                    }
+
+                    // Top-level category badge — link to category page
+                    return [
+                      catSlug ? (
+                        <Link key={entryIndex} href={`/coaches/specialty/${catSlug}`}>
+                          <Badge
+                            variant="secondary"
+                            className="cursor-pointer text-sm transition-colors hover:bg-secondary/70"
+                          >
+                            {entry.category}
+                          </Badge>
+                        </Link>
+                      ) : (
+                        <Badge key={entryIndex} variant="secondary" className="text-sm">
                           {entry.category}
                         </Badge>
-                      </Link>
-                    ) : (
-                      <Badge key={i} variant="secondary" className="text-sm">
-                        {entry.category}
-                      </Badge>
-                    );
+                      ),
+                    ];
                   })}
                 </div>
               </CardContent>
