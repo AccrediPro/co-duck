@@ -76,7 +76,8 @@ import Link from 'next/link';
 interface BioSpecialtiesFormProps {
   initialData?: {
     bio?: string | null;
-    specialties?: string[];
+    /** Accepts both flat string[] (legacy) and new {category, subNiches}[] shapes */
+    specialties?: string[] | Array<{ category: string; subNiches: string[] }>;
   };
 }
 
@@ -116,12 +117,17 @@ export function BioSpecialtiesForm({ initialData }: BioSpecialtiesFormProps) {
   const [error, setError] = useState<string | null>(null);
   const [customSpecialty, setCustomSpecialty] = useState('');
 
+  // Flatten specialties: accept both flat string[] and new {category, subNiches}[] shapes
+  const flatSpecialties = (initialData?.specialties || []).map((s) =>
+    typeof s === 'string' ? s : s.category
+  );
+
   // Initialize form with react-hook-form and Zod validation
   const form = useForm<CoachBioSpecialtiesFormData>({
     resolver: zodResolver(coachBioSpecialtiesSchema),
     defaultValues: {
       bio: initialData?.bio || '',
-      specialties: initialData?.specialties || [],
+      specialties: flatSpecialties,
     },
   });
 

@@ -52,12 +52,15 @@ export async function saveBioSpecialties(
       specialties,
     });
 
+    // Convert flat string[] → {category, subNiches}[] for the new taxonomy DB format
+    const specialtyEntries = specialties.map((s) => ({ category: s, subNiches: [] as string[] }));
+
     // Update coach profile with bio and specialties
     await db
       .update(coachProfiles)
       .set({
         bio: bio || null,
-        specialties,
+        specialties: specialtyEntries,
         profileCompletionPercentage: completionPercentage,
       })
       .where(eq(coachProfiles.userId, userId));
