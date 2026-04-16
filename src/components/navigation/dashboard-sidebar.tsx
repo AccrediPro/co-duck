@@ -15,6 +15,7 @@ import {
   CreditCard,
   MessageSquare,
   LayoutList,
+  ClipboardList,
 } from 'lucide-react';
 import { UserButton } from '@clerk/nextjs';
 import { useState } from 'react';
@@ -53,6 +54,7 @@ const coachLinks: NavLink[] = [
   { href: '/dashboard/sessions', label: 'Sessions', icon: CalendarDays, roles: ['coach'] },
   { href: '/dashboard/clients', label: 'My Clients', icon: Users, roles: ['coach'] },
   { href: '/dashboard/availability', label: 'Availability', icon: Clock, roles: ['coach'] },
+  { href: '/dashboard/forms', label: 'Forms', icon: ClipboardList, roles: ['coach'] },
   { href: '/dashboard/embed', label: 'Embed widget', icon: Code2, roles: ['coach'] },
   { href: '/dashboard/payments', label: 'Payments', icon: CreditCard, roles: ['coach'] },
   {

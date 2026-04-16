@@ -20,6 +20,8 @@ import {
   CalendarPlus,
   Check,
   CheckCircle,
+  ClipboardCheck,
+  ClipboardList,
   Clock,
   Globe,
   Loader2,
@@ -32,9 +34,20 @@ interface PaymentSuccessContentProps {
   slug: string;
   booking?: BookingSuccessData;
   error?: string;
+  /**
+   * Intake form state for this booking, if a form is assigned.
+   * `null` when no intake is required.
+   */
+  intake?: { required: true; submitted: boolean; intakeUrl: string } | null;
 }
 
-export function PaymentSuccessContent({ coach, slug, booking, error }: PaymentSuccessContentProps) {
+export function PaymentSuccessContent({
+  coach,
+  slug,
+  booking,
+  error,
+  intake,
+}: PaymentSuccessContentProps) {
   const { toast } = useToast();
   const [isDownloadingIcs, setIsDownloadingIcs] = useState(false);
 
@@ -167,6 +180,34 @@ export function PaymentSuccessContent({ coach, slug, booking, error }: PaymentSu
               </span>
             </div>
           </div>
+
+          {/* Intake form prompt */}
+          {intake && (
+            <div className="rounded-lg border bg-muted/30 p-4">
+              <div className="flex items-start gap-3">
+                {intake.submitted ? (
+                  <ClipboardCheck className="mt-0.5 h-5 w-5 shrink-0 text-green-600" />
+                ) : (
+                  <ClipboardList className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
+                )}
+                <div className="flex-1 space-y-2">
+                  <p className="text-sm font-medium">
+                    {intake.submitted ? 'Intake submitted' : 'One more step — complete your intake'}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {intake.submitted
+                      ? 'Your coach has received your intake answers and will review them before your session.'
+                      : 'Your coach would like you to fill out a short intake form so they can make the most of your session.'}
+                  </p>
+                  {!intake.submitted && (
+                    <Button asChild size="sm">
+                      <Link href={intake.intakeUrl}>Start intake</Link>
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Booking Details */}
           <div className="rounded-lg border bg-muted/30 p-4">

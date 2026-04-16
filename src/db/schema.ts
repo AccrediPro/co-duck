@@ -339,6 +339,12 @@ export interface SessionType {
   name: string;
   duration: number; // in minutes
   price: number; // in cents
+  /**
+   * Optional intake form (P0-09) that clients must submit before the booking can
+   * be confirmed. When set, overrides the coach's default intake form for this
+   * session type. See `coachProfiles.defaultIntakeFormId`.
+   */
+  intakeFormId?: number | null;
 }
 
 /**
@@ -766,6 +772,23 @@ export const coachProfiles = pgTable(
      * Used for displaying "X reviews" on coach cards.
      */
     reviewCount: integer('review_count').notNull().default(0),
+
+    // ----------------------
+    // Intake Form (P0-09)
+    // ----------------------
+
+    /**
+     * Default intake form shown to new clients before their first session.
+     * Applied when the selected session type does not declare its own
+     * `intakeFormId`. Null disables the default intake.
+     *
+     * @type {number | null}
+     * @remarks
+     * FK is declared *after* the `forms` table is created via
+     * `coachProfilesDefaultIntakeFormFk` below to avoid circular
+     * declaration order.
+     */
+    defaultIntakeFormId: integer('default_intake_form_id'),
 
     // ----------------------
     // Verification Fields
@@ -1206,6 +1229,18 @@ export const bookings = pgTable(
     /** Package purchase used to redeem this session. Null for direct Stripe bookings. */
     packagePurchaseId: integer('package_purchase_id'),
 
+    /**
+     * Intake form response (P0-09) submitted for this booking.
+     * Required when the coach / session type has an intake form attached
+     * and the booking is still `pending`. Set via the client-facing intake
+     * flow at `/booking/[bookingId]/intake` before payment can proceed.
+     *
+     * FK added in migration 0034 (circular dep with form_responses).
+     *
+     * @type {number | null}
+     */
+    intakeResponseId: integer('intake_response_id'),
+
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true })
       .notNull()
@@ -1223,6 +1258,8 @@ export const bookings = pgTable(
     index('bookings_status_idx').on(table.status),
     // Index for package-redeemed bookings
     index('bookings_package_purchase_id_idx').on(table.packagePurchaseId),
+    // Index for fast intake lookup / orphan detection
+    index('bookings_intake_response_id_idx').on(table.intakeResponseId),
   ]
 );
 
