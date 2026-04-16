@@ -75,7 +75,12 @@ export async function GET(request: Request) {
     const clientIds = Array.from(new Set(rows.map((r) => r.sub.clientId)));
     const clientUsers = clientIds.length
       ? await db
-          .select({ id: users.id, name: users.name, email: users.email, avatarUrl: users.avatarUrl })
+          .select({
+            id: users.id,
+            name: users.name,
+            email: users.email,
+            avatarUrl: users.avatarUrl,
+          })
           .from(users)
           .where(inArray(users.id, clientIds))
       : [];

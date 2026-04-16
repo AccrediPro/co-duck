@@ -16,12 +16,7 @@
 
 import { auth } from '@clerk/nextjs/server';
 import { db } from '@/db';
-import {
-  memberships,
-  coachProfiles,
-  users,
-  membershipSubscriptions,
-} from '@/db/schema';
+import { memberships, coachProfiles, users, membershipSubscriptions } from '@/db/schema';
 import { eq, and, inArray } from 'drizzle-orm';
 import { stripe } from '@/lib/stripe';
 import { rateLimit, WRITE_LIMIT, rateLimitResponse } from '@/lib/rate-limit';
@@ -176,8 +171,7 @@ export async function POST(request: Request, { params }: RouteParams) {
     const successUrl =
       parsed.data.successUrl ??
       `${appUrl}/dashboard/my-memberships?checkout_session_id={CHECKOUT_SESSION_ID}`;
-    const cancelUrl =
-      parsed.data.cancelUrl ?? `${appUrl}/coaches/${coachProfile.slug}`;
+    const cancelUrl = parsed.data.cancelUrl ?? `${appUrl}/coaches/${coachProfile.slug}`;
 
     const checkoutSession = await stripe.checkout.sessions.create({
       mode: 'subscription',

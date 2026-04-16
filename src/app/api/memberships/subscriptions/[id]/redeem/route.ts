@@ -19,13 +19,7 @@
 
 import { auth } from '@clerk/nextjs/server';
 import { db } from '@/db';
-import {
-  bookings,
-  coachProfiles,
-  membershipSubscriptions,
-  memberships,
-  users,
-} from '@/db/schema';
+import { bookings, coachProfiles, membershipSubscriptions, memberships, users } from '@/db/schema';
 import { and, eq, gte, inArray, lt, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { rateLimit, WRITE_LIMIT, rateLimitResponse } from '@/lib/rate-limit';
@@ -69,7 +63,10 @@ export async function POST(request: Request, { params }: RouteParams) {
     payload = await request.json();
   } catch {
     return Response.json(
-      { success: false, error: { code: 'INVALID_JSON', message: 'Request body is not valid JSON' } },
+      {
+        success: false,
+        error: { code: 'INVALID_JSON', message: 'Request body is not valid JSON' },
+      },
       { status: 400 }
     );
   }

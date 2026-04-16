@@ -146,7 +146,10 @@ export async function POST(request: Request) {
     payload = await request.json();
   } catch {
     return Response.json(
-      { success: false, error: { code: 'INVALID_JSON', message: 'Request body is not valid JSON' } },
+      {
+        success: false,
+        error: { code: 'INVALID_JSON', message: 'Request body is not valid JSON' },
+      },
       { status: 400 }
     );
   }
@@ -166,14 +169,8 @@ export async function POST(request: Request) {
     );
   }
 
-  const {
-    name,
-    description,
-    monthlyPriceCents,
-    currency,
-    sessionsPerPeriod,
-    includesMessaging,
-  } = parsed.data;
+  const { name, description, monthlyPriceCents, currency, sessionsPerPeriod, includesMessaging } =
+    parsed.data;
 
   try {
     // Create product and price on the platform account.

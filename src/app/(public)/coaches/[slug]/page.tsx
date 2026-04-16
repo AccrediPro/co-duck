@@ -103,10 +103,7 @@ export default async function CoachProfilePage({ params }: PageProps) {
         eq(membershipSubscriptions.coachId, coach.userId)
       ),
     });
-    if (
-      existingSub &&
-      (existingSub.status === 'active' || existingSub.status === 'past_due')
-    ) {
+    if (existingSub && (existingSub.status === 'active' || existingSub.status === 'past_due')) {
       currentUserHasActiveSubscription = true;
     }
   }

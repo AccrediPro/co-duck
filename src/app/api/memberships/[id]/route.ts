@@ -113,7 +113,10 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     payload = await request.json();
   } catch {
     return Response.json(
-      { success: false, error: { code: 'INVALID_JSON', message: 'Request body is not valid JSON' } },
+      {
+        success: false,
+        error: { code: 'INVALID_JSON', message: 'Request body is not valid JSON' },
+      },
       { status: 400 }
     );
   }

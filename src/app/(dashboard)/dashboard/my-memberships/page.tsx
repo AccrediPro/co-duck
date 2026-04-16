@@ -10,12 +10,7 @@ import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import { eq, desc } from 'drizzle-orm';
 import { db } from '@/db';
-import {
-  users,
-  coachProfiles,
-  memberships,
-  membershipSubscriptions,
-} from '@/db/schema';
+import { users, coachProfiles, memberships, membershipSubscriptions } from '@/db/schema';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { MyMembershipsList } from '@/components/memberships/my-memberships-list';
 
@@ -81,8 +76,8 @@ export default async function MyMembershipsPage({ searchParams }: PageProps) {
         <CardHeader>
           <CardTitle className="text-2xl font-bold">My Memberships</CardTitle>
           <CardDescription>
-            Monthly coaching retainers you’re subscribed to. Sessions renew at the start of
-            every billing period.
+            Monthly coaching retainers you’re subscribed to. Sessions renew at the start of every
+            billing period.
           </CardDescription>
         </CardHeader>
       </Card>
@@ -91,8 +86,8 @@ export default async function MyMembershipsPage({ searchParams }: PageProps) {
         <Card className="border-green-500/40 bg-green-500/5">
           <CardContent className="py-4">
             <p className="text-sm font-medium">
-              🎉 Subscription confirmed! It may take a moment to appear below — refresh the page
-              if you don’t see it yet.
+              🎉 Subscription confirmed! It may take a moment to appear below — refresh the page if
+              you don’t see it yet.
             </p>
           </CardContent>
         </Card>

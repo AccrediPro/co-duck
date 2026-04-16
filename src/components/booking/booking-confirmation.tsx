@@ -109,18 +109,15 @@ export function BookingConfirmation({
     if (isMembershipRedemption) {
       // Redeem from an active membership — no Stripe Checkout.
       try {
-        const res = await fetch(
-          `/api/memberships/subscriptions/${subscriptionId}/redeem`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              sessionTypeId: sessionType.id,
-              startTime,
-              clientNotes: clientNotes.trim() || undefined,
-            }),
-          }
-        );
+        const res = await fetch(`/api/memberships/subscriptions/${subscriptionId}/redeem`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sessionTypeId: sessionType.id,
+            startTime,
+            clientNotes: clientNotes.trim() || undefined,
+          }),
+        });
         const data = await res.json();
         setIsSubmitting(false);
 

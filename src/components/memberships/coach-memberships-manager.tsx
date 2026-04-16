@@ -205,9 +205,7 @@ export function CoachMembershipsManager({ initialMemberships, defaultCurrency }:
 
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="m-price">
-                    Monthly price ({defaultCurrency.toUpperCase()})
-                  </Label>
+                  <Label htmlFor="m-price">Monthly price ({defaultCurrency.toUpperCase()})</Label>
                   <Input
                     id="m-price"
                     type="number"

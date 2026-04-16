@@ -746,9 +746,7 @@ async function handleSubscriptionUpsert(sub: Stripe.Subscription) {
 
   const meta = getMembershipMetadata(sub);
   if (!meta) {
-    console.log(
-      `Stripe webhook: subscription ${sub.id} has no membership metadata, skipping`
-    );
+    console.log(`Stripe webhook: subscription ${sub.id} has no membership metadata, skipping`);
     return;
   }
 
@@ -764,8 +762,7 @@ async function handleSubscriptionUpsert(sub: Stripe.Subscription) {
   }
 
   const status = mapSubscriptionStatus(sub.status);
-  const customerId =
-    typeof sub.customer === 'string' ? sub.customer : sub.customer?.id ?? '';
+  const customerId = typeof sub.customer === 'string' ? sub.customer : (sub.customer?.id ?? '');
 
   // Stripe's `Subscription` type under newer API versions has
   // current_period_start/end on the items, not the sub itself. Read
@@ -783,8 +780,7 @@ async function handleSubscriptionUpsert(sub: Stripe.Subscription) {
 
   const periodStartUnix =
     subWithPeriods.current_period_start ?? firstItem?.current_period_start ?? 0;
-  const periodEndUnix =
-    subWithPeriods.current_period_end ?? firstItem?.current_period_end ?? 0;
+  const periodEndUnix = subWithPeriods.current_period_end ?? firstItem?.current_period_end ?? 0;
 
   const currentPeriodStart = new Date(periodStartUnix * 1000);
   const currentPeriodEnd = new Date(periodEndUnix * 1000);
@@ -877,9 +873,7 @@ async function handleSubscriptionDeleted(sub: Stripe.Subscription) {
   }
 
   if (existing.status === 'canceled') {
-    console.log(
-      `Stripe webhook: membership_subscription ${existing.id} already canceled`
-    );
+    console.log(`Stripe webhook: membership_subscription ${existing.id} already canceled`);
     return;
   }
 
@@ -952,9 +946,7 @@ async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
   });
 
   if (!existing) {
-    console.log(
-      `Stripe webhook: no membership_subscription for subscription ${subscriptionId}`
-    );
+    console.log(`Stripe webhook: no membership_subscription for subscription ${subscriptionId}`);
     return;
   }
 
@@ -970,8 +962,7 @@ async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
 
   // Determine whether to reset the session counter.
   const reason = invoice.billing_reason;
-  const shouldResetCounter =
-    reason === 'subscription_cycle' || reason === 'subscription_create';
+  const shouldResetCounter = reason === 'subscription_cycle' || reason === 'subscription_create';
 
   // Pull period bounds from the associated line (each line carries its own
   // period). Fall back to the invoice period if needed.
@@ -981,9 +972,7 @@ async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
     (invoice as Stripe.Invoice & { period_start?: number }).period_start ??
     0;
   const periodEndUnix =
-    firstLine?.period?.end ??
-    (invoice as Stripe.Invoice & { period_end?: number }).period_end ??
-    0;
+    firstLine?.period?.end ?? (invoice as Stripe.Invoice & { period_end?: number }).period_end ?? 0;
 
   const updatePayload: Partial<typeof membershipSubscriptions.$inferInsert> = {
     status: 'active',
@@ -1052,9 +1041,7 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
     .set({ status: 'past_due', updatedAt: new Date() })
     .where(eq(membershipSubscriptions.id, existing.id));
 
-  console.log(
-    `Stripe webhook: membership_subscription ${existing.id} marked past_due`
-  );
+  console.log(`Stripe webhook: membership_subscription ${existing.id} marked past_due`);
 
   createNotification({
     userId: existing.clientId,

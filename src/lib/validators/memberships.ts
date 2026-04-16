@@ -75,10 +75,7 @@ export const createMembershipSchema = z.object({
     .min(MIN_MEMBERSHIP_PRICE_CENTS, `Minimum price is ${MIN_MEMBERSHIP_PRICE_CENTS} cents`)
     .max(MAX_MEMBERSHIP_PRICE_CENTS, `Maximum price is ${MAX_MEMBERSHIP_PRICE_CENTS} cents`),
 
-  currency: z
-    .enum(SUPPORTED_CURRENCIES)
-    .optional()
-    .default('usd'),
+  currency: z.enum(SUPPORTED_CURRENCIES).optional().default('usd'),
 
   sessionsPerPeriod: z
     .number()
@@ -109,12 +106,7 @@ export type CreateMembershipInput = z.infer<typeof createMembershipSchema>;
 export const updateMembershipSchema = z
   .object({
     name: z.string().trim().min(3).max(100).optional(),
-    description: z
-      .string()
-      .trim()
-      .max(2000)
-      .nullable()
-      .optional(),
+    description: z.string().trim().max(2000).nullable().optional(),
     monthlyPriceCents: z
       .number()
       .int()
