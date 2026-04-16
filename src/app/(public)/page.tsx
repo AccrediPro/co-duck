@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic';
 import { eq } from 'drizzle-orm';
 import { SUPPORTED_CURRENCIES } from '@/lib/validators/coach-onboarding';
 import type { SessionType } from '@/db/schema';
-import { Users, Calendar, Shield, Star, ArrowRight, User } from 'lucide-react';
+import { ArrowRight, User, BadgeCheck, Heart, Lock } from 'lucide-react';
 
 async function getFeaturedCoaches() {
   try {
@@ -57,43 +57,45 @@ function getLowestPrice(sessionTypes: SessionType[] | null) {
 
 const valueProps = [
   {
-    icon: Users,
-    title: 'Expert Coaches',
+    icon: BadgeCheck,
+    title: 'Real Credentials, Verified',
     description:
-      'Connect with verified, experienced coaches across career, leadership, wellness, and personal development.',
+      "Every coach on Co-duck is credential-checked. You'll know exactly what they studied, where, and when.",
   },
   {
-    icon: Calendar,
-    title: 'Flexible Scheduling',
+    icon: Heart,
+    title: 'Trauma-Informed & Inclusive',
     description:
-      'Book sessions that fit your life. Choose from various time slots and manage everything in one place.',
+      'Coaches trained in nervous-system-aware, anti-diet, body-neutral, LGBTQ+-affirming care.',
   },
   {
-    icon: Shield,
-    title: 'Secure & Private',
+    icon: Lock,
+    title: 'Your Story, Your Control',
     description:
-      'Your privacy matters. Secure payments, encrypted sessions, and professional confidentiality standards.',
+      'Session notes you own. Intake you control. Data you can export or delete anytime.',
   },
 ];
 
-const howItWorks = [
+const specialties = [
+  { label: 'Hormones & Perimenopause', bg: 'bg-rose-50 border-rose-200', text: 'text-rose-800' },
+  { label: 'Trauma-Informed', bg: 'bg-amber-50 border-amber-200', text: 'text-amber-800' },
+  { label: 'ADHD Coaching', bg: 'bg-violet-50 border-violet-200', text: 'text-violet-800' },
+  { label: 'Grief Support', bg: 'bg-slate-50 border-slate-200', text: 'text-slate-700' },
+  { label: 'Menopause Circles', bg: 'bg-orange-50 border-orange-200', text: 'text-orange-800' },
+  { label: 'Somatic Practices', bg: 'bg-teal-50 border-teal-200', text: 'text-teal-800' },
   {
-    step: 1,
-    title: 'Browse Coaches',
-    description:
-      'Explore profiles, read reviews, and find a coach that matches your goals and style.',
+    label: 'Gut Health & Functional Medicine',
+    bg: 'bg-green-50 border-green-200',
+    text: 'text-green-800',
   },
   {
-    step: 2,
-    title: 'Book a Session',
-    description: 'Choose a time that works for you and book your first session in minutes.',
-  },
-  {
-    step: 3,
-    title: 'Achieve Your Goals',
-    description: 'Work with your coach to unlock your potential and make lasting progress.',
+    label: 'Nutrition & Body Neutrality',
+    bg: 'bg-yellow-50 border-yellow-200',
+    text: 'text-yellow-800',
   },
 ];
+
+const credentials = ['NBC-HWC ✓', 'IFM ✓', 'IIN ✓', 'ICF ✓', 'Trauma-Informed Verified'];
 
 export default async function HomePage() {
   const featuredCoaches = await getFeaturedCoaches();
@@ -104,35 +106,41 @@ export default async function HomePage() {
       <section className="relative overflow-hidden bg-gradient-to-br from-burgundy-dark to-burgundy">
         <div className="container mx-auto px-4 py-20 md:py-28">
           <div className="mx-auto max-w-4xl text-center">
-            <Badge className="mb-6 border-gold/30 bg-gold/20 px-4 py-1.5 text-sm text-white hover:bg-gold/30">
-              <Star className="mr-1.5 h-3.5 w-3.5 text-gold" />
-              Trusted by 1,000+ clients worldwide
-            </Badge>
             <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">
-              Find Your <span className="text-gold">Perfect Coach</span>
+              Find a Coach Who Gets <span className="text-gold">the Whole You.</span>
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg text-white/80 md:text-xl">
-              Connect with expert coaches for personalized guidance on your personal and
-              professional journey. Transform your life with one-on-one coaching that works.
+              Certified practitioners in hormones, trauma, ADHD, grief, and menopause — matched to
+              your body, mind, and life stage.
             </p>
             <div className="mt-10 flex flex-col justify-center gap-4 sm:flex-row">
               <Button
                 size="lg"
-                className="h-12 bg-gold px-8 text-base text-burgundy-dark hover:bg-gold-dark"
+                className="h-12 bg-gold px-8 text-base font-semibold text-burgundy-dark hover:bg-gold-dark"
                 asChild
               >
                 <Link href="/coaches">
-                  Find a Coach
+                  Find My Coach
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Link>
               </Button>
               <Button
                 size="lg"
-                className="h-12 bg-gold px-8 text-base text-white hover:bg-gold-dark"
+                variant="ghost"
+                className="h-12 border border-white/30 px-8 text-base text-white hover:bg-white/10 hover:text-white"
                 asChild
               >
-                <Link href="/sign-up">Get Started</Link>
+                <Link href="/sign-up?role=coach">I&apos;m a Coach →</Link>
               </Button>
+            </div>
+
+            {/* Trust row */}
+            <div className="mt-10 flex flex-wrap justify-center gap-x-4 gap-y-2">
+              {credentials.map((cred) => (
+                <span key={cred} className="text-sm font-medium text-white/70">
+                  {cred}
+                </span>
+              ))}
             </div>
           </div>
         </div>
@@ -146,10 +154,10 @@ export default async function HomePage() {
         <div className="container mx-auto px-4">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="text-3xl font-bold tracking-tight text-burgundy-dark md:text-4xl">
-              Why Choose AccrediPro CoachHub?
+              Why Co-duck?
             </h2>
             <p className="mt-4 text-muted-foreground">
-              Everything you need to find the right coach and achieve your goals.
+              A platform built around you — not corporate checkboxes.
             </p>
           </div>
           <div className="mt-16 grid gap-8 md:grid-cols-3">
@@ -171,31 +179,33 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* How It Works Section */}
+      {/* Browse by Specialty Section */}
       <section className="py-20">
         <div className="container mx-auto px-4">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="text-3xl font-bold tracking-tight text-burgundy-dark md:text-4xl">
-              How It Works
+              Browse by What You&apos;re Going Through
             </h2>
             <p className="mt-4 text-muted-foreground">
-              Get started in three simple steps and begin your transformation journey.
+              You don&apos;t have to fit a category — but these might feel familiar.
             </p>
           </div>
-          <div className="mt-16 grid gap-8 md:grid-cols-3">
-            {howItWorks.map((item) => (
-              <div key={item.step} className="relative text-center">
-                {/* Step number */}
-                <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full border-2 border-burgundy bg-white text-2xl font-bold text-burgundy">
-                  {item.step}
+          <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {specialties.map((specialty) => (
+              <Link
+                key={specialty.label}
+                href={`/coaches?specialties=${encodeURIComponent(specialty.label)}`}
+                className="group"
+              >
+                <div
+                  className={`rounded-xl border px-5 py-4 transition-all duration-200 hover:shadow-md ${specialty.bg}`}
+                >
+                  <p className={`font-medium ${specialty.text}`}>{specialty.label}</p>
+                  <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground group-hover:text-foreground">
+                    Find coaches <ArrowRight className="h-3 w-3" />
+                  </p>
                 </div>
-                {/* Connector line (hidden on mobile, shown between items on desktop) */}
-                {item.step < 3 && (
-                  <div className="absolute left-[calc(50%+40px)] top-8 hidden h-0.5 w-[calc(100%-80px)] bg-gradient-to-r from-burgundy to-burgundy/30 md:block" />
-                )}
-                <h3 className="mb-2 text-xl font-semibold">{item.title}</h3>
-                <p className="mx-auto max-w-xs text-muted-foreground">{item.description}</p>
-              </div>
+              </Link>
             ))}
           </div>
         </div>
@@ -206,10 +216,10 @@ export default async function HomePage() {
         <div className="container mx-auto px-4">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="text-3xl font-bold tracking-tight text-burgundy-dark md:text-4xl">
-              Featured Coaches
+              Meet Some of Our Coaches
             </h2>
             <p className="mt-4 text-muted-foreground">
-              Meet some of the amazing coaches ready to help you succeed.
+              Real practitioners, verified credentials, whole-person care.
             </p>
           </div>
           <div className="mt-16 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
@@ -268,8 +278,7 @@ export default async function HomePage() {
                     </Link>
                   );
                 })
-              : /* Placeholder cards when no coaches are available */
-                Array.from({ length: 3 }).map((_, index) => (
+              : Array.from({ length: 3 }).map((_, index) => (
                   <Card key={index} className="border-dashed">
                     <CardContent className="p-8">
                       <div className="flex flex-col items-center text-center">
@@ -305,21 +314,29 @@ export default async function HomePage() {
       <section className="bg-gradient-to-br from-burgundy-dark to-burgundy py-20">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold tracking-tight text-white md:text-4xl">
-            Ready to Transform Your Life?
+            Ready to Find the Right Support?
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-white/80">
-            Find the right coach and start your journey toward personal and professional growth.
+            You deserve a coach who actually understands what you&apos;re going through. Start here.
           </p>
-          <div className="mt-8 flex justify-center">
+          <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
             <Button
               size="lg"
-              className="h-12 bg-gold px-8 text-base text-burgundy-dark hover:bg-gold-dark"
+              className="h-12 bg-gold px-8 text-base font-semibold text-burgundy-dark hover:bg-gold-dark"
               asChild
             >
               <Link href="/coaches">
-                Browse Coaches
+                Find My Coach
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>
+            </Button>
+            <Button
+              size="lg"
+              variant="ghost"
+              className="h-12 border border-white/30 px-8 text-base text-white hover:bg-white/10 hover:text-white"
+              asChild
+            >
+              <Link href="/sign-up?role=coach">Join as a Coach</Link>
             </Button>
           </div>
         </div>

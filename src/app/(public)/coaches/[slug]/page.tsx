@@ -102,6 +102,14 @@ export default async function CoachProfilePage({ params }: PageProps) {
         currentUserId={userId}
         isVerified={coach.verificationStatus === 'verified'}
       />
+
+      {/* Not Medical Advice disclaimer */}
+      <div className="mx-auto mt-8 max-w-4xl rounded-lg border border-muted bg-muted/30 px-5 py-4 text-sm text-muted-foreground">
+        <span className="font-medium text-foreground">Not medical advice:</span> Coaches on Co-duck
+        are not licensed medical providers. Nothing shared in a session constitutes medical advice,
+        diagnosis, or treatment. If you have an urgent medical concern, contact your physician or
+        call 911.
+      </div>
     </div>
   );
 }
