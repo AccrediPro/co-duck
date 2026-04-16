@@ -3,6 +3,11 @@ import { notFound, redirect } from 'next/navigation';
 import { getCoachForBooking } from '../actions';
 import { getBookingFromCheckoutSession } from './actions';
 import { PaymentSuccessContent } from '@/components/booking';
+import { db, bookings } from '@/db';
+import { eq } from 'drizzle-orm';
+import type { SessionType, BookingSessionType } from '@/db/schema';
+import { coachProfiles } from '@/db/schema';
+import { resolveIntakeFormForSession, findIntakeResponseForBooking } from '@/lib/intake-forms';
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -56,9 +61,67 @@ export default async function PaymentSuccessPage({ params, searchParams }: PageP
     );
   }
 
+  // Check whether this booking has a required intake form not yet submitted.
+  // We look up the coach's session types to find the id that matches the name
+  // stored in the booking snapshot, then resolve the form.
+  const intake = await resolveIntakeForBooking(bookingResult.data.id);
+
   return (
     <div className="container mx-auto px-4 py-8">
-      <PaymentSuccessContent coach={coachResult.data} slug={slug} booking={bookingResult.data} />
+      <PaymentSuccessContent
+        coach={coachResult.data}
+        slug={slug}
+        booking={bookingResult.data}
+        intake={intake}
+      />
     </div>
   );
+}
+
+/**
+ * Looks up whether the given booking has a required intake form not yet
+ * submitted, and returns the info needed to surface an intake prompt on the
+ * success page. Returns null if no intake applies.
+ */
+async function resolveIntakeForBooking(
+  bookingId: number
+): Promise<{ required: true; submitted: boolean; intakeUrl: string } | null> {
+  const rows = await db
+    .select({
+      id: bookings.id,
+      coachId: bookings.coachId,
+      clientId: bookings.clientId,
+      sessionType: bookings.sessionType,
+      intakeResponseId: bookings.intakeResponseId,
+    })
+    .from(bookings)
+    .where(eq(bookings.id, bookingId))
+    .limit(1);
+
+  if (rows.length === 0) return null;
+  const b = rows[0];
+
+  const profile = await db
+    .select({ sessionTypes: coachProfiles.sessionTypes })
+    .from(coachProfiles)
+    .where(eq(coachProfiles.userId, b.coachId))
+    .limit(1);
+
+  const bookingSessionTypeName = (b.sessionType as BookingSessionType | null)?.name ?? null;
+  const match = (profile[0]?.sessionTypes as SessionType[] | null)?.find(
+    (st) => st.name === bookingSessionTypeName
+  );
+
+  const form = await resolveIntakeFormForSession(b.coachId, match?.id);
+  if (!form) return null;
+
+  const existingResponseId = b.intakeResponseId
+    ? b.intakeResponseId
+    : await findIntakeResponseForBooking(b.id, b.clientId);
+
+  return {
+    required: true,
+    submitted: existingResponseId !== null,
+    intakeUrl: `/booking/${b.id}/intake`,
+  };
 }
