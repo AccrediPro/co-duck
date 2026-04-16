@@ -12,7 +12,7 @@ import { db } from '@/db';
 import { coachProfiles } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://accredipro-coachhub.com';
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://co-duck.com';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Static pages

@@ -75,7 +75,7 @@ interface ProfileData {
   avatarUrl: string | null;
   headline: string | null;
   bio: string | null;
-  specialties: string[] | null;
+  specialties: Array<{ category: string; subNiches: string[] }> | string[] | null;
   timezone: string | null;
   hourlyRate: number | null;
   currency: string | null;
@@ -343,7 +343,7 @@ export function ReviewPublishForm({
               <div className="flex flex-wrap gap-2">
                 {profile.specialties.map((specialty, index) => (
                   <Badge key={index} variant="secondary">
-                    {specialty}
+                    {typeof specialty === 'string' ? specialty : specialty.category}
                   </Badge>
                 ))}
               </div>

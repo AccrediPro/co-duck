@@ -14,7 +14,7 @@ interface CoachCardProps {
   name: string;
   avatarUrl: string | null;
   headline: string | null;
-  specialties: string[] | null;
+  specialties: Array<{ category: string; subNiches: string[] }> | null;
   sessionTypes: SessionType[] | null;
   currency: string | null;
   slug: string;
@@ -57,9 +57,21 @@ export function CoachCard({
       ? sessionTypes.reduce((min, session) => (session.price < min.price ? session : min))
       : null;
 
+  // Flatten specialties to display labels (prefer sub-niches, fall back to category)
+  const specialtyLabels: string[] = [];
+  if (specialties) {
+    for (const entry of specialties) {
+      if (entry.subNiches && entry.subNiches.length > 0) {
+        specialtyLabels.push(...entry.subNiches);
+      } else {
+        specialtyLabels.push(entry.category);
+      }
+    }
+  }
+
   // Limit specialties to display (max 3)
-  const displaySpecialties = specialties?.slice(0, 3) || [];
-  const hasMoreSpecialties = (specialties?.length || 0) > 3;
+  const displaySpecialties = specialtyLabels.slice(0, 3);
+  const hasMoreSpecialties = specialtyLabels.length > 3;
 
   return (
     <Link href={`/coaches/${slug}`}>
@@ -107,7 +119,7 @@ export function CoachCard({
                 ))}
                 {hasMoreSpecialties && (
                   <Badge variant="outline" className="border-white/30 text-xs text-cream/70">
-                    +{(specialties?.length || 0) - 3}
+                    +{specialtyLabels.length - 3}
                   </Badge>
                 )}
               </div>

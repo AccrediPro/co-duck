@@ -23,6 +23,7 @@ import { headers } from 'next/headers';
 import { stripe } from '@/lib/stripe';
 import { db, bookings, transactions, users, coachProfiles } from '@/db';
 import { memberships, membershipSubscriptions } from '@/db/schema';
+import { packages, packagePurchases, coachSubscriptions } from '@/db/schema';
 import { eq, and, gte } from 'drizzle-orm';
 import type Stripe from 'stripe';
 import { getOrCreateConversationInternal, sendSystemMessage } from '@/lib/conversations';
@@ -147,18 +148,27 @@ export async function POST(req: Request) {
         break;
       }
 
+      // ---- Package purchase (P0-05) ----
+      // checkout.session.completed is already handled above but dispatches
+      // to handlePackageCheckoutCompleted when metadata.type === 'package'
+
+      // ---- Subscription events ----
+      // Two distinct subscription products share the Stripe subscription.*
+      // event stream:
+      //   • Coach SaaS tier subscriptions (P0-07) — handleSubscriptionUpserted
+      //   • Client membership retainers (P0-06)  — handleMembershipSubscriptionUpsert
+      // Each handler checks its own metadata shape and no-ops when the event
+      // belongs to the other product, so it's safe to fan out to both.
       case 'customer.subscription.created':
       case 'customer.subscription.updated': {
-        // Mirror subscription state into membership_subscriptions.
-        // Also fires for `subscription` mode checkouts completing, so we
-        // rely on this (not checkout.session.completed) to create the row.
-        await handleSubscriptionUpsert(event.data.object as Stripe.Subscription);
+        await handleSubscriptionUpserted(event.data.object as Stripe.Subscription);
+        await handleMembershipSubscriptionUpsert(event.data.object as Stripe.Subscription);
         break;
       }
 
       case 'customer.subscription.deleted': {
-        // Subscription ended (either immediately or at period end).
         await handleSubscriptionDeleted(event.data.object as Stripe.Subscription);
+        await handleMembershipSubscriptionDeleted(event.data.object as Stripe.Subscription);
         break;
       }
 
@@ -225,9 +235,16 @@ export async function POST(req: Request) {
 async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
   console.log(`Stripe webhook: checkout.session.completed for session ${session.id}`);
 
-  // Subscription-mode checkouts (memberships) are handled entirely by
-  // customer.subscription.* and invoice.* events — nothing to do here.
-  if (session.mode === 'subscription') {
+  // Dispatch to package handler if this is a package purchase
+  if (session.metadata?.type === 'package') {
+    await handlePackageCheckoutCompleted(session);
+    return;
+  }
+
+  // Subscription-mode checkouts (memberships P0-06 and coach SaaS P0-07) are
+  // handled entirely by customer.subscription.* and invoice.* events —
+  // nothing to do here.
+  if (session.mode === 'subscription' || session.metadata?.type === 'subscription') {
     console.log(
       `Stripe webhook: checkout.session.completed in subscription mode — ` +
         `deferring to subscription events`
@@ -581,7 +598,7 @@ async function handlePaymentIntentFailed(paymentIntent: Stripe.PaymentIntent) {
 /**
  * Handles the account.application.deauthorized event.
  *
- * When a coach disconnects their Stripe Connect account from the AccrediPro CoachHub platform,
+ * When a coach disconnects their Stripe Connect account from the Co-duck platform,
  * this handler:
  * 1. Finds the coach profile with that Stripe account ID
  * 2. Clears the stripeAccountId
@@ -741,7 +758,7 @@ function getMembershipMetadata(
  * counter — `invoice.payment_succeeded` is responsible for resetting it
  * at each renewal.
  */
-async function handleSubscriptionUpsert(sub: Stripe.Subscription) {
+async function handleMembershipSubscriptionUpsert(sub: Stripe.Subscription) {
   console.log(`Stripe webhook: customer.subscription.upsert ${sub.id} (status=${sub.status})`);
 
   const meta = getMembershipMetadata(sub);
@@ -860,7 +877,7 @@ async function handleSubscriptionUpsert(sub: Stripe.Subscription) {
  * `/api/memberships/subscriptions/[id]/redeem`) keys off `status` so this
  * is the single source of truth.
  */
-async function handleSubscriptionDeleted(sub: Stripe.Subscription) {
+async function handleMembershipSubscriptionDeleted(sub: Stripe.Subscription) {
   console.log(`Stripe webhook: customer.subscription.deleted ${sub.id}`);
 
   const existing = await db.query.membershipSubscriptions.findFirst({
@@ -1050,4 +1067,210 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
     body: 'We couldn’t collect your membership payment. Please update your payment method to keep access.',
     link: '/dashboard/my-memberships',
   });
+}
+
+// ============================================================================
+// PACKAGE PURCHASE HANDLER (P0-05)
+// ============================================================================
+
+async function handlePackageCheckoutCompleted(session: Stripe.Checkout.Session) {
+  const {
+    packageId: packageIdStr,
+    coachId,
+    clientId,
+    feeRate: feeRateStr,
+  } = session.metadata ?? {};
+
+  if (!packageIdStr || !coachId || !clientId) {
+    console.error('Stripe webhook [package]: Missing metadata fields', session.metadata);
+    return;
+  }
+
+  const packageId = parseInt(packageIdStr);
+  if (isNaN(packageId)) {
+    console.error('Stripe webhook [package]: Invalid packageId', packageIdStr);
+    return;
+  }
+
+  if (session.payment_status !== 'paid') {
+    console.log(`Stripe webhook [package]: payment_status=${session.payment_status}, skipping`);
+    return;
+  }
+
+  // Idempotency: skip if purchase already recorded for this checkout session
+  const existing = await db
+    .select({ id: packagePurchases.id })
+    .from(packagePurchases)
+    .where(eq(packagePurchases.stripeCheckoutSessionId, session.id))
+    .limit(1);
+
+  if (existing.length > 0) {
+    console.log(`Stripe webhook [package]: purchase already recorded for session ${session.id}`);
+    return;
+  }
+
+  const [pkg] = await db
+    .select({ sessionCount: packages.sessionCount, validityDays: packages.validityDays })
+    .from(packages)
+    .where(eq(packages.id, packageId))
+    .limit(1);
+
+  if (!pkg) {
+    console.error(`Stripe webhook [package]: Package ${packageId} not found`);
+    return;
+  }
+
+  const amountTotal = session.amount_total ?? 0;
+  const feeRate = parseFloat(feeRateStr ?? '0.1');
+  const platformFeeCents = Math.round(amountTotal * feeRate);
+  const coachPayoutCents = amountTotal - platformFeeCents;
+
+  const paymentIntentId =
+    typeof session.payment_intent === 'string'
+      ? session.payment_intent
+      : (session.payment_intent?.id ?? null);
+
+  const purchasedAt = new Date();
+  const expiresAt = new Date(purchasedAt.getTime() + pkg.validityDays * 24 * 60 * 60 * 1000);
+
+  await db.insert(packagePurchases).values({
+    packageId,
+    clientId,
+    coachId,
+    purchasedAt,
+    expiresAt,
+    totalSessions: pkg.sessionCount,
+    usedSessions: 0,
+    totalPaidCents: amountTotal,
+    platformFeeCents,
+    coachPayoutCents,
+    status: 'active',
+    stripePaymentIntentId: paymentIntentId,
+    stripeCheckoutSessionId: session.id,
+  });
+
+  console.log(
+    `Stripe webhook [package]: Purchase recorded for package ${packageId}, client ${clientId}`
+  );
+}
+
+// ============================================================================
+// SUBSCRIPTION HANDLERS (P0-07)
+// ============================================================================
+
+/**
+ * Stripe's Subscription object exposes `current_period_start`, `current_period_end`
+ * and `trial_end` as Unix timestamps on the raw payload, but the SDK typings
+ * sometimes omit them at the top level (they are declared on subscription items
+ * in newer API versions). We narrow the type locally instead of reaching for `any`.
+ */
+type SubscriptionWithPeriod = Stripe.Subscription & {
+  current_period_start: number;
+  current_period_end: number;
+  trial_end: number | null;
+};
+
+type DbSubscriptionStatus = 'trialing' | 'active' | 'past_due' | 'canceled' | 'incomplete';
+
+/**
+ * Maps a Stripe subscription status onto the subset of statuses tracked in our DB.
+ * Stripe statuses we don't model (`unpaid`, `incomplete_expired`, `paused`) collapse
+ * to their nearest equivalent so the column remains a strict enum.
+ */
+function mapStripeStatusToDb(status: Stripe.Subscription.Status): DbSubscriptionStatus {
+  switch (status) {
+    case 'trialing':
+    case 'active':
+    case 'past_due':
+    case 'canceled':
+    case 'incomplete':
+      return status;
+    case 'unpaid':
+      return 'past_due';
+    case 'incomplete_expired':
+      return 'canceled';
+    case 'paused':
+      return 'active';
+    default: {
+      const _exhaustive: never = status;
+      void _exhaustive;
+      return 'incomplete';
+    }
+  }
+}
+
+async function handleSubscriptionUpserted(sub: Stripe.Subscription) {
+  // Skip membership subscriptions — those are handled by the
+  // handleMembershipSubscription* handlers, not coachSubscriptions (P0-07).
+  if (sub.metadata?.productKind === 'membership') return;
+
+  const coachId = sub.metadata?.coachId;
+  const planId = sub.metadata?.planId ?? 'starter';
+  const billingInterval = (sub.metadata?.billingInterval ?? 'monthly') as 'monthly' | 'yearly';
+
+  if (!coachId) {
+    console.error('Stripe webhook [subscription]: Missing coachId in metadata');
+    return;
+  }
+
+  const stripeCustomerId =
+    typeof sub.customer === 'string' ? sub.customer : (sub.customer?.id ?? null);
+
+  const typedSub = sub as SubscriptionWithPeriod;
+  const currentPeriodStart = new Date(typedSub.current_period_start * 1000);
+  const currentPeriodEnd = new Date(typedSub.current_period_end * 1000);
+  const trialEndsAt = typedSub.trial_end ? new Date(typedSub.trial_end * 1000) : null;
+  const status = mapStripeStatusToDb(sub.status);
+
+  await db
+    .insert(coachSubscriptions)
+    .values({
+      coachId,
+      planId,
+      billingInterval,
+      stripeSubscriptionId: sub.id,
+      stripeCustomerId,
+      status,
+      currentPeriodStart,
+      currentPeriodEnd,
+      trialEndsAt: trialEndsAt ?? undefined,
+      cancelAtPeriodEnd: sub.cancel_at_period_end,
+    })
+    .onConflictDoUpdate({
+      target: coachSubscriptions.coachId,
+      set: {
+        planId,
+        billingInterval,
+        stripeSubscriptionId: sub.id,
+        stripeCustomerId,
+        status,
+        currentPeriodStart,
+        currentPeriodEnd,
+        trialEndsAt: trialEndsAt ?? undefined,
+        cancelAtPeriodEnd: sub.cancel_at_period_end,
+      },
+    });
+
+  console.log(
+    `Stripe webhook [subscription]: Upserted plan=${planId} status=${sub.status} for coach ${coachId}`
+  );
+}
+
+async function handleSubscriptionDeleted(sub: Stripe.Subscription) {
+  // Skip membership subscriptions — those are handled by the
+  // handleMembershipSubscription* handlers, not coachSubscriptions (P0-07).
+  if (sub.metadata?.productKind === 'membership') return;
+
+  const coachId = sub.metadata?.coachId;
+  if (!coachId) {
+    console.error('Stripe webhook [subscription]: Missing coachId in deleted subscription');
+    return;
+  }
+
+  await db
+    .update(coachSubscriptions)
+    .set({ status: 'canceled', cancelAtPeriodEnd: false })
+    .where(eq(coachSubscriptions.coachId, coachId));
+
+  console.log(`Stripe webhook [subscription]: Marked canceled for coach ${coachId}`);
 }

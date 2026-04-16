@@ -1,6 +1,9 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
+
+// This page queries the DB at request time; skip static prerender (CI has no DB).
+export const dynamic = 'force-dynamic';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Users } from 'lucide-react';
 import {
@@ -22,9 +25,9 @@ import { eq } from 'drizzle-orm';
 import { COACH_SPECIALTIES } from '@/lib/validators/coach-onboarding';
 
 export const metadata: Metadata = {
-  title: 'Coaching Specialties | AccrediPro CoachHub',
+  title: 'Coaching Specialties | Co-duck',
   description:
-    'Explore our coaching specialties. Find expert coaches in life coaching, career coaching, wellness, leadership, and more.',
+    'Find coaches specializing in hormones, menopause, trauma, ADHD, grief, gut health, and whole-person wellness on Co-duck.',
 };
 
 // Map specialties to their icons
@@ -46,26 +49,29 @@ const specialtyIcons: Record<string, React.ElementType> = {
 // Map specialties to their descriptions
 const specialtyDescriptions: Record<string, string> = {
   'Life Coaching':
-    'Find balance, set meaningful goals, and create the life you envision with personalized guidance.',
+    'Navigate big transitions, set meaningful goals, and create a life that fits who you actually are — not who you were supposed to be.',
   'Career Coaching':
-    'Navigate career transitions, advance professionally, and find fulfillment in your work.',
+    'Move through career pivots, burnout recovery, and finding work that aligns with your values and energy.',
   'Health & Wellness':
-    'Build sustainable habits, improve your wellbeing, and achieve your health goals.',
+    'Build sustainable habits rooted in your biology, not willpower. Coaches trained in functional and integrative approaches.',
   'Executive Coaching':
-    'Enhance your leadership presence, decision-making, and strategic thinking at the executive level.',
+    'Lead with clarity and integrity. For executives who want to grow without burning out or leaving themselves behind.',
   'Relationship Coaching':
-    'Improve communication, deepen connections, and build healthier relationships.',
-  'Business Coaching': 'Scale your business, overcome challenges, and achieve sustainable growth.',
+    'Heal communication patterns, deepen connections, and build relationships grounded in safety and trust.',
+  'Business Coaching':
+    'Grow your practice or business in a way that works with your nervous system and life — not against it.',
   'Leadership Coaching':
-    'Develop your leadership skills, inspire teams, and drive organizational success.',
+    'Develop your leadership style, build psychological safety on your team, and lead from values.',
   'Mindset & Motivation':
-    'Transform limiting beliefs, build resilience, and unlock your full potential.',
-  'Financial Coaching': 'Master money management, build wealth, and achieve financial freedom.',
+    'Work through limiting beliefs, perfectionism, and nervous system patterns that keep you stuck.',
+  'Financial Coaching':
+    'Build a healthy relationship with money — one rooted in your values, not shame or scarcity.',
   'Parenting Coaching':
-    'Navigate parenting challenges with confidence and build stronger family bonds.',
-  'Spiritual Coaching': 'Explore your inner journey, find purpose, and cultivate spiritual growth.',
+    'Navigate the challenges of parenting with more confidence, connection, and compassion for yourself.',
+  'Spiritual Coaching':
+    'Explore meaning, purpose, and inner knowing. For those seeking guidance that goes beyond the surface.',
   'Performance Coaching':
-    'Optimize your performance, break through plateaus, and achieve peak results.',
+    'Optimize your performance in a sustainable way — honoring recovery, regulation, and what your body needs.',
 };
 
 async function getSpecialtyCoachCounts(): Promise<Record<string, number>> {
@@ -109,11 +115,11 @@ export default async function SpecialtiesPage() {
         <div className="container mx-auto px-4 py-16 md:py-24">
           <div className="mx-auto max-w-3xl text-center">
             <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">
-              Explore Coaching <span className="text-gold">Specialties</span>
+              Find a Coach for <span className="text-gold">What You&apos;re Actually Facing</span>
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg text-white/80">
-              Find the perfect coach for your unique goals. Browse our specialties and connect with
-              experts who can guide your journey to success.
+              Browse by specialty and connect with coaches trained in the exact support you need —
+              hormones, trauma, menopause, ADHD, grief, and more.
             </p>
           </div>
         </div>
@@ -171,10 +177,11 @@ export default async function SpecialtiesPage() {
       <section className="bg-gradient-to-br from-burgundy-dark to-burgundy py-16">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-2xl font-bold tracking-tight text-white md:text-3xl">
-            Not sure which specialty is right for you?
+            Not sure which specialty fits what you&apos;re going through?
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-white/80">
-            Browse all our coaches and find someone who resonates with your goals and aspirations.
+            Browse all coaches and filter by credential type, approach, or availability. You
+            don&apos;t have to have it figured out before you start.
           </p>
           <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
             <Button

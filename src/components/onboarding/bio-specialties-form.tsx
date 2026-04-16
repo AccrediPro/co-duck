@@ -1,30 +1,11 @@
 /**
  * @fileoverview Coach Onboarding Step 2 - Bio & Specialties Form
  *
- * This component handles the second step of the coach onboarding flow where coaches
- * provide their professional biography and select their coaching specialties.
+ * Presents a 2-level specialty picker: coaches first select one or more
+ * top-level categories (Health & Wellness, Career, Life…), then choose
+ * relevant sub-niches within those categories.
  *
  * @module components/onboarding/bio-specialties-form
- *
- * ## Flow
- * 1. Coach writes their professional bio (up to 2000 characters)
- * 2. Coach selects from predefined specialties and/or adds custom ones
- * 3. On submit, data is saved via server action and user advances to step 3
- *
- * ## Data Flow
- * - Input: Existing bio and specialties data (for edits)
- * - Output: Saves to `coach_profiles` table via `saveBioSpecialties` server action
- * - Navigation: On success, redirects to `/onboarding/coach/step-3`
- *
- * ## Validation
- * Uses Zod schema `coachBioSpecialtiesSchema` from coach-onboarding validators:
- * - bio: Optional, max 2000 characters
- * - specialties: Required, at least 1 specialty must be selected
- *
- * ## Features
- * - Predefined specialty chips for common coaching areas
- * - Custom specialty input with Enter key support
- * - Character count indicator for bio with warning when approaching limit
  */
 'use client';
 
@@ -34,14 +15,14 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
   coachBioSpecialtiesSchema,
-  COACH_SPECIALTIES,
+  COACH_CATEGORIES,
   type CoachBioSpecialtiesFormData,
+  type SpecialtyEntry,
 } from '@/lib/validators/coach-onboarding';
 import { saveBioSpecialties } from '@/app/(dashboard)/onboarding/coach/actions/save-bio-specialties';
 
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Input } from '@/components/ui/input';
 import {
   Form,
   FormControl,
@@ -52,168 +33,158 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, X, Plus } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { ChevronDown, ChevronRight, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
-/* ============================================================================
- * TYPE DEFINITIONS
- * ========================================================================= */
-
-/**
- * Props for the BioSpecialtiesForm component.
- *
- * @property initialData - Pre-existing profile data for editing
- * @property initialData.bio - Coach's current bio text
- * @property initialData.specialties - Array of currently selected specialties
- */
-/**
- * Props for the BioSpecialtiesForm component.
- *
- * @property initialData - Pre-existing profile data for editing
- * @property initialData.bio - Coach's current bio text
- * @property initialData.specialties - Array of currently selected specialties
- */
 interface BioSpecialtiesFormProps {
   initialData?: {
     bio?: string | null;
-    specialties?: string[];
+    specialties?: Array<{ category: string; subNiches: string[] }>;
   };
 }
 
-/* ============================================================================
- * COMPONENT
- * ========================================================================= */
-
-/**
- * Bio & Specialties Form for coach onboarding step 2.
- *
- * Allows coaches to write their professional biography and select their areas
- * of expertise. Specialties can be chosen from a predefined list or custom
- * ones can be added.
- *
- * @param props - Component props
- * @param props.initialData - Pre-existing data for form pre-population
- *
- * @returns React component rendering the bio and specialties form
- *
- * @example
- * ```tsx
- * // New coach onboarding
- * <BioSpecialtiesForm />
- *
- * // Editing existing profile
- * <BioSpecialtiesForm
- *   initialData={{
- *     bio: "I am an executive coach with 10 years of experience...",
- *     specialties: ["Executive Coaching", "Leadership Development"]
- *   }}
- * />
- * ```
- */
 export function BioSpecialtiesForm({ initialData }: BioSpecialtiesFormProps) {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [customSpecialty, setCustomSpecialty] = useState('');
+  // Track which categories are expanded to show sub-niches
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
+    () =>
+      new Set(
+        (initialData?.specialties ?? [])
+          .filter((s) => s.subNiches.length > 0)
+          .map((s) => s.category)
+      )
+  );
 
-  // Initialize form with react-hook-form and Zod validation
   const form = useForm<CoachBioSpecialtiesFormData>({
     resolver: zodResolver(coachBioSpecialtiesSchema),
     defaultValues: {
       bio: initialData?.bio || '',
-      specialties: initialData?.specialties || [],
+      specialties: initialData?.specialties ?? [],
     },
   });
 
-  // Watch bio and specialties for real-time UI updates
   const watchedBio = form.watch('bio');
   const watchedSpecialties = form.watch('specialties');
   const bioLength = watchedBio?.length || 0;
 
-  /**
-   * Toggles a specialty selection on or off.
-   *
-   * @param specialty - The specialty name to toggle
-   */
-  /**
-   * Toggles a specialty selection on or off.
-   *
-   * @param specialty - The specialty name to toggle
-   */
-  const toggleSpecialty = (specialty: string) => {
-    const currentSpecialties = form.getValues('specialties');
-    if (currentSpecialties.includes(specialty)) {
-      // Remove specialty if already selected
+  // ── helpers ──────────────────────────────────────────────────────────────
+
+  function getCategoryEntry(categoryLabel: string): SpecialtyEntry | undefined {
+    return watchedSpecialties.find((s) => s.category === categoryLabel);
+  }
+
+  function isCategorySelected(categoryLabel: string): boolean {
+    return watchedSpecialties.some((s) => s.category === categoryLabel);
+  }
+
+  function isSubNicheSelected(categoryLabel: string, subLabel: string): boolean {
+    const entry = getCategoryEntry(categoryLabel);
+    return entry?.subNiches.includes(subLabel) ?? false;
+  }
+
+  // ── category toggle ───────────────────────────────────────────────────────
+
+  function toggleCategory(categoryLabel: string, hasSubNiches: boolean) {
+    const current = form.getValues('specialties');
+    const exists = current.some((s) => s.category === categoryLabel);
+
+    if (exists) {
+      // Deselect — remove the entry entirely
       form.setValue(
         'specialties',
-        currentSpecialties.filter((s) => s !== specialty),
+        current.filter((s) => s.category !== categoryLabel),
+        { shouldValidate: true }
+      );
+      // Collapse if it had sub-niches
+      if (hasSubNiches) {
+        setExpandedCategories((prev) => {
+          const next = new Set(prev);
+          next.delete(categoryLabel);
+          return next;
+        });
+      }
+    } else {
+      // Select — add with empty subNiches
+      form.setValue('specialties', [...current, { category: categoryLabel, subNiches: [] }], {
+        shouldValidate: true,
+      });
+      // Auto-expand if it has sub-niches
+      if (hasSubNiches) {
+        setExpandedCategories((prev) => {
+          const next = new Set(prev);
+          next.add(categoryLabel);
+          return next;
+        });
+      }
+    }
+  }
+
+  // ── sub-niche toggle ──────────────────────────────────────────────────────
+
+  function toggleSubNiche(categoryLabel: string, subLabel: string) {
+    const current = form.getValues('specialties');
+    const entryIdx = current.findIndex((s) => s.category === categoryLabel);
+
+    if (entryIdx === -1) {
+      // Parent not selected — auto-select parent too
+      form.setValue(
+        'specialties',
+        [...current, { category: categoryLabel, subNiches: [subLabel] }],
         { shouldValidate: true }
       );
     } else {
-      // Add specialty if not selected
-      form.setValue('specialties', [...currentSpecialties, specialty], { shouldValidate: true });
+      const entry = current[entryIdx];
+      const subNiches = entry.subNiches.includes(subLabel)
+        ? entry.subNiches.filter((s) => s !== subLabel)
+        : [...entry.subNiches, subLabel];
+      const updated = [...current];
+      updated[entryIdx] = { ...entry, subNiches };
+      form.setValue('specialties', updated, { shouldValidate: true });
     }
-  };
+  }
 
-  /**
-   * Adds a custom specialty from the input field.
-   *
-   * Only adds if the input is non-empty and not already in the list.
-   */
-  const addCustomSpecialty = () => {
-    const trimmed = customSpecialty.trim();
-    if (trimmed && !watchedSpecialties.includes(trimmed)) {
-      form.setValue('specialties', [...watchedSpecialties, trimmed], { shouldValidate: true });
-      setCustomSpecialty('');
-    }
-  };
+  function toggleExpandCategory(categoryLabel: string) {
+    setExpandedCategories((prev) => {
+      const next = new Set(prev);
+      if (next.has(categoryLabel)) {
+        next.delete(categoryLabel);
+      } else {
+        next.add(categoryLabel);
+      }
+      return next;
+    });
+  }
 
-  /**
-   * Handles Enter key press in custom specialty input.
-   *
-   * @param e - Keyboard event
-   */
-  const handleCustomKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      addCustomSpecialty();
-    }
-  };
+  // ── submit ────────────────────────────────────────────────────────────────
 
-  /**
-   * Handles form submission.
-   *
-   * Saves bio and specialties via server action and navigates to step 3 on success.
-   *
-   * @param data - Validated form data
-   */
   async function onSubmit(data: CoachBioSpecialtiesFormData) {
     setIsSubmitting(true);
     setError(null);
-
     try {
       const result = await saveBioSpecialties(data);
-
       if (result.success) {
-        // Navigate to step 3
-        router.push('/onboarding/coach/step-3');
+        router.push('/onboarding/coach/credentials');
       } else {
         setError(result.error);
       }
-    } catch (err) {
+    } catch {
       setError('An unexpected error occurred. Please try again.');
-      console.error('Form submission error:', err);
     } finally {
       setIsSubmitting(false);
     }
   }
+
+  // ── render ────────────────────────────────────────────────────────────────
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>Bio & Specialties</CardTitle>
         <CardDescription>
-          Tell potential clients about yourself and your areas of expertise.
+          Tell potential clients about yourself and the areas you specialize in.
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -228,7 +199,7 @@ export function BioSpecialtiesForm({ initialData }: BioSpecialtiesFormProps) {
                   <FormLabel>Bio</FormLabel>
                   <FormControl>
                     <Textarea
-                      placeholder="Tell potential clients about your background, experience, and coaching philosophy. What makes you unique as a coach? What can clients expect when working with you?"
+                      placeholder="Tell potential clients about your background, experience, and coaching philosophy. What makes you unique? What can clients expect when working with you?"
                       className="min-h-[200px] resize-y"
                       maxLength={2000}
                       {...field}
@@ -238,14 +209,14 @@ export function BioSpecialtiesForm({ initialData }: BioSpecialtiesFormProps) {
                     <span className={bioLength > 1900 ? 'text-gold-dark' : ''}>
                       {bioLength}/2000 characters
                     </span>
-                    {bioLength > 1900 && bioLength <= 2000 && ' - approaching limit'}
+                    {bioLength > 1900 && bioLength <= 2000 && ' — approaching limit'}
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            {/* Specialties */}
+            {/* Specialties — 2-level picker */}
             <FormField
               control={form.control}
               name="specialties"
@@ -253,85 +224,95 @@ export function BioSpecialtiesForm({ initialData }: BioSpecialtiesFormProps) {
                 <FormItem>
                   <FormLabel>Specialties *</FormLabel>
                   <FormDescription className="mb-3">
-                    Select at least one specialty. Click to toggle selection.
+                    Select at least one category. Expand categories with sub-niches to get more
+                    specific.
                   </FormDescription>
 
-                  {/* Predefined Specialties as Chips */}
-                  <div className="flex flex-wrap gap-2">
-                    {COACH_SPECIALTIES.map((specialty) => {
-                      const isSelected = watchedSpecialties.includes(specialty);
+                  <div className="space-y-2">
+                    {COACH_CATEGORIES.map((cat) => {
+                      const hasSubNiches = cat.subNiches.length > 0;
+                      const isSelected = isCategorySelected(cat.label);
+                      const isExpanded = expandedCategories.has(cat.label);
+
                       return (
-                        <button
-                          key={specialty}
-                          type="button"
-                          onClick={() => toggleSpecialty(specialty)}
-                          className={`rounded-full border px-3 py-1.5 text-sm font-medium transition-colors ${
-                            isSelected
-                              ? 'border-primary bg-primary text-primary-foreground'
-                              : 'border-input bg-background hover:bg-accent hover:text-accent-foreground'
-                          }`}
-                        >
-                          {specialty}
-                        </button>
+                        <div key={cat.slug} className="rounded-lg border">
+                          {/* Category row */}
+                          <div className="flex items-center gap-3 px-4 py-3">
+                            <Checkbox
+                              id={`cat-${cat.slug}`}
+                              checked={isSelected}
+                              onCheckedChange={() => toggleCategory(cat.label, hasSubNiches)}
+                            />
+                            <label
+                              htmlFor={`cat-${cat.slug}`}
+                              className="flex-1 cursor-pointer text-sm font-medium"
+                            >
+                              {cat.label}
+                            </label>
+                            {hasSubNiches && (
+                              <button
+                                type="button"
+                                onClick={() => toggleExpandCategory(cat.label)}
+                                className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground"
+                                aria-label={
+                                  isExpanded ? 'Collapse sub-niches' : 'Expand sub-niches'
+                                }
+                              >
+                                {isExpanded ? (
+                                  <ChevronDown className="h-4 w-4" />
+                                ) : (
+                                  <ChevronRight className="h-4 w-4" />
+                                )}
+                                <span>{cat.subNiches.length} specializations</span>
+                              </button>
+                            )}
+                          </div>
+
+                          {/* Sub-niches (collapsible) */}
+                          {hasSubNiches && isExpanded && (
+                            <div className="border-t bg-muted/30 px-4 py-3">
+                              <p className="mb-2 text-xs font-medium text-muted-foreground">
+                                Select specific areas within {cat.label}:
+                              </p>
+                              <div className="flex flex-wrap gap-2">
+                                {cat.subNiches.map((sub) => {
+                                  const subSelected = isSubNicheSelected(cat.label, sub.label);
+                                  return (
+                                    <button
+                                      key={sub.slug}
+                                      type="button"
+                                      onClick={() => toggleSubNiche(cat.label, sub.label)}
+                                      className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+                                        subSelected
+                                          ? 'border-primary bg-primary text-primary-foreground'
+                                          : 'border-input bg-background hover:bg-accent hover:text-accent-foreground'
+                                      }`}
+                                    >
+                                      {sub.label}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          )}
+                        </div>
                       );
                     })}
                   </div>
 
-                  {/* Custom Specialties (shown if any) */}
-                  {watchedSpecialties.filter((s) => !COACH_SPECIALTIES.includes(s as never))
-                    .length > 0 && (
-                    <div className="mt-3">
-                      <p className="mb-2 text-sm font-medium text-muted-foreground">
-                        Custom Specialties:
-                      </p>
-                      <div className="flex flex-wrap gap-2">
-                        {watchedSpecialties
-                          .filter((s) => !COACH_SPECIALTIES.includes(s as never))
-                          .map((specialty) => (
-                            <span
-                              key={specialty}
-                              className="inline-flex items-center gap-1 rounded-full border border-primary bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground"
-                            >
-                              {specialty}
-                              <button
-                                type="button"
-                                onClick={() => toggleSpecialty(specialty)}
-                                className="rounded-full p-0.5 hover:bg-primary-foreground/20"
-                              >
-                                <X className="h-3 w-3" />
-                                <span className="sr-only">Remove {specialty}</span>
-                              </button>
-                            </span>
-                          ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Add Custom Specialty */}
-                  <div className="mt-4">
-                    <p className="mb-2 text-sm font-medium text-muted-foreground">
-                      Add a custom specialty:
+                  {/* Selection summary */}
+                  {watchedSpecialties.length > 0 && (
+                    <p className="mt-2 text-xs text-muted-foreground">
+                      Selected:{' '}
+                      {watchedSpecialties
+                        .map((s) =>
+                          s.subNiches.length > 0
+                            ? `${s.category} (${s.subNiches.join(', ')})`
+                            : s.category
+                        )
+                        .join(' · ')}
                     </p>
-                    <div className="flex gap-2">
-                      <Input
-                        placeholder="e.g., ADHD Coaching"
-                        value={customSpecialty}
-                        onChange={(e) => setCustomSpecialty(e.target.value)}
-                        onKeyDown={handleCustomKeyDown}
-                        className="max-w-xs"
-                      />
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={addCustomSpecialty}
-                        disabled={!customSpecialty.trim()}
-                      >
-                        <Plus className="mr-1 h-4 w-4" />
-                        Add
-                      </Button>
-                    </div>
-                  </div>
+                  )}
 
                   <FormMessage />
                 </FormItem>
@@ -345,7 +326,7 @@ export function BioSpecialtiesForm({ initialData }: BioSpecialtiesFormProps) {
               </div>
             )}
 
-            {/* Navigation buttons */}
+            {/* Navigation */}
             <div className="flex justify-between">
               <Button variant="outline" asChild>
                 <Link href="/onboarding/coach">Back to Step 1</Link>
