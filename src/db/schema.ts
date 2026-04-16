@@ -593,7 +593,9 @@ export const coachProfiles = pgTable(
      * Evolved from a flat string[] to a 2-level tree in migration 0027.
      * Use COACH_CATEGORIES from coach-onboarding.ts for the canonical list.
      */
-    specialties: jsonb('specialties').$type<Array<{ category: string; subNiches: string[] }>>().default([]),
+    specialties: jsonb('specialties')
+      .$type<Array<{ category: string; subNiches: string[] }>>()
+      .default([]),
 
     /**
      * Default hourly rate in CENTS

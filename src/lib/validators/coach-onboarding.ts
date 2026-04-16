@@ -206,6 +206,72 @@ export function findParentCategory(subNicheSlug: string): CoachCategory | undefi
 }
 
 /* =============================================================================
+   2-LEVEL TAXONOMY: COACH CATEGORIES
+   ============================================================================= */
+
+export interface SubNiche {
+  slug: string;
+  label: string;
+}
+
+export interface CoachCategory {
+  slug: string;
+  label: string;
+  subNiches: SubNiche[];
+}
+
+/**
+ * 2-level specialty taxonomy for coach discovery and SEO landing pages.
+ * Top-level categories each have optional sub-niches.
+ */
+export const COACH_CATEGORIES: CoachCategory[] = [
+  {
+    slug: 'health-wellness',
+    label: 'Health & Wellness',
+    subNiches: [
+      { slug: 'functional-medicine', label: 'Functional Medicine' },
+      { slug: 'perimenopause-hormones', label: 'Perimenopause & Hormones' },
+      { slug: 'trauma-informed', label: 'Trauma-Informed Coaching' },
+      { slug: 'adhd-focus', label: 'ADHD & Focus' },
+      { slug: 'grief-loss', label: 'Grief & Loss' },
+      { slug: 'autoimmune-chronic', label: 'Autoimmune & Chronic Illness' },
+      { slug: 'weight-loss', label: 'Weight Loss & Metabolic Health' },
+      { slug: 'sleep-fatigue', label: 'Sleep & Fatigue Recovery' },
+      { slug: 'gut-health', label: 'Gut Health & Nutrition' },
+      { slug: 'mental-health', label: 'Mental Health & Anxiety' },
+      { slug: 'fertility-preconception', label: 'Fertility & Preconception' },
+      { slug: 'postpartum', label: 'Postpartum & Motherhood' },
+      { slug: 'menopause', label: 'Menopause' },
+      { slug: 'addiction-recovery', label: 'Addiction & Recovery' },
+      { slug: 'chronic-pain', label: 'Chronic Pain' },
+    ],
+  },
+  { slug: 'career', label: 'Career', subNiches: [] },
+  { slug: 'life', label: 'Life', subNiches: [] },
+  { slug: 'business', label: 'Business', subNiches: [] },
+  { slug: 'relationship', label: 'Relationship', subNiches: [] },
+  { slug: 'financial', label: 'Financial', subNiches: [] },
+  { slug: 'leadership', label: 'Leadership', subNiches: [] },
+  { slug: 'performance', label: 'Performance', subNiches: [] },
+  { slug: 'mindset', label: 'Mindset', subNiches: [] },
+  { slug: 'communication', label: 'Communication', subNiches: [] },
+  { slug: 'transition', label: 'Transition', subNiches: [] },
+];
+
+/**
+ * Given a slug, returns the parent category if the slug belongs to a sub-niche,
+ * or null if the slug is itself a top-level category.
+ */
+export function findParentCategory(slug: string): CoachCategory | null {
+  for (const cat of COACH_CATEGORIES) {
+    if (cat.subNiches.some((s) => s.slug === slug)) {
+      return cat;
+    }
+  }
+  return null;
+}
+
+/* =============================================================================
    STEP 2: BIO & SPECIALTIES SCHEMA
    ============================================================================= */
 
@@ -217,7 +283,7 @@ export function findParentCategory(subNicheSlug: string): CoachCategory | undefi
  */
 export const specialtyEntrySchema = z.object({
   /** Top-level category label (e.g., "Health & Wellness") */
-  category: z.string().min(1),
+  category: z.string().min(1, 'Category cannot be empty'),
   /** Selected sub-niche labels within this category (may be empty) */
   subNiches: z.array(z.string()),
 });

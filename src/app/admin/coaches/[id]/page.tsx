@@ -82,7 +82,7 @@ export default async function AdminCoachDetailPage({ params }: PageProps) {
     notFound();
   }
 
-  const specialties = (coach.specialties || []) as unknown as string[];
+  const specialties = (coach.specialties || []).map((entry) => entry.category);
   const sessionTypes = (coach.sessionTypes || []) as SessionType[];
 
   return (
