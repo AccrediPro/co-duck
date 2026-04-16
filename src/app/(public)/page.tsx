@@ -4,6 +4,9 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { db, coachProfiles, users } from '@/db';
+
+// This page queries the DB at request time; skip static prerender (CI has no DB).
+export const dynamic = 'force-dynamic';
 import { eq } from 'drizzle-orm';
 import { SUPPORTED_CURRENCIES } from '@/lib/validators/coach-onboarding';
 import type { SessionType } from '@/db/schema';
