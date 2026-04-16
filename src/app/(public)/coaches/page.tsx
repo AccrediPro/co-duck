@@ -11,6 +11,9 @@ import {
   type SortOption,
 } from '@/components/coaches';
 
+// This page queries the DB at request time; skip static prerender (CI has no DB).
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: 'Find a Coach | Co-duck',
   description:

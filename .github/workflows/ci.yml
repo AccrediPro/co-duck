@@ -52,9 +52,12 @@ jobs:
       - name: Build
         run: npm run build
         env:
-          # Stub env vars for build (no actual connections needed)
+          # Stub env vars for build (no actual connections needed).
+          # Clerk keys must decode to a valid `<domain>.clerk.accounts.dev$` format or the
+          # @clerk/clerk-react SDK throws during prerender and fails the build.
+          # The publishable-key base64 below decodes to "placeholder.clerk.accounts.dev$".
           DATABASE_URL: postgresql://stub:stub@localhost:5432/stub
-          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_stub
+          NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_cGxhY2Vob2xkZXIuY2xlcmsuYWNjb3VudHMuZGV2JA
           CLERK_SECRET_KEY: sk_test_stub
           STRIPE_SECRET_KEY: sk_test_stub
           NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: pk_test_stub

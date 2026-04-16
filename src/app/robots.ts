@@ -8,7 +8,7 @@
 
 import { MetadataRoute } from 'next';
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://accredipro-coachhub.com';
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://co-duck.com';
 
 export default function robots(): MetadataRoute.Robots {
   return {

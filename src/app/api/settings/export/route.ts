@@ -238,7 +238,7 @@ export async function GET(request: Request) {
       status: 200,
       headers: {
         'Content-Type': 'application/json',
-        'Content-Disposition': `attachment; filename="accredipro-coachhub-data-export-${new Date().toISOString().split('T')[0]}.json"`,
+        'Content-Disposition': `attachment; filename="co-duck-data-export-${new Date().toISOString().split('T')[0]}.json"`,
       },
     });
   } catch (error) {

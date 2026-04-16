@@ -127,7 +127,7 @@ export function CancellationEmail({
 
       <Text style={paragraph}>
         We understand plans can change. If you&apos;d like to reschedule,{' '}
-        <Link href="https://accredipro-coachhub.com/coaches" style={link}>
+        <Link href="https://co-duck.com/coaches" style={link}>
           browse available coaches
         </Link>{' '}
         and book a new session at your convenience.
@@ -135,7 +135,7 @@ export function CancellationEmail({
 
       <Text style={paragraph}>
         Questions about your cancellation?{' '}
-        <Link href="https://accredipro-coachhub.com/support" style={link}>
+        <Link href="https://co-duck.com/support" style={link}>
           Contact our support team
         </Link>
       </Text>

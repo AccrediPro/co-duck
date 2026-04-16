@@ -29,7 +29,7 @@ export function PaymentReceiptEmail({
   bookingId,
   unsubscribeUrl,
 }: PaymentReceiptEmailProps) {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://accredipro-coachhub.com';
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://co-duck.com';
   const formattedAmount = new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: currency.toUpperCase(),
