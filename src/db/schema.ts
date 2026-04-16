@@ -1118,6 +1118,9 @@ export const bookings = pgTable(
      */
     googleCalendarEventId: text('google_calendar_event_id'),
 
+    /** Package purchase this booking redeems a session from (P0-05) */
+    packagePurchaseId: integer('package_purchase_id'),
+
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true })
       .notNull()
@@ -1133,6 +1136,8 @@ export const bookings = pgTable(
     index('bookings_start_time_idx').on(table.startTime),
     // Index for filtering by status (tabs: upcoming, past, cancelled)
     index('bookings_status_idx').on(table.status),
+    // Index for package purchase redemption lookup (P0-05)
+    index('bookings_package_purchase_id_idx').on(table.packagePurchaseId),
   ]
 );
 
@@ -3390,6 +3395,262 @@ export const sessionPrepResponsesRelations = relations(sessionPrepResponses, ({ 
 export const sessionPrepQuestionsRelations = relations(sessionPrepQuestions, ({ one }) => ({
   coach: one(users, {
     fields: [sessionPrepQuestions.coachId],
+    references: [users.id],
+  }),
+}));
+
+// ============================================================================
+// FORMS PRIMITIVE (P0-08)
+// ============================================================================
+
+export const formTypeEnum = pgEnum('form_type', [
+  'intake',
+  'session_feedback',
+  'progress_check',
+  'custom',
+]);
+
+export interface FormQuestion {
+  id: string;
+  order: number;
+  type: 'short_text' | 'long_text' | 'single_choice' | 'multi_choice' | 'rating' | 'yes_no';
+  label: string;
+  required: boolean;
+  options?: string[]; // for single_choice / multi_choice
+}
+
+export const forms = pgTable(
+  'forms',
+  {
+    id: serial('id').primaryKey(),
+    coachId: text('coach_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    title: text('title').notNull(),
+    description: text('description'),
+    formType: formTypeEnum('form_type').notNull().default('custom'),
+    questions: jsonb('questions').$type<FormQuestion[]>().notNull().default([]),
+    isPublished: boolean('is_published').notNull().default(false),
+    publishedAt: timestamp('published_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index('forms_coach_id_idx').on(t.coachId),
+    index('forms_form_type_idx').on(t.formType),
+  ]
+);
+
+export type Form = typeof forms.$inferSelect;
+export type NewForm = typeof forms.$inferInsert;
+
+export interface FormAnswers {
+  [questionId: string]: string | string[] | number | boolean;
+}
+
+export const formResponses = pgTable(
+  'form_responses',
+  {
+    id: serial('id').primaryKey(),
+    formId: integer('form_id')
+      .notNull()
+      .references(() => forms.id, { onDelete: 'cascade' }),
+    respondentId: text('respondent_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    bookingId: integer('booking_id').references(() => bookings.id, { onDelete: 'set null' }),
+    answers: jsonb('answers').$type<FormAnswers>().notNull().default({}),
+    submittedAt: timestamp('submitted_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index('form_responses_form_id_idx').on(t.formId),
+    index('form_responses_respondent_id_idx').on(t.respondentId),
+    index('form_responses_booking_id_idx').on(t.bookingId),
+  ]
+);
+
+export type FormResponse = typeof formResponses.$inferSelect;
+export type NewFormResponse = typeof formResponses.$inferInsert;
+
+// Relations
+export const formsRelations = relations(forms, ({ one, many }) => ({
+  coach: one(users, {
+    fields: [forms.coachId],
+    references: [users.id],
+  }),
+  responses: many(formResponses),
+}));
+
+export const formResponsesRelations = relations(formResponses, ({ one }) => ({
+  form: one(forms, {
+    fields: [formResponses.formId],
+    references: [forms.id],
+  }),
+  respondent: one(users, {
+    fields: [formResponses.respondentId],
+    references: [users.id],
+  }),
+  booking: one(bookings, {
+    fields: [formResponses.bookingId],
+    references: [bookings.id],
+  }),
+}));
+
+// ============================================================================
+// P0-05: MULTI-SESSION PACKAGES
+// ============================================================================
+
+export const packagePurchaseStatusEnum = pgEnum('package_purchase_status', [
+  'active',
+  'expired',
+  'completed',
+  'refunded',
+]);
+
+export const packages = pgTable(
+  'packages',
+  {
+    id: serial('id').primaryKey(),
+    coachId: text('coach_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    title: text('title').notNull(),
+    description: text('description'),
+    sessionCount: integer('session_count').notNull(),
+    sessionDuration: integer('session_duration').notNull(),
+    priceCents: integer('price_cents').notNull(),
+    originalPriceCents: integer('original_price_cents'),
+    validityDays: integer('validity_days').notNull().default(180),
+    isPublished: boolean('is_published').notNull().default(false),
+    sessionTypeId: text('session_type_id'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
+  },
+  (table) => [
+    index('packages_coach_id_idx').on(table.coachId),
+    index('packages_is_published_idx').on(table.isPublished),
+  ]
+);
+
+export type Package = typeof packages.$inferSelect;
+export type NewPackage = typeof packages.$inferInsert;
+
+export const packagePurchases = pgTable(
+  'package_purchases',
+  {
+    id: serial('id').primaryKey(),
+    packageId: integer('package_id')
+      .notNull()
+      .references(() => packages.id, { onDelete: 'restrict' }),
+    clientId: text('client_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    coachId: text('coach_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    purchasedAt: timestamp('purchased_at', { withTimezone: true }).notNull().defaultNow(),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    totalSessions: integer('total_sessions').notNull(),
+    usedSessions: integer('used_sessions').notNull().default(0),
+    totalPaidCents: integer('total_paid_cents').notNull(),
+    platformFeeCents: integer('platform_fee_cents').notNull(),
+    coachPayoutCents: integer('coach_payout_cents').notNull(),
+    status: packagePurchaseStatusEnum('status').notNull().default('active'),
+    stripePaymentIntentId: text('stripe_payment_intent_id'),
+    stripeCheckoutSessionId: text('stripe_checkout_session_id'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
+  },
+  (table) => [
+    index('package_purchases_client_id_idx').on(table.clientId),
+    index('package_purchases_coach_id_idx').on(table.coachId),
+    index('package_purchases_package_id_idx').on(table.packageId),
+    index('package_purchases_status_idx').on(table.status),
+  ]
+);
+
+export type PackagePurchase = typeof packagePurchases.$inferSelect;
+export type NewPackagePurchase = typeof packagePurchases.$inferInsert;
+
+export const packagesRelations = relations(packages, ({ one, many }) => ({
+  coach: one(users, {
+    fields: [packages.coachId],
+    references: [users.id],
+  }),
+  purchases: many(packagePurchases),
+}));
+
+export const packagePurchasesRelations = relations(packagePurchases, ({ one }) => ({
+  package: one(packages, {
+    fields: [packagePurchases.packageId],
+    references: [packages.id],
+  }),
+  client: one(users, {
+    fields: [packagePurchases.clientId],
+    references: [users.id],
+    relationName: 'packagePurchaseClient',
+  }),
+  coach: one(users, {
+    fields: [packagePurchases.coachId],
+    references: [users.id],
+    relationName: 'packagePurchaseCoach',
+  }),
+}));
+
+// ============================================================================
+// P0-07: TIERED SAAS SUBSCRIPTIONS
+// ============================================================================
+
+export const billingIntervalEnum = pgEnum('billing_interval', ['monthly', 'yearly']);
+export const subscriptionStatusEnum = pgEnum('subscription_status', [
+  'trialing',
+  'active',
+  'past_due',
+  'canceled',
+  'incomplete',
+]);
+
+export const coachSubscriptions = pgTable(
+  'coach_subscriptions',
+  {
+    id: serial('id').primaryKey(),
+    coachId: text('coach_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    planId: text('plan_id').notNull().default('starter'),
+    status: subscriptionStatusEnum('status').notNull().default('trialing'),
+    billingInterval: billingIntervalEnum('billing_interval').notNull().default('monthly'),
+    stripeCustomerId: text('stripe_customer_id'),
+    stripeSubscriptionId: text('stripe_subscription_id'),
+    currentPeriodStart: timestamp('current_period_start', { withTimezone: true }),
+    currentPeriodEnd: timestamp('current_period_end', { withTimezone: true }),
+    cancelAtPeriodEnd: boolean('cancel_at_period_end').notNull().default(false),
+    trialEnd: timestamp('trial_end', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
+  },
+  (table) => [
+    uniqueIndex('coach_subscriptions_coach_id_unique').on(table.coachId),
+    index('coach_subscriptions_status_idx').on(table.status),
+    index('coach_subscriptions_stripe_sub_id_idx').on(table.stripeSubscriptionId),
+  ]
+);
+
+export type CoachSubscription = typeof coachSubscriptions.$inferSelect;
+export type NewCoachSubscription = typeof coachSubscriptions.$inferInsert;
+
+export const coachSubscriptionsRelations = relations(coachSubscriptions, ({ one }) => ({
+  coach: one(users, {
+    fields: [coachSubscriptions.coachId],
     references: [users.id],
   }),
 }));
