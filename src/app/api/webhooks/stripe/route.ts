@@ -572,7 +572,7 @@ async function handlePaymentIntentFailed(paymentIntent: Stripe.PaymentIntent) {
 /**
  * Handles the account.application.deauthorized event.
  *
- * When a coach disconnects their Stripe Connect account from the AccrediPro CoachHub platform,
+ * When a coach disconnects their Stripe Connect account from the Co-duck platform,
  * this handler:
  * 1. Finds the coach profile with that Stripe account ID
  * 2. Clears the stripeAccountId
@@ -804,7 +804,7 @@ async function handleSubscriptionUpserted(sub: Stripe.Subscription) {
   const typedSub = sub as SubscriptionWithPeriod;
   const currentPeriodStart = new Date(typedSub.current_period_start * 1000);
   const currentPeriodEnd = new Date(typedSub.current_period_end * 1000);
-  const trialEnd = typedSub.trial_end ? new Date(typedSub.trial_end * 1000) : null;
+  const trialEndsAt = typedSub.trial_end ? new Date(typedSub.trial_end * 1000) : null;
   const status = mapStripeStatusToDb(sub.status);
 
   await db
@@ -818,7 +818,7 @@ async function handleSubscriptionUpserted(sub: Stripe.Subscription) {
       status,
       currentPeriodStart,
       currentPeriodEnd,
-      trialEnd: trialEnd ?? undefined,
+      trialEndsAt: trialEndsAt ?? undefined,
       cancelAtPeriodEnd: sub.cancel_at_period_end,
     })
     .onConflictDoUpdate({
@@ -831,7 +831,7 @@ async function handleSubscriptionUpserted(sub: Stripe.Subscription) {
         status,
         currentPeriodStart,
         currentPeriodEnd,
-        trialEnd: trialEnd ?? undefined,
+        trialEndsAt: trialEndsAt ?? undefined,
         cancelAtPeriodEnd: sub.cancel_at_period_end,
       },
     });

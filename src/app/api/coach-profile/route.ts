@@ -208,7 +208,7 @@ export async function PATCH(request: Request) {
         slug,
         headline: data.headline,
         bio: data.bio || null,
-        specialties: data.specialties,
+        specialties: data.specialties.map((s) => ({ category: s, subNiches: [] as string[] })),
         timezone: data.timezone,
         hourlyRate: data.hourlyRate != null ? Math.round(data.hourlyRate * 100) : null,
         currency: data.currency,
