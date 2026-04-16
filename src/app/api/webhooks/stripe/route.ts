@@ -22,6 +22,7 @@
 import { headers } from 'next/headers';
 import { stripe } from '@/lib/stripe';
 import { db, bookings, transactions, users, coachProfiles } from '@/db';
+import { memberships, membershipSubscriptions } from '@/db/schema';
 import { eq, and, gte } from 'drizzle-orm';
 import type Stripe from 'stripe';
 import { getOrCreateConversationInternal, sendSystemMessage } from '@/lib/conversations';
@@ -146,6 +147,33 @@ export async function POST(req: Request) {
         break;
       }
 
+      case 'customer.subscription.created':
+      case 'customer.subscription.updated': {
+        // Mirror subscription state into membership_subscriptions.
+        // Also fires for `subscription` mode checkouts completing, so we
+        // rely on this (not checkout.session.completed) to create the row.
+        await handleSubscriptionUpsert(event.data.object as Stripe.Subscription);
+        break;
+      }
+
+      case 'customer.subscription.deleted': {
+        // Subscription ended (either immediately or at period end).
+        await handleSubscriptionDeleted(event.data.object as Stripe.Subscription);
+        break;
+      }
+
+      case 'invoice.payment_succeeded': {
+        // Period renewal or first charge. Resets the session allotment.
+        await handleInvoicePaymentSucceeded(event.data.object as Stripe.Invoice);
+        break;
+      }
+
+      case 'invoice.payment_failed': {
+        // Flip to past_due; grace window handled via subscription.updated.
+        await handleInvoicePaymentFailed(event.data.object as Stripe.Invoice);
+        break;
+      }
+
       default:
         // Log unhandled event types for monitoring
         // This helps identify if we need to handle new event types
@@ -196,6 +224,16 @@ export async function POST(req: Request) {
  */
 async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
   console.log(`Stripe webhook: checkout.session.completed for session ${session.id}`);
+
+  // Subscription-mode checkouts (memberships) are handled entirely by
+  // customer.subscription.* and invoice.* events — nothing to do here.
+  if (session.mode === 'subscription') {
+    console.log(
+      `Stripe webhook: checkout.session.completed in subscription mode — ` +
+        `deferring to subscription events`
+    );
+    return;
+  }
 
   // Get booking ID from metadata
   const bookingId = session.metadata?.bookingId;
@@ -627,4 +665,402 @@ async function handleConnectDeauthorized(stripeAccountId: string) {
   console.log(
     `Stripe webhook: Cancelled ${pendingOrConfirmed.length} future bookings for coach ${profile.userId}`
   );
+}
+
+// ============================================================================
+// MEMBERSHIPS: SUBSCRIPTION + INVOICE EVENTS
+// ============================================================================
+
+/**
+ * Maps a Stripe subscription status to our narrower enum.
+ *
+ * Stripe emits more statuses than we model (e.g. `trialing`, `unpaid`,
+ * `paused`). We collapse them sensibly so downstream code only has to
+ * understand four values.
+ */
+function mapSubscriptionStatus(
+  stripeStatus: Stripe.Subscription.Status
+): 'active' | 'past_due' | 'canceled' | 'incomplete' {
+  switch (stripeStatus) {
+    case 'active':
+    case 'trialing':
+      return 'active';
+    case 'past_due':
+    case 'unpaid':
+      return 'past_due';
+    case 'canceled':
+      return 'canceled';
+    case 'incomplete':
+    case 'incomplete_expired':
+    case 'paused':
+    default:
+      return 'incomplete';
+  }
+}
+
+/**
+ * Reads our internal membership metadata off a Stripe subscription.
+ *
+ * We stamp `membershipId` / `clientId` / `coachId` onto the subscription at
+ * Checkout creation time. If those are missing, this isn't one of our
+ * membership subscriptions and the handler should no-op.
+ */
+function getMembershipMetadata(
+  sub: Stripe.Subscription
+): { membershipId: number; clientId: string; coachId: string } | null {
+  const meta = sub.metadata ?? {};
+  if (meta.productKind !== 'membership') return null;
+
+  const membershipIdStr = meta.membershipId;
+  const clientId = meta.clientId;
+  const coachId = meta.coachId;
+
+  if (!membershipIdStr || !clientId || !coachId) return null;
+  const membershipId = Number.parseInt(membershipIdStr, 10);
+  if (!Number.isFinite(membershipId) || membershipId <= 0) return null;
+
+  return { membershipId, clientId, coachId };
+}
+
+/**
+ * Handles `customer.subscription.created` and `customer.subscription.updated`.
+ *
+ * This is where we mirror Stripe's subscription state into our
+ * `membership_subscriptions` table. It runs both at the end of the
+ * subscription-mode Checkout (replacing `checkout.session.completed`) and
+ * on every subsequent status transition (cancel-at-period-end toggled,
+ * plan swap, etc.).
+ *
+ * ## Idempotency
+ * Keyed on `stripeSubscriptionId` (unique column) — we either INSERT the
+ * row the first time we see the sub, or UPDATE the existing row otherwise.
+ *
+ * ## Session allotment
+ * On row creation, `sessionsRemainingThisPeriod` is seeded from the
+ * membership's `sessionsPerPeriod`. On update we do NOT touch the
+ * counter — `invoice.payment_succeeded` is responsible for resetting it
+ * at each renewal.
+ */
+async function handleSubscriptionUpsert(sub: Stripe.Subscription) {
+  console.log(`Stripe webhook: customer.subscription.upsert ${sub.id} (status=${sub.status})`);
+
+  const meta = getMembershipMetadata(sub);
+  if (!meta) {
+    console.log(
+      `Stripe webhook: subscription ${sub.id} has no membership metadata, skipping`
+    );
+    return;
+  }
+
+  const { membershipId, clientId, coachId } = meta;
+
+  const membership = await db.query.memberships.findFirst({
+    where: eq(memberships.id, membershipId),
+  });
+
+  if (!membership) {
+    console.error(`Stripe webhook: membership ${membershipId} not found for sub ${sub.id}`);
+    return;
+  }
+
+  const status = mapSubscriptionStatus(sub.status);
+  const customerId =
+    typeof sub.customer === 'string' ? sub.customer : sub.customer?.id ?? '';
+
+  // Stripe's `Subscription` type under newer API versions has
+  // current_period_start/end on the items, not the sub itself. Read
+  // defensively from both to stay resilient across versions.
+  const subWithPeriods = sub as unknown as {
+    current_period_start?: number;
+    current_period_end?: number;
+  };
+  const firstItem = sub.items?.data?.[0] as
+    | (Stripe.SubscriptionItem & {
+        current_period_start?: number;
+        current_period_end?: number;
+      })
+    | undefined;
+
+  const periodStartUnix =
+    subWithPeriods.current_period_start ?? firstItem?.current_period_start ?? 0;
+  const periodEndUnix =
+    subWithPeriods.current_period_end ?? firstItem?.current_period_end ?? 0;
+
+  const currentPeriodStart = new Date(periodStartUnix * 1000);
+  const currentPeriodEnd = new Date(periodEndUnix * 1000);
+
+  const canceledAt = sub.canceled_at ? new Date(sub.canceled_at * 1000) : null;
+
+  const existing = await db.query.membershipSubscriptions.findFirst({
+    where: eq(membershipSubscriptions.stripeSubscriptionId, sub.id),
+  });
+
+  if (!existing) {
+    await db.insert(membershipSubscriptions).values({
+      membershipId,
+      clientId,
+      coachId,
+      stripeSubscriptionId: sub.id,
+      stripeCustomerId: customerId,
+      status,
+      currentPeriodStart,
+      currentPeriodEnd,
+      // Initial allotment — invoice.payment_succeeded will keep it in sync
+      // on renewal. Initialised to full allotment on create.
+      sessionsRemainingThisPeriod: membership.sessionsPerPeriod,
+      cancelAtPeriodEnd: sub.cancel_at_period_end,
+      canceledAt,
+    });
+
+    console.log(
+      `Stripe webhook: created membership_subscription for sub ${sub.id} ` +
+        `(client=${clientId}, coach=${coachId}, membership=${membershipId})`
+    );
+
+    // Notify both parties that the subscription is live.
+    if (status === 'active') {
+      createNotification({
+        userId: clientId,
+        type: 'system',
+        title: 'Membership active',
+        body: `Your "${membership.name}" membership is now active. ${membership.sessionsPerPeriod} session${membership.sessionsPerPeriod === 1 ? '' : 's'} available this period.`,
+        link: '/dashboard/my-memberships',
+      });
+
+      createNotification({
+        userId: coachId,
+        type: 'system',
+        title: 'New membership subscriber',
+        body: `A client just subscribed to "${membership.name}".`,
+        link: '/dashboard/memberships',
+      });
+    }
+  } else {
+    await db
+      .update(membershipSubscriptions)
+      .set({
+        status,
+        currentPeriodStart,
+        currentPeriodEnd,
+        cancelAtPeriodEnd: sub.cancel_at_period_end,
+        canceledAt,
+        updatedAt: new Date(),
+      })
+      .where(eq(membershipSubscriptions.id, existing.id));
+
+    console.log(
+      `Stripe webhook: updated membership_subscription ${existing.id} ` +
+        `(status=${status}, cancelAtPeriodEnd=${sub.cancel_at_period_end})`
+    );
+  }
+}
+
+/**
+ * Handles `customer.subscription.deleted` — the subscription has ended
+ * (either `immediate=true` on cancel, or the end-of-period rollover after
+ * `cancel_at_period_end`).
+ *
+ * We mark our row `canceled` and stamp `canceledAt`. Access logic (see
+ * `/api/memberships/subscriptions/[id]/redeem`) keys off `status` so this
+ * is the single source of truth.
+ */
+async function handleSubscriptionDeleted(sub: Stripe.Subscription) {
+  console.log(`Stripe webhook: customer.subscription.deleted ${sub.id}`);
+
+  const existing = await db.query.membershipSubscriptions.findFirst({
+    where: eq(membershipSubscriptions.stripeSubscriptionId, sub.id),
+  });
+
+  if (!existing) {
+    console.log(`Stripe webhook: no membership_subscription for sub ${sub.id}`);
+    return;
+  }
+
+  if (existing.status === 'canceled') {
+    console.log(
+      `Stripe webhook: membership_subscription ${existing.id} already canceled`
+    );
+    return;
+  }
+
+  await db
+    .update(membershipSubscriptions)
+    .set({
+      status: 'canceled',
+      canceledAt: sub.canceled_at ? new Date(sub.canceled_at * 1000) : new Date(),
+      cancelAtPeriodEnd: false,
+      updatedAt: new Date(),
+    })
+    .where(eq(membershipSubscriptions.id, existing.id));
+
+  console.log(`Stripe webhook: membership_subscription ${existing.id} marked canceled`);
+
+  createNotification({
+    userId: existing.clientId,
+    type: 'system',
+    title: 'Membership ended',
+    body: 'Your coaching membership has ended. You can resubscribe any time from the coach’s profile.',
+    link: '/dashboard/my-memberships',
+  });
+
+  createNotification({
+    userId: existing.coachId,
+    type: 'system',
+    title: 'Membership canceled',
+    body: 'A client’s membership has ended.',
+    link: '/dashboard/memberships',
+  });
+}
+
+/**
+ * Handles `invoice.payment_succeeded` — a successful charge on a
+ * subscription. On period renewals this is where we **reset** the
+ * client's session allotment for the new billing period.
+ *
+ * ## Billing reasons we care about
+ * - `subscription_create` — first invoice at signup. Counter was seeded
+ *   to the full allotment during subscription upsert; we make sure the
+ *   period window is accurate.
+ * - `subscription_cycle` — a regular monthly renewal. Reset the counter
+ *   to the membership's `sessionsPerPeriod` and advance the window.
+ * - `subscription_update` — mid-cycle plan change. Update the window
+ *   without touching the counter (client has already consumed sessions
+ *   this period).
+ *
+ * Everything else (e.g. one-off invoices) is ignored.
+ */
+async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
+  console.log(
+    `Stripe webhook: invoice.payment_succeeded ${invoice.id} (reason=${invoice.billing_reason})`
+  );
+
+  const invoiceWithSub = invoice as Stripe.Invoice & {
+    subscription?: string | Stripe.Subscription | null;
+  };
+  const subscriptionId =
+    typeof invoiceWithSub.subscription === 'string'
+      ? invoiceWithSub.subscription
+      : invoiceWithSub.subscription?.id;
+
+  if (!subscriptionId) {
+    // Not a subscription invoice — nothing to do for memberships.
+    return;
+  }
+
+  const existing = await db.query.membershipSubscriptions.findFirst({
+    where: eq(membershipSubscriptions.stripeSubscriptionId, subscriptionId),
+  });
+
+  if (!existing) {
+    console.log(
+      `Stripe webhook: no membership_subscription for subscription ${subscriptionId}`
+    );
+    return;
+  }
+
+  const membership = await db.query.memberships.findFirst({
+    where: eq(memberships.id, existing.membershipId),
+  });
+  if (!membership) {
+    console.error(
+      `Stripe webhook: missing membership ${existing.membershipId} for sub ${subscriptionId}`
+    );
+    return;
+  }
+
+  // Determine whether to reset the session counter.
+  const reason = invoice.billing_reason;
+  const shouldResetCounter =
+    reason === 'subscription_cycle' || reason === 'subscription_create';
+
+  // Pull period bounds from the associated line (each line carries its own
+  // period). Fall back to the invoice period if needed.
+  const firstLine = invoice.lines?.data?.[0];
+  const periodStartUnix =
+    firstLine?.period?.start ??
+    (invoice as Stripe.Invoice & { period_start?: number }).period_start ??
+    0;
+  const periodEndUnix =
+    firstLine?.period?.end ??
+    (invoice as Stripe.Invoice & { period_end?: number }).period_end ??
+    0;
+
+  const updatePayload: Partial<typeof membershipSubscriptions.$inferInsert> = {
+    status: 'active',
+    updatedAt: new Date(),
+  };
+
+  if (periodStartUnix && periodEndUnix) {
+    updatePayload.currentPeriodStart = new Date(periodStartUnix * 1000);
+    updatePayload.currentPeriodEnd = new Date(periodEndUnix * 1000);
+  }
+
+  if (shouldResetCounter) {
+    updatePayload.sessionsRemainingThisPeriod = membership.sessionsPerPeriod;
+  }
+
+  await db
+    .update(membershipSubscriptions)
+    .set(updatePayload)
+    .where(eq(membershipSubscriptions.id, existing.id));
+
+  console.log(
+    `Stripe webhook: membership_subscription ${existing.id} invoice applied ` +
+      `(reason=${reason}, resetCounter=${shouldResetCounter})`
+  );
+
+  if (reason === 'subscription_cycle') {
+    createNotification({
+      userId: existing.clientId,
+      type: 'system',
+      title: 'Membership renewed',
+      body: `Your "${membership.name}" membership renewed. ${membership.sessionsPerPeriod} session${membership.sessionsPerPeriod === 1 ? '' : 's'} available this period.`,
+      link: '/dashboard/my-memberships',
+    });
+  }
+}
+
+/**
+ * Handles `invoice.payment_failed` — a subscription invoice couldn't be
+ * collected.
+ *
+ * We don't cancel immediately: Stripe Smart Retries will re-attempt
+ * collection. We flip the row to `past_due` so the UI can surface a
+ * "Please update your card" nudge, and `redeem` still allows bookings
+ * during the grace window (see route logic).
+ */
+async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
+  console.log(`Stripe webhook: invoice.payment_failed ${invoice.id}`);
+
+  const invoiceWithSub = invoice as Stripe.Invoice & {
+    subscription?: string | Stripe.Subscription | null;
+  };
+  const subscriptionId =
+    typeof invoiceWithSub.subscription === 'string'
+      ? invoiceWithSub.subscription
+      : invoiceWithSub.subscription?.id;
+
+  if (!subscriptionId) return;
+
+  const existing = await db.query.membershipSubscriptions.findFirst({
+    where: eq(membershipSubscriptions.stripeSubscriptionId, subscriptionId),
+  });
+  if (!existing) return;
+
+  await db
+    .update(membershipSubscriptions)
+    .set({ status: 'past_due', updatedAt: new Date() })
+    .where(eq(membershipSubscriptions.id, existing.id));
+
+  console.log(
+    `Stripe webhook: membership_subscription ${existing.id} marked past_due`
+  );
+
+  createNotification({
+    userId: existing.clientId,
+    type: 'system',
+    title: 'Membership payment failed',
+    body: 'We couldn’t collect your membership payment. Please update your payment method to keep access.',
+    link: '/dashboard/my-memberships',
+  });
 }

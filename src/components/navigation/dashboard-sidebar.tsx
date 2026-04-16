@@ -14,6 +14,7 @@ import {
   CreditCard,
   MessageSquare,
   LayoutList,
+  Repeat,
 } from 'lucide-react';
 import { UserButton } from '@clerk/nextjs';
 import { useState } from 'react';
@@ -52,6 +53,7 @@ const coachLinks: NavLink[] = [
   { href: '/dashboard/sessions', label: 'Sessions', icon: CalendarDays, roles: ['coach'] },
   { href: '/dashboard/clients', label: 'My Clients', icon: Users, roles: ['coach'] },
   { href: '/dashboard/availability', label: 'Availability', icon: Clock, roles: ['coach'] },
+  { href: '/dashboard/memberships', label: 'Memberships', icon: Repeat, roles: ['coach'] },
   { href: '/dashboard/payments', label: 'Payments', icon: CreditCard, roles: ['coach'] },
   {
     href: '/dashboard/iconnect',
@@ -66,6 +68,12 @@ const coachLinks: NavLink[] = [
 const clientLinks: NavLink[] = [
   { href: '/dashboard/my-coaches', label: 'My Coach', icon: UserCheck, roles: ['client'] },
   { href: '/dashboard/my-sessions', label: 'My Sessions', icon: CalendarDays, roles: ['client'] },
+  {
+    href: '/dashboard/my-memberships',
+    label: 'Memberships',
+    icon: Repeat,
+    roles: ['client'],
+  },
   {
     href: '/dashboard/iconnect',
     label: 'iConnect',

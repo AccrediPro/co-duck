@@ -65,6 +65,7 @@ import {
   serial,
   unique,
   varchar,
+  type AnyPgColumn,
 } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
@@ -251,6 +252,25 @@ export const streakActionTypeEnum = pgEnum('streak_action_type', [
   'message_sent',
   'check_in_completed',
   'session_prep_completed',
+]);
+
+/**
+ * Membership Subscription Status Enum
+ *
+ * Tracks the lifecycle of a client's recurring membership with a coach.
+ * Values mirror Stripe's `Stripe.Subscription.Status` semantics (subset we handle).
+ *
+ * @enum {string}
+ * @property {'active'} active - Subscription is current, periodic payment succeeded
+ * @property {'past_due'} past_due - Renewal payment failed; in grace period
+ * @property {'canceled'} canceled - Subscription ended (by client or coach)
+ * @property {'incomplete'} incomplete - Checkout completed but initial payment not yet settled
+ */
+export const membershipSubscriptionStatusEnum = pgEnum('membership_subscription_status', [
+  'active',
+  'past_due',
+  'canceled',
+  'incomplete',
 ]);
 
 // ============================================================================
@@ -1061,6 +1081,24 @@ export const bookings = pgTable(
     coachNotes: text('coach_notes'),
 
     /**
+     * Associated membership subscription (if the session was redeemed
+     * against an active recurring membership rather than a one-time payment).
+     *
+     * @type {number | null}
+     *
+     * @remarks
+     * - null for regular paid bookings (Stripe Checkout).
+     * - non-null when the session was redeemed against a membership
+     *   (no payment created; the member's sessions_remaining_this_period was decremented).
+     * - on cascade delete of the subscription we keep the booking (set null) so
+     *   historical records are preserved.
+     */
+    membershipSubscriptionId: integer('membership_subscription_id').references(
+      (): AnyPgColumn => membershipSubscriptions.id,
+      { onDelete: 'set null' }
+    ),
+
+    /**
      * User ID of who cancelled (if cancelled)
      * @type {string | null}
      */
@@ -1133,6 +1171,8 @@ export const bookings = pgTable(
     index('bookings_start_time_idx').on(table.startTime),
     // Index for filtering by status (tabs: upcoming, past, cancelled)
     index('bookings_status_idx').on(table.status),
+    // Index for finding bookings redeemed against a given membership subscription
+    index('bookings_membership_subscription_id_idx').on(table.membershipSubscriptionId),
   ]
 );
 
@@ -2655,6 +2695,13 @@ export const usersRelations = relations(users, ({ one, many }) => ({
     fields: [users.id],
     references: [sessionPrepQuestions.coachId],
   }),
+  coachMemberships: many(memberships, { relationName: 'coachMemberships' }),
+  clientMembershipSubscriptions: many(membershipSubscriptions, {
+    relationName: 'clientMembershipSubscriptions',
+  }),
+  coachMembershipSubscriptions: many(membershipSubscriptions, {
+    relationName: 'coachMembershipSubscriptions',
+  }),
 }));
 
 export const programsRelations = relations(programs, ({ one, many }) => ({
@@ -2748,6 +2795,10 @@ export const bookingsRelations = relations(bookings, ({ one, many }) => ({
   review: one(reviews),
   actionItems: many(actionItems),
   sessionPrepResponse: one(sessionPrepResponses),
+  membershipSubscription: one(membershipSubscriptions, {
+    fields: [bookings.membershipSubscriptionId],
+    references: [membershipSubscriptions.id],
+  }),
 }));
 
 export const transactionsRelations = relations(transactions, ({ one }) => ({
@@ -3393,3 +3444,336 @@ export const sessionPrepQuestionsRelations = relations(sessionPrepQuestions, ({ 
     references: [users.id],
   }),
 }));
+
+// ============================================================================
+// MEMBERSHIPS TABLE
+// ============================================================================
+
+/**
+ * Memberships Table
+ *
+ * A coach-offered recurring retainer product. Clients purchase a membership
+ * and are charged monthly by Stripe Subscriptions. Each billing period the
+ * client gets a fresh allotment of sessions (`sessionsPerPeriod`) that they
+ * can redeem against the coach, plus optional add-ons (e.g. unlimited
+ * messaging).
+ *
+ * ## Purpose
+ *
+ * Unlike one-time session bookings or multi-session packages, memberships
+ * are a recurring revenue model:
+ * - Monthly auto-renewal via Stripe Subscriptions
+ * - Session allotment resets each billing period
+ * - Cancel-anytime (cancel_at_period_end by default)
+ *
+ * ## Relationships
+ * - Belongs to users (as coach, many:1)
+ * - Has many membershipSubscriptions
+ *
+ * ## Stripe Integration
+ *
+ * On creation the platform creates:
+ * - A Stripe Product (stored in `stripeProductId`)
+ * - A recurring Price (stored in `stripePriceId`, interval=month)
+ *
+ * Price changes create a NEW Stripe Price and update `stripePriceId`.
+ * Existing subscriptions keep their original price until explicitly migrated.
+ *
+ * ## Soft Deletion
+ *
+ * `isActive=false` means the membership is hidden from the public profile
+ * and no new subscriptions can be created, but existing subscriptions
+ * continue to renew until canceled.
+ *
+ * @remarks
+ * All monetary values in CENTS. Uses the coach's profile currency.
+ */
+export const memberships = pgTable(
+  'memberships',
+  {
+    id: serial('id').primaryKey(),
+
+    /**
+     * The coach offering this membership
+     * @type {string}
+     */
+    coachId: text('coach_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+
+    /**
+     * Display name of the membership (e.g. "Premium Coaching")
+     * @type {string}
+     */
+    name: text('name').notNull(),
+
+    /**
+     * Longer marketing description shown on the coach profile
+     * @type {string | null}
+     */
+    description: text('description'),
+
+    /**
+     * Monthly price in CENTS
+     * @type {number}
+     * @example 40000 // $400.00 per month
+     */
+    monthlyPriceCents: integer('monthly_price_cents').notNull(),
+
+    /**
+     * Currency code (lowercase ISO)
+     * @type {string}
+     * @default 'usd'
+     */
+    currency: text('currency').notNull().default('usd'),
+
+    /**
+     * Number of sessions included in a billing period
+     * @type {number}
+     * @example 2 // 2 sessions per month
+     */
+    sessionsPerPeriod: integer('sessions_per_period').notNull(),
+
+    /**
+     * Whether unlimited messaging is included with this membership
+     * @type {boolean}
+     * @default true
+     */
+    includesMessaging: boolean('includes_messaging').notNull().default(true),
+
+    /**
+     * Stripe Product ID (created when the membership is created)
+     * @type {string | null}
+     * @example "prod_abc123"
+     */
+    stripeProductId: text('stripe_product_id'),
+
+    /**
+     * Current Stripe Price ID used for new checkouts
+     * @type {string | null}
+     * @example "price_abc123"
+     *
+     * @remarks
+     * Stripe Prices are immutable — updating the monthly price creates a
+     * new Price and rotates this pointer. Existing subscriptions keep the
+     * old price until migrated.
+     */
+    stripePriceId: text('stripe_price_id'),
+
+    /**
+     * Whether the membership is currently offered for new subscriptions
+     * @type {boolean}
+     * @default true
+     */
+    isActive: boolean('is_active').notNull().default(true),
+
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
+  },
+  (table) => [
+    index('memberships_coach_id_idx').on(table.coachId),
+    index('memberships_is_active_idx').on(table.isActive),
+  ]
+);
+
+/** Type for selecting a membership record */
+export type Membership = typeof memberships.$inferSelect;
+
+/** Type for inserting a new membership record */
+export type NewMembership = typeof memberships.$inferInsert;
+
+// ============================================================================
+// MEMBERSHIP SUBSCRIPTIONS TABLE
+// ============================================================================
+
+/**
+ * Membership Subscriptions Table
+ *
+ * A client's active (or historical) subscription to a coach's membership.
+ * Mirrors the core fields of a Stripe Subscription so we can drive the UI
+ * without round-tripping to Stripe on every request.
+ *
+ * ## Purpose
+ * Tracks:
+ * - Subscription state (active / past_due / canceled / incomplete)
+ * - Current billing period window (start / end)
+ * - Session allotment remaining in THIS period
+ * - Pending cancellation (cancel_at_period_end)
+ *
+ * ## Relationships
+ * - Belongs to memberships (many:1)
+ * - Belongs to users as client (many:1)
+ * - Belongs to users as coach (denormalized for query speed) (many:1)
+ * - Has many bookings (sessions redeemed from this subscription)
+ *
+ * ## Session Allotment
+ *
+ * `sessionsRemainingThisPeriod` is initialized to the membership's
+ * `sessionsPerPeriod` on creation and on every `invoice.payment_succeeded`
+ * for a renewal. Each redeemed booking decrements the counter.
+ *
+ * ## Grace Period
+ *
+ * When Stripe reports `past_due` we keep the subscription usable for a
+ * short grace window (handled in app logic, not schema) so a failed
+ * renewal doesn't immediately block bookings already scheduled.
+ *
+ * @remarks
+ * `stripeSubscriptionId` is unique — webhook lookups use it to dedupe
+ * and locate the row idempotently.
+ */
+export const membershipSubscriptions = pgTable(
+  'membership_subscriptions',
+  {
+    id: serial('id').primaryKey(),
+
+    /**
+     * The membership this subscription is for
+     * @type {number}
+     */
+    membershipId: integer('membership_id')
+      .notNull()
+      .references(() => memberships.id, { onDelete: 'restrict' }),
+
+    /**
+     * Client who owns this subscription
+     * @type {string}
+     */
+    clientId: text('client_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+
+    /**
+     * Coach who receives the subscription revenue.
+     * Denormalized from memberships.coach_id for faster queries
+     * (e.g. "does this client have an active membership with coach X?").
+     *
+     * @type {string}
+     */
+    coachId: text('coach_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+
+    /**
+     * Stripe Subscription ID (unique)
+     * @type {string}
+     * @example "sub_abc123"
+     */
+    stripeSubscriptionId: text('stripe_subscription_id').notNull().unique(),
+
+    /**
+     * Stripe Customer ID attached to this subscription
+     * @type {string}
+     */
+    stripeCustomerId: text('stripe_customer_id').notNull(),
+
+    /**
+     * Current lifecycle state of the subscription
+     * @type {'active' | 'past_due' | 'canceled' | 'incomplete'}
+     * @default 'incomplete'
+     */
+    status: membershipSubscriptionStatusEnum('status').notNull().default('incomplete'),
+
+    /**
+     * Start of the current billing period (UTC)
+     * @type {Date}
+     */
+    currentPeriodStart: timestamp('current_period_start', { withTimezone: true }).notNull(),
+
+    /**
+     * End of the current billing period (UTC).
+     *
+     * Also acts as the renewal date for active subscriptions, and as the
+     * access cutoff when `cancelAtPeriodEnd=true`.
+     *
+     * @type {Date}
+     */
+    currentPeriodEnd: timestamp('current_period_end', { withTimezone: true }).notNull(),
+
+    /**
+     * Sessions the client can still redeem in this billing period.
+     * Reset to membership.sessionsPerPeriod on every renewal.
+     *
+     * @type {number}
+     */
+    sessionsRemainingThisPeriod: integer('sessions_remaining_this_period').notNull(),
+
+    /**
+     * If true, the subscription will NOT renew at the end of the current
+     * period. The client retains access until `currentPeriodEnd`.
+     *
+     * @type {boolean}
+     * @default false
+     */
+    cancelAtPeriodEnd: boolean('cancel_at_period_end').notNull().default(false),
+
+    /**
+     * When the subscription was actually canceled (either immediately or at
+     * the end of the period).
+     *
+     * @type {Date | null}
+     */
+    canceledAt: timestamp('canceled_at', { withTimezone: true }),
+
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
+  },
+  (table) => [
+    index('membership_subscriptions_membership_id_idx').on(table.membershipId),
+    index('membership_subscriptions_client_id_idx').on(table.clientId),
+    index('membership_subscriptions_coach_id_idx').on(table.coachId),
+    index('membership_subscriptions_status_idx').on(table.status),
+    // Fast lookup when checking "does this client have an active membership with this coach?"
+    index('membership_subscriptions_client_coach_status_idx').on(
+      table.clientId,
+      table.coachId,
+      table.status
+    ),
+  ]
+);
+
+/** Type for selecting a membership subscription record */
+export type MembershipSubscription = typeof membershipSubscriptions.$inferSelect;
+
+/** Type for inserting a new membership subscription record */
+export type NewMembershipSubscription = typeof membershipSubscriptions.$inferInsert;
+
+// ============================================================================
+// MEMBERSHIP RELATIONS
+// ============================================================================
+
+export const membershipsRelations = relations(memberships, ({ one, many }) => ({
+  coach: one(users, {
+    fields: [memberships.coachId],
+    references: [users.id],
+    relationName: 'coachMemberships',
+  }),
+  subscriptions: many(membershipSubscriptions),
+}));
+
+export const membershipSubscriptionsRelations = relations(
+  membershipSubscriptions,
+  ({ one, many }) => ({
+    membership: one(memberships, {
+      fields: [membershipSubscriptions.membershipId],
+      references: [memberships.id],
+    }),
+    client: one(users, {
+      fields: [membershipSubscriptions.clientId],
+      references: [users.id],
+      relationName: 'clientMembershipSubscriptions',
+    }),
+    coach: one(users, {
+      fields: [membershipSubscriptions.coachId],
+      references: [users.id],
+      relationName: 'coachMembershipSubscriptions',
+    }),
+    bookings: many(bookings),
+  })
+);

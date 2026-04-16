@@ -1,8 +1,9 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, desc } from 'drizzle-orm';
 import { auth } from '@clerk/nextjs/server';
 import { db, users, coachProfiles } from '@/db';
+import { memberships, membershipSubscriptions } from '@/db/schema';
 import { CoachProfileDisplay } from '@/components/coaches/coach-profile-display';
 import { getCoachAvailabilityForProfile } from './availability-actions';
 
@@ -84,6 +85,42 @@ export default async function CoachProfilePage({ params }: PageProps) {
   // Fetch availability data for display
   const availability = await getCoachAvailabilityForProfile(coach.userId);
 
+  // Fetch this coach's active memberships (for the "Ongoing coaching" block).
+  const coachMembershipsRows = await db
+    .select()
+    .from(memberships)
+    .where(and(eq(memberships.coachId, coach.userId), eq(memberships.isActive, true)))
+    .orderBy(desc(memberships.monthlyPriceCents));
+
+  // If the viewer is logged in, check whether they already have a live
+  // subscription with this coach so we can swap the "Subscribe" CTA for
+  // "Manage subscription".
+  let currentUserHasActiveSubscription = false;
+  if (userId) {
+    const existingSub = await db.query.membershipSubscriptions.findFirst({
+      where: and(
+        eq(membershipSubscriptions.clientId, userId),
+        eq(membershipSubscriptions.coachId, coach.userId)
+      ),
+    });
+    if (
+      existingSub &&
+      (existingSub.status === 'active' || existingSub.status === 'past_due')
+    ) {
+      currentUserHasActiveSubscription = true;
+    }
+  }
+
+  const coachMemberships = coachMembershipsRows.map((m) => ({
+    id: m.id,
+    name: m.name,
+    description: m.description,
+    monthlyPriceCents: m.monthlyPriceCents,
+    currency: m.currency,
+    sessionsPerPeriod: m.sessionsPerPeriod,
+    includesMessaging: m.includesMessaging,
+  }));
+
   return (
     <div className="container mx-auto px-4 py-8">
       <CoachProfileDisplay
@@ -101,6 +138,8 @@ export default async function CoachProfilePage({ params }: PageProps) {
         coachId={coach.userId}
         currentUserId={userId}
         isVerified={coach.verificationStatus === 'verified'}
+        memberships={coachMemberships}
+        currentUserHasActiveSubscription={currentUserHasActiveSubscription}
       />
     </div>
   );
