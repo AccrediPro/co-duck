@@ -211,6 +211,20 @@
       "when": 1745539200000,
       "tag": "0029_forms_primitive",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "7",
+      "when": 1745600000000,
+      "tag": "0030_packages_p0_05",
+      "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "7",
+      "when": 1745610000000,
+      "tag": "0031_subscriptions_p0_07",
+      "breakpoints": true
     }
   ]
 }

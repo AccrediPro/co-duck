@@ -22,6 +22,7 @@
 import { headers } from 'next/headers';
 import { stripe } from '@/lib/stripe';
 import { db, bookings, transactions, users, coachProfiles } from '@/db';
+import { packages, packagePurchases, coachSubscriptions } from '@/db/schema';
 import { eq, and, gte } from 'drizzle-orm';
 import type Stripe from 'stripe';
 import { getOrCreateConversationInternal, sendSystemMessage } from '@/lib/conversations';
@@ -146,6 +147,22 @@ export async function POST(req: Request) {
         break;
       }
 
+      // ---- Package purchase (P0-05) ----
+      // checkout.session.completed is already handled above but dispatches
+      // to handlePackageCheckoutCompleted when metadata.type === 'package'
+
+      // ---- Subscription events (P0-07) ----
+      case 'customer.subscription.created':
+      case 'customer.subscription.updated': {
+        await handleSubscriptionUpserted(event.data.object as Stripe.Subscription);
+        break;
+      }
+
+      case 'customer.subscription.deleted': {
+        await handleSubscriptionDeleted(event.data.object as Stripe.Subscription);
+        break;
+      }
+
       default:
         // Log unhandled event types for monitoring
         // This helps identify if we need to handle new event types
@@ -196,6 +213,18 @@ export async function POST(req: Request) {
  */
 async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
   console.log(`Stripe webhook: checkout.session.completed for session ${session.id}`);
+
+  // Dispatch to package handler if this is a package purchase
+  if (session.metadata?.type === 'package') {
+    await handlePackageCheckoutCompleted(session);
+    return;
+  }
+
+  // Dispatch to subscription handler if this is a subscription checkout
+  if (session.metadata?.type === 'subscription') {
+    // Subscription state is handled by customer.subscription.* events
+    return;
+  }
 
   // Get booking ID from metadata
   const bookingId = session.metadata?.bookingId;
@@ -627,4 +656,202 @@ async function handleConnectDeauthorized(stripeAccountId: string) {
   console.log(
     `Stripe webhook: Cancelled ${pendingOrConfirmed.length} future bookings for coach ${profile.userId}`
   );
+}
+
+// ============================================================================
+// PACKAGE PURCHASE HANDLER (P0-05)
+// ============================================================================
+
+async function handlePackageCheckoutCompleted(session: Stripe.Checkout.Session) {
+  const {
+    packageId: packageIdStr,
+    coachId,
+    clientId,
+    feeRate: feeRateStr,
+  } = session.metadata ?? {};
+
+  if (!packageIdStr || !coachId || !clientId) {
+    console.error('Stripe webhook [package]: Missing metadata fields', session.metadata);
+    return;
+  }
+
+  const packageId = parseInt(packageIdStr);
+  if (isNaN(packageId)) {
+    console.error('Stripe webhook [package]: Invalid packageId', packageIdStr);
+    return;
+  }
+
+  if (session.payment_status !== 'paid') {
+    console.log(`Stripe webhook [package]: payment_status=${session.payment_status}, skipping`);
+    return;
+  }
+
+  // Idempotency: skip if purchase already recorded for this checkout session
+  const existing = await db
+    .select({ id: packagePurchases.id })
+    .from(packagePurchases)
+    .where(eq(packagePurchases.stripeCheckoutSessionId, session.id))
+    .limit(1);
+
+  if (existing.length > 0) {
+    console.log(`Stripe webhook [package]: purchase already recorded for session ${session.id}`);
+    return;
+  }
+
+  const [pkg] = await db
+    .select({ sessionCount: packages.sessionCount, validityDays: packages.validityDays })
+    .from(packages)
+    .where(eq(packages.id, packageId))
+    .limit(1);
+
+  if (!pkg) {
+    console.error(`Stripe webhook [package]: Package ${packageId} not found`);
+    return;
+  }
+
+  const amountTotal = session.amount_total ?? 0;
+  const feeRate = parseFloat(feeRateStr ?? '0.1');
+  const platformFeeCents = Math.round(amountTotal * feeRate);
+  const coachPayoutCents = amountTotal - platformFeeCents;
+
+  const paymentIntentId =
+    typeof session.payment_intent === 'string'
+      ? session.payment_intent
+      : (session.payment_intent?.id ?? null);
+
+  const purchasedAt = new Date();
+  const expiresAt = new Date(purchasedAt.getTime() + pkg.validityDays * 24 * 60 * 60 * 1000);
+
+  await db.insert(packagePurchases).values({
+    packageId,
+    clientId,
+    coachId,
+    purchasedAt,
+    expiresAt,
+    totalSessions: pkg.sessionCount,
+    usedSessions: 0,
+    totalPaidCents: amountTotal,
+    platformFeeCents,
+    coachPayoutCents,
+    status: 'active',
+    stripePaymentIntentId: paymentIntentId,
+    stripeCheckoutSessionId: session.id,
+  });
+
+  console.log(
+    `Stripe webhook [package]: Purchase recorded for package ${packageId}, client ${clientId}`
+  );
+}
+
+// ============================================================================
+// SUBSCRIPTION HANDLERS (P0-07)
+// ============================================================================
+
+/**
+ * Stripe's Subscription object exposes `current_period_start`, `current_period_end`
+ * and `trial_end` as Unix timestamps on the raw payload, but the SDK typings
+ * sometimes omit them at the top level (they are declared on subscription items
+ * in newer API versions). We narrow the type locally instead of reaching for `any`.
+ */
+type SubscriptionWithPeriod = Stripe.Subscription & {
+  current_period_start: number;
+  current_period_end: number;
+  trial_end: number | null;
+};
+
+type DbSubscriptionStatus = 'trialing' | 'active' | 'past_due' | 'canceled' | 'incomplete';
+
+/**
+ * Maps a Stripe subscription status onto the subset of statuses tracked in our DB.
+ * Stripe statuses we don't model (`unpaid`, `incomplete_expired`, `paused`) collapse
+ * to their nearest equivalent so the column remains a strict enum.
+ */
+function mapStripeStatusToDb(status: Stripe.Subscription.Status): DbSubscriptionStatus {
+  switch (status) {
+    case 'trialing':
+    case 'active':
+    case 'past_due':
+    case 'canceled':
+    case 'incomplete':
+      return status;
+    case 'unpaid':
+      return 'past_due';
+    case 'incomplete_expired':
+      return 'canceled';
+    case 'paused':
+      return 'active';
+    default: {
+      const _exhaustive: never = status;
+      void _exhaustive;
+      return 'incomplete';
+    }
+  }
+}
+
+async function handleSubscriptionUpserted(sub: Stripe.Subscription) {
+  const coachId = sub.metadata?.coachId;
+  const planId = sub.metadata?.planId ?? 'starter';
+  const billingInterval = (sub.metadata?.billingInterval ?? 'monthly') as 'monthly' | 'yearly';
+
+  if (!coachId) {
+    console.error('Stripe webhook [subscription]: Missing coachId in metadata');
+    return;
+  }
+
+  const stripeCustomerId =
+    typeof sub.customer === 'string' ? sub.customer : (sub.customer?.id ?? null);
+
+  const typedSub = sub as SubscriptionWithPeriod;
+  const currentPeriodStart = new Date(typedSub.current_period_start * 1000);
+  const currentPeriodEnd = new Date(typedSub.current_period_end * 1000);
+  const trialEndsAt = typedSub.trial_end ? new Date(typedSub.trial_end * 1000) : null;
+  const status = mapStripeStatusToDb(sub.status);
+
+  await db
+    .insert(coachSubscriptions)
+    .values({
+      coachId,
+      planId,
+      billingInterval,
+      stripeSubscriptionId: sub.id,
+      stripeCustomerId,
+      status,
+      currentPeriodStart,
+      currentPeriodEnd,
+      trialEndsAt: trialEndsAt ?? undefined,
+      cancelAtPeriodEnd: sub.cancel_at_period_end,
+    })
+    .onConflictDoUpdate({
+      target: coachSubscriptions.coachId,
+      set: {
+        planId,
+        billingInterval,
+        stripeSubscriptionId: sub.id,
+        stripeCustomerId,
+        status,
+        currentPeriodStart,
+        currentPeriodEnd,
+        trialEndsAt: trialEndsAt ?? undefined,
+        cancelAtPeriodEnd: sub.cancel_at_period_end,
+      },
+    });
+
+  console.log(
+    `Stripe webhook [subscription]: Upserted plan=${planId} status=${sub.status} for coach ${coachId}`
+  );
+}
+
+async function handleSubscriptionDeleted(sub: Stripe.Subscription) {
+  const coachId = sub.metadata?.coachId;
+  if (!coachId) {
+    console.error('Stripe webhook [subscription]: Missing coachId in deleted subscription');
+    return;
+  }
+
+  await db
+    .update(coachSubscriptions)
+    .set({ status: 'canceled', cancelAtPeriodEnd: false })
+    .where(eq(coachSubscriptions.coachId, coachId));
+
+  console.log(`Stripe webhook [subscription]: Marked canceled for coach ${coachId}`);
 }
