@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -45,6 +45,11 @@ type BookingStep = 'session' | 'date' | 'time';
 
 export function BookingFlow({ coach, slug }: BookingFlowProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  // If the user arrived via "Redeem a session" from their membership, the
+  // subscription id rides along as a query param and is forwarded through
+  // to the confirm page where the booking is created without payment.
+  const subscriptionIdParam = searchParams?.get('subscriptionId') ?? null;
 
   // State
   const [currentStep, setCurrentStep] = useState<BookingStep>('session');
@@ -167,6 +172,9 @@ export function BookingFlow({ coach, slug }: BookingFlowProps) {
         endTime: selectedSlot.endTime,
         timezone: clientTimezone,
       });
+      if (subscriptionIdParam) {
+        params.set('subscriptionId', subscriptionIdParam);
+      }
       router.push(`/coaches/${slug}/book/confirm?${params.toString()}`);
     }
   };

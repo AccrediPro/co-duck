@@ -43,6 +43,12 @@ interface BookingConfirmationProps {
   clientTimezone: string;
   isAuthenticated: boolean;
   returnUrl: string;
+  /**
+   * If set, this booking is being redeemed from an existing membership
+   * subscription. No Stripe Checkout — the API decrements the session
+   * counter and creates a pending booking directly.
+   */
+  subscriptionId?: number | null;
 }
 
 export function BookingConfirmation({
@@ -54,6 +60,7 @@ export function BookingConfirmation({
   clientTimezone,
   isAuthenticated,
   returnUrl,
+  subscriptionId,
 }: BookingConfirmationProps) {
   const router = useRouter();
   const { toast } = useToast();
@@ -87,6 +94,7 @@ export function BookingConfirmation({
 
   // Check if this is a paid session
   const isPaidSession = sessionType.price > 0;
+  const isMembershipRedemption = !!subscriptionId;
 
   // Handle booking confirmation
   const handleConfirmBooking = async () => {
@@ -97,6 +105,62 @@ export function BookingConfirmation({
     }
 
     setIsSubmitting(true);
+
+    if (isMembershipRedemption) {
+      // Redeem from an active membership — no Stripe Checkout.
+      try {
+        const res = await fetch(`/api/memberships/subscriptions/${subscriptionId}/redeem`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sessionTypeId: sessionType.id,
+            startTime,
+            clientNotes: clientNotes.trim() || undefined,
+          }),
+        });
+        const data = await res.json();
+        setIsSubmitting(false);
+
+        if (res.ok && data.success) {
+          setBookingResult({
+            id: data.data.booking.id,
+            coachName: coach.name || 'Coach',
+            coachAvatarUrl: coach.avatarUrl ?? null,
+            sessionType: {
+              name: sessionType.name,
+              duration: sessionType.duration,
+              price: sessionType.price,
+            },
+            startTime: new Date(startTime),
+            endTime: new Date(endTime),
+            clientNotes: clientNotes.trim() || null,
+            coachTimezone: coach.timezone || clientTimezone,
+            coachSlug: slug,
+          });
+          setBookingComplete(true);
+          toast({
+            title: 'Session requested',
+            description: `You have ${data.data.sessionsRemainingThisPeriod} session${
+              data.data.sessionsRemainingThisPeriod === 1 ? '' : 's'
+            } remaining this period.`,
+          });
+        } else {
+          toast({
+            title: 'Could not redeem session',
+            description: data?.error?.message || 'Something went wrong',
+            variant: 'destructive',
+          });
+        }
+      } catch (err) {
+        setIsSubmitting(false);
+        toast({
+          title: 'Could not redeem session',
+          description: err instanceof Error ? err.message : 'Network error',
+          variant: 'destructive',
+        });
+      }
+      return;
+    }
 
     if (isPaidSession) {
       // For paid sessions, create a Stripe Checkout session
@@ -410,16 +474,26 @@ export function BookingConfirmation({
           <Separator />
 
           {/* Price Summary */}
-          <div className="flex items-center justify-between rounded-lg border bg-muted/50 p-4">
-            <div className="flex items-center gap-2">
-              <DollarSign className="h-5 w-5 text-muted-foreground" />
-              <span className="font-medium">Total</span>
+          {isMembershipRedemption ? (
+            <div className="flex items-center justify-between rounded-lg border bg-muted/50 p-4">
+              <div className="flex items-center gap-2">
+                <Check className="h-5 w-5 text-muted-foreground" />
+                <span className="font-medium">Covered by your membership</span>
+              </div>
+              <span className="text-sm text-muted-foreground">No charge today</span>
             </div>
-            <span className="text-xl font-bold">
-              {currencySymbol}
-              {formatPrice(sessionType.price)} {coach.currency}
-            </span>
-          </div>
+          ) : (
+            <div className="flex items-center justify-between rounded-lg border bg-muted/50 p-4">
+              <div className="flex items-center gap-2">
+                <DollarSign className="h-5 w-5 text-muted-foreground" />
+                <span className="font-medium">Total</span>
+              </div>
+              <span className="text-xl font-bold">
+                {currencySymbol}
+                {formatPrice(sessionType.price)} {coach.currency}
+              </span>
+            </div>
+          )}
 
           {/* Auth warning */}
           {!isAuthenticated && (
@@ -442,10 +516,19 @@ export function BookingConfirmation({
               {isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {isPaidSession ? 'Redirecting to Payment...' : 'Confirming...'}
+                  {isMembershipRedemption
+                    ? 'Requesting session...'
+                    : isPaidSession
+                      ? 'Redirecting to Payment...'
+                      : 'Confirming...'}
                 </>
               ) : isAuthenticated ? (
-                isPaidSession ? (
+                isMembershipRedemption ? (
+                  <>
+                    <Check className="mr-2 h-4 w-4" />
+                    Redeem from membership
+                  </>
+                ) : isPaidSession ? (
                   <>
                     <CreditCard className="mr-2 h-4 w-4" />
                     Pay Now
@@ -457,7 +540,7 @@ export function BookingConfirmation({
                   </>
                 )
               ) : (
-                `Sign in to ${isPaidSession ? 'Pay & Book' : 'Confirm Booking'}`
+                `Sign in to ${isMembershipRedemption ? 'Redeem' : isPaidSession ? 'Pay & Book' : 'Confirm Booking'}`
               )}
             </Button>
             <Button variant="ghost" asChild>

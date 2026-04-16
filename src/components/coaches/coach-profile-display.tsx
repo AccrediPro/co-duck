@@ -19,6 +19,7 @@ import {
   Copy,
   ExternalLink,
   Globe,
+  Repeat,
   User,
 } from 'lucide-react';
 import type { Credential } from '@/db/schema';
@@ -26,6 +27,7 @@ import { AvailabilitySection } from './availability-section';
 import { MessageButton } from '@/components/messages';
 import { ReviewsSection } from '@/components/reviews';
 import { VerifiedBadge } from './verified-badge';
+import { SubscribeButton } from '@/components/memberships/subscribe-button';
 
 interface AvailabilityDisplayData {
   timezone: string | null;
@@ -33,6 +35,16 @@ interface AvailabilityDisplayData {
   nextAvailableDisplay: string | null;
   weeklyAvailabilitySummary: string | null;
   hasAvailability: boolean;
+}
+
+interface MembershipSummary {
+  id: number;
+  name: string;
+  description: string | null;
+  monthlyPriceCents: number;
+  currency: string;
+  sessionsPerPeriod: number;
+  includesMessaging: boolean;
 }
 
 interface CoachProfileDisplayProps {
@@ -53,6 +65,10 @@ interface CoachProfileDisplayProps {
   currentUserId?: string | null;
   // Verification status
   isVerified?: boolean;
+  // Recurring memberships offered by this coach (may be empty)
+  memberships?: MembershipSummary[];
+  /** True if the signed-in viewer already has an active/past_due sub with this coach. */
+  currentUserHasActiveSubscription?: boolean;
   // Credentials
   credentials?: Credential[] | null;
 }
@@ -72,6 +88,8 @@ export function CoachProfileDisplay({
   coachId,
   currentUserId,
   isVerified,
+  memberships: coachMemberships,
+  currentUserHasActiveSubscription,
   credentials,
 }: CoachProfileDisplayProps) {
   // Show message button only if user is logged in and not viewing their own profile
@@ -297,6 +315,69 @@ export function CoachProfileDisplay({
                     ];
                   })}
                 </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Ongoing Coaching (Memberships) */}
+          {coachMemberships && coachMemberships.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Repeat className="h-5 w-5" />
+                  Ongoing coaching
+                </CardTitle>
+                <CardDescription>
+                  Monthly retainers for clients who want ongoing support.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {coachMemberships.map((m) => {
+                  const price = (m.monthlyPriceCents / 100).toLocaleString(undefined, {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  });
+                  return (
+                    <div key={m.id} className="rounded-lg border bg-card p-4">
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                        <div className="min-w-0 flex-1">
+                          <h4 className="font-semibold">{m.name}</h4>
+                          {m.description && (
+                            <p className="mt-1 text-sm text-muted-foreground">{m.description}</p>
+                          )}
+                          <ul className="mt-2 space-y-1 text-sm text-muted-foreground">
+                            <li>
+                              {m.sessionsPerPeriod > 0
+                                ? `${m.sessionsPerPeriod} session${
+                                    m.sessionsPerPeriod === 1 ? '' : 's'
+                                  } per month`
+                                : 'Messaging-only tier'}
+                            </li>
+                            {m.includesMessaging && <li>Unlimited messaging</li>}
+                          </ul>
+                        </div>
+                        <div className="sm:text-right">
+                          <div className="text-xl font-bold">
+                            {m.currency.toUpperCase() === 'USD' ? '$' : ''}
+                            {price}
+                            <span className="ml-1 text-sm font-normal text-muted-foreground">
+                              /month
+                            </span>
+                          </div>
+                          <p className="text-xs uppercase text-muted-foreground">{m.currency}</p>
+                          <div className="mt-3">
+                            <SubscribeButton
+                              membershipId={m.id}
+                              coachId={coachId || ''}
+                              currentUserId={currentUserId ?? null}
+                              alreadySubscribed={!!currentUserHasActiveSubscription}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
               </CardContent>
             </Card>
           )}

@@ -11,6 +11,7 @@ interface PageProps {
     startTime?: string;
     endTime?: string;
     timezone?: string;
+    subscriptionId?: string;
   }>;
 }
 
@@ -32,7 +33,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function ConfirmBookingPage({ params, searchParams }: PageProps) {
   const { slug } = await params;
-  const { sessionId, startTime, endTime, timezone } = await searchParams;
+  const { sessionId, startTime, endTime, timezone, subscriptionId } = await searchParams;
 
   // Validate required params
   if (!sessionId || !startTime || !endTime || !timezone) {
@@ -58,8 +59,19 @@ export default async function ConfirmBookingPage({ params, searchParams }: PageP
   // Check if user is authenticated
   const { userId } = await auth();
 
+  // Validate redeem-from-membership intent if set: must be a numeric ID
+  // owned by this user, for this coach, and still have sessions left.
+  // We only echo it into the component if it looks plausible; the API
+  // re-validates on redeem.
+  const parsedSubscriptionId = subscriptionId ? Number.parseInt(subscriptionId, 10) : null;
+  const validSubscriptionId =
+    parsedSubscriptionId && Number.isFinite(parsedSubscriptionId) && parsedSubscriptionId > 0
+      ? parsedSubscriptionId
+      : null;
+
   // Build the return URL for after sign-in
-  const currentUrl = `/coaches/${slug}/book/confirm?sessionId=${sessionId}&startTime=${encodeURIComponent(startTime)}&endTime=${encodeURIComponent(endTime)}&timezone=${encodeURIComponent(timezone)}`;
+  const subParam = validSubscriptionId ? `&subscriptionId=${validSubscriptionId}` : '';
+  const currentUrl = `/coaches/${slug}/book/confirm?sessionId=${sessionId}&startTime=${encodeURIComponent(startTime)}&endTime=${encodeURIComponent(endTime)}&timezone=${encodeURIComponent(timezone)}${subParam}`;
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -72,6 +84,7 @@ export default async function ConfirmBookingPage({ params, searchParams }: PageP
         clientTimezone={timezone}
         isAuthenticated={!!userId}
         returnUrl={currentUrl}
+        subscriptionId={validSubscriptionId}
       />
     </div>
   );
