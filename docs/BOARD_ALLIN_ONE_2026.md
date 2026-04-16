@@ -32,11 +32,12 @@ iconnect_posts, iconnect_task_items, iconnect_comments, coach_invites,
 push_tokens, client_groups, client_group_members, coaching_streaks,
 streak_activities, weekly_check_ins, session_prep_responses, session_prep_questions
 ```
+
 </details>
 
-That is a 2014 PHP product. Coaching is a **conversation between two humans about feeling better**. The whole thing should be one chat thread with structured memory. What if Co-duck is just a **superintelligent thread between Sarah and her client**, and everything — booking, payment, intake, notes, action items, mood — is just *messages in that thread* parsed by AI? You don't need 32 tables. You need 4: users, conversations, messages, money. Everything else is a view.
+That is a 2014 PHP product. Coaching is a **conversation between two humans about feeling better**. The whole thing should be one chat thread with structured memory. What if Co-duck is just a **superintelligent thread between Sarah and her client**, and everything — booking, payment, intake, notes, action items, mood — is just _messages in that thread_ parsed by AI? You don't need 32 tables. You need 4: users, conversations, messages, money. Everything else is a view.
 
-**Altman:** Elon's right about the direction, wrong about the timing. You can't ship "AI-mediated relationship" in Q2 2026 to a Functional Medicine coach who still prints intake forms. But the *bet* is right. The next two years, every SaaS platform that doesn't have an AI agent doing the boring work for the coach loses. Sarah spends 10 hours a week on admin. We can take 7 of those hours back with **session transcript → AI summary → auto-suggested action items → auto-drafted client follow-up email**. That alone is more valuable than packages, intake forms, and embeddable widgets combined.
+**Altman:** Elon's right about the direction, wrong about the timing. You can't ship "AI-mediated relationship" in Q2 2026 to a Functional Medicine coach who still prints intake forms. But the _bet_ is right. The next two years, every SaaS platform that doesn't have an AI agent doing the boring work for the coach loses. Sarah spends 10 hours a week on admin. We can take 7 of those hours back with **session transcript → AI summary → auto-suggested action items → auto-drafted client follow-up email**. That alone is more valuable than packages, intake forms, and embeddable widgets combined.
 
 **Bezos:** Sam, I love AI. But "AI summary" is a feature. **Customer trust is the moat.** The reason Sarah pays Paperbell $49/mo isn't because Paperbell is innovative. It's because Paperbell doesn't lose her client data, doesn't change pricing on her, doesn't ship breaking changes the week before her cohort launches. We have a **brand consistency bug in production right now** — the homepage literally has the wrong company name. That's not a missing feature. That's a "do you trust us with your livelihood?" failure. Fix that before any AI bet.
 
@@ -50,7 +51,7 @@ That is a 2014 PHP product. Coaching is a **conversation between two humans abou
 
 **Bezos:** CRM. Sarah pays for the tool that makes her money on Tuesday morning. She doesn't pay for the tool that maybe brings her a client in 6 months.
 
-**Altman:** Both of you are right. The marketplace is the **acquisition** moat, the CRM is the **retention** moat. The AI layer is what *makes them inseparable* — when the AI knows everything about Sarah's clients (because it's running her CRM), the matching for new clients (the marketplace) becomes 10x better than Paperbell, who has no client data.
+**Altman:** Both of you are right. The marketplace is the **acquisition** moat, the CRM is the **retention** moat. The AI layer is what _makes them inseparable_ — when the AI knows everything about Sarah's clients (because it's running her CRM), the matching for new clients (the marketplace) becomes 10x better than Paperbell, who has no client data.
 
 **Musk:** Fine. But we're still not answering Dave's question. He said "ALL-IN-ONE." That word has a meaning. It means **Sarah closes every other tab.** Round 2.
 
@@ -59,6 +60,7 @@ That is a 2014 PHP product. Coaching is a **conversation between two humans abou
 ### Round 2 — "What does ALL-IN-ONE even mean for a Health & Wellness coach?"
 
 **Zuck:** Let's enumerate. Sarah's stack today, by category:
+
 1. **Booking** — Calendly or Acuity
 2. **Payments** — Stripe direct + Venmo for sliding scale
 3. **Packages** — Paperbell or ThriveCart
@@ -85,6 +87,7 @@ That is a 2014 PHP product. Coaching is a **conversation between two humans abou
 That's 22 tools. Co-duck today replaces — generously — booking, payments, messaging, basic notes, basic CRM. That's 5/22. **We're at 22% all-in-one.**
 
 **Bezos:** Let's not chase 22/22. Let's pick the **top friction tools** Sarah actively complains about. From customer interviews in this niche the top complaints are:
+
 - "I'm tired of stitching Stripe + Calendly + my intake form together — when one breaks, the booking flow breaks." (Booking + Payment + Intake — we partially have this)
 - "Voxer for async voice between sessions, but it's not connected to my notes about that client." (Voice + CRM)
 - "I have a 12-week program but no platform sells multi-session packages well." (Packages — gap)
@@ -93,17 +96,17 @@ That's 22 tools. Co-duck today replaces — generously — booking, payments, me
 
 Five clear bundles. Hit those five and Sarah's at 80% all-in.
 
-**Altman:** Add a sixth: "ChatGPT is now writing all my client follow-ups, my Instagram captions, and my newsletter — but it doesn't know my clients." **Native AI with full client context** is the differentiator no incumbent can copy in 12 months because they don't have the data model. Co-duck's 32 tables are actually a *gift* for Sam Altman's argument — **we have the substrate AI needs.**
+**Altman:** Add a sixth: "ChatGPT is now writing all my client follow-ups, my Instagram captions, and my newsletter — but it doesn't know my clients." **Native AI with full client context** is the differentiator no incumbent can copy in 12 months because they don't have the data model. Co-duck's 32 tables are actually a _gift_ for Sam Altman's argument — **we have the substrate AI needs.**
 
 **Musk:** Counterpoint — if we have 32 tables and 22% coverage, the marginal cost of each new feature is enormous. Look at iConnect (`schema.ts:2402-2540`) — three tables, posts/tasks/comments. What does it actually do that the messages table doesn't? Why is `weekly_check_ins` (`schema.ts:3172`) a separate table from messages with `messageType: 'check_in'`? **We have schema sprawl, not feature depth.** Before we add Voxer-killer + Kajabi-killer + Circle-killer, kill the dead weight.
 
-**Zuck:** I'm with Elon on the kill list. But Sam's point about AI-as-substrate is the sharpest thing said in this room. Here's the synthesis: **Co-duck's all-in-one play is "the AI-native coaching CRM with a marketplace front door."** Booking, packages, intake, video, async voice, notes, email — these are *table stakes* for ALL-IN-ONE. The **moat** is the AI agent that lives on top of all that data and does Sarah's admin while she sleeps.
+**Zuck:** I'm with Elon on the kill list. But Sam's point about AI-as-substrate is the sharpest thing said in this room. Here's the synthesis: **Co-duck's all-in-one play is "the AI-native coaching CRM with a marketplace front door."** Booking, packages, intake, video, async voice, notes, email — these are _table stakes_ for ALL-IN-ONE. The **moat** is the AI agent that lives on top of all that data and does Sarah's admin while she sleeps.
 
 **Bezos:** Define "all-in-one" operationally for the deliverable: **Sarah can close Calendly, Stripe Checkout, Typeform, Zoom, Voxer, Notion, ConvertKit, Senja, and Circle within 90 days of switching to Co-duck.** Nine tabs closed. That's the goal post.
 
 **Musk:** And Kajabi? Squarespace?
 
-**Bezos:** Year 2. Kajabi is a content product with a different mental model — selling courses to a list. We should not pretend to replace it in 90 days. Squarespace is her brand. We embed *into* Squarespace, we don't replace it. That's Zuck's embeddable widget point.
+**Bezos:** Year 2. Kajabi is a content product with a different mental model — selling courses to a list. We should not pretend to replace it in 90 days. Squarespace is her brand. We embed _into_ Squarespace, we don't replace it. That's Zuck's embeddable widget point.
 
 **Zuck:** OK. So Round 2 verdict: **all-in-one means 9 specific tools closed in 90 days, plus an AI layer no competitor has, plus a marketplace front door no SaaS competitor has.**
 
@@ -117,11 +120,11 @@ Five clear bundles. Hit those five and Sarah's at 80% all-in.
 
 **Musk:** I'll start because I have the longest list. **iConnect.** Three tables (`iconnect_posts`, `iconnect_task_items`, `iconnect_comments` — `schema.ts:2402-2540`). It's a Slack-for-one-client. Nobody asked for it. Sarah uses Voxer because it's voice. Clients use iMessage because it's iMessage. We built a third thing that's neither. **Fold it into the messages table** with `messageType: 'task' | 'image' | 'voice'`. Save 800 lines of code.
 
-**Bezos:** Cautious agree. iConnect's *intent* — a structured workspace per client — is right. Its *execution* as a separate primitive is wrong. Make the conversation thread the workspace. Pin tasks. Pin files. One thread, infinite affordances.
+**Bezos:** Cautious agree. iConnect's _intent_ — a structured workspace per client — is right. Its _execution_ as a separate primitive is wrong. Make the conversation thread the workspace. Pin tasks. Pin files. One thread, infinite affordances.
 
 **Zuck:** Kill #2: **the `coach_invites` table** (`schema.ts:2548`) if it's just for inviting other coaches manually. We need a real referral product, not a manual invite link.
 
-**Musk:** Kill #3: **the entire `session_prep_questions` + `session_prep_responses` tables** (`schema.ts:3245-3335`) as a separate primitive. This is just an intake form. Build ONE form-builder primitive (`forms` + `form_responses`) and use it for: intake forms, session prep, post-session check-in, contract waivers, NPS surveys, testimonial requests. Today we have *zero* form builder and *one* hardcoded session-prep schema. That's backwards.
+**Musk:** Kill #3: **the entire `session_prep_questions` + `session_prep_responses` tables** (`schema.ts:3245-3335`) as a separate primitive. This is just an intake form. Build ONE form-builder primitive (`forms` + `form_responses`) and use it for: intake forms, session prep, post-session check-in, contract waivers, NPS surveys, testimonial requests. Today we have _zero_ form builder and _one_ hardcoded session-prep schema. That's backwards.
 
 **Altman:** Kill #4: **the corporate "executive coach" copy across the marketing surface.** Specifically `(public)/page.tsx`, `(public)/about/page.tsx`, `(public)/specialties/page.tsx`. The audit calls this out. Sarah looks at "Transform Your Life — Trusted by 1,000+ executives" and bounces. Either rebuild for the H&W niche or — Zuck's call — go dual-vertical with a route-based theme switch. But the current copy must die.
 
@@ -133,7 +136,7 @@ Five clear bundles. Hit those five and Sarah's at 80% all-in.
 
 **Altman:** That's an AI feature — agreed, but tag it as build, not kill.
 
-**Musk:** Fair. Then Kill #7: **the assumption that Stripe's 2.9% + 10% platform fee is the right business model.** A Functional Medicine coach charging $150/session and doing 60 sessions/month grosses $9,000. We take $900. Paperbell takes $49 flat. **We're 18x more expensive than Paperbell at scale.** Move to a tiered SaaS model — $49/mo flat or 5% capped at $99 — pick whichever is lower. 10% scales us out of the market when she succeeds. We should *want* her to succeed.
+**Musk:** Fair. Then Kill #7: **the assumption that Stripe's 2.9% + 10% platform fee is the right business model.** A Functional Medicine coach charging $150/session and doing 60 sessions/month grosses $9,000. We take $900. Paperbell takes $49 flat. **We're 18x more expensive than Paperbell at scale.** Move to a tiered SaaS model — $49/mo flat or 5% capped at $99 — pick whichever is lower. 10% scales us out of the market when she succeeds. We should _want_ her to succeed.
 
 **Bezos:** Strong agree. Pricing model is a strategic kill. The 10% destination charge made sense as a marketplace v1 because it's frictionless. But we're not just a marketplace — we're SaaS now. Hybrid: free directory listing + 10% on marketplace-originated bookings, $39/mo or $79/mo for SaaS features (her own clients, packages, AI, no fee).
 
@@ -144,6 +147,7 @@ Five clear bundles. Hit those five and Sarah's at 80% all-in.
 **Zuck:** Fair.
 
 **Bezos:** Round 3 verdict — kill list:
+
 1. iConnect tables → fold into messages
 2. Manual coach_invites → real referral product
 3. Session_prep_questions tables → generalize to forms primitive
@@ -162,7 +166,8 @@ Seven kills. Now Round 4 — what do we build?
 
 **Musk:** Which is what?
 
-**Bezos:** Her calendar to see today's clients. Today she opens Calendly *and* Co-duck *and* her notes app. We need to be the only tab. So:
+**Bezos:** Her calendar to see today's clients. Today she opens Calendly _and_ Co-duck _and_ her notes app. We need to be the only tab. So:
+
 1. **Embeddable booking widget** — she pastes one snippet on Squarespace and Calendly is gone. (Audit P1 #10.)
 2. **Packages** — multi-session bundles with Stripe Checkout. (Audit P0 #3.) Without this Paperbell wins on day one.
 3. **Custom intake form builder** (per Musk's "one form primitive"). (Audit P0 #4.)
@@ -172,6 +177,7 @@ Seven kills. Now Round 4 — what do we build?
 That's the table-stakes block. ~6-8 weeks of focused engineering.
 
 **Altman:** Now my AI block, also 6-8 weeks but parallelizable:
+
 1. **AI coach onboarding** — paste LinkedIn URL → draft profile, headline, bio, specialties. Reduce 4-step wizard to 1 step.
 2. **AI session notes** — coach uploads recording or transcript (or we record in-app), AI generates: 1-paragraph summary, 3-5 action items, suggested follow-up email, suggested next session prep. This alone is the killer feature.
 3. **AI intake summary** — when client fills the intake form, AI gives Sarah a 3-bullet pre-session brief. Audit P2 #24.
@@ -179,6 +185,7 @@ That's the table-stakes block. ~6-8 weeks of focused engineering.
 5. **AI content repurposing** — session highlight (with consent) → social post draft, newsletter excerpt. Replaces ChatGPT-for-content workflow.
 
 **Zuck:** My growth block:
+
 1. **Sub-specialty taxonomy + SEO landing pages** — one per sub-niche. `/coaches/perimenopause-coach`, `/coaches/trauma-informed-coach`, etc. 15 pages on day one, compound for 12 months.
 2. **Embeddable booking widget** (overlap with Bezos — confirmed P0).
 3. **Referral program** — client invites friend → both get $20. Coach invites coach → coach earns 10% of invitee's first 6 months SaaS fee.
@@ -186,6 +193,7 @@ That's the table-stakes block. ~6-8 weeks of focused engineering.
 5. **Coach profile becomes a real landing page** — replace `/coaches/[slug]` minimal page with a Linktree-quality landing page Sarah can use as her sole IG bio link. Replaces Linktree + Squarespace lite.
 
 **Musk:** My simplification block:
+
 1. **Forms primitive** (kills `session_prep_questions` and the future Typeform need).
 2. **Folding iConnect into messages.**
 3. **Onboarding wizard collapse to 1 page.**
@@ -193,6 +201,7 @@ That's the table-stakes block. ~6-8 weeks of focused engineering.
 5. **Mobile-first UX redesign** — dashboard that works thumbs-only.
 
 **Altman:** I want to add the moonshot bets too — these aren't 90-day, they're the why-Co-duck-wins bets:
+
 - **Voice-first AI coach companion (mobile)** — async voice notes Sarah records that her clients can listen to, AI transcribes and tags. Voxer killer + Otter killer.
 - **AI coach twin** — between sessions, client can chat with an AI persona trained on Sarah's voice and notes (with Sarah's consent and pricing). Async between-session support that scales Sarah's hours without scaling her hours.
 - **HIPAA / BAA tier** — for the slice of H&W who actually need it (RDs, LCSWs, therapists who coach on the side). $199/mo enterprise tier.
@@ -227,33 +236,20 @@ That's the table-stakes block. ~6-8 weeks of focused engineering.
 **Bezos:** Agreed. 90-day list:
 
 **Block A — Trust & Brand (Week 1-2):**
+
 1. Fix "AccrediPro CoachHub" homepage. New niche-native hero. (Audit P0 #5.) — S
 2. HIPAA-adjacent privacy pack — rewrite `/privacy`, microcopy on intake/messaging. (Audit P0 #6.) — S
 3. Credentials field on coach profile. (Audit P0 #1.) — M
 
-**Block B — Discovery (Week 2-4):**
-4. Sub-specialty taxonomy + SEO landing pages. (Audit P0 #2 + P1 #17.) — M
-5. Credential-verified badge tier. (Audit P0 #8.) — S
-6. Free Discovery Call as primary CTA. (Audit P0 #7.) — S
+**Block B — Discovery (Week 2-4):** 4. Sub-specialty taxonomy + SEO landing pages. (Audit P0 #2 + P1 #17.) — M 5. Credential-verified badge tier. (Audit P0 #8.) — S 6. Free Discovery Call as primary CTA. (Audit P0 #7.) — S
 
-**Block C — Monetization (Week 3-7):**
-7. Packages (multi-session bundles). (Audit P0 #3.) — L
-8. Memberships / recurring subscriptions. (Audit P1 #9.) — L
-9. Pricing model overhaul: tiered SaaS + reduced marketplace fee. — M
+**Block C — Monetization (Week 3-7):** 7. Packages (multi-session bundles). (Audit P0 #3.) — L 8. Memberships / recurring subscriptions. (Audit P1 #9.) — L 9. Pricing model overhaul: tiered SaaS + reduced marketplace fee. — M
 
-**Block D — Platform Primitives (Week 4-9):**
-10. Forms primitive (replaces session_prep_questions + enables intake forms + waivers + post-session check-ins + NPS). — L
-11. Custom Intake Form Builder (uses forms primitive). (Audit P0 #4.) — M (after #10)
-12. iConnect collapse into messages with `messageType` extensions. — M
+**Block D — Platform Primitives (Week 4-9):** 10. Forms primitive (replaces session_prep_questions + enables intake forms + waivers + post-session check-ins + NPS). — L 11. Custom Intake Form Builder (uses forms primitive). (Audit P0 #4.) — M (after #10) 12. iConnect collapse into messages with `messageType` extensions. — M
 
-**Block E — AI Wedge (Week 5-10):**
-13. AI session notes (transcript → summary + action items + draft follow-up). (Audit P2 #20.) — L
-14. AI coach onboarding (LinkedIn URL → draft profile). — M
+**Block E — AI Wedge (Week 5-10):** 13. AI session notes (transcript → summary + action items + draft follow-up). (Audit P2 #20.) — L 14. AI coach onboarding (LinkedIn URL → draft profile). — M
 
-**Block F — Distribution (Week 8-12):**
-15. Embeddable booking widget. (Audit P1 #10.) — M
-16. Email sequences (welcome / prep / follow-up / re-engagement). (Audit P1 #11.) — M
-17. Testimonial request flow. (Audit P1 #12.) — M
+**Block F — Distribution (Week 8-12):** 15. Embeddable booking widget. (Audit P1 #10.) — M 16. Email sequences (welcome / prep / follow-up / re-engagement). (Audit P1 #11.) — M 17. Testimonial request flow. (Audit P1 #12.) — M
 
 That's 17 ships in 90 days across 4 parallel tracks. Aggressive but doable with Caesar's decomposition.
 
@@ -262,6 +258,7 @@ That's 17 ships in 90 days across 4 parallel tracks. Aggressive but doable with 
 **Zuck:** Fine — 12. But keep the embeddable widget. That's the distribution unlock.
 
 **Bezos:** OK. **12-month horizon** beyond the 90-day:
+
 - AI matching (client → coach)
 - AI intake summary
 - AI content repurposing
@@ -276,6 +273,7 @@ That's 17 ships in 90 days across 4 parallel tracks. Aggressive but doable with 
 - Voxer-style async voice in messages
 
 **Altman:** **3-year moonshots:**
+
 - Sarah's AI Assistant (between-session AI for clients, with coach approval and pricing)
 - Voice-first mobile UX (whisper + speak instead of type)
 - HIPAA / BAA enterprise tier ($199/mo) for licensed practitioners
@@ -295,38 +293,38 @@ That's 17 ships in 90 days across 4 parallel tracks. Aggressive but doable with 
 
 ## Part 2 — The Complete ALL-IN-ONE Feature Map
 
-| Tool Sarah uses today | What it does | Co-duck replacement | Status |
-|---|---|---|---|
-| **Calendly / Acuity** | Booking + availability + buffers + timezone | Booking flow + `coach_availability` + `availability_overrides` (`schema.ts:770, 871`) | ✅ Shipped |
-| **Stripe Checkout (direct)** | Per-session payment | Stripe Connect destination charges (`src/lib/stripe.ts`) | ✅ Shipped |
-| **Venmo / PayPal (sliding scale)** | Off-platform discount payments | Coupons / promo codes / sliding scale field on coach profile | ❌ P1 |
-| **Paperbell / ThriveCart** | Multi-session packages, one-time payment | `coach_packages` table + Stripe Checkout for bundle | ❌ P0 |
-| **Stripe Subscriptions** | Monthly retainer model | Memberships table + Stripe Subscriptions integration | ❌ P0 |
-| **HoneyBook / Dubsado (contracts)** | Client agreements, e-signature | Contract waiver as a Form type with consent checkbox + audit log | ❌ P1 |
-| **Typeform / JotForm / Google Forms** | Custom intake forms | Forms primitive (generalized from `session_prep_questions`) + Intake Form Builder | 🟡 Partial → P0 |
-| **Zoom / Google Meet** | Video calls | `bookings.meetingLink` is just a URL today (`schema.ts:991`) | 🟡 Link-only — P1 in-app |
-| **Voxer / Marco Polo** | Async voice notes between sessions | Messages table + voice message type (`messageType: 'voice'`) | ❌ P1 |
-| **Notion / Evernote / Google Docs** | Session notes | `session_notes` + `session_note_templates` (`schema.ts:1509, 1563`) | ✅ Shipped |
-| **Dubsado / HoneyBook (CRM)** | Client pipeline, tags, lifecycle | `client_groups` + `client_group_members` (`schema.ts:2935, 2982`) — needs pipeline stages + tags | 🟡 Partial — P1 |
-| **ConvertKit / Mailchimp / Flodesk** | Email marketing sequences | Resend templates exist (`src/lib/emails/`); needs sequence engine | 🟡 Cron only — P0 |
-| **Kajabi / Teachable / Thinkific** | Async courses + content | Programs + Goals + Attachments (`schema.ts:2180, 2253, 2335`) — needs lesson/module structure | 🟡 Partial — P2 |
-| **Circle / Mighty Networks / FB Groups** | Community / membership feed | `group_sessions` + recurrence + anonymous Q&A | 🟡 Partial — P1 |
-| **Zoom + Eventbrite + spreadsheet (groups)** | Group coaching workshops | `group_sessions` + `group_session_participants` (`schema.ts:2045, 2117`) | ✅ Shipped (needs polish) |
-| **Oura / Clue / paper journal** | Mood, sleep, energy, cycle tracking | `weekly_check_ins` (`schema.ts:3172`) → extend to `daily_metrics` table | 🟡 Partial — P1 |
-| **Email / Dropbox (lab results)** | Send PDFs to coach | `attachments` (`schema.ts:2335`) + new `attachment_type: 'lab_result'` + coach annotation UI | 🟡 Partial — P1 |
-| **Squarespace / Wix / Linktree** | Coach's website + bio link | Coach profile becomes Linktree-quality landing page; embeddable booking widget for full sites | 🟡 Partial — P0 |
-| **Later / Buffer / Planoly** | Social media scheduling | AI content repurposing (session theme → social post draft) | ❌ P2 |
-| **Senja / Testimonial.to** | Testimonial collection + display | Reviews table (`schema.ts:1778`) + auto-request flow + embeddable widget | 🟡 Partial — P1 |
-| **Manual referrals / Rewardful** | Client + coach referrals | Referral program: client → friend ($20 credit), coach → coach (% of SaaS fee) | ❌ P1 |
-| **Google Analytics / Stripe dashboard** | Coach business analytics | Coach analytics dashboard: bookings, revenue, retention, NPS, at-risk clients (`coaching_streaks` already tracks at-risk — `schema.ts:3053`) | 🟡 Partial — P1 |
-| **QuickBooks / Xero** | Tax + accounting | Annual 1099-style export from `transactions` table; integration link to QBO | ❌ P2 |
-| **ChatGPT (content)** | Drafts emails, captions, newsletters | AI content repurposing + AI follow-up drafts | ❌ P0 (one AI win) |
-| **Otter.ai (transcripts)** | Session recording + transcript | AI session notes (record in-app or upload → transcript + summary + action items) | ❌ P0 (THE killer feature) |
-| **Google Drive / Dropbox** | Client file storage | `attachments` (`schema.ts:2335`) — already exists; just needs UI polish | ✅ Shipped |
-| **Multiple coaches / VA** | Hire associate or VA | Multi-coach teams + view-only admin role | ❌ P2 |
-| **Apple Calendar / Outlook** | Personal calendar sync | Today only Google (`google_calendar_tokens`, `schema.ts:1885`); add Apple/Outlook | ❌ P1 |
-| **Crisis hotline / safety net** | 988, Crisis Text Line | Crisis resource footer on every client dashboard | ❌ P0 (S complexity) |
-| **Push notifications** | Mobile reminders | `push_tokens` table exists (`schema.ts:2581`) — needs mobile app to consume | 🟡 Schema-ready — P1 (with mobile) |
+| Tool Sarah uses today                        | What it does                                | Co-duck replacement                                                                                                                          | Status                             |
+| -------------------------------------------- | ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
+| **Calendly / Acuity**                        | Booking + availability + buffers + timezone | Booking flow + `coach_availability` + `availability_overrides` (`schema.ts:770, 871`)                                                        | ✅ Shipped                         |
+| **Stripe Checkout (direct)**                 | Per-session payment                         | Stripe Connect destination charges (`src/lib/stripe.ts`)                                                                                     | ✅ Shipped                         |
+| **Venmo / PayPal (sliding scale)**           | Off-platform discount payments              | Coupons / promo codes / sliding scale field on coach profile                                                                                 | ❌ P1                              |
+| **Paperbell / ThriveCart**                   | Multi-session packages, one-time payment    | `coach_packages` table + Stripe Checkout for bundle                                                                                          | ❌ P0                              |
+| **Stripe Subscriptions**                     | Monthly retainer model                      | Memberships table + Stripe Subscriptions integration                                                                                         | ❌ P0                              |
+| **HoneyBook / Dubsado (contracts)**          | Client agreements, e-signature              | Contract waiver as a Form type with consent checkbox + audit log                                                                             | ❌ P1                              |
+| **Typeform / JotForm / Google Forms**        | Custom intake forms                         | Forms primitive (generalized from `session_prep_questions`) + Intake Form Builder                                                            | 🟡 Partial → P0                    |
+| **Zoom / Google Meet**                       | Video calls                                 | `bookings.meetingLink` is just a URL today (`schema.ts:991`)                                                                                 | 🟡 Link-only — P1 in-app           |
+| **Voxer / Marco Polo**                       | Async voice notes between sessions          | Messages table + voice message type (`messageType: 'voice'`)                                                                                 | ❌ P1                              |
+| **Notion / Evernote / Google Docs**          | Session notes                               | `session_notes` + `session_note_templates` (`schema.ts:1509, 1563`)                                                                          | ✅ Shipped                         |
+| **Dubsado / HoneyBook (CRM)**                | Client pipeline, tags, lifecycle            | `client_groups` + `client_group_members` (`schema.ts:2935, 2982`) — needs pipeline stages + tags                                             | 🟡 Partial — P1                    |
+| **ConvertKit / Mailchimp / Flodesk**         | Email marketing sequences                   | Resend templates exist (`src/lib/emails/`); needs sequence engine                                                                            | 🟡 Cron only — P0                  |
+| **Kajabi / Teachable / Thinkific**           | Async courses + content                     | Programs + Goals + Attachments (`schema.ts:2180, 2253, 2335`) — needs lesson/module structure                                                | 🟡 Partial — P2                    |
+| **Circle / Mighty Networks / FB Groups**     | Community / membership feed                 | `group_sessions` + recurrence + anonymous Q&A                                                                                                | 🟡 Partial — P1                    |
+| **Zoom + Eventbrite + spreadsheet (groups)** | Group coaching workshops                    | `group_sessions` + `group_session_participants` (`schema.ts:2045, 2117`)                                                                     | ✅ Shipped (needs polish)          |
+| **Oura / Clue / paper journal**              | Mood, sleep, energy, cycle tracking         | `weekly_check_ins` (`schema.ts:3172`) → extend to `daily_metrics` table                                                                      | 🟡 Partial — P1                    |
+| **Email / Dropbox (lab results)**            | Send PDFs to coach                          | `attachments` (`schema.ts:2335`) + new `attachment_type: 'lab_result'` + coach annotation UI                                                 | 🟡 Partial — P1                    |
+| **Squarespace / Wix / Linktree**             | Coach's website + bio link                  | Coach profile becomes Linktree-quality landing page; embeddable booking widget for full sites                                                | 🟡 Partial — P0                    |
+| **Later / Buffer / Planoly**                 | Social media scheduling                     | AI content repurposing (session theme → social post draft)                                                                                   | ❌ P2                              |
+| **Senja / Testimonial.to**                   | Testimonial collection + display            | Reviews table (`schema.ts:1778`) + auto-request flow + embeddable widget                                                                     | 🟡 Partial — P1                    |
+| **Manual referrals / Rewardful**             | Client + coach referrals                    | Referral program: client → friend ($20 credit), coach → coach (% of SaaS fee)                                                                | ❌ P1                              |
+| **Google Analytics / Stripe dashboard**      | Coach business analytics                    | Coach analytics dashboard: bookings, revenue, retention, NPS, at-risk clients (`coaching_streaks` already tracks at-risk — `schema.ts:3053`) | 🟡 Partial — P1                    |
+| **QuickBooks / Xero**                        | Tax + accounting                            | Annual 1099-style export from `transactions` table; integration link to QBO                                                                  | ❌ P2                              |
+| **ChatGPT (content)**                        | Drafts emails, captions, newsletters        | AI content repurposing + AI follow-up drafts                                                                                                 | ❌ P0 (one AI win)                 |
+| **Otter.ai (transcripts)**                   | Session recording + transcript              | AI session notes (record in-app or upload → transcript + summary + action items)                                                             | ❌ P0 (THE killer feature)         |
+| **Google Drive / Dropbox**                   | Client file storage                         | `attachments` (`schema.ts:2335`) — already exists; just needs UI polish                                                                      | ✅ Shipped                         |
+| **Multiple coaches / VA**                    | Hire associate or VA                        | Multi-coach teams + view-only admin role                                                                                                     | ❌ P2                              |
+| **Apple Calendar / Outlook**                 | Personal calendar sync                      | Today only Google (`google_calendar_tokens`, `schema.ts:1885`); add Apple/Outlook                                                            | ❌ P1                              |
+| **Crisis hotline / safety net**              | 988, Crisis Text Line                       | Crisis resource footer on every client dashboard                                                                                             | ❌ P0 (S complexity)               |
+| **Push notifications**                       | Mobile reminders                            | `push_tokens` table exists (`schema.ts:2581`) — needs mobile app to consume                                                                  | 🟡 Schema-ready — P1 (with mobile) |
 
 **Coverage today:** 5/29 fully shipped, 11/29 partial, 13/29 missing. **Co-duck closes ~24% of Sarah's stack today. Goal: 75% in 90 days, 90% in 12 months.**
 
@@ -334,15 +332,15 @@ That's 17 ships in 90 days across 4 parallel tracks. Aggressive but doable with 
 
 ## Part 3 — What to KILL (Musk's List, Board-Approved)
 
-| # | Kill | Why | Files / Tables |
-|---|---|---|---|
-| 1 | **iConnect as separate primitive** — fold into messages | Three tables for what is functionally a richer message type. Schema sprawl with no UX advantage over a thread with pinning + tasks. | `iconnect_posts`, `iconnect_task_items`, `iconnect_comments` (`schema.ts:2402-2540`) |
-| 2 | **`session_prep_questions` + `session_prep_responses` as bespoke schema** — generalize to a Forms primitive | One forms primitive serves intake + waivers + session prep + NPS + post-session check-ins + testimonial requests. Today we have one hardcoded form pattern and zero builder. | `session_prep_questions`, `session_prep_responses` (`schema.ts:3245-3335`) |
-| 3 | **"AccrediPro CoachHub" homepage copy + executive-coach positioning** | Brand inconsistency bug + wrong persona. Sarah bounces in 10 seconds. | `src/app/(public)/page.tsx:104-146`, `src/app/(public)/about/page.tsx`, `src/app/(public)/specialties/page.tsx` |
-| 4 | **12-bucket `COACH_SPECIALTIES` taxonomy** | "Health & Wellness" as one tile is the SEO + discovery bottleneck. Replace with 2-level tree with 15 H&W sub-niches. | `src/lib/validators/coach-onboarding.ts:133-146` |
-| 5 | **4-step coach onboarding wizard** | High friction, high drop-off. Replace with 1-page AI-assisted onboarding (paste LinkedIn → draft profile). | `src/app/(dashboard)/onboarding/coach/*.tsx` (4 pages) |
-| 6 | **Blanket 10% platform fee** | Makes us 18x more expensive than Paperbell at scale. Move to tiered SaaS ($39 / $79) + reduced fee on marketplace-originated bookings only. | `src/lib/stripe.ts` (fee calc), pricing page, transaction model |
-| 7 | **`coach_invites` as the only invite mechanism** | Manual one-off links don't drive growth. Replace with a real referral product (client→friend credit + coach→coach revenue share). | `coach_invites` (`schema.ts:2548`) |
+| #   | Kill                                                                                                        | Why                                                                                                                                                                          | Files / Tables                                                                                                  |
+| --- | ----------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| 1   | **iConnect as separate primitive** — fold into messages                                                     | Three tables for what is functionally a richer message type. Schema sprawl with no UX advantage over a thread with pinning + tasks.                                          | `iconnect_posts`, `iconnect_task_items`, `iconnect_comments` (`schema.ts:2402-2540`)                            |
+| 2   | **`session_prep_questions` + `session_prep_responses` as bespoke schema** — generalize to a Forms primitive | One forms primitive serves intake + waivers + session prep + NPS + post-session check-ins + testimonial requests. Today we have one hardcoded form pattern and zero builder. | `session_prep_questions`, `session_prep_responses` (`schema.ts:3245-3335`)                                      |
+| 3   | **"AccrediPro CoachHub" homepage copy + executive-coach positioning**                                       | Brand inconsistency bug + wrong persona. Sarah bounces in 10 seconds.                                                                                                        | `src/app/(public)/page.tsx:104-146`, `src/app/(public)/about/page.tsx`, `src/app/(public)/specialties/page.tsx` |
+| 4   | **12-bucket `COACH_SPECIALTIES` taxonomy**                                                                  | "Health & Wellness" as one tile is the SEO + discovery bottleneck. Replace with 2-level tree with 15 H&W sub-niches.                                                         | `src/lib/validators/coach-onboarding.ts:133-146`                                                                |
+| 5   | **4-step coach onboarding wizard**                                                                          | High friction, high drop-off. Replace with 1-page AI-assisted onboarding (paste LinkedIn → draft profile).                                                                   | `src/app/(dashboard)/onboarding/coach/*.tsx` (4 pages)                                                          |
+| 6   | **Blanket 10% platform fee**                                                                                | Makes us 18x more expensive than Paperbell at scale. Move to tiered SaaS ($39 / $79) + reduced fee on marketplace-originated bookings only.                                  | `src/lib/stripe.ts` (fee calc), pricing page, transaction model                                                 |
+| 7   | **`coach_invites` as the only invite mechanism**                                                            | Manual one-off links don't drive growth. Replace with a real referral product (client→friend credit + coach→coach revenue share).                                            | `coach_invites` (`schema.ts:2548`)                                                                              |
 
 **Net effect:** ~3 tables removed, ~1500 lines of code deleted, schema simpler, brand consistent, pricing competitive, onboarding faster, taxonomy SEO-ready. **Subtraction is a feature.**
 
@@ -352,20 +350,20 @@ That's 17 ships in 90 days across 4 parallel tracks. Aggressive but doable with 
 
 ### 90-Day Sprint (Q3 2026 — 12 ships, 4 parallel tracks)
 
-| # | Feature | Champion | Rationale | Complexity | Discipline |
-|---|---|---|---|:---:|---|
-| 1 | **Brand fix + niche-native homepage** (kill "AccrediPro", new H1, 8 specialty tiles, credential trust strip) | Bezos | Trust precondition. Every dollar of paid traffic leaks until this is fixed. | S | Frontend + Design |
-| 2 | **HIPAA-adjacent privacy pack** (rewrite `/privacy`, microcopy, "not medical advice" disclaimers, crisis resource footer) | Bezos | Disqualifying gap for H&W buyers. Quick win. | S | Frontend + Legal copy |
-| 3 | **Credentials field on coach profile** (JSONB: body, credential, year, verification URL) | Bezos | Sarah's #1 trust signal. Justifies $150/session. | M | Backend + Frontend + Onboarding |
-| 4 | **Sub-specialty taxonomy (2-level tree)** + 15 SEO landing pages for H&W sub-niches | Zuck | SEO + discovery unlock. Compounds for 12 months. | M | Backend + Frontend + Content |
-| 5 | **Packages (multi-session bundles)** + Stripe Checkout for one-time bundle purchase + remaining-sessions UI | Bezos | The #1 revenue feature. Closes Paperbell. | L | Backend + Frontend + Stripe |
-| 6 | **Memberships / recurring subscriptions** (Stripe Subscriptions) | Bezos | Predictable revenue + retention. Grief / long-term H&W requires it. | L | Backend + Stripe |
-| 7 | **Pricing model overhaul** — Free directory + tiered SaaS ($39 starter, $79 pro) + reduced marketplace fee (5% capped) | Musk | We're 18x more expensive than Paperbell at scale. Fix before scaling. | M | Backend + Pricing page |
-| 8 | **Forms primitive** (replaces `session_prep_questions`; enables intake, waivers, post-session, NPS, testimonial) | Musk | Foundational. One primitive, six use cases. | L | Backend + Frontend |
-| 9 | **Custom Intake Form Builder** (uses Forms primitive) — required first-booking with consent + scope-of-practice | Bezos | Mandatory for H&W coaches. Cannot legally take a client without it. | M | Frontend (after #8) |
-| 10 | **AI session notes** (record/upload → Whisper transcript → GPT-4o summary + action items + draft follow-up email) | Altman | THE killer feature. Saves Sarah 7+ hours/week of admin. | L | Backend + AI |
-| 11 | **AI coach onboarding** (paste LinkedIn → draft profile, headline, bio, specialties; coach edits) | Altman | Collapses 4-step wizard to 1 step. Onboarding conversion 2-3x. | M | Backend + AI + Frontend |
-| 12 | **Embeddable booking widget** (`<script>` tag for Squarespace/WordPress/Linktree) | Zuck | Sarah won't switch unless we slot into her existing site. Distribution unlock. | M | Frontend + Backend |
+| #   | Feature                                                                                                                   | Champion | Rationale                                                                      | Complexity | Discipline                      |
+| --- | ------------------------------------------------------------------------------------------------------------------------- | -------- | ------------------------------------------------------------------------------ | :--------: | ------------------------------- |
+| 1   | **Brand fix + niche-native homepage** (kill "AccrediPro", new H1, 8 specialty tiles, credential trust strip)              | Bezos    | Trust precondition. Every dollar of paid traffic leaks until this is fixed.    |     S      | Frontend + Design               |
+| 2   | **HIPAA-adjacent privacy pack** (rewrite `/privacy`, microcopy, "not medical advice" disclaimers, crisis resource footer) | Bezos    | Disqualifying gap for H&W buyers. Quick win.                                   |     S      | Frontend + Legal copy           |
+| 3   | **Credentials field on coach profile** (JSONB: body, credential, year, verification URL)                                  | Bezos    | Sarah's #1 trust signal. Justifies $150/session.                               |     M      | Backend + Frontend + Onboarding |
+| 4   | **Sub-specialty taxonomy (2-level tree)** + 15 SEO landing pages for H&W sub-niches                                       | Zuck     | SEO + discovery unlock. Compounds for 12 months.                               |     M      | Backend + Frontend + Content    |
+| 5   | **Packages (multi-session bundles)** + Stripe Checkout for one-time bundle purchase + remaining-sessions UI               | Bezos    | The #1 revenue feature. Closes Paperbell.                                      |     L      | Backend + Frontend + Stripe     |
+| 6   | **Memberships / recurring subscriptions** (Stripe Subscriptions)                                                          | Bezos    | Predictable revenue + retention. Grief / long-term H&W requires it.            |     L      | Backend + Stripe                |
+| 7   | **Pricing model overhaul** — Free directory + tiered SaaS ($39 starter, $79 pro) + reduced marketplace fee (5% capped)    | Musk     | We're 18x more expensive than Paperbell at scale. Fix before scaling.          |     M      | Backend + Pricing page          |
+| 8   | **Forms primitive** (replaces `session_prep_questions`; enables intake, waivers, post-session, NPS, testimonial)          | Musk     | Foundational. One primitive, six use cases.                                    |     L      | Backend + Frontend              |
+| 9   | **Custom Intake Form Builder** (uses Forms primitive) — required first-booking with consent + scope-of-practice           | Bezos    | Mandatory for H&W coaches. Cannot legally take a client without it.            |     M      | Frontend (after #8)             |
+| 10  | **AI session notes** (record/upload → Whisper transcript → GPT-4o summary + action items + draft follow-up email)         | Altman   | THE killer feature. Saves Sarah 7+ hours/week of admin.                        |     L      | Backend + AI                    |
+| 11  | **AI coach onboarding** (paste LinkedIn → draft profile, headline, bio, specialties; coach edits)                         | Altman   | Collapses 4-step wizard to 1 step. Onboarding conversion 2-3x.                 |     M      | Backend + AI + Frontend         |
+| 12  | **Embeddable booking widget** (`<script>` tag for Squarespace/WordPress/Linktree)                                         | Zuck     | Sarah won't switch unless we slot into her existing site. Distribution unlock. |     M      | Frontend + Backend              |
 
 **Cuts the board explicitly chose to defer (Musk insisted on 12, not 17):** email sequence engine (cron is enough for v1), testimonial automation (manual ask is enough for v1), credential-verified badge tier (ship the field first, badge in Q4), iConnect collapse (refactor in Q4 once Forms primitive lands).
 
@@ -373,41 +371,41 @@ That's 17 ships in 90 days across 4 parallel tracks. Aggressive but doable with 
 
 ### 12-Month Horizon (Q4 2026 → Q2 2027)
 
-| # | Feature | Champion | Rationale | Complexity |
-|---|---|---|---|:---:|
-| 13 | **iConnect → messages collapse** (Musk's kill #1, deferred from Q3) | Musk | Pay down schema debt before mobile app scales it. | M |
-| 14 | **Email sequence engine** (welcome / pre-session prep / post-session follow-up / 30-day re-engagement / anniversary) | Bezos | Replaces ConvertKit. Retention multiplier. | M |
-| 15 | **Testimonial request automation + embeddable widget** | Zuck | Reviews compound; H&W buyers buy on stories, not features. | M |
-| 16 | **AI matching** — client describes need → ranked coach list with explanations | Altman | Marketplace becomes 10x better than browsing tiles. Defensive moat. | L |
-| 17 | **AI intake summary** — coach gets 3-bullet pre-session brief from intake form | Altman | Sarah "gets" each client in 30 seconds. | M |
-| 18 | **AI content repurposing** — session theme → social post / newsletter draft (with coach approval) | Altman | Closes the ChatGPT-for-content tab. | M |
-| 19 | **Apple Calendar + Outlook sync** | Zuck | Today Google-only. Loses 40% of Sarah's prospects. | M |
-| 20 | **Voxer-style async voice in messages** (`messageType: 'voice'`) | Zuck | Voxer is the #2 most-cited tool in H&W. Closing this tab is huge. | M |
-| 21 | **Sliding scale + coupon codes / promo codes** | Bezos | Industry-standard equity pricing + paid-ad funnel enabler. | M |
-| 22 | **Client self-tracking dashboard** (mood / sleep / energy / cycle — daily, optional per coach) | Bezos | Functional Medicine + Hormone niche expects this. Oura-Ring-lite. | L |
-| 23 | **Wellness exercise library** (coach-curated video/audio attached to action items) | Altman | Somatic/trauma-informed coaches live on this. | M |
-| 24 | **Group coaching circles** (recurring, anonymous Q&A, age-gated tracks) | Zuck | Menopause/grief coaches earn more from circles than 1:1. | L |
-| 25 | **Refund/cancellation policy per coach** (configurable + enforced at API) | Bezos | Reduces support load + anxiety-selling for both sides. | M |
-| 26 | **Branded subdomain per coach** (`sarah.coduck.com`) — premium SaaS tier | Zuck | Premium-tier upsell + competitive moat vs Practice.do. | L |
-| 27 | **Mobile app (iOS first)** — consume existing `push_tokens` schema | Musk | H&W clients are on phones. Push schema (`schema.ts:2581`) is ready. | L |
-| 28 | **Lab result upload + coach annotation** (extend `attachments` with `attachment_type: 'lab_result'`) | Bezos | Functional Medicine niche must-have. | M |
-| 29 | **Coach analytics dashboard** (bookings / revenue / retention / NPS / at-risk clients) | Bezos | Replaces Stripe dashboard + spreadsheets. | M |
-| 30 | **Trauma-informed UX pack** (compassionate copy, low-stimulation toggle, "pause session" button) | Bezos | Differentiator for trauma-informed niche. Code is small; copy is the work. | S |
+| #   | Feature                                                                                                              | Champion | Rationale                                                                  | Complexity |
+| --- | -------------------------------------------------------------------------------------------------------------------- | -------- | -------------------------------------------------------------------------- | :--------: |
+| 13  | **iConnect → messages collapse** (Musk's kill #1, deferred from Q3)                                                  | Musk     | Pay down schema debt before mobile app scales it.                          |     M      |
+| 14  | **Email sequence engine** (welcome / pre-session prep / post-session follow-up / 30-day re-engagement / anniversary) | Bezos    | Replaces ConvertKit. Retention multiplier.                                 |     M      |
+| 15  | **Testimonial request automation + embeddable widget**                                                               | Zuck     | Reviews compound; H&W buyers buy on stories, not features.                 |     M      |
+| 16  | **AI matching** — client describes need → ranked coach list with explanations                                        | Altman   | Marketplace becomes 10x better than browsing tiles. Defensive moat.        |     L      |
+| 17  | **AI intake summary** — coach gets 3-bullet pre-session brief from intake form                                       | Altman   | Sarah "gets" each client in 30 seconds.                                    |     M      |
+| 18  | **AI content repurposing** — session theme → social post / newsletter draft (with coach approval)                    | Altman   | Closes the ChatGPT-for-content tab.                                        |     M      |
+| 19  | **Apple Calendar + Outlook sync**                                                                                    | Zuck     | Today Google-only. Loses 40% of Sarah's prospects.                         |     M      |
+| 20  | **Voxer-style async voice in messages** (`messageType: 'voice'`)                                                     | Zuck     | Voxer is the #2 most-cited tool in H&W. Closing this tab is huge.          |     M      |
+| 21  | **Sliding scale + coupon codes / promo codes**                                                                       | Bezos    | Industry-standard equity pricing + paid-ad funnel enabler.                 |     M      |
+| 22  | **Client self-tracking dashboard** (mood / sleep / energy / cycle — daily, optional per coach)                       | Bezos    | Functional Medicine + Hormone niche expects this. Oura-Ring-lite.          |     L      |
+| 23  | **Wellness exercise library** (coach-curated video/audio attached to action items)                                   | Altman   | Somatic/trauma-informed coaches live on this.                              |     M      |
+| 24  | **Group coaching circles** (recurring, anonymous Q&A, age-gated tracks)                                              | Zuck     | Menopause/grief coaches earn more from circles than 1:1.                   |     L      |
+| 25  | **Refund/cancellation policy per coach** (configurable + enforced at API)                                            | Bezos    | Reduces support load + anxiety-selling for both sides.                     |     M      |
+| 26  | **Branded subdomain per coach** (`sarah.coduck.com`) — premium SaaS tier                                             | Zuck     | Premium-tier upsell + competitive moat vs Practice.do.                     |     L      |
+| 27  | **Mobile app (iOS first)** — consume existing `push_tokens` schema                                                   | Musk     | H&W clients are on phones. Push schema (`schema.ts:2581`) is ready.        |     L      |
+| 28  | **Lab result upload + coach annotation** (extend `attachments` with `attachment_type: 'lab_result'`)                 | Bezos    | Functional Medicine niche must-have.                                       |     M      |
+| 29  | **Coach analytics dashboard** (bookings / revenue / retention / NPS / at-risk clients)                               | Bezos    | Replaces Stripe dashboard + spreadsheets.                                  |     M      |
+| 30  | **Trauma-informed UX pack** (compassionate copy, low-stimulation toggle, "pause session" button)                     | Bezos    | Differentiator for trauma-informed niche. Code is small; copy is the work. |     S      |
 
 ---
 
 ### 3-Year Moonshots (2027-2029)
 
-| # | Bet | Champion | Why | Risk |
-|---|---|---|---|---|
-| 31 | **Sarah's AI Assistant** (between-session AI chat for clients, trained on coach's voice/notes, with coach approval + revenue share) | Altman | Scales coach hours without scaling coach hours. Defensible moat — needs the data substrate Co-duck has. | Liability if AI misadvises. Frame as "powered by your coach", strict guardrails, coach reviews all conversations weekly. |
-| 32 | **Voice-first mobile UX** | Musk | Whisper + speak instead of type. The H&W client doesn't want to type at 11pm spiraling. | UX research-heavy. Bet on Apple's on-device speech-to-text quality maturing. |
-| 33 | **HIPAA / BAA enterprise tier ($199/mo)** | Bezos | Captures the LCSW/RD/therapist-who-coaches slice. High-value, low-volume. | Compliance burden. Hire a compliance lead first. |
-| 34 | **B2B2C corporate wellness** | Zuck | Sell Co-duck to companies for employee mental wellness benefits. Different sales motion entirely. | Distracts from B2C focus. Spin out as separate sales team in year 2-3. |
-| 35 | **API + plugin ecosystem** (Zapier app, Zoom embed, Oura/Whoop/Apple Health pull-in) | Zuck | Network effects + integrations moat. Per Bezos: only AFTER PMF. | Premature opens up trust attack surface. Year 3, not year 1. |
-| 36 | **Public coach reputation API** — Co-duck-verified credentials surface on IG, podcasts, wellness directories | Zuck | Become the LinkedIn of credentialed wellness coaches. | Requires trust + scale before partners care. |
-| 37 | **International expansion (UK first)** | Bezos | Same English copy, similar coaching market, no regulatory cliff. Then Australia, Canada. | EU/GDPR adds compliance load. Save EU for year 3. |
-| 38 | **Agentic operations** — AI VA that books, drafts, sends, flags at-risk on Sarah's behalf | Musk + Altman | Replace Sarah's $25/hr VA. Pricing unlock — Co-duck saves her $400/mo, charges her $99/mo more. | Tooling/agent maturity needs to catch up. Q4 2027 earliest. |
+| #   | Bet                                                                                                                                 | Champion      | Why                                                                                                     | Risk                                                                                                                     |
+| --- | ----------------------------------------------------------------------------------------------------------------------------------- | ------------- | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| 31  | **Sarah's AI Assistant** (between-session AI chat for clients, trained on coach's voice/notes, with coach approval + revenue share) | Altman        | Scales coach hours without scaling coach hours. Defensible moat — needs the data substrate Co-duck has. | Liability if AI misadvises. Frame as "powered by your coach", strict guardrails, coach reviews all conversations weekly. |
+| 32  | **Voice-first mobile UX**                                                                                                           | Musk          | Whisper + speak instead of type. The H&W client doesn't want to type at 11pm spiraling.                 | UX research-heavy. Bet on Apple's on-device speech-to-text quality maturing.                                             |
+| 33  | **HIPAA / BAA enterprise tier ($199/mo)**                                                                                           | Bezos         | Captures the LCSW/RD/therapist-who-coaches slice. High-value, low-volume.                               | Compliance burden. Hire a compliance lead first.                                                                         |
+| 34  | **B2B2C corporate wellness**                                                                                                        | Zuck          | Sell Co-duck to companies for employee mental wellness benefits. Different sales motion entirely.       | Distracts from B2C focus. Spin out as separate sales team in year 2-3.                                                   |
+| 35  | **API + plugin ecosystem** (Zapier app, Zoom embed, Oura/Whoop/Apple Health pull-in)                                                | Zuck          | Network effects + integrations moat. Per Bezos: only AFTER PMF.                                         | Premature opens up trust attack surface. Year 3, not year 1.                                                             |
+| 36  | **Public coach reputation API** — Co-duck-verified credentials surface on IG, podcasts, wellness directories                        | Zuck          | Become the LinkedIn of credentialed wellness coaches.                                                   | Requires trust + scale before partners care.                                                                             |
+| 37  | **International expansion (UK first)**                                                                                              | Bezos         | Same English copy, similar coaching market, no regulatory cliff. Then Australia, Canada.                | EU/GDPR adds compliance load. Save EU for year 3.                                                                        |
+| 38  | **Agentic operations** — AI VA that books, drafts, sends, flags at-risk on Sarah's behalf                                           | Musk + Altman | Replace Sarah's $25/hr VA. Pricing unlock — Co-duck saves her $400/mo, charges her $99/mo more.         | Tooling/agent maturity needs to catch up. Q4 2027 earliest.                                                              |
 
 ---
 
@@ -454,6 +452,7 @@ WEEK 11-12 ──  DISTRIBUTION + LAUNCH
 **Beta strategy (Week 9-12):** Hand-recruit 10 H&W founding coaches (Functional Medicine + Trauma-informed + Menopause + ADHD mix). Their photos + stories become the homepage. They get free Pro tier for 12 months in exchange for content + testimonials.
 
 **Risk mitigations:**
+
 - AI session notes hallucination → coach must review/edit before sending follow-up email
 - Packages refund logic complexity → start with simple "no refund after 50% of sessions used" default
 - SEO landing pages thin content → seed each with 800 words of niche-specific copy + 3 founding coach profiles each
@@ -465,6 +464,7 @@ WEEK 11-12 ──  DISTRIBUTION + LAUNCH
 ## Part 6 — The Final Verdict
 
 **Co-duck becomes the ALL-IN-ONE coaching platform by:**
+
 - **Doing** five things ruthlessly well in 90 days: niche-native brand + credentials, sub-specialty taxonomy with SEO landing pages, packages + memberships, a Forms primitive that powers intake, and AI session notes that save Sarah 7 hours a week.
 - **Killing** seven things that are dragging the product sideways: the "AccrediPro" brand bug, the executive-coach positioning, the 4-step onboarding wizard, the 12-bucket specialty taxonomy, the iConnect/session-prep schema sprawl, the bespoke `session_prep_questions` table (replaced by a generic Forms primitive), and the blanket 10% fee that prices us 18x above Paperbell at scale.
 - **Betting** on AI not as a feature but as the layer that makes Co-duck's data substrate uniquely valuable — and earning the right (year 2-3) to ship Sarah's AI Assistant, voice-first mobile, and agentic operations that no incumbent can copy without Co-duck's 32 tables of structured client + session + engagement data.
@@ -477,5 +477,5 @@ WEEK 11-12 ──  DISTRIBUTION + LAUNCH
 
 ---
 
-> *"The best products subtract before they add. Sarah doesn't need 28 features. She needs 5 great ones, no broken brand, and an AI that does her admin while she sleeps. Ship that in 90 days and we win the niche. Win the niche and the platform follows."*
+> _"The best products subtract before they add. Sarah doesn't need 28 features. She needs 5 great ones, no broken brand, and an AI that does her admin while she sleeps. Ship that in 90 days and we win the niche. Win the niche and the platform follows."_
 > — Board, unanimous, 2026-04-16

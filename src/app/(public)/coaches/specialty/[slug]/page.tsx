@@ -117,22 +117,15 @@ async function getCoachesForSpecialty(slug: string) {
 }
 
 /** FAQ Accordion — server component using details/summary for zero-JS */
-function FaqAccordion({
-  faqs,
-}: {
-  faqs: Array<{ question: string; answer: string }>;
-}) {
+function FaqAccordion({ faqs }: { faqs: Array<{ question: string; answer: string }> }) {
   return (
     <div className="space-y-3">
       {faqs.map((faq, i) => (
-        <details
-          key={i}
-          className="group rounded-lg border bg-card px-5 py-4 open:shadow-sm"
-        >
+        <details key={i} className="group rounded-lg border bg-card px-5 py-4 open:shadow-sm">
           <summary className="cursor-pointer list-none text-sm font-medium leading-snug text-foreground marker:hidden">
             <span className="flex items-center justify-between gap-3">
               {faq.question}
-              <ChevronRight className="h-4 w-4 shrink-0 transition-transform group-open:rotate-90 text-muted-foreground" />
+              <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-90" />
             </span>
           </summary>
           <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{faq.answer}</p>
@@ -166,8 +159,7 @@ export default async function SpecialtyLandingPage({ params }: PageProps) {
   ];
 
   // Related sub-niches (only for H&W sub-niches)
-  const relatedSubNiches =
-    parentCat?.subNiches.filter((s) => s.slug !== slug).slice(0, 6) ?? [];
+  const relatedSubNiches = parentCat?.subNiches.filter((s) => s.slug !== slug).slice(0, 6) ?? [];
 
   return (
     <div className="container mx-auto px-4 py-10">
@@ -178,7 +170,7 @@ export default async function SpecialtyLandingPage({ params }: PageProps) {
             <li key={crumb.href} className="flex items-center gap-1">
               {i > 0 && <ChevronRight className="h-3 w-3" />}
               {i < breadcrumbs.length - 1 ? (
-                <Link href={crumb.href} className="hover:text-foreground transition-colors">
+                <Link href={crumb.href} className="transition-colors hover:text-foreground">
                   {crumb.label}
                 </Link>
               ) : (
@@ -192,7 +184,7 @@ export default async function SpecialtyLandingPage({ params }: PageProps) {
       {/* Hero */}
       <div className="mb-10 max-w-2xl">
         <h1 className="text-4xl font-bold leading-tight text-burgundy-dark">{copy.h1}</h1>
-        <p className="mt-4 text-lg text-muted-foreground leading-relaxed">{copy.ogDescription}</p>
+        <p className="mt-4 text-lg leading-relaxed text-muted-foreground">{copy.ogDescription}</p>
         <Link
           href={
             parentCat
@@ -216,7 +208,7 @@ export default async function SpecialtyLandingPage({ params }: PageProps) {
               const heading = boldPart.replace(/\*\*/g, '');
               return (
                 <div key={i}>
-                  <h2 className="mt-6 mb-2 text-base font-semibold text-foreground">{heading}</h2>
+                  <h2 className="mb-2 mt-6 text-base font-semibold text-foreground">{heading}</h2>
                   <p className="text-muted-foreground">{rest.join('\n')}</p>
                 </div>
               );
@@ -291,7 +283,7 @@ export default async function SpecialtyLandingPage({ params }: PageProps) {
         ) : (
           <div className="rounded-lg border bg-muted/30 p-8 text-center">
             <p className="text-muted-foreground">
-              No {label} coaches listed yet. Check back soon — we're growing.
+              No {label} coaches listed yet. Check back soon &mdash; we&rsquo;re growing.
             </p>
             <Link
               href="/coaches"
@@ -305,9 +297,7 @@ export default async function SpecialtyLandingPage({ params }: PageProps) {
 
       {/* FAQ */}
       <section className="mb-12 max-w-2xl">
-        <h2 className="mb-5 text-2xl font-bold text-foreground">
-          Frequently Asked Questions
-        </h2>
+        <h2 className="mb-5 text-2xl font-bold text-foreground">Frequently Asked Questions</h2>
         <FaqAccordion faqs={copy.faqs} />
       </section>
 
@@ -333,9 +323,7 @@ export default async function SpecialtyLandingPage({ params }: PageProps) {
 
       {/* CTA for coaches */}
       <section className="rounded-2xl bg-muted/40 px-8 py-10 text-center">
-        <h2 className="text-xl font-bold text-foreground">
-          Are you a {label} coach?
-        </h2>
+        <h2 className="text-xl font-bold text-foreground">Are you a {label} coach?</h2>
         <p className="mt-2 text-sm text-muted-foreground">
           Join Co-duck and connect with clients who are specifically looking for your expertise.
         </p>

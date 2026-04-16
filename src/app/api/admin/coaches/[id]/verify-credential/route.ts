@@ -51,7 +51,8 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     }
 
     const { credentialId, action } = parsed.data;
-    const adminId = auth.userId;
+    // `auth.authorized` above guarantees a signed-in admin user.
+    const adminId = auth.userId as string;
 
     const profile = await db.query.coachProfiles.findFirst({
       where: eq(coachProfiles.userId, coachUserId),
@@ -77,7 +78,12 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
     const updatedCredentials: Credential[] = credentials.map((c, i) => {
       if (i !== credIndex) return c;
       if (action === 'verify') {
-        return { ...c, verifiedAt: new Date().toISOString(), verifiedBy: adminId };
+        const verified: Credential = {
+          ...c,
+          verifiedAt: new Date().toISOString(),
+          verifiedBy: adminId,
+        };
+        return verified;
       } else {
         const { verifiedAt: _va, verifiedBy: _vb, ...rest } = c;
         return rest as Credential;

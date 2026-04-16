@@ -12,7 +12,16 @@ import { Button } from '@/components/ui/button';
 import { CoachVerifyActions, VerificationBadge } from '@/components/admin/coach-verify-actions';
 import { CredentialVerifyActions } from '@/components/admin/credential-verify-actions';
 import type { Credential } from '@/db/schema';
-import { ArrowLeft, Award, Star, Clock, Calendar, DollarSign, Globe, ExternalLink } from 'lucide-react';
+import {
+  ArrowLeft,
+  Award,
+  Star,
+  Clock,
+  Calendar,
+  DollarSign,
+  Globe,
+  ExternalLink,
+} from 'lucide-react';
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -267,7 +276,9 @@ export default async function AdminCoachDetailPage({ params }: PageProps) {
                   <Award className="h-5 w-5 text-muted-foreground" />
                   <CardTitle>Credentials</CardTitle>
                 </div>
-                <CardDescription>Verify individual credentials submitted by this coach</CardDescription>
+                <CardDescription>
+                  Verify individual credentials submitted by this coach
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <CredentialVerifyActions

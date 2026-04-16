@@ -56,7 +56,9 @@ export function CredentialVerifyActions({ coachId, credentials }: CredentialVeri
 
   if (credentials.length === 0) {
     return (
-      <p className="text-sm italic text-muted-foreground">No credentials submitted by this coach.</p>
+      <p className="text-sm italic text-muted-foreground">
+        No credentials submitted by this coach.
+      </p>
     );
   }
 
@@ -65,14 +67,14 @@ export function CredentialVerifyActions({ coachId, credentials }: CredentialVeri
       {credentials.map((cred) => (
         <div key={cred.id} className="rounded-lg border p-3">
           <div className="flex items-start justify-between gap-2">
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="font-medium text-sm">{cred.title}</span>
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-sm font-medium">{cred.title}</span>
                 <Badge variant="outline" className="text-xs capitalize">
                   {TYPE_LABELS[cred.type] || cred.type}
                 </Badge>
                 {cred.verifiedAt && (
-                  <Badge className="bg-green-100 text-green-800 border-green-200 text-xs">
+                  <Badge className="border-green-200 bg-green-100 text-xs text-green-800">
                     <BadgeCheck className="mr-1 h-3 w-3" />
                     Verified
                   </Badge>

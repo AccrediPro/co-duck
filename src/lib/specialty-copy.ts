@@ -69,7 +69,7 @@ If you're ready to stop managing symptoms and start understanding your body, the
       {
         question: 'What conditions do Functional Medicine coaches typically work with?',
         answer:
-          'Common areas include chronic fatigue, gut dysfunction (IBS, SIBO, bloating), autoimmune conditions (Hashimoto\'s, lupus), hormonal imbalance (perimenopause, PCOS, adrenal issues), brain fog, weight management resistance, and chronic stress or burnout. Note that coaching is not medical treatment — it\'s behavioral and lifestyle support.',
+          "Common areas include chronic fatigue, gut dysfunction (IBS, SIBO, bloating), autoimmune conditions (Hashimoto's, lupus), hormonal imbalance (perimenopause, PCOS, adrenal issues), brain fog, weight management resistance, and chronic stress or burnout. Note that coaching is not medical treatment — it's behavioral and lifestyle support.",
       },
       {
         question: 'How is this different from a health coach or wellness coach?',
@@ -91,7 +91,7 @@ If you're ready to stop managing symptoms and start understanding your body, the
     metaDescription:
       'Work with a certified Perimenopause & Hormones coach who understands the HPA axis, thyroid interplay, and the emotional layer most medical providers skip.',
     ogDescription:
-      'Perimenopause isn\'t just hot flashes. It\'s a decade-long shift. Our coaches meet you where you are.',
+      "Perimenopause isn't just hot flashes. It's a decade-long shift. Our coaches meet you where you are.",
     body: `Perimenopause isn't a single event. It's a decade-long hormonal transition that most women enter between their late 30s and mid-40s — often without a clear map, adequate preparation, or a medical provider who has time to explain what's actually happening.
 
 Hot flashes get the headlines, but the reality is far more complex. Irregular cycles. Sleep that used to be effortless now feels fragile. Anxiety that arrives without context. Brain fog on days when you need to be sharp. A sense that your body has started behaving like a stranger. And providers who run your TSH and estradiol, see numbers "within range," and send you home.
@@ -122,10 +122,10 @@ You deserve a guide who gets it. Not just the labs — the whole experience.`,
       {
         question: 'Do I need a hormone prescription to work with a perimenopause coach?',
         answer:
-          'No. A coach works with you wherever you are in your journey — whether you\'re just starting to notice changes, actively considering HRT, or already on hormone therapy and wanting to optimize lifestyle alongside it. Coaching complements, not replaces, your medical care.',
+          "No. A coach works with you wherever you are in your journey — whether you're just starting to notice changes, actively considering HRT, or already on hormone therapy and wanting to optimize lifestyle alongside it. Coaching complements, not replaces, your medical care.",
       },
       {
-        question: 'What\'s the difference between perimenopause and menopause?',
+        question: "What's the difference between perimenopause and menopause?",
         answer:
           'Perimenopause is the transition period — hormonally volatile, often spanning years. Menopause is a single point in time: 12 consecutive months without a period. Most of the challenging symptoms actually occur in perimenopause, before estrogen fully declines. Postmenopause is everything after.',
       },
@@ -137,7 +137,7 @@ You deserve a guide who gets it. Not just the labs — the whole experience.`,
       {
         question: 'I feel like no one believes my symptoms. Can a coach help?',
         answer:
-          'Yes — this is one of the most common reasons women seek perimenopause coaching. A coach provides a space where your experience is taken seriously, your symptoms are mapped systematically, and you\'re equipped to advocate for yourself in medical settings. You\'re not imagining it, and you don\'t have to navigate it alone.',
+          "Yes — this is one of the most common reasons women seek perimenopause coaching. A coach provides a space where your experience is taken seriously, your symptoms are mapped systematically, and you're equipped to advocate for yourself in medical settings. You're not imagining it, and you don't have to navigate it alone.",
       },
     ],
   },
@@ -171,12 +171,12 @@ If you're ready to work with someone who sees the full picture, a Gut Health coa
       {
         question: 'Do I need a GI diagnosis before working with a gut health coach?',
         answer:
-          'No. Many clients come without a formal diagnosis — just persistent symptoms that haven\'t been fully explained. A coach can help you identify patterns, determine if further testing makes sense, and build a protocol based on where you currently are.',
+          "No. Many clients come without a formal diagnosis — just persistent symptoms that haven't been fully explained. A coach can help you identify patterns, determine if further testing makes sense, and build a protocol based on where you currently are.",
       },
       {
         question: 'Will a coach put me on an elimination diet?',
         answer:
-          'Not necessarily, and not without context. Elimination diets can be useful tools, but they\'re often overused and can create unnecessary anxiety around food. A good coach will assess whether an elimination protocol makes sense for your specific situation and will support you through it if so — not just hand you a list.',
+          "Not necessarily, and not without context. Elimination diets can be useful tools, but they're often overused and can create unnecessary anxiety around food. A good coach will assess whether an elimination protocol makes sense for your specific situation and will support you through it if so — not just hand you a list.",
       },
       {
         question: 'Can gut coaching help with mental health symptoms?',
@@ -184,7 +184,7 @@ If you're ready to work with someone who sees the full picture, a Gut Health coa
           'The gut-brain connection is well established. Improving gut function often positively affects mood, anxiety, and cognitive clarity. While a coach is not a mental health provider, addressing gut health holistically frequently has downstream benefits on emotional wellbeing.',
       },
       {
-        question: 'What\'s the difference between a gut health coach and a registered dietitian?',
+        question: "What's the difference between a gut health coach and a registered dietitian?",
         answer:
           'A registered dietitian has formal medical training and can provide medical nutrition therapy. A gut health coach focuses on behavioral change, lifestyle protocols, and helping you implement and sustain changes over time. They often work best together — the dietitian for clinical guidance, the coach for day-to-day accountability and support.',
       },
@@ -233,14 +233,14 @@ On Co-duck, our trauma-informed coaches carry relevant training — whether that
           'Polyvagal theory, developed by Dr. Stephen Porges, explains how our autonomic nervous system determines our sense of safety, our capacity to connect, and our response to stress. A polyvagal-informed coach understands how to help you recognize your nervous system states and build practices that support regulation — so you can access the calm, connected state where learning and change are possible.',
       },
       {
-        question: 'I\'ve had bad experiences with coaching in the past. How is this different?',
+        question: "I've had bad experiences with coaching in the past. How is this different?",
         answer:
-          'Many coaching approaches prioritize productivity, accountability, and pushing through resistance — frameworks that can be actively harmful for people with trauma histories. Trauma-informed coaches lead with safety, curiosity, and pacing. If something doesn\'t feel right in a session, you\'re always entitled to say so, slow down, or stop. A good trauma-informed coach will actively support that.',
+          "Many coaching approaches prioritize productivity, accountability, and pushing through resistance — frameworks that can be actively harmful for people with trauma histories. Trauma-informed coaches lead with safety, curiosity, and pacing. If something doesn't feel right in a session, you're always entitled to say so, slow down, or stop. A good trauma-informed coach will actively support that.",
       },
       {
         question: 'Do I need to share my trauma history with my coach?',
         answer:
-          'No. You share only what feels safe and useful. Trauma-informed coaching doesn\'t require you to revisit or disclose traumatic experiences. The work focuses on the present — your current goals, patterns, and resources — with sensitivity to the ways your history may be showing up.',
+          "No. You share only what feels safe and useful. Trauma-informed coaching doesn't require you to revisit or disclose traumatic experiences. The work focuses on the present — your current goals, patterns, and resources — with sensitivity to the ways your history may be showing up.",
       },
       {
         question: 'Can trauma-informed coaching help with anxiety?',
@@ -284,7 +284,7 @@ On Co-duck, our somatic coaches hold training in somatic movement, somatic exper
       {
         question: 'How is somatic coaching different from yoga or meditation?',
         answer:
-          'Yoga and meditation can be somatic in nature, but somatic coaching is specifically oriented around your individual goals, patterns, and experience — with a trained practitioner responding in real time. It\'s more relational and personalized than a class or recorded practice.',
+          "Yoga and meditation can be somatic in nature, but somatic coaching is specifically oriented around your individual goals, patterns, and experience — with a trained practitioner responding in real time. It's more relational and personalized than a class or recorded practice.",
       },
       {
         question: 'Can somatic coaching help with chronic pain or physical tension?',
@@ -294,12 +294,12 @@ On Co-duck, our somatic coaches hold training in somatic movement, somatic exper
       {
         question: 'Is somatic coaching appropriate for people with trauma?',
         answer:
-          'Often yes, but with nuance. Somatic work can be profoundly healing for trauma — it\'s one of the key modalities in trauma-informed care. However, moving too quickly into somatic practices without adequate safety can sometimes activate trauma responses. A skilled somatic coach will always track your window of tolerance and pace accordingly.',
+          "Often yes, but with nuance. Somatic work can be profoundly healing for trauma — it's one of the key modalities in trauma-informed care. However, moving too quickly into somatic practices without adequate safety can sometimes activate trauma responses. A skilled somatic coach will always track your window of tolerance and pace accordingly.",
       },
       {
         question: 'What should I expect from a first somatic coaching session?',
         answer:
-          'Expect to be asked about your goals and what brought you here, and also to be invited into some body-based awareness — perhaps a brief check-in with your breath or physical sensations. The first session is largely about establishing safety and understanding what you\'re working with. Come comfortable and ready to be gently curious.',
+          "Expect to be asked about your goals and what brought you here, and also to be invited into some body-based awareness — perhaps a brief check-in with your breath or physical sensations. The first session is largely about establishing safety and understanding what you're working with. Come comfortable and ready to be gently curious.",
       },
     ],
   },
@@ -311,7 +311,7 @@ On Co-duck, our somatic coaches hold training in somatic movement, somatic exper
     metaDescription:
       'Work with a certified Grief Support coach who offers compassionate, non-pathologizing support for loss, life transitions, and the complexity of grief.',
     ogDescription:
-      'Grief is not a problem to solve. It\'s a process to be witnessed. Find a coach who knows how to hold that space.',
+      "Grief is not a problem to solve. It's a process to be witnessed. Find a coach who knows how to hold that space.",
     body: `Grief doesn't follow a timeline. It doesn't come in five orderly stages, it doesn't resolve when others expect it to, and it doesn't stay neatly in the category of loss we assign to it.
 
 We grieve deaths — of people, of relationships, of versions of ourselves. We grieve diagnoses, fertility losses, career endings, and the life we thought we'd have. We grieve during transitions that look like success to everyone around us: the empty nest, the retirement, the decade-long marriage that quietly became something else.
@@ -335,17 +335,18 @@ Anyone navigating significant loss. Often people who feel unsupported by well-me
 Our grief coaches on Co-duck bring training in grief-informed care, many with additional specialization in perinatal loss, anticipatory grief, or traumatic bereavement.`,
     faqs: [
       {
-        question: 'Is grief coaching appropriate while I\'m in acute grief?',
+        question: "Is grief coaching appropriate while I'm in acute grief?",
         answer:
-          'It can be, depending on the person and the coach. Some people find coaching helpful from the earliest days of loss; others need to wait until they have a bit more capacity. A good grief coach will help you assess this honestly in a first session. If you\'re in crisis, please also reach out to a mental health provider or crisis line.',
+          "It can be, depending on the person and the coach. Some people find coaching helpful from the earliest days of loss; others need to wait until they have a bit more capacity. A good grief coach will help you assess this honestly in a first session. If you're in crisis, please also reach out to a mental health provider or crisis line.",
       },
       {
         question: 'How is grief coaching different from grief therapy?',
         answer:
-          'Grief therapy (particularly with a licensed grief counselor or therapist) may involve clinical assessment, trauma processing, and mental health treatment. Grief coaching focuses on accompaniment, meaning-making, practical coping, and forward movement — often as a complement to therapy or for people whose grief, while profound, doesn\'t require clinical intervention.',
+          "Grief therapy (particularly with a licensed grief counselor or therapist) may involve clinical assessment, trauma processing, and mental health treatment. Grief coaching focuses on accompaniment, meaning-making, practical coping, and forward movement — often as a complement to therapy or for people whose grief, while profound, doesn't require clinical intervention.",
       },
       {
-        question: 'I lost someone years ago but still feel the grief. Is coaching still appropriate?',
+        question:
+          'I lost someone years ago but still feel the grief. Is coaching still appropriate?',
         answer:
           'Absolutely. Grief doesn\'t have an expiration date, and "still grieving" years after a loss is more common than our culture acknowledges. Whether the loss is recent or old, grief coaching can help you understand and work with where you are now.',
       },
@@ -355,9 +356,9 @@ Our grief coaches on Co-duck bring training in grief-informed care, many with ad
           'Yes. Anticipatory grief — grief before the loss occurs — is real and often intensely difficult. It comes with a unique mix of present pain and future dread. A grief coach can provide support during this period, helping you navigate the tension between preparing and still being present with what is.',
       },
       {
-        question: 'What if I don\'t know how to talk about my grief?',
+        question: "What if I don't know how to talk about my grief?",
         answer:
-          'That\'s entirely okay. Many people come to grief coaching not knowing what to say or even what they feel. A skilled grief coach works with whatever you bring — silence, fragments, confusion. You don\'t need to have your grief figured out in order to begin.',
+          "That's entirely okay. Many people come to grief coaching not knowing what to say or even what they feel. A skilled grief coach works with whatever you bring — silence, fragments, confusion. You don't need to have your grief figured out in order to begin.",
       },
     ],
   },
@@ -393,7 +394,7 @@ Our ADHD coaches on Co-duck hold ADHD-specific training (ACO membership, ADHD co
       {
         question: 'Do I need an ADHD diagnosis to work with an ADHD coach?',
         answer:
-          'No. Many clients come to ADHD coaching without a formal diagnosis — either because they suspect they have ADHD or because they resonate with ADHD patterns even if they\'ve never been evaluated. A coach can work with your actual experience regardless of diagnostic status.',
+          "No. Many clients come to ADHD coaching without a formal diagnosis — either because they suspect they have ADHD or because they resonate with ADHD patterns even if they've never been evaluated. A coach can work with your actual experience regardless of diagnostic status.",
       },
       {
         question: 'Is ADHD coaching a substitute for medication?',
@@ -406,9 +407,9 @@ Our ADHD coaches on Co-duck hold ADHD-specific training (ACO membership, ADHD co
           'Standard productivity approaches are often based on neurotypical assumptions: that motivation is linear, that willpower is a reliable resource, that lists and calendars work for everyone. ADHD coaching starts from an understanding of how ADHD brains actually work and builds strategies accordingly — which are often quite different from mainstream advice.',
       },
       {
-        question: 'I\'ve tried coaching before and it didn\'t help. Why might this be different?',
+        question: "I've tried coaching before and it didn't help. Why might this be different?",
         answer:
-          'ADHD coaching that doesn\'t account for ADHD often makes things worse — adding another layer of expectation that the ADHD brain struggles to meet. An ADHD-specific coach builds from where you are, without pathologizing your patterns, and adjusts based on what actually works for you over time.',
+          "ADHD coaching that doesn't account for ADHD often makes things worse — adding another layer of expectation that the ADHD brain struggles to meet. An ADHD-specific coach builds from where you are, without pathologizing your patterns, and adjusts based on what actually works for you over time.",
       },
       {
         question: 'Can ADHD coaching help with emotional regulation?',
@@ -453,14 +454,14 @@ On Co-duck, our chronic illness coaches often have personal experience with chro
           'That depends on the person and the coach. Many people find coaching helpful during flares for emotional support and problem-solving. Others find they need to pause sessions during their worst periods. A good coach will be flexible and follow your lead.',
       },
       {
-        question: 'I\'ve been told my illness is psychosomatic. Can a coach help?',
+        question: "I've been told my illness is psychosomatic. Can a coach help?",
         answer:
           'Chronic illness coaches understand the history of medicine systematically dismissing symptoms — particularly in women. You deserve to be believed. A coach provides a space where your experience is taken at face value, and where you can build the self-advocacy skills to navigate a medical system that may not always do the same.',
       },
       {
         question: 'Will coaching help me get better?',
         answer:
-          'Coaching can help you live better — with more clarity, capacity, and self-compassion — within your current health reality. Whether that reality improves is a medical question that coaching can\'t answer. But the quality of your life within that reality is something coaching can meaningfully influence.',
+          "Coaching can help you live better — with more clarity, capacity, and self-compassion — within your current health reality. Whether that reality improves is a medical question that coaching can't answer. But the quality of your life within that reality is something coaching can meaningfully influence.",
       },
       {
         question: 'How often should I expect to meet with a chronic illness coach?',
@@ -477,7 +478,7 @@ On Co-duck, our chronic illness coaches often have personal experience with chro
     metaDescription:
       'Work with a coach who combines evidence-based nutrition support with a body-neutral, anti-diet framework — because health is not a weight.',
     ogDescription:
-      'Health at every size. Nourishment without restriction. Find a coach who\'s left diet culture behind.',
+      "Health at every size. Nourishment without restriction. Find a coach who's left diet culture behind.",
     body: `Body neutrality is not the same as body positivity. It doesn't require you to love your body, or celebrate it, or feel good about it on days when you don't. It asks something more modest and more sustainable: that you treat your body with basic respect, fuel it without punishment, and evaluate your health by means other than a number on a scale.
 
 Nutrition & Body Neutrality coaches work at the intersection of evidence-based nutrition and weight-neutral care. They understand intuitive eating principles, Health at Every Size (HAES) framework, the physiology of hunger and satiety, and the profound impact of diet culture on how most people relate to food, eating, and their bodies.
@@ -505,7 +506,7 @@ This is not a weight loss program. Coaches working in this space do not prescrib
       {
         question: 'Will my coach help me lose weight?',
         answer:
-          'Coaches working in the body-neutral, HAES-aligned framework do not provide weight loss coaching as their goal. Their focus is on sustainable health behaviors, a peaceful relationship with food, and wellbeing that isn\'t contingent on body size. Weight changes that occur as a side effect of lifestyle shifts are not the metric they use.',
+          "Coaches working in the body-neutral, HAES-aligned framework do not provide weight loss coaching as their goal. Their focus is on sustainable health behaviors, a peaceful relationship with food, and wellbeing that isn't contingent on body size. Weight changes that occur as a side effect of lifestyle shifts are not the metric they use.",
       },
       {
         question: 'What is intuitive eating?',
@@ -513,7 +514,8 @@ This is not a weight loss program. Coaches working in this space do not prescrib
           'Intuitive eating is a framework developed by dietitians Evelyn Tribole and Elyse Resch that teaches you to honor your hunger and fullness cues, reject the diet mentality, and reconnect with the pleasure and satisfaction of eating — while also respecting your body and noticing how different foods make you feel. It has a growing evidence base and is a key element of many body-neutral nutrition approaches.',
       },
       {
-        question: 'I have a chronic condition that requires nutritional management. Can this approach work for me?',
+        question:
+          'I have a chronic condition that requires nutritional management. Can this approach work for me?',
         answer:
           'Yes, with appropriate integration. Body-neutral nutrition coaching can work alongside medical nutrition therapy for conditions like PCOS, type 2 diabetes, and autoimmune conditions. Your coach will recommend working with your medical team for any clinical dietary needs while supporting the behavioral and emotional aspects of eating.',
       },
@@ -550,9 +552,9 @@ Sleep coaches on Co-duck often hold certification in sleep health coaching or be
           'CBT-I (Cognitive Behavioral Therapy for Insomnia) is a structured, evidence-based protocol delivered by trained therapists. Sleep coaches often use CBT-I-informed techniques — stimulus control, sleep restriction, cognitive restructuring — but are not therapists delivering clinical CBT-I. The approaches are complementary, and a sleep coach can be a helpful support alongside or instead of a full CBT-I program.',
       },
       {
-        question: 'I wake up at 3 a.m. and can\'t get back to sleep. Can coaching help?',
+        question: "I wake up at 3 a.m. and can't get back to sleep. Can coaching help?",
         answer:
-          'This is one of the most common sleep complaints, particularly in perimenopausal women. Early morning waking is often related to a combination of hormonal changes, cortisol patterns, and sleep architecture shifts. A sleep coach can help you understand what\'s driving it and build a practical response strategy.',
+          "This is one of the most common sleep complaints, particularly in perimenopausal women. Early morning waking is often related to a combination of hormonal changes, cortisol patterns, and sleep architecture shifts. A sleep coach can help you understand what's driving it and build a practical response strategy.",
       },
       {
         question: 'Will my coach recommend supplements or medications?',
@@ -562,7 +564,7 @@ Sleep coaches on Co-duck often hold certification in sleep health coaching or be
       {
         question: 'I have a newborn/young child. Is sleep coaching appropriate?',
         answer:
-          'Sleep coaching for your own sleep is appropriate at any parenting stage, though the strategies will need to account for the realities of your situation. A coach who specializes in parenting-stage sleep disruption can help you optimize what\'s in your control even with a wakeful child.',
+          "Sleep coaching for your own sleep is appropriate at any parenting stage, though the strategies will need to account for the realities of your situation. A coach who specializes in parenting-stage sleep disruption can help you optimize what's in your control even with a wakeful child.",
       },
       {
         question: 'How long does it take to improve sleep?',
@@ -578,8 +580,7 @@ Sleep coaches on Co-duck often hold certification in sleep health coaching or be
     metaTitle: 'Find a Mind-Body Medicine Coach | Co-duck',
     metaDescription:
       'Work with a coach trained in mind-body medicine principles — bridging the science of stress, emotions, and physical health.',
-    ogDescription:
-      'Your body and mind are not separate systems. Find a coach who works with both.',
+    ogDescription: 'Your body and mind are not separate systems. Find a coach who works with both.',
     body: `Mind-body medicine rests on a foundational insight: that the divide between psychological and physical is largely artificial. The same nervous system that registers fear also regulates inflammation. The same stress response that helps you sprint from danger also suppresses immune function when chronically activated. What you think, feel, and believe — and how you relate to stress, loss, and uncertainty — shapes your physical health in measurable, documented ways.
 
 Mind-Body Medicine coaches work with clients who want to engage this connection intentionally. They're trained in the science of psychoneuroimmunology (how mental states affect immune function), the stress response and its physiological effects, mindfulness and relaxation practices with evidence-based health outcomes, and the role of emotions, beliefs, and meaning-making in healing and health.
@@ -615,7 +616,7 @@ People who notice clear connections between stress and their physical wellbeing.
           'No. Mind-body coaching complements — it does not replace — conventional medical care. For any diagnosed condition, continue working with your healthcare providers. Mind-body practices are powerful adjuncts to that care.',
       },
       {
-        question: 'I\'m skeptical of meditation and mindfulness. Can I still benefit from this?',
+        question: "I'm skeptical of meditation and mindfulness. Can I still benefit from this?",
         answer:
           'Yes. Mind-body coaching includes many practices beyond formal meditation — breath work, body awareness, relaxation techniques, and cognitive approaches to stress. A good coach will find what resonates with your style and preferences.',
       },
@@ -645,12 +646,12 @@ Newly diagnosed clients navigating the overwhelming information landscape. Peopl
       {
         question: 'Can lifestyle changes put an autoimmune condition in remission?',
         answer:
-          'For some people, significant lifestyle interventions (particularly anti-inflammatory nutrition, stress reduction, sleep optimization, and gut health support) have contributed to remission or reduced disease activity. The evidence varies by condition. A coach can help you explore what\'s supported for your specific condition and implement it systematically — always in coordination with your medical team.',
+          "For some people, significant lifestyle interventions (particularly anti-inflammatory nutrition, stress reduction, sleep optimization, and gut health support) have contributed to remission or reduced disease activity. The evidence varies by condition. A coach can help you explore what's supported for your specific condition and implement it systematically — always in coordination with your medical team.",
       },
       {
         question: 'Do I need to follow the AIP (Autoimmune Protocol) diet?',
         answer:
-          'AIP is one of several dietary approaches used in autoimmune coaching, and it\'s not right for everyone. It\'s highly restrictive and requires significant commitment. Many coaches work with a range of anti-inflammatory eating approaches depending on the client\'s condition, preferences, and tolerance for dietary restriction. A good coach will help you find the approach that\'s both therapeutically meaningful and actually sustainable for your life.',
+          "AIP is one of several dietary approaches used in autoimmune coaching, and it's not right for everyone. It's highly restrictive and requires significant commitment. Many coaches work with a range of anti-inflammatory eating approaches depending on the client's condition, preferences, and tolerance for dietary restriction. A good coach will help you find the approach that's both therapeutically meaningful and actually sustainable for your life.",
       },
       {
         question: 'My condition is well managed with medication. Do I still need coaching?',
@@ -695,7 +696,7 @@ Our fertility coaches on Co-duck hold coaching certifications and often have add
       {
         question: 'Is fertility coaching a substitute for medical fertility treatment?',
         answer:
-          'No. Fertility coaching complements medical care — it does not replace it. If you\'re experiencing fertility challenges, working with a reproductive endocrinologist is essential. A coach supports the lifestyle, emotional, and relational dimensions of your journey alongside that medical care.',
+          "No. Fertility coaching complements medical care — it does not replace it. If you're experiencing fertility challenges, working with a reproductive endocrinologist is essential. A coach supports the lifestyle, emotional, and relational dimensions of your journey alongside that medical care.",
       },
       {
         question: 'Can lifestyle changes actually improve fertility?',
@@ -703,9 +704,9 @@ Our fertility coaches on Co-duck hold coaching certifications and often have add
           'Yes, in meaningful ways. Research supports the role of nutrition (particularly Mediterranean-style eating and specific micronutrients), healthy weight management, stress reduction, avoiding alcohol and tobacco, and sleep optimization in fertility outcomes. The degree of impact varies by person and underlying cause of infertility, but these are factors within your control.',
       },
       {
-        question: 'I\'ve had a pregnancy loss. Can coaching help me?',
+        question: "I've had a pregnancy loss. Can coaching help me?",
         answer:
-          'Yes. Pregnancy loss — whether miscarriage, ectopic pregnancy, stillbirth, or late loss — is a profound grief that is often significantly undersupported. Fertility coaches who specialize in loss can provide the witness and practical support that the medical system typically can\'t. Some coaches specialize specifically in recurrent loss.',
+          "Yes. Pregnancy loss — whether miscarriage, ectopic pregnancy, stillbirth, or late loss — is a profound grief that is often significantly undersupported. Fertility coaches who specialize in loss can provide the witness and practical support that the medical system typically can't. Some coaches specialize specifically in recurrent loss.",
       },
       {
         question: 'My partner and I are on different pages about next steps. Can coaching help?',
@@ -747,7 +748,7 @@ People newly in recovery who want structured support and accountability beyond t
       {
         question: 'Do I need to be fully sober to work with a recovery coach?',
         answer:
-          'This depends on the coach and your situation. Some coaches work with people who are actively using and are building toward sobriety. Others work specifically with people who have established some period of sobriety. It\'s worth discussing where you are and what you\'re looking for in an initial conversation with the coach.',
+          "This depends on the coach and your situation. Some coaches work with people who are actively using and are building toward sobriety. Others work specifically with people who have established some period of sobriety. It's worth discussing where you are and what you're looking for in an initial conversation with the coach.",
       },
       {
         question: 'How is recovery coaching different from addiction therapy?',
@@ -757,12 +758,12 @@ People newly in recovery who want structured support and accountability beyond t
       {
         question: 'Can a recovery coach help with relapse?',
         answer:
-          'Yes. Relapse is a common part of many people\'s recovery journeys — not a failure, but information. A recovery coach can help you understand what happened, adjust your plan, and rebuild without the shame spiral that can make relapse worse.',
+          "Yes. Relapse is a common part of many people's recovery journeys — not a failure, but information. A recovery coach can help you understand what happened, adjust your plan, and rebuild without the shame spiral that can make relapse worse.",
       },
       {
         question: 'Is recovery coaching compatible with AA or NA?',
         answer:
-          'Absolutely. Many recovery coaches are in recovery themselves and have experience with 12-step programs. Coaching can work alongside AA/NA, SMART Recovery, or any other framework you\'re using.',
+          "Absolutely. Many recovery coaches are in recovery themselves and have experience with 12-step programs. Coaching can work alongside AA/NA, SMART Recovery, or any other framework you're using.",
       },
       {
         question: 'My loved one is in recovery. Can I work with a coach too?',
@@ -797,7 +798,7 @@ People who feel like they're doing many things "right" but still not thriving �
       {
         question: 'How is integrative wellness different from general wellness coaching?',
         answer:
-          'Integrative wellness coaching emphasizes the interconnection between body systems and life domains — it\'s explicitly systems-based. Rather than working on one area at a time, an integrative approach identifies the leverage points where multiple things improve at once, and sequences changes accordingly.',
+          "Integrative wellness coaching emphasizes the interconnection between body systems and life domains — it's explicitly systems-based. Rather than working on one area at a time, an integrative approach identifies the leverage points where multiple things improve at once, and sequences changes accordingly.",
       },
       {
         question: 'Does integrative wellness coaching incorporate spiritual practices?',
@@ -805,9 +806,10 @@ People who feel like they're doing many things "right" but still not thriving �
           'It can, depending on the coach and the client. Many integrative wellness coaches include contemplative practices (meditation, breathwork, time in nature, journaling) as part of their framework. "Spiritual" doesn\'t necessarily mean religious — it refers to practices that connect you with meaning, purpose, and something larger than daily function.',
       },
       {
-        question: 'I already work with a doctor, nutritionist, and therapist. Why would I need a wellness coach?',
+        question:
+          'I already work with a doctor, nutritionist, and therapist. Why would I need a wellness coach?',
         answer:
-          'Each of those providers typically focuses on their domain. A wellness coach helps you integrate the guidance from all of them into a coherent daily practice — and often sees the connections between domains that individual specialists don\'t. Think of a wellness coach as the integrating layer.',
+          "Each of those providers typically focuses on their domain. A wellness coach helps you integrate the guidance from all of them into a coherent daily practice — and often sees the connections between domains that individual specialists don't. Think of a wellness coach as the integrating layer.",
       },
       {
         question: 'What results can I expect from integrative wellness coaching?',
@@ -830,7 +832,8 @@ People who feel like they're doing many things "right" but still not thriving �
     metaTitle: 'Find a Career Coach | Co-duck',
     metaDescription:
       'Connect with certified Career coaches who help you navigate pivots, promotions, negotiation, and finding work that actually fits who you are.',
-    ogDescription: 'Career coaching that goes beyond the resume. Find a coach who sees the full picture.',
+    ogDescription:
+      'Career coaching that goes beyond the resume. Find a coach who sees the full picture.',
     body: `Career coaching meets you wherever you are in your professional life — and the work looks different at every stage.
 
 Some clients come with a burning desire to leave what they're doing but no idea what comes next. Others know exactly where they want to go and need help navigating the politics, the positioning, and the negotiation to get there. Some are early in their careers, trying to find footing in a landscape nothing like what they were promised. Others are mid-career, staring down a pivot they've been postponing for years.
@@ -842,12 +845,12 @@ On Co-duck, our career coaches work across industries and career stages, with pa
       {
         question: 'How is career coaching different from career counseling?',
         answer:
-          'Career counseling typically involves formal assessment tools (aptitude tests, interest inventories) and guidance toward career paths. Career coaching is more forward-focused and action-oriented — it\'s about implementing change and moving toward specific goals, with accountability and strategic support.',
+          "Career counseling typically involves formal assessment tools (aptitude tests, interest inventories) and guidance toward career paths. Career coaching is more forward-focused and action-oriented — it's about implementing change and moving toward specific goals, with accountability and strategic support.",
       },
       {
-        question: 'I\'m unhappy at work but don\'t know why. Can coaching help?',
+        question: "I'm unhappy at work but don't know why. Can coaching help?",
         answer:
-          'Yes. Coaching can help you identify what\'s actually driving the dissatisfaction — the work itself, the environment, the values mismatch, the relationship with management, or something outside work that\'s coloring everything. Clarity is often the first and most important product of career coaching.',
+          "Yes. Coaching can help you identify what's actually driving the dissatisfaction — the work itself, the environment, the values mismatch, the relationship with management, or something outside work that's coloring everything. Clarity is often the first and most important product of career coaching.",
       },
       {
         question: 'Can a career coach help with salary negotiation?',
@@ -857,7 +860,7 @@ On Co-duck, our career coaches work across industries and career stages, with pa
       {
         question: 'I want to start my own business. Is career coaching appropriate?',
         answer:
-          'Yes, though some coaches specialize specifically in entrepreneurship or business coaching. If you\'re at the early exploration stage — whether entrepreneurship is right for you, what kind of business — a career coach is a good starting point. For more operational business development, a business coach may serve you better.',
+          "Yes, though some coaches specialize specifically in entrepreneurship or business coaching. If you're at the early exploration stage — whether entrepreneurship is right for you, what kind of business — a career coach is a good starting point. For more operational business development, a business coach may serve you better.",
       },
       {
         question: 'How many sessions does career coaching typically take?',
@@ -890,17 +893,17 @@ The best life coaches ask uncomfortable questions, tolerate uncomfortable answer
       {
         question: 'How do I know what I want to work on?',
         answer:
-          'You don\'t have to know before you start. Part of what coaching provides is clarity — many clients come knowing only that something isn\'t working. A skilled coach can help you identify what matters and what you actually want to change.',
+          "You don't have to know before you start. Part of what coaching provides is clarity — many clients come knowing only that something isn't working. A skilled coach can help you identify what matters and what you actually want to change.",
       },
       {
         question: 'Does life coaching actually work?',
         answer:
-          'Research supports coaching\'s effectiveness for goal attainment, wellbeing, and behavioral change. The quality of the coaching relationship matters significantly. A good coach-client fit, a coach with real training and experience, and a client who is genuinely ready to work — that combination tends to produce meaningful results.',
+          "Research supports coaching's effectiveness for goal attainment, wellbeing, and behavioral change. The quality of the coaching relationship matters significantly. A good coach-client fit, a coach with real training and experience, and a client who is genuinely ready to work — that combination tends to produce meaningful results.",
       },
       {
         question: 'What credentials should I look for in a life coach?',
         answer:
-          'The coaching industry is largely unregulated, which means credentials vary. Look for ICF certification (International Coaching Federation) — particularly ACC, PCC, or MCC levels — which require training hours, mentorship, and competency assessment. On Co-duck, coach verification helps ensure you\'re working with someone with legitimate training.',
+          "The coaching industry is largely unregulated, which means credentials vary. Look for ICF certification (International Coaching Federation) — particularly ACC, PCC, or MCC levels — which require training hours, mentorship, and competency assessment. On Co-duck, coach verification helps ensure you're working with someone with legitimate training.",
       },
       {
         question: 'How often should I meet with my life coach?',
@@ -916,7 +919,8 @@ The best life coaches ask uncomfortable questions, tolerate uncomfortable answer
     metaTitle: 'Find a Business Coach | Co-duck',
     metaDescription:
       'Connect with certified Business coaches who help entrepreneurs, founders, and business owners grow with clarity, strategy, and sustainable momentum.',
-    ogDescription: 'Business coaching for people who are serious about building something that lasts.',
+    ogDescription:
+      'Business coaching for people who are serious about building something that lasts.',
     body: `Building a business is not just a strategy exercise. It's an identity exercise, a relational exercise, and frequently a psychological exercise — and treating it as purely operational misses most of what makes it hard.
 
 Business coaches work with founders, entrepreneurs, small business owners, and corporate leaders who want a thinking partner who understands both the mechanics of business growth and the human dimensions of leading one.
@@ -938,15 +942,15 @@ On Co-duck, our business coaches bring backgrounds in entrepreneurship, corporat
       {
         question: 'Can a business coach help with work-life balance as an entrepreneur?',
         answer:
-          'Yes — and it\'s one of the most common presenting issues. The unsustainability of how many entrepreneurs work is not just a personal problem; it\'s a business problem. A coach who understands entrepreneurship knows how to address this practically and specifically.',
+          "Yes — and it's one of the most common presenting issues. The unsustainability of how many entrepreneurs work is not just a personal problem; it's a business problem. A coach who understands entrepreneurship knows how to address this practically and specifically.",
       },
       {
-        question: 'I\'m pre-revenue / just starting. Is coaching appropriate?',
+        question: "I'm pre-revenue / just starting. Is coaching appropriate?",
         answer:
           'Yes. Early-stage coaching often provides the most leverage — before patterns solidify and before early decisions compound. Many coaches specialize in the ideation-to-launch phase, helping you validate your model, find your market, and set up the foundations that will support growth.',
       },
       {
-        question: 'What\'s the typical coaching engagement structure for a business?',
+        question: "What's the typical coaching engagement structure for a business?",
         answer:
           'Many business coaches work on retainer — monthly with a set number of sessions and often async access for quick questions. Some prefer project-based engagements around specific business phases (fundraising, product launch, team build). Discuss structure in your first conversation with any prospective coach.',
       },
@@ -979,9 +983,10 @@ On Co-duck, our relationship coaches hold training in attachment theory, Gottman
           'Absolutely. Individual relationship coaching is extremely common and often highly effective. Understanding your own patterns, attachment style, and communication defaults — independent of your partner — is foundational work that many people find more impactful than joint sessions, at least initially.',
       },
       {
-        question: 'We have a good relationship but want to make it better. Is coaching appropriate?',
+        question:
+          'We have a good relationship but want to make it better. Is coaching appropriate?',
         answer:
-          'Yes — relationship coaching doesn\'t require a crisis. Many couples use coaching proactively during major transitions (engagement, parenthood, empty nest) or as regular maintenance for a relationship they value and want to invest in.',
+          "Yes — relationship coaching doesn't require a crisis. Many couples use coaching proactively during major transitions (engagement, parenthood, empty nest) or as regular maintenance for a relationship they value and want to invest in.",
       },
       {
         question: 'Can a relationship coach help with dating and finding a partner?',
@@ -991,7 +996,7 @@ On Co-duck, our relationship coaches hold training in attachment theory, Gottman
       {
         question: 'What attachment styles are, and why do they matter in relationship coaching?',
         answer:
-          'Attachment theory describes four primary patterns of relating to others in close relationships (secure, anxious, avoidant, and disorganized), shaped largely by early caregiving experiences. Understanding your attachment style — and your partner\'s — provides significant clarity on many common relationship dynamics. Most relationship coaches will help you explore this.',
+          "Attachment theory describes four primary patterns of relating to others in close relationships (secure, anxious, avoidant, and disorganized), shaped largely by early caregiving experiences. Understanding your attachment style — and your partner's — provides significant clarity on many common relationship dynamics. Most relationship coaches will help you explore this.",
       },
     ],
   },
@@ -1002,7 +1007,8 @@ On Co-duck, our relationship coaches hold training in attachment theory, Gottman
     metaTitle: 'Find a Financial Coach | Co-duck',
     metaDescription:
       'Work with a certified Financial coach who helps you build a healthier relationship with money — budgeting, saving, debt, and the beliefs that drive all of it.',
-    ogDescription: 'Financial coaching that goes beyond spreadsheets to the real story about money.',
+    ogDescription:
+      'Financial coaching that goes beyond spreadsheets to the real story about money.',
     body: `Financial coaching is not financial advising. It doesn't involve portfolio management, investment strategies, or licensed financial planning. What it does involve is often more foundational: your relationship with money — what you believe about it, how you feel about it, and what behaviors those beliefs and feelings produce.
 
 Most of us carry inherited money stories — absorbed from family, culture, and early experiences — that shape our financial decisions without our awareness. Financial coaches help you see those stories clearly, understand how they're driving your current behavior, and build the practical skills and habits that support the financial life you actually want.
@@ -1020,9 +1026,10 @@ Financial coaches on Co-duck work with clients on budgeting and cash flow, debt 
           'Yes. Financial coaches regularly work with clients navigating debt — both the practical mechanics of a payoff strategy and the emotional weight that debt carries. A coach can help you build a realistic plan and the psychological framework to stick to it.',
       },
       {
-        question: 'I earn a good income but still feel financially anxious. Is coaching right for me?',
+        question:
+          'I earn a good income but still feel financially anxious. Is coaching right for me?',
         answer:
-          'Absolutely. Financial anxiety is often not about the amount of money you have — it\'s about your relationship with money. High earners with significant savings frequently carry financial anxiety rooted in early scarcity experiences or inherited beliefs about money\'s reliability. Coaching addresses the root of that anxiety, not just the numbers.',
+          "Absolutely. Financial anxiety is often not about the amount of money you have — it's about your relationship with money. High earners with significant savings frequently carry financial anxiety rooted in early scarcity experiences or inherited beliefs about money's reliability. Coaching addresses the root of that anxiety, not just the numbers.",
       },
       {
         question: 'Can a financial coach help me talk to my partner about money?',
@@ -1032,7 +1039,7 @@ Financial coaches on Co-duck work with clients on budgeting and cash flow, debt 
       {
         question: 'Do I need to share my exact financial situation with a financial coach?',
         answer:
-          'You share what\'s useful and what you\'re comfortable with. Many coaching conversations focus on patterns, beliefs, and goals without requiring a full accounting of your finances. You can choose the level of detail that feels right.',
+          "You share what's useful and what you're comfortable with. Many coaching conversations focus on patterns, beliefs, and goals without requiring a full accounting of your finances. You can choose the level of detail that feels right.",
       },
     ],
   },
@@ -1043,7 +1050,8 @@ Financial coaches on Co-duck work with clients on budgeting and cash flow, debt 
     metaTitle: 'Find a Leadership Coach | Co-duck',
     metaDescription:
       'Work with a certified Leadership coach to develop your leadership presence, navigate executive challenges, and build the skills that sustain influence.',
-    ogDescription: 'Leadership coaching that develops who you are as a leader, not just what you do.',
+    ogDescription:
+      'Leadership coaching that develops who you are as a leader, not just what you do.',
     body: `Leadership is not a title. It's a practice — and like all practices, it benefits from skilled observation, honest feedback, and deliberate development.
 
 Leadership coaches work with executives, directors, managers, and emerging leaders who want to grow in their capacity to lead — not just manage — people, organizations, and change. The work spans communication and influence, executive presence, navigating complexity and ambiguity, building and developing teams, managing up and across, and the personal sustainability of leadership — because leading is exhausting when done without self-awareness.
@@ -1068,10 +1076,10 @@ Leadership coaching on Co-duck draws on a range of frameworks: systems thinking,
       {
         question: 'Can a coach help me manage a difficult team member?',
         answer:
-          'Yes. Navigating difficult relationships at work — whether with a team member, peer, or manager — is one of the most common and practical things leadership coaching addresses. A coach helps you understand what\'s happening, clarify what you want, and build an approach that\'s both effective and aligned with your values.',
+          "Yes. Navigating difficult relationships at work — whether with a team member, peer, or manager — is one of the most common and practical things leadership coaching addresses. A coach helps you understand what's happening, clarify what you want, and build an approach that's both effective and aligned with your values.",
       },
       {
-        question: 'I\'m about to take on a new leadership role. Is coaching appropriate now?',
+        question: "I'm about to take on a new leadership role. Is coaching appropriate now?",
         answer:
           'Ideal timing. Leadership transitions are one of the highest-leverage moments for coaching. A coach can help you enter the new role with intention, navigate the early months effectively, and set up the patterns that will serve you long-term.',
       },
@@ -1084,7 +1092,8 @@ Leadership coaching on Co-duck draws on a range of frameworks: systems thinking,
     metaTitle: 'Find a Performance Coach | Co-duck',
     metaDescription:
       'Work with a certified Performance coach who helps athletes, executives, and high achievers operate at their best — sustainably.',
-    ogDescription: 'Performance coaching for people serious about excellence — without burning out.',
+    ogDescription:
+      'Performance coaching for people serious about excellence — without burning out.',
     body: `Performance coaching draws on sports psychology, organizational psychology, and behavioral science to help people perform at their best — whether that "performance" is athletic, professional, creative, or academic.
 
 The core insight of performance coaching is that sustained high performance requires more than skill or effort. It requires understanding how your mind, body, and environment interact to either support or undermine optimal functioning — and building systems that reliably produce the conditions for excellence.
@@ -1099,10 +1108,11 @@ Performance coaches work with athletes preparing for competition, executives nav
       {
         question: 'Can a performance coach help with performance anxiety?',
         answer:
-          'Yes — this is one of the core applications. Whether it\'s pre-competition anxiety, presentation nerves, or the anxiety of high-stakes evaluation, performance coaches are trained in evidence-based techniques for managing and channeling activation, including pre-performance routines, breathing techniques, cognitive reappraisal, and simulation practices.',
+          "Yes — this is one of the core applications. Whether it's pre-competition anxiety, presentation nerves, or the anxiety of high-stakes evaluation, performance coaches are trained in evidence-based techniques for managing and channeling activation, including pre-performance routines, breathing techniques, cognitive reappraisal, and simulation practices.",
       },
       {
-        question: 'What\'s the difference between performance coaching and peak performance coaching?',
+        question:
+          "What's the difference between performance coaching and peak performance coaching?",
         answer:
           '"Peak performance" is a common marketing term that is sometimes used interchangeably with performance coaching. Ask any coach with this label what they specifically do and what training they hold — the substance matters more than the label.',
       },
@@ -1140,14 +1150,14 @@ Mindset coaches on Co-duck work on a wide range of specific applications: overco
           'No — and the best mindset coaches would distance themselves from this framing. Genuine mindset work involves honest examination of limiting beliefs, not replacing them with affirmations. It includes sitting with discomfort, challenging core assumptions, and building beliefs that are both more accurate and more useful than the ones that currently limit you.',
       },
       {
-        question: 'What\'s a limiting belief, and how do I identify mine?',
+        question: "What's a limiting belief, and how do I identify mine?",
         answer:
           'A limiting belief is an assumption you hold — often below the level of conscious awareness — that constrains your action or self-image. Common examples include "I\'m not smart/talented/qualified enough," "Success is for other people," or "If I fail, it proves something about my worth." A mindset coach helps you surface these beliefs through patterns in your behavior, language, and emotional responses.',
       },
       {
         question: 'Can mindset coaching help with perfectionism?',
         answer:
-          'Yes. Perfectionism is one of the most common and complex mindset issues coaches work with — it often drives significant achievement alongside significant suffering. A coach can help you understand the function perfectionism serves, the beliefs underneath it, and how to build a relationship with excellence that doesn\'t require exhausting self-criticism.',
+          "Yes. Perfectionism is one of the most common and complex mindset issues coaches work with — it often drives significant achievement alongside significant suffering. A coach can help you understand the function perfectionism serves, the beliefs underneath it, and how to build a relationship with excellence that doesn't require exhausting self-criticism.",
       },
       {
         question: 'How is mindset coaching different from CBT or therapy?',
@@ -1183,14 +1193,14 @@ This is a skills domain — communication can be learned, practiced, and improve
           'Yes. Public speaking anxiety is one of the most common reasons people seek communication coaching. Coaches work on both the practical skills (structure, delivery, presence) and the underlying anxiety — the beliefs and physical responses that amplify the fear and undermine performance.',
       },
       {
-        question: 'I\'m not a public speaker. Is communication coaching still relevant?',
+        question: "I'm not a public speaker. Is communication coaching still relevant?",
         answer:
           'Absolutely. Most communication coaching has nothing to do with presentations. It addresses everyday communication — how you handle conflict, how you express needs, how you listen, how you give and receive feedback, how you navigate power dynamics. These are universal skills.',
       },
       {
         question: 'Can a communication coach help with assertiveness?',
         answer:
-          'Yes — this is one of the most common presenting issues, particularly for women who have been socialized to prioritize others\' comfort over their own. A communication coach can help you understand the beliefs and patterns underlying difficulty with assertiveness, and build practical skills for saying what you mean without apology or aggression.',
+          "Yes — this is one of the most common presenting issues, particularly for women who have been socialized to prioritize others' comfort over their own. A communication coach can help you understand the beliefs and patterns underlying difficulty with assertiveness, and build practical skills for saying what you mean without apology or aggression.",
       },
       {
         question: 'Is communication coaching done through role-play?',
@@ -1198,9 +1208,10 @@ This is a skills domain — communication can be learned, practiced, and improve
           'Often, yes — with permission. Role-playing difficult conversations in a safe context is one of the most effective ways to build communication skills. A good coach makes this comfortable and productive, not awkward.',
       },
       {
-        question: 'Can communication coaching help across cultures or with English as a second language?',
+        question:
+          'Can communication coaching help across cultures or with English as a second language?',
         answer:
-          'Yes. Some coaches specifically specialize in cross-cultural communication or in supporting non-native English speakers navigating professional communication in English-dominant environments. Look for coaches with this specific background if it\'s relevant to your situation.',
+          "Yes. Some coaches specifically specialize in cross-cultural communication or in supporting non-native English speakers navigating professional communication in English-dominant environments. Look for coaches with this specific background if it's relevant to your situation.",
       },
     ],
   },
@@ -1211,7 +1222,8 @@ This is a skills domain — communication can be learned, practiced, and improve
     metaTitle: 'Find a Life Transition Coach | Co-duck',
     metaDescription:
       'Work with a certified Transition coach who helps you navigate major life changes — career, relationships, identity, and everything in between — with clarity and intention.',
-    ogDescription: 'Major life transitions deserve more than just getting through them. Find a coach who helps you build what comes next.',
+    ogDescription:
+      'Major life transitions deserve more than just getting through them. Find a coach who helps you build what comes next.',
     body: `Every major life transition carries two things simultaneously: an ending and a beginning. The ending is often easier to see — the job left, the relationship ended, the children launched, the chapter closed. The beginning is murkier. What comes next? Who am I now? What do I want this next phase to look like?
 
 Transition coaches specialize in this liminal space — the between, where the old identity is gone and the new one isn't formed yet. They bring structure and support to a process that can otherwise feel destabilizing, chaotic, or simply stuck.
@@ -1223,12 +1235,13 @@ What transition coaching provides is not resolution — transitions take the tim
       {
         question: 'How is transition coaching different from life coaching?',
         answer:
-          'Life coaching addresses goals and growth broadly. Transition coaching specifically focuses on navigating periods of significant change — where the old map no longer applies and the new one isn\'t yet drawn. The skill set is overlapping but the emphasis is on the change process itself.',
+          "Life coaching addresses goals and growth broadly. Transition coaching specifically focuses on navigating periods of significant change — where the old map no longer applies and the new one isn't yet drawn. The skill set is overlapping but the emphasis is on the change process itself.",
       },
       {
-        question: 'I\'m going through a transition but haven\'t decided what comes next. Is coaching too early?',
+        question:
+          "I'm going through a transition but haven't decided what comes next. Is coaching too early?",
         answer:
-          'Not at all. The early, unclear stage of transition is often when coaching is most valuable — before you\'ve committed to a direction that may not serve you. Coaching can help you slow down, make meaning, and build clarity rather than just rushing to the next thing.',
+          "Not at all. The early, unclear stage of transition is often when coaching is most valuable — before you've committed to a direction that may not serve you. Coaching can help you slow down, make meaning, and build clarity rather than just rushing to the next thing.",
       },
       {
         question: 'Can transition coaching help with retirement?',
@@ -1238,12 +1251,12 @@ What transition coaching provides is not resolution — transitions take the tim
       {
         question: 'Is transition coaching appropriate during grief or loss?',
         answer:
-          'It can be, depending on the type of loss and where you are in the grieving process. Bereavement in particular may benefit first from grief-specific support (therapy or grief coaching). Transition coaching is often more appropriate once you\'ve moved through the initial intensity of grief and are beginning to orient toward what comes next.',
+          "It can be, depending on the type of loss and where you are in the grieving process. Bereavement in particular may benefit first from grief-specific support (therapy or grief coaching). Transition coaching is often more appropriate once you've moved through the initial intensity of grief and are beginning to orient toward what comes next.",
       },
       {
         question: 'How long does transition coaching typically last?',
         answer:
-          'Transitions don\'t follow a set timeline — but meaningful coaching engagement during a transition is usually 3–12 months, depending on the scope of the change and the pace of your process. Some clients work intensively at the beginning and shift to occasional check-ins as they gain their footing.',
+          "Transitions don't follow a set timeline — but meaningful coaching engagement during a transition is usually 3–12 months, depending on the scope of the change and the pace of your process. Some clients work intensively at the beginning and shift to occasional check-ins as they gain their footing.",
       },
     ],
   },

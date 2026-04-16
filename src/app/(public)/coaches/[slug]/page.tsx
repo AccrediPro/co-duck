@@ -91,7 +91,7 @@ export default async function CoachProfilePage({ params }: PageProps) {
         avatarUrl={coach.avatarUrl}
         headline={coach.headline}
         bio={coach.bio}
-        specialties={coach.specialties as unknown as string[]}
+        specialties={coach.specialties}
         timezone={coach.timezone}
         hourlyRate={coach.hourlyRate}
         currency={coach.currency}

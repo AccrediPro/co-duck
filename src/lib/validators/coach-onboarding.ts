@@ -98,7 +98,7 @@ export const coachBasicInfoSchema = z.object({
 export type CoachBasicInfoFormData = z.infer<typeof coachBasicInfoSchema>;
 
 /* =============================================================================
-   CONSTANTS: COACH CATEGORIES (2-LEVEL TAXONOMY)
+   CONSTANTS: 2-LEVEL TAXONOMY (COACH CATEGORIES → SUB-NICHES)
    ============================================================================= */
 
 /**
@@ -126,11 +126,8 @@ export interface CoachCategory {
 }
 
 /**
- * 2-level coaching taxonomy: top-level categories → sub-niches.
- *
- * Health & Wellness has 15 sub-niches covering the full spectrum of
- * functional medicine, trauma-informed, and integrative wellness coaching.
- * Other categories are single-level (no sub-niches) for now.
+ * 2-level specialty taxonomy for coach discovery and SEO landing pages.
+ * Top-level categories each have optional sub-niches.
  *
  * ## Storage convention (coach_profiles.specialties JSONB)
  *
@@ -143,86 +140,6 @@ export interface CoachCategory {
  *
  * @constant
  * @readonly
- */
-export const COACH_CATEGORIES: CoachCategory[] = [
-  {
-    slug: 'health-wellness',
-    label: 'Health & Wellness',
-    subNiches: [
-      { slug: 'functional-medicine', label: 'Functional Medicine' },
-      { slug: 'perimenopause-hormones', label: 'Perimenopause & Hormones' },
-      { slug: 'gut-health', label: 'Gut Health' },
-      { slug: 'trauma-informed', label: 'Trauma-Informed' },
-      { slug: 'somatic-practices', label: 'Somatic Practices' },
-      { slug: 'grief-support', label: 'Grief Support' },
-      { slug: 'adhd-coaching', label: 'ADHD Coaching' },
-      { slug: 'chronic-illness', label: 'Chronic Illness' },
-      { slug: 'nutrition-body-neutrality', label: 'Nutrition & Body Neutrality' },
-      { slug: 'sleep', label: 'Sleep' },
-      { slug: 'mind-body-medicine', label: 'Mind-Body Medicine' },
-      { slug: 'autoimmune', label: 'Autoimmune' },
-      { slug: 'fertility', label: 'Fertility' },
-      { slug: 'addiction-recovery', label: 'Addiction Recovery' },
-      { slug: 'integrative-wellness', label: 'Integrative Wellness' },
-    ],
-  },
-  { slug: 'career', label: 'Career', subNiches: [] },
-  { slug: 'life', label: 'Life', subNiches: [] },
-  { slug: 'business', label: 'Business', subNiches: [] },
-  { slug: 'relationship', label: 'Relationship', subNiches: [] },
-  { slug: 'financial', label: 'Financial', subNiches: [] },
-  { slug: 'leadership', label: 'Leadership', subNiches: [] },
-  { slug: 'performance', label: 'Performance', subNiches: [] },
-  { slug: 'mindset', label: 'Mindset', subNiches: [] },
-  { slug: 'communication', label: 'Communication', subNiches: [] },
-  { slug: 'transition', label: 'Transition', subNiches: [] },
-];
-
-/**
- * Flat list of all category labels (for backward-compat references).
- * @deprecated Use COACH_CATEGORIES for new code.
- */
-export const COACH_SPECIALTIES = COACH_CATEGORIES.map((c) => c.label) as unknown as readonly string[];
-
-/**
- * Resolve a category or sub-niche slug to its display label.
- * Returns undefined if slug is not found.
- */
-export function resolveCategoryLabel(slug: string): string | undefined {
-  for (const cat of COACH_CATEGORIES) {
-    if (cat.slug === slug) return cat.label;
-    const sub = cat.subNiches.find((s) => s.slug === slug);
-    if (sub) return sub.label;
-  }
-  return undefined;
-}
-
-/**
- * Find the parent category for a given sub-niche slug.
- * Returns undefined if the slug is not a sub-niche.
- */
-export function findParentCategory(subNicheSlug: string): CoachCategory | undefined {
-  return COACH_CATEGORIES.find((cat) => cat.subNiches.some((s) => s.slug === subNicheSlug));
-}
-
-/* =============================================================================
-   2-LEVEL TAXONOMY: COACH CATEGORIES
-   ============================================================================= */
-
-export interface SubNiche {
-  slug: string;
-  label: string;
-}
-
-export interface CoachCategory {
-  slug: string;
-  label: string;
-  subNiches: SubNiche[];
-}
-
-/**
- * 2-level specialty taxonomy for coach discovery and SEO landing pages.
- * Top-level categories each have optional sub-niches.
  */
 export const COACH_CATEGORIES: CoachCategory[] = [
   {
@@ -259,8 +176,29 @@ export const COACH_CATEGORIES: CoachCategory[] = [
 ];
 
 /**
+ * Flat list of all top-level category labels.
+ * Kept as a convenience for legacy consumers (filters, profile editor).
+ */
+export const COACH_SPECIALTIES = COACH_CATEGORIES.map(
+  (c) => c.label
+) as unknown as readonly string[];
+
+/**
+ * Resolve a category or sub-niche slug to its display label.
+ * Returns undefined if slug is not found.
+ */
+export function resolveCategoryLabel(slug: string): string | undefined {
+  for (const cat of COACH_CATEGORIES) {
+    if (cat.slug === slug) return cat.label;
+    const sub = cat.subNiches.find((s) => s.slug === slug);
+    if (sub) return sub.label;
+  }
+  return undefined;
+}
+
+/**
  * Given a slug, returns the parent category if the slug belongs to a sub-niche,
- * or null if the slug is itself a top-level category.
+ * or null if the slug is itself a top-level category (or unknown).
  */
 export function findParentCategory(slug: string): CoachCategory | null {
   for (const cat of COACH_CATEGORIES) {
@@ -321,9 +259,7 @@ export const coachBioSpecialtiesSchema = z.object({
    * Coaching specialties in the 2-level taxonomy format.
    * Must include at least one category entry.
    */
-  specialties: z
-    .array(specialtyEntrySchema)
-    .min(1, 'Please select at least one specialty area'),
+  specialties: z.array(specialtyEntrySchema).min(1, 'Please select at least one specialty area'),
 });
 
 /**
@@ -613,15 +549,14 @@ export const credentialSchema = z.object({
     .int()
     .min(1900)
     .max(new Date().getFullYear(), 'Issued year cannot be in the future'),
-  expiresYear: z
-    .number()
-    .int()
-    .min(1900)
-    .max(2100)
-    .optional()
-    .nullable(),
+  expiresYear: z.number().int().min(1900).max(2100).optional().nullable(),
   credentialId: z.string().max(100).optional().nullable(),
-  verificationUrl: z.string().url('Please enter a valid URL').optional().nullable().or(z.literal('')),
+  verificationUrl: z
+    .string()
+    .url('Please enter a valid URL')
+    .optional()
+    .nullable()
+    .or(z.literal('')),
   documentUrl: z.string().optional().nullable(),
   verifiedAt: z.string().optional().nullable(),
   verifiedBy: z.string().optional().nullable(),

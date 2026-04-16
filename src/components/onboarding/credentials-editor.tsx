@@ -93,7 +93,10 @@ export function CredentialsEditor({
       }
       const { url } = await res.json();
       form.setValue(`credentials.${index}.documentUrl`, url);
-      toast({ title: 'Document uploaded', description: 'Your credential document has been saved.' });
+      toast({
+        title: 'Document uploaded',
+        description: 'Your credential document has been saved.',
+      });
     } catch (err) {
       toast({
         title: 'Upload failed',
@@ -285,7 +288,9 @@ export function CredentialsEditor({
                 ) : (
                   <label className="flex cursor-pointer items-center gap-2 rounded-md border border-dashed px-3 py-2 text-sm text-muted-foreground hover:bg-muted/20">
                     <Upload className="h-4 w-4" />
-                    {uploading[index] ? 'Uploading...' : 'Upload certificate or diploma (PDF, JPG, PNG — max 2MB)'}
+                    {uploading[index]
+                      ? 'Uploading...'
+                      : 'Upload certificate or diploma (PDF, JPG, PNG — max 2MB)'}
                     <input
                       type="file"
                       className="sr-only"
