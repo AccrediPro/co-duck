@@ -234,9 +234,7 @@ export function CoachProfileDisplay({
                       return entry.subNiches.map((subNiche, subIndex) => {
                         const subNicheData = cat?.subNiches.find((s) => s.label === subNiche);
                         const href =
-                          cat && subNicheData
-                            ? `/coaches/specialty/${subNicheData.slug}`
-                            : null;
+                          cat && subNicheData ? `/coaches/specialty/${subNicheData.slug}` : null;
                         return href ? (
                           <Link key={`${entryIndex}-${subIndex}`} href={href}>
                             <Badge
