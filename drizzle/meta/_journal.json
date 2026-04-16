@@ -225,6 +225,13 @@
       "when": 1745610000000,
       "tag": "0031_subscriptions_p0_07",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1745620000000,
+      "tag": "0032_ai_session_notes",
+      "breakpoints": true
     }
   ]
 }
