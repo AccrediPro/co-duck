@@ -6,6 +6,21 @@ import { db, users, coachProfiles } from '@/db';
 import { CoachProfileDisplay } from '@/components/coaches/coach-profile-display';
 import { getCoachAvailabilityForProfile } from './availability-actions';
 
+/**
+ * Normalize the coach_profiles.specialties JSONB union to the 2-level shape
+ * consumed by <CoachProfileDisplay>. Legacy flat `string[]` entries are
+ * promoted to categories with empty sub-niches.
+ */
+function toTwoLevelSpecialties(
+  value: string[] | Array<{ category: string; subNiches: string[] }> | null
+): Array<{ category: string; subNiches: string[] }> {
+  if (!value || value.length === 0) return [];
+  if (typeof value[0] === 'string') {
+    return (value as string[]).map((label) => ({ category: label, subNiches: [] }));
+  }
+  return value as Array<{ category: string; subNiches: string[] }>;
+}
+
 interface PageProps {
   params: Promise<{ slug: string }>;
 }
@@ -91,7 +106,7 @@ export default async function CoachProfilePage({ params }: PageProps) {
         avatarUrl={coach.avatarUrl}
         headline={coach.headline}
         bio={coach.bio}
-        specialties={coach.specialties}
+        specialties={toTwoLevelSpecialties(coach.specialties)}
         timezone={coach.timezone}
         hourlyRate={coach.hourlyRate}
         currency={coach.currency}
@@ -102,6 +117,14 @@ export default async function CoachProfilePage({ params }: PageProps) {
         currentUserId={userId}
         isVerified={coach.verificationStatus === 'verified'}
       />
+
+      {/* Not Medical Advice disclaimer */}
+      <div className="mx-auto mt-8 max-w-4xl rounded-lg border border-muted bg-muted/30 px-5 py-4 text-sm text-muted-foreground">
+        <span className="font-medium text-foreground">Not medical advice:</span> Coaches on Co-duck
+        are not licensed medical providers. Nothing shared in a session constitutes medical advice,
+        diagnosis, or treatment. If you have an urgent medical concern, contact your physician or
+        call 911.
+      </div>
     </div>
   );
 }

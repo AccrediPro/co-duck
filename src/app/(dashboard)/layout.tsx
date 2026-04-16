@@ -4,6 +4,7 @@ import { eq } from 'drizzle-orm';
 
 import { DashboardSidebar, DashboardMobileHeader } from '@/components/navigation';
 import { ProfileCompletionBanner } from '@/components/dashboard/profile-completion-banner';
+import { CrisisResourceFooter } from '@/components/shared/crisis-resource-footer';
 import { db, users, coachProfiles } from '@/db';
 import { claimCoachInvite } from '@/lib/claim-invite';
 import { getUnreadMessageCountForUser } from './dashboard/messages/actions';
@@ -172,6 +173,11 @@ export default async function DashboardLayout({ children }: { children: React.Re
             />
           )}
           {children}
+          {userRole === 'client' && (
+            <div className="mt-8">
+              <CrisisResourceFooter compact />
+            </div>
+          )}
         </main>
       </div>
     </div>
