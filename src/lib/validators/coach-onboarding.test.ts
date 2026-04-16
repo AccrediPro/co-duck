@@ -70,10 +70,15 @@ describe('coachBasicInfoSchema', () => {
 });
 
 describe('coachBioSpecialtiesSchema', () => {
+  const validSpecialty = { category: 'Life', subNiches: [] };
+
   it('accepts valid bio and specialties', () => {
     const result = coachBioSpecialtiesSchema.safeParse({
       bio: 'I am an experienced coach with 10 years of practice.',
-      specialties: ['Life Coaching', 'Career Coaching'],
+      specialties: [
+        { category: 'Life', subNiches: [] },
+        { category: 'Career', subNiches: [] },
+      ],
     });
     expect(result.success).toBe(true);
   });
@@ -89,14 +94,14 @@ describe('coachBioSpecialtiesSchema', () => {
   it('allows empty string for bio', () => {
     const result = coachBioSpecialtiesSchema.safeParse({
       bio: '',
-      specialties: ['Executive Coaching'],
+      specialties: [validSpecialty],
     });
     expect(result.success).toBe(true);
   });
 
   it('allows omitted bio', () => {
     const result = coachBioSpecialtiesSchema.safeParse({
-      specialties: ['Executive Coaching'],
+      specialties: [validSpecialty],
     });
     expect(result.success).toBe(true);
   });
@@ -104,14 +109,14 @@ describe('coachBioSpecialtiesSchema', () => {
   it('rejects bio longer than 2000 characters', () => {
     const result = coachBioSpecialtiesSchema.safeParse({
       bio: 'A'.repeat(2001),
-      specialties: ['Life Coaching'],
+      specialties: [validSpecialty],
     });
     expect(result.success).toBe(false);
   });
 
-  it('rejects specialties with empty string entries', () => {
+  it('rejects specialty entries with empty category', () => {
     const result = coachBioSpecialtiesSchema.safeParse({
-      specialties: [''],
+      specialties: [{ category: '', subNiches: [] }],
     });
     expect(result.success).toBe(false);
   });
@@ -258,8 +263,8 @@ describe('generateSlug', () => {
 });
 
 describe('constants', () => {
-  it('COACH_SPECIALTIES contains 12 specialties', () => {
-    expect(COACH_SPECIALTIES).toHaveLength(12);
+  it('COACH_SPECIALTIES contains 11 top-level categories', () => {
+    expect(COACH_SPECIALTIES).toHaveLength(11);
   });
 
   it('SUPPORTED_CURRENCIES contains 10 currencies', () => {

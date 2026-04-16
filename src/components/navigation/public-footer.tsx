@@ -40,9 +40,9 @@ export function PublicFooter() {
         <div className="mb-12 rounded-lg bg-primary/5 p-6 md:p-8">
           <div className="flex flex-col items-center gap-4 md:flex-row md:justify-between">
             <div className="text-center md:text-left">
-              <h3 className="text-lg font-semibold">Stay Updated</h3>
+              <h3 className="text-lg font-semibold">Stay Connected</h3>
               <p className="text-sm text-muted-foreground">
-                Get coaching tips, success stories, and platform updates in your inbox.
+                Coaching insights, wellness resources, and platform updates in your inbox.
               </p>
             </div>
             {subscribed ? (
@@ -79,10 +79,11 @@ export function PublicFooter() {
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
             <Link href="/" className="text-xl font-bold">
-              AccrediPro CoachHub
+              Co-duck
             </Link>
             <p className="mt-2 text-sm text-muted-foreground">
-              Connect with expert coaches for personalized guidance on your journey.
+              Credential-verified coaches for hormones, menopause, trauma, ADHD, and whole-person
+              health.
             </p>
           </div>
 
@@ -143,10 +144,10 @@ export function PublicFooter() {
             <ul className="space-y-2">
               <li>
                 <a
-                  href="mailto:support@accredipro-coachhub.com"
+                  href="mailto:support@co-duck.com"
                   className="text-sm text-muted-foreground transition-colors hover:text-foreground"
                 >
-                  support@accredipro-coachhub.com
+                  support@co-duck.com
                 </a>
               </li>
               <li>
@@ -164,7 +165,7 @@ export function PublicFooter() {
         {/* Copyright */}
         <div className="mt-8 flex flex-col items-center justify-between gap-4 border-t pt-8 md:flex-row">
           <p className="text-sm text-muted-foreground">
-            &copy; {new Date().getFullYear()} AccrediPro CoachHub. All rights reserved.
+            &copy; {new Date().getFullYear()} Co-duck. All rights reserved.
           </p>
           <div className="flex gap-4 text-sm text-muted-foreground">
             <Link href="/privacy" className="transition-colors hover:text-foreground">

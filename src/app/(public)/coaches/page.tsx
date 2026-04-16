@@ -2,6 +2,7 @@ import { Suspense } from 'react';
 import { Metadata } from 'next';
 import { eq, and, or, ilike, sql, desc, asc } from 'drizzle-orm';
 import { db, users, coachProfiles } from '@/db';
+import { COACH_CATEGORIES } from '@/lib/validators/coach-onboarding';
 import {
   CoachesGrid,
   CoachGridSkeleton,
@@ -10,10 +11,13 @@ import {
   type SortOption,
 } from '@/components/coaches';
 
+// This page queries the DB at request time; skip static prerender (CI has no DB).
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
-  title: 'Find a Coach | Coaching Platform',
+  title: 'Find a Coach | Co-duck',
   description:
-    'Browse our community of expert coaches. Find the perfect coach for career, life, wellness, leadership, and more.',
+    'Browse certified coaches in functional medicine, hormones, trauma-informed care, ADHD, grief, and more. Find your perfect match.',
 };
 
 const COACHES_PER_PAGE = 12;
@@ -21,7 +25,10 @@ const COACHES_PER_PAGE = 12;
 interface SearchParams {
   page?: string;
   q?: string;
-  specialties?: string;
+  /** Category slug (e.g. 'health-wellness') */
+  category?: string;
+  /** Sub-niche slug (e.g. 'perimenopause-hormones') */
+  sub?: string;
   minPrice?: string;
   maxPrice?: string;
   sort?: SortOption;
@@ -33,7 +40,8 @@ interface PageProps {
 
 interface FilterOptions {
   search?: string;
-  specialties?: string[];
+  categoryLabel?: string;
+  subNicheLabel?: string;
   minPrice?: number;
   maxPrice?: number;
   sort?: SortOption;
@@ -45,10 +53,8 @@ async function getCoaches(
 ): Promise<{ coaches: CoachListItem[]; totalCount: number }> {
   const offset = (page - 1) * COACHES_PER_PAGE;
 
-  // Build where conditions
   const conditions = [eq(coachProfiles.isPublished, true)];
 
-  // Search filter - search in name, headline, and bio
   if (filters.search) {
     const searchTerm = `%${filters.search}%`;
     conditions.push(
@@ -60,27 +66,15 @@ async function getCoaches(
     );
   }
 
-  // Get total count with filters (excluding price filter for count since it requires subquery)
-  const baseQuery = db
-    .select({ count: sql<number>`count(*)` })
-    .from(coachProfiles)
-    .innerJoin(users, eq(coachProfiles.userId, users.id))
-    .where(and(...conditions));
-
-  const countResult = await baseQuery;
-  let totalCount = Number(countResult[0]?.count || 0);
-
   // Determine sort order
   let orderBy;
   switch (filters.sort) {
     case 'price_low':
-      // Sort by minimum session price (ascending)
       orderBy = asc(
         sql`COALESCE((SELECT MIN((elem->>'price')::integer) FROM jsonb_array_elements(${coachProfiles.sessionTypes}) elem), 999999999)`
       );
       break;
     case 'price_high':
-      // Sort by minimum session price (descending)
       orderBy = desc(
         sql`COALESCE((SELECT MIN((elem->>'price')::integer) FROM jsonb_array_elements(${coachProfiles.sessionTypes}) elem), 0)`
       );
@@ -91,7 +85,6 @@ async function getCoaches(
       break;
   }
 
-  // Get coaches for current page with all filters
   const query = db
     .select({
       userId: coachProfiles.userId,
@@ -110,95 +103,89 @@ async function getCoaches(
     .innerJoin(users, eq(coachProfiles.userId, users.id))
     .where(and(...conditions))
     .orderBy(orderBy)
-    .limit(COACHES_PER_PAGE)
-    .offset(offset);
+    .limit(COACHES_PER_PAGE * 10) // Over-fetch for client-side specialty filtering
+    .offset(0); // We'll slice after filter
 
   let coaches = await query;
 
-  // Filter by specialties in application layer (JSONB array contains is complex in Drizzle)
-  if (filters.specialties && filters.specialties.length > 0) {
+  // Filter by category + sub-niche (application layer — JSONB shape is dynamic).
+  // The DB column holds either the legacy `string[]` or the new `{category, subNiches}[]`
+  // shape during the 2-level taxonomy transition. Legacy flat entries are matched by
+  // their label against the category label (no sub-niche info available).
+  if (filters.categoryLabel) {
     coaches = coaches.filter((coach) => {
       if (!coach.specialties || coach.specialties.length === 0) return false;
-      return filters.specialties!.some((spec) => coach.specialties!.includes(spec));
+      return coach.specialties.some((entry) => {
+        // Legacy flat string shape: match the label against categoryLabel.
+        if (typeof entry === 'string') {
+          return !filters.subNicheLabel && entry === filters.categoryLabel;
+        }
+        if (entry.category !== filters.categoryLabel) return false;
+        if (filters.subNicheLabel) {
+          return entry.subNiches.includes(filters.subNicheLabel);
+        }
+        return true;
+      });
     });
   }
 
-  // Filter by price range in application layer (JSONB queries are complex)
+  // Filter by price range
   if (filters.minPrice !== undefined || filters.maxPrice !== undefined) {
     coaches = coaches.filter((coach) => {
       if (!coach.sessionTypes || coach.sessionTypes.length === 0) return false;
-
-      // Get minimum price from session types (in cents)
       const minSessionPrice = Math.min(...coach.sessionTypes.map((s) => s.price));
       const priceInDollars = minSessionPrice / 100;
-
-      if (filters.minPrice !== undefined && priceInDollars < filters.minPrice) {
-        return false;
-      }
-      if (filters.maxPrice !== undefined && priceInDollars > filters.maxPrice) {
-        return false;
-      }
+      if (filters.minPrice !== undefined && priceInDollars < filters.minPrice) return false;
+      if (filters.maxPrice !== undefined && priceInDollars > filters.maxPrice) return false;
       return true;
     });
   }
 
-  // Adjust count for client-side filters (specialty and price)
-  if (
-    filters.specialties?.length ||
-    filters.minPrice !== undefined ||
-    filters.maxPrice !== undefined
-  ) {
-    // Re-fetch all and filter to get accurate count
-    const allCoaches = await db
-      .select({
-        userId: coachProfiles.userId,
-        specialties: coachProfiles.specialties,
-        sessionTypes: coachProfiles.sessionTypes,
-      })
-      .from(coachProfiles)
-      .innerJoin(users, eq(coachProfiles.userId, users.id))
-      .where(and(...conditions));
+  const totalCount = coaches.length;
+  const paginated = coaches.slice(offset, offset + COACHES_PER_PAGE);
 
-    let filteredCount = allCoaches.length;
+  // Normalize each coach's specialties to the 2-level `{category, subNiches}[]`
+  // shape expected by CoachListItem. The DB column holds either shape during
+  // the taxonomy transition; legacy flat `string[]` entries are wrapped as
+  // categories with no sub-niches.
+  const coachesNormalized: CoachListItem[] = paginated.map((c) => ({
+    ...c,
+    specialties: Array.isArray(c.specialties)
+      ? c.specialties.map((entry) =>
+          typeof entry === 'string'
+            ? { category: entry, subNiches: [] as string[] }
+            : { category: entry.category, subNiches: entry.subNiches ?? [] }
+        )
+      : null,
+  }));
 
-    if (filters.specialties && filters.specialties.length > 0) {
-      filteredCount = allCoaches.filter((coach) => {
-        if (!coach.specialties || coach.specialties.length === 0) return false;
-        return filters.specialties!.some((spec) => coach.specialties!.includes(spec));
-      }).length;
-    }
-
-    if (filters.minPrice !== undefined || filters.maxPrice !== undefined) {
-      const tempFiltered = allCoaches.filter((coach) => {
-        if (filters.specialties && filters.specialties.length > 0) {
-          if (!coach.specialties || coach.specialties.length === 0) return false;
-          if (!filters.specialties.some((spec) => coach.specialties!.includes(spec))) {
-            return false;
-          }
-        }
-        if (!coach.sessionTypes || coach.sessionTypes.length === 0) return false;
-        const minSessionPrice = Math.min(...coach.sessionTypes.map((s) => s.price));
-        const priceInDollars = minSessionPrice / 100;
-        if (filters.minPrice !== undefined && priceInDollars < filters.minPrice) return false;
-        if (filters.maxPrice !== undefined && priceInDollars > filters.maxPrice) return false;
-        return true;
-      });
-      filteredCount = tempFiltered.length;
-    }
-
-    totalCount = filteredCount;
-  }
-
-  return { coaches, totalCount };
+  return { coaches: coachesNormalized, totalCount };
 }
 
 async function CoachesContent({ searchParams }: PageProps) {
   const params = await searchParams;
   const page = Math.max(1, parseInt(params.page || '1', 10));
 
+  // Resolve slugs → labels for filtering
+  const categorySlug = params.category || '';
+  const subSlug = params.sub || '';
+
+  let categoryLabel: string | undefined;
+  let subNicheLabel: string | undefined;
+
+  if (categorySlug) {
+    const cat = COACH_CATEGORIES.find((c) => c.slug === categorySlug);
+    categoryLabel = cat?.label;
+    if (subSlug && cat) {
+      const sub = cat.subNiches.find((s) => s.slug === subSlug);
+      subNicheLabel = sub?.label;
+    }
+  }
+
   const filters: FilterOptions = {
     search: params.q || undefined,
-    specialties: params.specialties ? params.specialties.split(',') : undefined,
+    categoryLabel,
+    subNicheLabel,
     minPrice: params.minPrice ? parseInt(params.minPrice, 10) : undefined,
     maxPrice: params.maxPrice ? parseInt(params.maxPrice, 10) : undefined,
     sort: (params.sort as SortOption) || 'newest',
@@ -221,13 +208,35 @@ async function CoachesContent({ searchParams }: PageProps) {
 }
 
 export default async function CoachesPage({ searchParams }: PageProps) {
+  const params = await searchParams;
+  const categorySlug = params.category || '';
+  const subSlug = params.sub || '';
+
+  // Build contextual heading
+  let heading = 'Find a Coach';
+  let subheading = 'Browse our community of expert coaches ready to help you succeed.';
+
+  if (categorySlug) {
+    const cat = COACH_CATEGORIES.find((c) => c.slug === categorySlug);
+    if (cat) {
+      if (subSlug) {
+        const sub = cat.subNiches.find((s) => s.slug === subSlug);
+        if (sub) {
+          heading = `${sub.label} Coaches`;
+          subheading = `Browse certified ${sub.label.toLowerCase()} coaches on Co-duck.`;
+        }
+      } else {
+        heading = `${cat.label} Coaches`;
+        subheading = `Browse certified ${cat.label.toLowerCase()} coaches on Co-duck.`;
+      }
+    }
+  }
+
   return (
     <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-burgundy-dark">Find a Coach</h1>
-        <p className="mt-2 text-muted-foreground">
-          Browse our community of expert coaches ready to help you succeed.
-        </p>
+        <h1 className="text-3xl font-bold text-burgundy-dark">{heading}</h1>
+        <p className="mt-2 text-muted-foreground">{subheading}</p>
       </div>
 
       <Suspense fallback={<CoachGridSkeleton count={COACHES_PER_PAGE} />}>

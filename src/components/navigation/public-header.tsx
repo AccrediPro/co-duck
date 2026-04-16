@@ -31,7 +31,7 @@ export function PublicHeader() {
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         {/* Logo */}
         <Link href="/" className="flex items-center space-x-2 py-2">
-          <span className="text-xl font-bold">AccrediPro CoachHub</span>
+          <span className="text-xl font-bold">Co-duck</span>
         </Link>
 
         {/* Desktop Navigation */}

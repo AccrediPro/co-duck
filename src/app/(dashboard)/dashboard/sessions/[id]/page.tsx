@@ -27,6 +27,7 @@ import { BookingResponseActions } from './booking-response-actions';
 import { PaymentSection } from './payment-section';
 import { MeetingLinkSection } from './meeting-link-section';
 import { SessionReviewSection } from './session-review-section';
+import { AiNotesCard } from '@/components/sessions/ai-notes';
 
 export const metadata = {
   title: 'Session Details | Coaching Platform',
@@ -468,6 +469,9 @@ export default async function SessionDetailPage({ params }: PageProps) {
             initialSections={sessionNoteSections}
           />
         )}
+
+        {/* AI Session Notes - Only visible to coach */}
+        {isCoachView && <AiNotesCard sessionId={session.id} />}
 
         {/* Review Section */}
         {reviewForDisplay && (

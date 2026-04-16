@@ -137,7 +137,7 @@ export function DashboardSidebar({
             href="/"
             className="flex min-h-[44px] min-w-0 flex-1 items-center truncate text-sm font-bold"
           >
-            AccrediPro CoachHub
+            Co-duck
           </Link>
           <NotificationBell />
         </div>
@@ -218,7 +218,7 @@ export function DashboardMobileHeader({
   return (
     <header className="sticky top-0 z-50 flex h-16 items-center justify-between border-b bg-background px-4 md:hidden">
       <Link href="/" className="flex min-h-[44px] items-center whitespace-nowrap text-xl font-bold">
-        AccrediPro CoachHub
+        Co-duck
       </Link>
 
       <div className="flex items-center gap-2">
@@ -266,7 +266,7 @@ export function DashboardMobileHeader({
                   className="flex min-h-[44px] items-center truncate text-sm font-bold"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  AccrediPro CoachHub
+                  Co-duck
                 </Link>
               </div>
 
