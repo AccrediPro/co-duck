@@ -12,11 +12,9 @@ import { db } from '@/db';
 import { users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
 
-interface AdminAuthResult {
-  authorized: boolean;
-  userId: string | null;
-  response?: Response;
-}
+type AdminAuthResult =
+  | { authorized: true; userId: string; response?: undefined }
+  | { authorized: false; userId: string | null; response: Response };
 
 /**
  * Checks that the current user is authenticated and has admin role.

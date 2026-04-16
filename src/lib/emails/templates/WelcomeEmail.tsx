@@ -8,25 +8,23 @@ interface WelcomeEmailProps {
 }
 
 export function WelcomeEmail({ name, unsubscribeUrl }: WelcomeEmailProps) {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://accredipro-coachhub.com';
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://co-duck.com';
 
   return (
-    <EmailLayout
-      preview={`Welcome to AccrediPro CoachHub, ${name}!`}
-      unsubscribeUrl={unsubscribeUrl}
-    >
-      <Text style={heading}>Welcome to AccrediPro CoachHub!</Text>
+    <EmailLayout preview={`Welcome to Co-duck, ${name}!`} unsubscribeUrl={unsubscribeUrl}>
+      <Text style={heading}>Welcome to Co-duck!</Text>
       <Text style={paragraph}>
-        Hi {name}, thanks for joining AccrediPro CoachHub. You now have access to a network of
-        expert coaches ready to help you grow.
+        Hi {name}, thanks for joining Co-duck. You now have access to a network of
+        credential-verified coaches in hormones, trauma, menopause, ADHD, grief, and whole-person
+        health.
       </Text>
 
       <Text style={paragraph}>Here&apos;s how to get started:</Text>
 
       <Section style={listSection}>
-        <Text style={listItem}>1. Browse our coaches and find your match</Text>
+        <Text style={listItem}>1. Browse coaches and filter by specialty or approach</Text>
         <Text style={listItem}>2. Book a session that fits your schedule</Text>
-        <Text style={listItem}>3. Connect and start your growth journey</Text>
+        <Text style={listItem}>3. Connect privately and start your journey</Text>
       </Section>
 
       <Section style={buttonContainer}>

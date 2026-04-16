@@ -46,7 +46,7 @@ export default async function CoachOnboardingStep3Page() {
       </div>
 
       {/* Step Indicator */}
-      <StepIndicator currentStep={3} totalSteps={4} />
+      <StepIndicator currentStep={4} totalSteps={5} />
 
       {/* Form */}
       <PricingForm initialData={initialData} />

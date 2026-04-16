@@ -119,14 +119,23 @@ async function compressImage(file: File): Promise<Blob> {
   });
 }
 
-// Combined schema for full profile
+// Combined schema for full profile.
+//
+// Note on specialties: this editor uses the LEGACY flat `string[]` shape.
+// The new 2-level taxonomy (`{category, subNiches}[]`) lives in
+// `coachBioSpecialtiesSchema` and is consumed by the onboarding step-2 form
+// (bio-specialties-form.tsx). Migrating this editor to the 2-level taxonomy
+// is tracked as a follow-up — the DB column accepts either shape during the
+// transition (see coachProfiles.specialties in db/schema.ts).
 const profileEditorSchema = z.object({
   displayName: coachBasicInfoSchema.shape.displayName,
   headline: coachBasicInfoSchema.shape.headline,
   profilePhotoUrl: coachBasicInfoSchema.shape.profilePhotoUrl,
   timezone: coachBasicInfoSchema.shape.timezone,
   bio: coachBioSpecialtiesSchema.shape.bio,
-  specialties: coachBioSpecialtiesSchema.shape.specialties,
+  specialties: z
+    .array(z.string().min(1, 'Specialty cannot be empty'))
+    .min(1, 'Please select at least one specialty'),
   hourlyRate: z.number().min(0).optional().nullable(),
   currency: z.string().refine((val) => SUPPORTED_CURRENCIES.some((c) => c.code === val)),
   sessionTypes: z.array(sessionTypeSchema).min(1, 'At least one session type is required'),
