@@ -3,6 +3,7 @@
 import { auth } from '@clerk/nextjs/server';
 import { db, coachProfiles, users } from '@/db';
 import { eq } from 'drizzle-orm';
+import { flattenSpecialties } from '@/lib/validators/coach-onboarding';
 
 export type PublishProfileResult =
   | { success: true; isPublished: boolean }
@@ -137,6 +138,9 @@ export async function getCoachProfileForReview() {
         ...profile,
         displayName: user?.name || '',
         avatarUrl: user?.avatarUrl || null,
+        // Normalize specialties to a flat `string[]` for the review form.
+        // The DB column holds either legacy `string[]` or `{category, subNiches}[]`.
+        specialties: flattenSpecialties(profile.specialties),
       },
       missingItems,
       completionPercentage,

@@ -13,3 +13,4 @@ export { BookingRequestCoachEmail } from './templates/BookingRequestCoachEmail';
 export { BookingRequestClientEmail } from './templates/BookingRequestClientEmail';
 export { NewReviewEmail } from './templates/NewReviewEmail';
 export { ReviewResponseEmail } from './templates/ReviewResponseEmail';
+export { SessionFollowUpEmail } from './templates/SessionFollowUpEmail';

@@ -52,7 +52,9 @@ export async function saveBioSpecialties(
       specialties,
     });
 
-    // Update coach profile with bio and specialties (2-level taxonomy shape)
+    // Update coach profile with bio and specialties.
+    // `specialties` is already in the 2-level `{category, subNiches}[]` shape
+    // (validated by coachBioSpecialtiesSchema) — store it directly.
     await db
       .update(coachProfiles)
       .set({

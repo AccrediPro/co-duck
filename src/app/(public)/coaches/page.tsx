@@ -11,6 +11,9 @@ import {
   type SortOption,
 } from '@/components/coaches';
 
+// This page queries the DB at request time; skip static prerender (CI has no DB).
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: 'Find a Coach | Co-duck',
   description:
@@ -105,11 +108,18 @@ async function getCoaches(
 
   let coaches = await query;
 
-  // Filter by category + sub-niche (application layer — JSONB shape is dynamic)
+  // Filter by category + sub-niche (application layer — JSONB shape is dynamic).
+  // The DB column holds either the legacy `string[]` or the new `{category, subNiches}[]`
+  // shape during the 2-level taxonomy transition. Legacy flat entries are matched by
+  // their label against the category label (no sub-niche info available).
   if (filters.categoryLabel) {
     coaches = coaches.filter((coach) => {
       if (!coach.specialties || coach.specialties.length === 0) return false;
       return coach.specialties.some((entry) => {
+        // Legacy flat string shape: match the label against categoryLabel.
+        if (typeof entry === 'string') {
+          return !filters.subNicheLabel && entry === filters.categoryLabel;
+        }
         if (entry.category !== filters.categoryLabel) return false;
         if (filters.subNicheLabel) {
           return entry.subNiches.includes(filters.subNicheLabel);
@@ -134,7 +144,22 @@ async function getCoaches(
   const totalCount = coaches.length;
   const paginated = coaches.slice(offset, offset + COACHES_PER_PAGE);
 
-  return { coaches: paginated, totalCount };
+  // Normalize each coach's specialties to the 2-level `{category, subNiches}[]`
+  // shape expected by CoachListItem. The DB column holds either shape during
+  // the taxonomy transition; legacy flat `string[]` entries are wrapped as
+  // categories with no sub-niches.
+  const coachesNormalized: CoachListItem[] = paginated.map((c) => ({
+    ...c,
+    specialties: Array.isArray(c.specialties)
+      ? c.specialties.map((entry) =>
+          typeof entry === 'string'
+            ? { category: entry, subNiches: [] as string[] }
+            : { category: entry.category, subNiches: entry.subNiches ?? [] }
+        )
+      : null,
+  }));
+
+  return { coaches: coachesNormalized, totalCount };
 }
 
 async function CoachesContent({ searchParams }: PageProps) {

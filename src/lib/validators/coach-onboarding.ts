@@ -98,7 +98,7 @@ export const coachBasicInfoSchema = z.object({
 export type CoachBasicInfoFormData = z.infer<typeof coachBasicInfoSchema>;
 
 /* =============================================================================
-   CONSTANTS: 2-LEVEL TAXONOMY (COACH CATEGORIES → SUB-NICHES)
+   CONSTANTS: COACH CATEGORIES (2-LEVEL TAXONOMY)
    ============================================================================= */
 
 /**
@@ -126,8 +126,11 @@ export interface CoachCategory {
 }
 
 /**
- * 2-level specialty taxonomy for coach discovery and SEO landing pages.
- * Top-level categories each have optional sub-niches.
+ * 2-level coaching taxonomy: top-level categories → sub-niches.
+ *
+ * Health & Wellness has 15 sub-niches covering the full spectrum of
+ * functional medicine, trauma-informed, and integrative wellness coaching.
+ * Other categories are single-level (no sub-niches) for now.
  *
  * ## Storage convention (coach_profiles.specialties JSONB)
  *
@@ -148,19 +151,19 @@ export const COACH_CATEGORIES: CoachCategory[] = [
     subNiches: [
       { slug: 'functional-medicine', label: 'Functional Medicine' },
       { slug: 'perimenopause-hormones', label: 'Perimenopause & Hormones' },
-      { slug: 'trauma-informed', label: 'Trauma-Informed Coaching' },
-      { slug: 'adhd-focus', label: 'ADHD & Focus' },
-      { slug: 'grief-loss', label: 'Grief & Loss' },
-      { slug: 'autoimmune-chronic', label: 'Autoimmune & Chronic Illness' },
-      { slug: 'weight-loss', label: 'Weight Loss & Metabolic Health' },
-      { slug: 'sleep-fatigue', label: 'Sleep & Fatigue Recovery' },
-      { slug: 'gut-health', label: 'Gut Health & Nutrition' },
-      { slug: 'mental-health', label: 'Mental Health & Anxiety' },
-      { slug: 'fertility-preconception', label: 'Fertility & Preconception' },
-      { slug: 'postpartum', label: 'Postpartum & Motherhood' },
-      { slug: 'menopause', label: 'Menopause' },
-      { slug: 'addiction-recovery', label: 'Addiction & Recovery' },
-      { slug: 'chronic-pain', label: 'Chronic Pain' },
+      { slug: 'gut-health', label: 'Gut Health' },
+      { slug: 'trauma-informed', label: 'Trauma-Informed' },
+      { slug: 'somatic-practices', label: 'Somatic Practices' },
+      { slug: 'grief-support', label: 'Grief Support' },
+      { slug: 'adhd-coaching', label: 'ADHD Coaching' },
+      { slug: 'chronic-illness', label: 'Chronic Illness' },
+      { slug: 'nutrition-body-neutrality', label: 'Nutrition & Body Neutrality' },
+      { slug: 'sleep', label: 'Sleep' },
+      { slug: 'mind-body-medicine', label: 'Mind-Body Medicine' },
+      { slug: 'autoimmune', label: 'Autoimmune' },
+      { slug: 'fertility', label: 'Fertility' },
+      { slug: 'addiction-recovery', label: 'Addiction Recovery' },
+      { slug: 'integrative-wellness', label: 'Integrative Wellness' },
     ],
   },
   { slug: 'career', label: 'Career', subNiches: [] },
@@ -176,8 +179,8 @@ export const COACH_CATEGORIES: CoachCategory[] = [
 ];
 
 /**
- * Flat list of all top-level category labels.
- * Kept as a convenience for legacy consumers (filters, profile editor).
+ * Flat list of all category labels (for backward-compat references).
+ * @deprecated Use COACH_CATEGORIES for new code.
  */
 export const COACH_SPECIALTIES = COACH_CATEGORIES.map(
   (c) => c.label
@@ -197,16 +200,46 @@ export function resolveCategoryLabel(slug: string): string | undefined {
 }
 
 /**
- * Given a slug, returns the parent category if the slug belongs to a sub-niche,
- * or null if the slug is itself a top-level category (or unknown).
+ * Find the parent category for a given sub-niche slug.
+ * Returns undefined if the slug is not a sub-niche.
  */
-export function findParentCategory(slug: string): CoachCategory | null {
-  for (const cat of COACH_CATEGORIES) {
-    if (cat.subNiches.some((s) => s.slug === slug)) {
-      return cat;
+export function findParentCategory(subNicheSlug: string): CoachCategory | undefined {
+  return COACH_CATEGORIES.find((cat) => cat.subNiches.some((s) => s.slug === subNicheSlug));
+}
+
+/**
+ * Normalize a coach_profiles.specialties JSONB value to a flat string array.
+ *
+ * The column has two shapes during the taxonomy transition:
+ *   - Legacy: `string[]` (flat labels)
+ *   - New:    `Array<{ category: string; subNiches: string[] }>` (2-level)
+ *
+ * This helper folds either shape down to `string[]` for display, filtering,
+ * and form consumption. For the 2-level shape, sub-niches (if any) are emitted
+ * and the category falls back when no sub-niches are selected.
+ */
+export function flattenSpecialties(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  const out: string[] = [];
+  for (const entry of value) {
+    if (typeof entry === 'string') {
+      if (entry.length > 0) out.push(entry);
+      continue;
+    }
+    if (entry && typeof entry === 'object') {
+      const obj = entry as { category?: unknown; subNiches?: unknown };
+      const category = typeof obj.category === 'string' ? obj.category : '';
+      const subs = Array.isArray(obj.subNiches)
+        ? (obj.subNiches.filter((s) => typeof s === 'string') as string[])
+        : [];
+      if (subs.length > 0) {
+        out.push(...subs);
+      } else if (category) {
+        out.push(category);
+      }
     }
   }
-  return null;
+  return out;
 }
 
 /* =============================================================================
@@ -221,7 +254,7 @@ export function findParentCategory(slug: string): CoachCategory | null {
  */
 export const specialtyEntrySchema = z.object({
   /** Top-level category label (e.g., "Health & Wellness") */
-  category: z.string().min(1, 'Category cannot be empty'),
+  category: z.string().min(1),
   /** Selected sub-niche labels within this category (may be empty) */
   subNiches: z.array(z.string()),
 });

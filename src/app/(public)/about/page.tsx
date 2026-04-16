@@ -2,45 +2,45 @@ import { Metadata } from 'next';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Users, Target, Heart, Sparkles, ArrowRight, CheckCircle } from 'lucide-react';
+import { Heart, Sparkles, ArrowRight, CheckCircle, Shield, Users } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'About Us | AccrediPro CoachHub',
+  title: 'About Us | Co-duck',
   description:
-    'Learn about AccrediPro CoachHub - our mission to connect people with expert coaches for personal and professional growth.',
+    'Co-duck connects people with credential-verified, trauma-informed coaches in hormones, menopause, ADHD, grief, and whole-person health.',
 };
 
 const stats = [
-  { value: '1,000+', label: 'Active Clients' },
-  { value: '100+', label: 'Expert Coaches' },
+  { value: '1,000+', label: 'Clients Supported' },
+  { value: '100+', label: 'Verified Coaches' },
   { value: '10,000+', label: 'Sessions Completed' },
   { value: '4.9/5', label: 'Average Rating' },
 ];
 
 const values = [
   {
-    icon: Target,
-    title: 'Purpose-Driven',
+    icon: Shield,
+    title: 'Credential-First',
     description:
-      'We believe everyone deserves access to quality coaching to help them reach their full potential.',
+      "We verify every coach's certifications before they appear on the platform — NBC-HWC, IFM, IIN, ICF, and trauma-informed training included.",
   },
   {
     icon: Heart,
-    title: 'Client-Centered',
+    title: 'Whole-Person Care',
     description:
-      'Your growth is at the heart of everything we do. We match you with coaches who truly understand your goals.',
+      'Your body, hormones, nervous system, and life stage all matter. We match you with coaches trained to see the full picture.',
   },
   {
     icon: Users,
-    title: 'Community-Focused',
+    title: 'Inclusive by Design',
     description:
-      'We foster a supportive community of coaches and clients committed to growth and positive change.',
+      "Anti-diet. Body-neutral. LGBTQ+-affirming. Our coaches practice care that doesn't leave parts of you at the door.",
   },
   {
     icon: Sparkles,
-    title: 'Excellence',
+    title: 'Your Data, Your Control',
     description:
-      'We maintain high standards for our coaches and continuously improve our platform for the best experience.',
+      'Session notes you own. Intake forms you control. Export or delete your data anytime — no questions asked.',
   },
 ];
 
@@ -49,17 +49,19 @@ const milestones = [
     year: '2023',
     title: 'Founded',
     description:
-      'AccrediPro CoachHub was launched with a vision to democratize access to professional coaching.',
+      'Co-duck launched with one mission: make it easier to find a coach who actually gets your health journey.',
   },
   {
     year: '2024',
     title: 'Growing Community',
-    description: 'Expanded to 100+ verified coaches across multiple specialties worldwide.',
+    description:
+      'Expanded to 100+ verified coaches specializing in hormones, trauma, menopause, ADHD, and functional medicine.',
   },
   {
     year: '2025',
     title: 'Platform Evolution',
-    description: 'Introduced advanced matching, group sessions, and enhanced scheduling tools.',
+    description:
+      'Introduced specialty-based matching, secure messaging, and enhanced privacy tools for client data ownership.',
   },
 ];
 
@@ -71,11 +73,11 @@ export default function AboutPage() {
         <div className="container mx-auto px-4 py-20 md:py-28">
           <div className="mx-auto max-w-3xl text-center">
             <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl md:text-6xl">
-              Empowering Growth Through <span className="text-gold">Expert Coaching</span>
+              Built for the Whole You — <span className="text-gold">Not Just the Symptoms</span>
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg text-white/80 md:text-xl">
-              At AccrediPro CoachHub, we connect individuals with world-class coaches to unlock
-              their potential, achieve their goals, and transform their lives.
+              At Co-duck, we connect you with credential-verified coaches who understand hormones,
+              trauma, ADHD, grief, menopause, and the ways your body and life intersect.
             </p>
           </div>
         </div>
@@ -105,11 +107,11 @@ export default function AboutPage() {
               Our Mission
             </h2>
             <p className="mt-6 text-lg text-muted-foreground">
-              We believe that everyone has the potential to achieve extraordinary things. Our
-              mission is to make professional coaching accessible, affordable, and effective for
-              anyone seeking personal or professional growth. By connecting you with the right
-              coach, we help you overcome obstacles, develop new skills, and create lasting positive
-              change in your life.
+              Too many people spend years in doctors&apos; offices being told their labs are
+              &quot;normal&quot; while they feel anything but. We believe you deserve support from
+              someone who understands how hormones, nervous system dysregulation, life transitions,
+              and whole-body health connect. Co-duck exists to make that kind of coach findable,
+              affordable, and accountable — with credentials you can actually verify.
             </p>
           </div>
         </div>
@@ -120,10 +122,10 @@ export default function AboutPage() {
         <div className="container mx-auto px-4">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="text-3xl font-bold tracking-tight text-burgundy-dark md:text-4xl">
-              Our Values
+              What We Stand For
             </h2>
             <p className="mt-4 text-muted-foreground">
-              The principles that guide everything we do at AccrediPro CoachHub.
+              The principles that guide every decision on Co-duck.
             </p>
           </div>
           <div className="mt-16 grid gap-8 md:grid-cols-2 lg:grid-cols-4">
@@ -149,9 +151,7 @@ export default function AboutPage() {
             <h2 className="text-3xl font-bold tracking-tight text-burgundy-dark md:text-4xl">
               Our Journey
             </h2>
-            <p className="mt-4 text-muted-foreground">
-              Key milestones in the AccrediPro CoachHub story.
-            </p>
+            <p className="mt-4 text-muted-foreground">Key milestones in the Co-duck story.</p>
           </div>
           <div className="mx-auto mt-16 max-w-3xl">
             <div className="space-y-8">
@@ -183,20 +183,20 @@ export default function AboutPage() {
           <div className="grid items-center gap-12 lg:grid-cols-2">
             <div>
               <h2 className="text-3xl font-bold tracking-tight text-burgundy-dark md:text-4xl">
-                What Makes Us Different
+                What Makes Co-duck Different
               </h2>
               <p className="mt-4 text-lg text-muted-foreground">
-                We are not just another coaching platform. We are committed to creating meaningful
-                connections that lead to real results.
+                We&apos;re not a generic marketplace. Every feature was built with health and
+                wellness clients in mind.
               </p>
               <ul className="mt-8 space-y-4">
                 {[
-                  'Verified and vetted professional coaches',
-                  'Personalized matching based on your goals',
-                  'Flexible scheduling that fits your life',
-                  'Secure and private communication',
-                  'Progress tracking and accountability tools',
-                  'Money-back satisfaction guarantee',
+                  'Credential-verified coaches — no self-reporting',
+                  'Specialty matching: hormones, trauma, ADHD, menopause, and more',
+                  'Trauma-informed, anti-diet, body-neutral coaches available',
+                  'Private 1:1 messaging with end-to-end encryption',
+                  'Session notes and intake data you own and can export',
+                  'LGBTQ+-affirming care listed on every coach profile',
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-3">
                     <CheckCircle className="h-5 w-5 flex-shrink-0 text-sage" />
@@ -207,10 +207,10 @@ export default function AboutPage() {
             </div>
             <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-burgundy-dark to-burgundy p-8 text-white md:p-12">
               <div className="relative z-10">
-                <h3 className="text-2xl font-bold md:text-3xl">Ready to start your journey?</h3>
+                <h3 className="text-2xl font-bold md:text-3xl">Ready to find your coach?</h3>
                 <p className="mt-4 text-white/90">
-                  Join thousands of others who have transformed their lives with the help of expert
-                  coaching.
+                  Browse credential-verified practitioners and find someone who understands your
+                  whole health story.
                 </p>
                 <div className="mt-8 flex flex-col gap-4 sm:flex-row">
                   <Button
@@ -219,7 +219,7 @@ export default function AboutPage() {
                     asChild
                   >
                     <Link href="/coaches">
-                      Find a Coach
+                      Find My Coach
                       <ArrowRight className="ml-2 h-4 w-4" />
                     </Link>
                   </Button>
@@ -247,7 +247,7 @@ export default function AboutPage() {
             Start Your Journey
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-muted-foreground">
-            Find the right coach and take the first step toward achieving your goals.
+            Find a coach who gets your whole story — hormones, history, and all.
           </p>
           <div className="mt-8 flex justify-center">
             <Button size="lg" className="h-12 px-8 text-base" asChild>

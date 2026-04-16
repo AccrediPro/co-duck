@@ -113,7 +113,11 @@ export function BioSpecialtiesForm({ initialData }: BioSpecialtiesFormProps) {
       });
       // Auto-expand if it has sub-niches
       if (hasSubNiches) {
-        setExpandedCategories((prev) => new Set([...Array.from(prev), categoryLabel]));
+        setExpandedCategories((prev) => {
+          const next = new Set(prev);
+          next.add(categoryLabel);
+          return next;
+        });
       }
     }
   }

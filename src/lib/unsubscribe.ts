@@ -31,7 +31,7 @@ export function verifyUnsubscribeToken(
  * Generate a full unsubscribe URL for an email category.
  */
 export function getUnsubscribeUrl(userId: string, category: EmailCategory): string {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://accredipro-coachhub.com';
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://co-duck.com';
   const token = generateToken(userId, category);
   return `${appUrl}/api/settings/unsubscribe?userId=${encodeURIComponent(userId)}&category=${category}&token=${token}`;
 }

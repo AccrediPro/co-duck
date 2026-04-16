@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 
 import { db, users, coachProfiles } from '@/db';
+import { flattenSpecialties } from '@/lib/validators/coach-onboarding';
 import { formatDate } from '@/lib/date-utils';
 import type { SessionType } from '@/db/schema';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -91,7 +92,9 @@ export default async function AdminCoachDetailPage({ params }: PageProps) {
     notFound();
   }
 
-  const specialties = (coach.specialties || []).map((entry) => entry.category);
+  // Normalize from the JSONB union (legacy `string[]` or new
+  // `{category, subNiches}[]`) to a flat string[] for badge display.
+  const specialties = flattenSpecialties(coach.specialties);
   const sessionTypes = (coach.sessionTypes || []) as SessionType[];
 
   return (
