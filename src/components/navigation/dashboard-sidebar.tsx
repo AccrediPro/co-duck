@@ -9,6 +9,7 @@ import {
   UserCheck,
   CalendarDays,
   Clock,
+  Code2,
   Settings,
   Menu,
   CreditCard,
@@ -52,6 +53,7 @@ const coachLinks: NavLink[] = [
   { href: '/dashboard/sessions', label: 'Sessions', icon: CalendarDays, roles: ['coach'] },
   { href: '/dashboard/clients', label: 'My Clients', icon: Users, roles: ['coach'] },
   { href: '/dashboard/availability', label: 'Availability', icon: Clock, roles: ['coach'] },
+  { href: '/dashboard/embed', label: 'Embed widget', icon: Code2, roles: ['coach'] },
   { href: '/dashboard/payments', label: 'Payments', icon: CreditCard, roles: ['coach'] },
   {
     href: '/dashboard/iconnect',
