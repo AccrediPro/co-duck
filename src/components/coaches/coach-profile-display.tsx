@@ -10,7 +10,18 @@ import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { SUPPORTED_CURRENCIES, COACH_CATEGORIES } from '@/lib/validators/coach-onboarding';
 import type { SessionType } from '@/db/schema';
-import { Calendar, Check, Clock, Copy, Globe, User } from 'lucide-react';
+import {
+  Award,
+  BadgeCheck,
+  Calendar,
+  Check,
+  Clock,
+  Copy,
+  ExternalLink,
+  Globe,
+  User,
+} from 'lucide-react';
+import type { Credential } from '@/db/schema';
 import { AvailabilitySection } from './availability-section';
 import { MessageButton } from '@/components/messages';
 import { ReviewsSection } from '@/components/reviews';
@@ -29,6 +40,7 @@ interface CoachProfileDisplayProps {
   avatarUrl: string | null;
   headline: string | null;
   bio: string | null;
+  /** 2-level taxonomy: Array<{category, subNiches}> */
   specialties: Array<{ category: string; subNiches: string[] }> | null;
   timezone: string | null;
   hourlyRate: number | null;
@@ -41,6 +53,8 @@ interface CoachProfileDisplayProps {
   currentUserId?: string | null;
   // Verification status
   isVerified?: boolean;
+  // Credentials
+  credentials?: Credential[] | null;
 }
 
 export function CoachProfileDisplay({
@@ -58,6 +72,7 @@ export function CoachProfileDisplay({
   coachId,
   currentUserId,
   isVerified,
+  credentials,
 }: CoachProfileDisplayProps) {
   // Show message button only if user is logged in and not viewing their own profile
   const canMessage = currentUserId && coachId && currentUserId !== coachId;
@@ -229,19 +244,26 @@ export function CoachProfileDisplay({
               <CardContent>
                 <div className="flex flex-wrap gap-2">
                   {specialties.flatMap((entry, entryIndex) => {
-                    const cat = COACH_CATEGORIES.find((c) => c.label === entry.category);
+                    // Find the category definition for slug-based links
+                    const catDef = COACH_CATEGORIES.find((c) => c.label === entry.category);
+                    const catSlug = catDef?.slug;
+
                     if (entry.subNiches && entry.subNiches.length > 0) {
-                      return entry.subNiches.map((subNiche, subIndex) => {
-                        const subNicheData = cat?.subNiches.find((s) => s.label === subNiche);
-                        const href =
-                          cat && subNicheData ? `/coaches/specialty/${subNicheData.slug}` : null;
+                      // Render each sub-niche as a linked badge
+                      return entry.subNiches.map((sub, subIndex) => {
+                        const subDef = catDef?.subNiches.find((s) => s.label === sub);
+                        const href = subDef
+                          ? `/coaches/specialty/${subDef.slug}`
+                          : catSlug
+                            ? `/coaches/specialty/${catSlug}`
+                            : null;
                         return href ? (
                           <Link key={`${entryIndex}-${subIndex}`} href={href}>
                             <Badge
                               variant="secondary"
-                              className="cursor-pointer text-sm hover:bg-secondary/80"
+                              className="cursor-pointer text-sm transition-colors hover:bg-secondary/70"
                             >
-                              {subNiche}
+                              {sub}
                             </Badge>
                           </Link>
                         ) : (
@@ -250,18 +272,19 @@ export function CoachProfileDisplay({
                             variant="secondary"
                             className="text-sm"
                           >
-                            {subNiche}
+                            {sub}
                           </Badge>
                         );
                       });
                     }
-                    const href = cat ? `/coaches/specialty/${cat.slug}` : null;
+
+                    // Top-level category badge — link to category page
                     return [
-                      href ? (
-                        <Link key={entryIndex} href={href}>
+                      catSlug ? (
+                        <Link key={entryIndex} href={`/coaches/specialty/${catSlug}`}>
                           <Badge
                             variant="secondary"
-                            className="cursor-pointer text-sm hover:bg-secondary/80"
+                            className="cursor-pointer text-sm transition-colors hover:bg-secondary/70"
                           >
                             {entry.category}
                           </Badge>
@@ -274,6 +297,51 @@ export function CoachProfileDisplay({
                     ];
                   })}
                 </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Credentials & Training Section */}
+          {credentials && credentials.length > 0 && (
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <Award className="h-5 w-5 text-[hsl(var(--brand-warm))]" />
+                  <CardTitle>Credentials & Training</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {credentials.map((cred) => (
+                  <div key={cred.id} className="flex items-start gap-3 rounded-lg border p-3">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="text-sm font-medium">{cred.title}</p>
+                        {cred.verifiedAt && (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-green-50 px-2 py-0.5 text-xs font-medium text-green-700">
+                            <BadgeCheck className="h-3 w-3" />
+                            Verified
+                          </span>
+                        )}
+                      </div>
+                      <p className="mt-0.5 text-sm text-muted-foreground">{cred.issuer}</p>
+                      <p className="mt-0.5 text-xs capitalize text-muted-foreground">
+                        {cred.type} · {cred.issuedYear}
+                        {cred.expiresYear ? ` – ${cred.expiresYear}` : ''}
+                      </p>
+                      {cred.verificationUrl && (
+                        <a
+                          href={cred.verificationUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="mt-1 inline-flex items-center gap-1 text-xs text-burgundy hover:underline"
+                        >
+                          <ExternalLink className="h-3 w-3" />
+                          Verify credential
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                ))}
               </CardContent>
             </Card>
           )}

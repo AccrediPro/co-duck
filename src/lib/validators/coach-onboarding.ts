@@ -98,62 +98,27 @@ export const coachBasicInfoSchema = z.object({
 export type CoachBasicInfoFormData = z.infer<typeof coachBasicInfoSchema>;
 
 /* =============================================================================
-   CONSTANTS: COACH SPECIALTIES
+   CONSTANTS: COACH CATEGORIES (2-LEVEL TAXONOMY)
    ============================================================================= */
 
 /**
- * Predefined coaching specialty tags available during onboarding.
+ * Sub-niche entry in a coaching category.
  *
- * Coaches can select one or more of these specialties to describe their practice.
- * These tags are displayed on coach profiles and used for search/filter functionality.
- *
- * ## Usage
- *
- * - **Selection UI**: Displayed as toggleable chips in bio-specialties-form.tsx
- * - **Custom Specialties**: Coaches can also add custom specialties not in this list
- * - **Storage**: Selected specialties stored as string[] in coach_profiles.specialties
- *
- * @example
- * ```typescript
- * // Type-safe specialty selection
- * type Specialty = (typeof COACH_SPECIALTIES)[number];
- *
- * // Validate against predefined specialties
- * const isValid = COACH_SPECIALTIES.includes(selectedSpecialty as Specialty);
- *
- * // Filter coaches by specialty
- * const careerCoaches = coaches.filter(c =>
- *   c.specialties.includes('Career Coaching')
- * );
- * ```
- *
- * @constant
- * @readonly
+ * @property slug - URL-safe identifier used in filter params and SEO URLs
+ * @property label - Human-readable display name
  */
-export const COACH_SPECIALTIES = [
-  'Life Coaching',
-  'Career Coaching',
-  'Health & Wellness',
-  'Executive Coaching',
-  'Relationship Coaching',
-  'Business Coaching',
-  'Leadership Coaching',
-  'Mindset & Motivation',
-  'Financial Coaching',
-  'Parenting Coaching',
-  'Spiritual Coaching',
-  'Performance Coaching',
-] as const;
-
-/* =============================================================================
-   2-LEVEL TAXONOMY: COACH CATEGORIES
-   ============================================================================= */
-
 export interface SubNiche {
   slug: string;
   label: string;
 }
 
+/**
+ * Top-level coaching category with optional sub-niches.
+ *
+ * @property slug - URL-safe identifier (e.g., 'health-wellness')
+ * @property label - Human-readable label (e.g., 'Health & Wellness')
+ * @property subNiches - Array of sub-niches (empty for flat categories)
+ */
 export interface CoachCategory {
   slug: string;
   label: string;
@@ -161,8 +126,23 @@ export interface CoachCategory {
 }
 
 /**
- * 2-level specialty taxonomy for coach discovery and SEO landing pages.
- * Top-level categories each have optional sub-niches.
+ * 2-level coaching taxonomy: top-level categories → sub-niches.
+ *
+ * Health & Wellness has 15 sub-niches covering the full spectrum of
+ * functional medicine, trauma-informed, and integrative wellness coaching.
+ * Other categories are single-level (no sub-niches) for now.
+ *
+ * ## Storage convention (coach_profiles.specialties JSONB)
+ *
+ * ```json
+ * [
+ *   { "category": "Health & Wellness", "subNiches": ["Functional Medicine", "Perimenopause & Hormones"] },
+ *   { "category": "Life", "subNiches": [] }
+ * ]
+ * ```
+ *
+ * @constant
+ * @readonly
  */
 export const COACH_CATEGORIES: CoachCategory[] = [
   {
@@ -171,19 +151,19 @@ export const COACH_CATEGORIES: CoachCategory[] = [
     subNiches: [
       { slug: 'functional-medicine', label: 'Functional Medicine' },
       { slug: 'perimenopause-hormones', label: 'Perimenopause & Hormones' },
-      { slug: 'trauma-informed', label: 'Trauma-Informed Coaching' },
-      { slug: 'adhd-focus', label: 'ADHD & Focus' },
-      { slug: 'grief-loss', label: 'Grief & Loss' },
-      { slug: 'autoimmune-chronic', label: 'Autoimmune & Chronic Illness' },
-      { slug: 'weight-loss', label: 'Weight Loss & Metabolic Health' },
-      { slug: 'sleep-fatigue', label: 'Sleep & Fatigue Recovery' },
-      { slug: 'gut-health', label: 'Gut Health & Nutrition' },
-      { slug: 'mental-health', label: 'Mental Health & Anxiety' },
-      { slug: 'fertility-preconception', label: 'Fertility & Preconception' },
-      { slug: 'postpartum', label: 'Postpartum & Motherhood' },
-      { slug: 'menopause', label: 'Menopause' },
-      { slug: 'addiction-recovery', label: 'Addiction & Recovery' },
-      { slug: 'chronic-pain', label: 'Chronic Pain' },
+      { slug: 'gut-health', label: 'Gut Health' },
+      { slug: 'trauma-informed', label: 'Trauma-Informed' },
+      { slug: 'somatic-practices', label: 'Somatic Practices' },
+      { slug: 'grief-support', label: 'Grief Support' },
+      { slug: 'adhd-coaching', label: 'ADHD Coaching' },
+      { slug: 'chronic-illness', label: 'Chronic Illness' },
+      { slug: 'nutrition-body-neutrality', label: 'Nutrition & Body Neutrality' },
+      { slug: 'sleep', label: 'Sleep' },
+      { slug: 'mind-body-medicine', label: 'Mind-Body Medicine' },
+      { slug: 'autoimmune', label: 'Autoimmune' },
+      { slug: 'fertility', label: 'Fertility' },
+      { slug: 'addiction-recovery', label: 'Addiction Recovery' },
+      { slug: 'integrative-wellness', label: 'Integrative Wellness' },
     ],
   },
   { slug: 'career', label: 'Career', subNiches: [] },
@@ -199,16 +179,67 @@ export const COACH_CATEGORIES: CoachCategory[] = [
 ];
 
 /**
- * Given a slug, returns the parent category if the slug belongs to a sub-niche,
- * or null if the slug is itself a top-level category.
+ * Flat list of all category labels (for backward-compat references).
+ * @deprecated Use COACH_CATEGORIES for new code.
  */
-export function findParentCategory(slug: string): CoachCategory | null {
+export const COACH_SPECIALTIES = COACH_CATEGORIES.map(
+  (c) => c.label
+) as unknown as readonly string[];
+
+/**
+ * Resolve a category or sub-niche slug to its display label.
+ * Returns undefined if slug is not found.
+ */
+export function resolveCategoryLabel(slug: string): string | undefined {
   for (const cat of COACH_CATEGORIES) {
-    if (cat.subNiches.some((s) => s.slug === slug)) {
-      return cat;
+    if (cat.slug === slug) return cat.label;
+    const sub = cat.subNiches.find((s) => s.slug === slug);
+    if (sub) return sub.label;
+  }
+  return undefined;
+}
+
+/**
+ * Find the parent category for a given sub-niche slug.
+ * Returns undefined if the slug is not a sub-niche.
+ */
+export function findParentCategory(subNicheSlug: string): CoachCategory | undefined {
+  return COACH_CATEGORIES.find((cat) => cat.subNiches.some((s) => s.slug === subNicheSlug));
+}
+
+/**
+ * Normalize a coach_profiles.specialties JSONB value to a flat string array.
+ *
+ * The column has two shapes during the taxonomy transition:
+ *   - Legacy: `string[]` (flat labels)
+ *   - New:    `Array<{ category: string; subNiches: string[] }>` (2-level)
+ *
+ * This helper folds either shape down to `string[]` for display, filtering,
+ * and form consumption. For the 2-level shape, sub-niches (if any) are emitted
+ * and the category falls back when no sub-niches are selected.
+ */
+export function flattenSpecialties(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  const out: string[] = [];
+  for (const entry of value) {
+    if (typeof entry === 'string') {
+      if (entry.length > 0) out.push(entry);
+      continue;
+    }
+    if (entry && typeof entry === 'object') {
+      const obj = entry as { category?: unknown; subNiches?: unknown };
+      const category = typeof obj.category === 'string' ? obj.category : '';
+      const subs = Array.isArray(obj.subNiches)
+        ? (obj.subNiches.filter((s) => typeof s === 'string') as string[])
+        : [];
+      if (subs.length > 0) {
+        out.push(...subs);
+      } else if (category) {
+        out.push(category);
+      }
     }
   }
-  return null;
+  return out;
 }
 
 /* =============================================================================
@@ -216,44 +247,52 @@ export function findParentCategory(slug: string): CoachCategory | null {
    ============================================================================= */
 
 /**
+ * Zod schema for a single specialty entry in the new 2-level JSONB structure.
+ *
+ * Stored in coach_profiles.specialties as:
+ * Array<{ category: string; subNiches: string[] }>
+ */
+export const specialtyEntrySchema = z.object({
+  /** Top-level category label (e.g., "Health & Wellness") */
+  category: z.string().min(1),
+  /** Selected sub-niche labels within this category (may be empty) */
+  subNiches: z.array(z.string()),
+});
+
+export type SpecialtyEntry = z.infer<typeof specialtyEntrySchema>;
+
+/**
  * Validation schema for Step 2 of coach onboarding: Bio and Specialties.
  *
- * Collects the coach's professional biography and area of expertise tags.
+ * Collects the coach's professional biography and their area(s) of expertise
+ * using the 2-level category → sub-niche taxonomy.
  *
  * ## Fields
  *
- * | Field       | Type     | Required | Constraints                        |
- * |-------------|----------|----------|------------------------------------|
- * | bio         | string   | No       | Max 2000 characters                |
- * | specialties | string[] | Yes      | At least 1 specialty required      |
- *
- * ## Notes
- *
- * - **Bio**: Supports rich text but stored as plain string. Rendered with line breaks.
- * - **Specialties**: Can include values from {@link COACH_SPECIALTIES} or custom strings.
+ * | Field       | Type                                | Required | Constraints                   |
+ * |-------------|-------------------------------------|----------|-------------------------------|
+ * | bio         | string                              | No       | Max 2000 characters           |
+ * | specialties | Array<{category, subNiches}>        | Yes      | At least 1 category required  |
  *
  * @example
  * ```typescript
  * const validData: CoachBioSpecialtiesFormData = {
- *   bio: 'With 15 years of experience in executive leadership...',
- *   specialties: ['Executive Coaching', 'Leadership Coaching', 'Team Dynamics']
+ *   bio: 'With 15 years of functional medicine coaching...',
+ *   specialties: [
+ *     { category: 'Health & Wellness', subNiches: ['Functional Medicine', 'Gut Health'] },
+ *     { category: 'Life', subNiches: [] },
+ *   ]
  * };
- *
- * const result = coachBioSpecialtiesSchema.safeParse(validData);
  * ```
  */
-export const specialtyEntrySchema = z.object({
-  category: z.string().min(1, 'Category cannot be empty'),
-  subNiches: z.array(z.string()),
-});
-
 export const coachBioSpecialtiesSchema = z.object({
   /** Coach's professional biography. Optional but recommended for profile completeness. */
   bio: z.string().max(2000, 'Bio must be less than 2000 characters').optional().or(z.literal('')),
-  /** Coaching specialty tags. Must have at least one. */
-  specialties: z
-    .array(z.string().min(1, 'Specialty cannot be empty'))
-    .min(1, 'Please select at least one specialty'),
+  /**
+   * Coaching specialties in the 2-level taxonomy format.
+   * Must include at least one category entry.
+   */
+  specialties: z.array(specialtyEntrySchema).min(1, 'Please select at least one specialty area'),
 });
 
 /**
@@ -520,3 +559,58 @@ export const coachPricingSchema = z.object({
  * @property sessionTypes - Array of session type offerings (min 1)
  */
 export type CoachPricingFormData = z.infer<typeof coachPricingSchema>;
+
+/* =============================================================================
+   STEP 3 (CREDENTIALS): CREDENTIALS SCHEMA
+   ============================================================================= */
+
+/** Valid credential types */
+export const CREDENTIAL_TYPES = ['certification', 'degree', 'license', 'membership'] as const;
+export type CredentialType = (typeof CREDENTIAL_TYPES)[number];
+
+/**
+ * Zod schema for a single credential entry.
+ * Stored in coach_profiles.credentials JSONB array.
+ */
+export const credentialSchema = z.object({
+  id: z.string().uuid(),
+  type: z.enum(CREDENTIAL_TYPES),
+  title: z.string().min(1, 'Credential title is required').max(200),
+  issuer: z.string().min(1, 'Issuing organization is required').max(200),
+  issuedYear: z
+    .number()
+    .int()
+    .min(1900)
+    .max(new Date().getFullYear(), 'Issued year cannot be in the future'),
+  expiresYear: z.number().int().min(1900).max(2100).optional().nullable(),
+  credentialId: z.string().max(100).optional().nullable(),
+  verificationUrl: z
+    .string()
+    .url('Please enter a valid URL')
+    .optional()
+    .nullable()
+    .or(z.literal('')),
+  documentUrl: z.string().optional().nullable(),
+  verifiedAt: z.string().optional().nullable(),
+  verifiedBy: z.string().optional().nullable(),
+});
+
+export type CredentialFormData = z.infer<typeof credentialSchema>;
+
+/**
+ * Schema for the credentials onboarding step.
+ */
+export const coachCredentialsSchema = z.object({
+  credentials: z.array(credentialSchema).max(20, 'You can add up to 20 credentials'),
+});
+
+export type CoachCredentialsFormData = z.infer<typeof coachCredentialsSchema>;
+
+/**
+ * Schema for admin verifying a single credential (sets verifiedAt + verifiedBy).
+ */
+export const adminVerifyCredentialSchema = z.object({
+  coachId: z.string().min(1),
+  credentialId: z.string().uuid(),
+  action: z.enum(['verify', 'unverify']),
+});

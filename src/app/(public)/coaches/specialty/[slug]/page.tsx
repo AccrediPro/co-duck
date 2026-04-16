@@ -8,6 +8,11 @@ import { SPECIALTY_COPY } from '@/lib/specialty-copy';
 import { CoachCard } from '@/components/coaches/coach-card';
 import { ChevronRight } from 'lucide-react';
 
+// This page queries the DB at build time via generateStaticParams-backed
+// static params, but the DB isn't reachable in CI. Mark as dynamic so the
+// page renders at request time instead of being prerendered.
+export const dynamic = 'force-dynamic';
+
 interface PageProps {
   params: Promise<{ slug: string }>;
 }
@@ -113,7 +118,17 @@ async function getCoachesForSpecialty(slug: string) {
     )
     .limit(12);
 
-  return coaches;
+  // The EXISTS clause above only matches coaches whose specialties JSONB has
+  // the new 2-level shape. Narrow the union type by normalizing legacy
+  // `string[]` entries (which won't match anyway) to empty 2-level entries.
+  return coaches.map((c) => ({
+    ...c,
+    specialties: Array.isArray(c.specialties)
+      ? c.specialties
+          .filter((e): e is { category: string; subNiches: string[] } => typeof e === 'object')
+          .map((e) => ({ category: e.category, subNiches: e.subNiches ?? [] }))
+      : null,
+  }));
 }
 
 /** FAQ Accordion — server component using details/summary for zero-JS */
