@@ -25,7 +25,7 @@ const sections = [
     id: 'acceptance',
     icon: FileText,
     title: '1. Acceptance of Terms',
-    content: `By accessing or using the AccrediPro CoachHub platform ("Service"), you agree to be bound by these Terms of Service ("Terms"). If you do not agree to all the terms and conditions, you may not access or use the Service.
+    content: `By accessing or using the Co-duck platform ("Service"), you agree to be bound by these Terms of Service ("Terms"). If you do not agree to all the terms and conditions, you may not access or use the Service.
 
 These Terms apply to all visitors, users, coaches, and clients who access or use the Service. By using the Service, you represent that you are at least 18 years of age and have the legal capacity to enter into these Terms.
 
@@ -35,7 +35,7 @@ We may update these Terms from time to time. We will notify you of any changes b
     id: 'services',
     icon: Users,
     title: '2. Description of Services',
-    content: `AccrediPro CoachHub provides a platform connecting individuals seeking coaching services ("Clients") with professional coaches ("Coaches"). Our services include:
+    content: `Co-duck provides a platform connecting individuals seeking coaching services ("Clients") with professional coaches ("Coaches"). Our services include:
 
 • **Coach Discovery**: Browse and search for coaches by specialty, availability, and pricing
 • **Session Booking**: Schedule one-on-one and group coaching sessions
@@ -63,17 +63,17 @@ We do not provide coaching services directly. Coaches on our platform are indepe
     id: 'coaches',
     icon: Scale,
     title: '4. Coach Terms',
-    content: `If you register as a Coach on AccrediPro CoachHub, you agree to the following additional terms:
+    content: `If you register as a Coach on Co-duck, you agree to the following additional terms:
 
 **Qualifications**: You represent that you have the appropriate qualifications, training, and experience to provide coaching services in your stated areas of expertise.
 
-**Independent Contractor**: You acknowledge that you are an independent contractor and not an employee, agent, or representative of AccrediPro CoachHub.
+**Independent Contractor**: You acknowledge that you are an independent contractor and not an employee, agent, or representative of Co-duck.
 
 **Service Quality**: You agree to provide professional, ethical, and high-quality coaching services to clients.
 
 **Availability**: You are responsible for keeping your calendar updated and honoring scheduled sessions.
 
-**Fees and Payments**: You set your own rates. AccrediPro CoachHub charges a platform fee (currently 15%) on each transaction. Payments are processed through our secure payment system.
+**Fees and Payments**: You set your own rates. Co-duck charges a platform fee (currently 15%) on each transaction. Payments are processed through our secure payment system.
 
 **Cancellation Policy**: You must establish and communicate a clear cancellation policy to clients.`,
   },
@@ -81,7 +81,7 @@ We do not provide coaching services directly. Coaches on our platform are indepe
     id: 'clients',
     icon: Users,
     title: '5. Client Terms',
-    content: `If you use AccrediPro CoachHub as a Client, you agree to the following:
+    content: `If you use Co-duck as a Client, you agree to the following:
 
 **Booking Sessions**: When you book a session, you enter into a direct agreement with the Coach for the services described.
 
@@ -99,11 +99,11 @@ We do not provide coaching services directly. Coaches on our platform are indepe
     title: '6. Payments and Fees',
     content: `**Payment Processing**: All payments are processed through Stripe, our secure payment provider. By using our Service, you also agree to Stripe's terms of service.
 
-**Platform Fees**: AccrediPro CoachHub charges a platform fee on each transaction. Current fee structure:
+**Platform Fees**: Co-duck charges a platform fee on each transaction. Current fee structure:
 • Coach platform fee: 15% of session price
 • Client payment processing: Included in session price
 
-**Refunds**: Refunds are handled according to each Coach's cancellation policy. In cases of dispute, AccrediPro CoachHub may mediate and determine appropriate refunds.
+**Refunds**: Refunds are handled according to each Coach's cancellation policy. In cases of dispute, Co-duck may mediate and determine appropriate refunds.
 
 **Payouts**: Coaches receive payouts according to our payout schedule, typically within 7-14 business days after session completion.
 
@@ -132,13 +132,13 @@ We do not provide coaching services directly. Coaches on our platform are indepe
     id: 'intellectual',
     icon: FileText,
     title: '8. Intellectual Property',
-    content: `**AccrediPro CoachHub Property**: The Service and its original content, features, and functionality are owned by AccrediPro CoachHub and are protected by international copyright, trademark, patent, trade secret, and other intellectual property laws.
+    content: `**Co-duck Property**: The Service and its original content, features, and functionality are owned by Co-duck and are protected by international copyright, trademark, patent, trade secret, and other intellectual property laws.
 
-**User Content**: You retain ownership of any content you submit to the Service. By submitting content, you grant AccrediPro CoachHub a worldwide, non-exclusive, royalty-free license to use, copy, modify, and display such content in connection with the Service.
+**User Content**: You retain ownership of any content you submit to the Service. By submitting content, you grant Co-duck a worldwide, non-exclusive, royalty-free license to use, copy, modify, and display such content in connection with the Service.
 
 **Coach Materials**: Coaches retain ownership of their coaching materials, methodologies, and content shared during sessions.
 
-**Feedback**: Any feedback, suggestions, or ideas you provide about the Service may be used by AccrediPro CoachHub without any obligation to you.`,
+**Feedback**: Any feedback, suggestions, or ideas you provide about the Service may be used by Co-duck without any obligation to you.`,
   },
   {
     id: 'liability',
@@ -156,7 +156,7 @@ We do not provide coaching services directly. Coaches on our platform are indepe
     id: 'disputes',
     icon: Scale,
     title: '10. Dispute Resolution',
-    content: `**Informal Resolution**: Before filing any formal dispute, you agree to try to resolve the dispute informally by contacting us at support@accredipro-coachhub.com.
+    content: `**Informal Resolution**: Before filing any formal dispute, you agree to try to resolve the dispute informally by contacting us at support@co-duck.com.
 
 **Arbitration**: Any disputes that cannot be resolved informally shall be resolved through binding arbitration in accordance with the rules of the American Arbitration Association.
 
@@ -184,15 +184,15 @@ We do not provide coaching services directly. Coaches on our platform are indepe
     title: '12. Contact Information',
     content: `If you have any questions about these Terms of Service, please contact us:
 
-**Email**: legal@accredipro-coachhub.com
+**Email**: legal@co-duck.com
 
 **Mailing Address**:
-AccrediPro CoachHub Legal Team
+Co-duck Legal Team
 123 Innovation Drive
 San Francisco, CA 94105
 United States
 
-**Support**: For general support inquiries, please visit our Contact page or email support@accredipro-coachhub.com.`,
+**Support**: For general support inquiries, please visit our Contact page or email support@co-duck.com.`,
   },
 ];
 
@@ -290,7 +290,7 @@ export default function TermsPage() {
             </h1>
             <p className="mx-auto mt-4 max-w-xl text-white/70">Last updated: January 31, 2026</p>
             <p className="mx-auto mt-2 text-sm text-white/70">
-              Please read these terms carefully before using AccrediPro CoachHub.
+              Please read these terms carefully before using Co-duck.
             </p>
             <div className="mt-6 flex justify-center gap-4">
               <Button variant="outline" onClick={handlePrint}>
@@ -357,8 +357,8 @@ export default function TermsPage() {
               {/* Introduction */}
               <div className="mb-8 rounded-lg border bg-cream p-6">
                 <p className="text-muted-foreground">
-                  Welcome to AccrediPro CoachHub. These Terms of Service govern your use of our
-                  platform and services. By accessing or using AccrediPro CoachHub, you agree to be
+                  Welcome to Co-duck. These Terms of Service govern your use of our
+                  platform and services. By accessing or using Co-duck, you agree to be
                   bound by these terms. Please read them carefully.
                 </p>
               </div>
@@ -396,7 +396,7 @@ export default function TermsPage() {
               {/* Footer Note */}
               <div className="mt-12 rounded-lg border bg-cream p-6 text-center">
                 <p className="text-sm text-muted-foreground">
-                  By using AccrediPro CoachHub, you acknowledge that you have read, understood, and
+                  By using Co-duck, you acknowledge that you have read, understood, and
                   agree to be bound by these Terms of Service.
                 </p>
                 <div className="mt-4 flex justify-center gap-4">
