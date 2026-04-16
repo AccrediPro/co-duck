@@ -3,13 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AlertCircle, Loader2, RefreshCw, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AudioUpload } from './audio-upload';
@@ -171,8 +165,7 @@ export function AiNotesCard({ sessionId }: AiNotesCardProps) {
     return processingStatus === 'idle' || processingStatus === 'failed';
   }, [data]);
 
-  const showEditor =
-    data?.processingStatus === 'ready' || (data?.exists && data.aiGenerated);
+  const showEditor = data?.processingStatus === 'ready' || (data?.exists && data.aiGenerated);
 
   return (
     <Card className="border-primary/20 bg-gradient-to-br from-background to-primary/5">
@@ -233,17 +226,13 @@ export function AiNotesCard({ sessionId }: AiNotesCardProps) {
             )}
 
             {showEditor && data && (
-              <StructuredNotesEditor
-                sessionId={sessionId}
-                data={data}
-                onRefresh={refresh}
-              />
+              <StructuredNotesEditor sessionId={sessionId} data={data} onRefresh={refresh} />
             )}
 
             <p className="text-[11px] leading-snug text-muted-foreground">
               Privacy: recordings are stored in a private bucket and automatically deleted after
-              transcription. Notes are visible only to you — never shared with the client unless
-              you explicitly send the follow-up email.
+              transcription. Notes are visible only to you — never shared with the client unless you
+              explicitly send the follow-up email.
             </p>
           </>
         )}

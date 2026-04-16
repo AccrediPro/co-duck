@@ -62,7 +62,10 @@ export async function POST(request: Request, { params }: RouteParams) {
     return Response.json(
       {
         success: false,
-        error: { code: 'INVALID_INPUT', message: overrides.error.issues[0]?.message ?? 'Invalid input' },
+        error: {
+          code: 'INVALID_INPUT',
+          message: overrides.error.issues[0]?.message ?? 'Invalid input',
+        },
       },
       { status: 400 }
     );
@@ -77,7 +80,10 @@ export async function POST(request: Request, { params }: RouteParams) {
   }
   if (booking.coachId !== userId) {
     return Response.json(
-      { success: false, error: { code: 'FORBIDDEN', message: 'Only the coach can send the follow-up email.' } },
+      {
+        success: false,
+        error: { code: 'FORBIDDEN', message: 'Only the coach can send the follow-up email.' },
+      },
       { status: 403 }
     );
   }
@@ -128,7 +134,10 @@ export async function POST(request: Request, { params }: RouteParams) {
 
   if (!client?.email) {
     return Response.json(
-      { success: false, error: { code: 'NO_CLIENT_EMAIL', message: 'Client has no email on file.' } },
+      {
+        success: false,
+        error: { code: 'NO_CLIENT_EMAIL', message: 'Client has no email on file.' },
+      },
       { status: 400 }
     );
   }

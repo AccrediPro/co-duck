@@ -22,12 +22,7 @@ import { eq } from 'drizzle-orm';
 import { z } from 'zod';
 import { createClient } from '@supabase/supabase-js';
 import { db, bookings, sessionNotes, users } from '@/db';
-import {
-  rateLimit,
-  FREQUENT_LIMIT,
-  WRITE_LIMIT,
-  rateLimitResponse,
-} from '@/lib/rate-limit';
+import { rateLimit, FREQUENT_LIMIT, WRITE_LIMIT, rateLimitResponse } from '@/lib/rate-limit';
 import { formatDateLong } from '@/lib/date-utils';
 import { transcribeAudio } from '@/lib/ai/transcribe';
 import { generateSessionNotes, concatSoap } from '@/lib/ai/session-notes';
@@ -444,10 +439,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     return json({ success: true, data: { created: true } });
   }
 
-  await db
-    .update(sessionNotes)
-    .set(updates)
-    .where(eq(sessionNotes.bookingId, bookingId));
+  await db.update(sessionNotes).set(updates).where(eq(sessionNotes.bookingId, bookingId));
 
   return json({ success: true, data: { updated: true } });
 }

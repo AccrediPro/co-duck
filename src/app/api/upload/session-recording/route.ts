@@ -117,7 +117,10 @@ export async function POST(request: NextRequest) {
   });
   if (!booking) {
     return NextResponse.json(
-      { success: false, error: { code: 'FORBIDDEN', message: 'Only the session coach can upload recordings.' } },
+      {
+        success: false,
+        error: { code: 'FORBIDDEN', message: 'Only the session coach can upload recordings.' },
+      },
       { status: 403 }
     );
   }
@@ -152,7 +155,10 @@ export async function POST(request: NextRequest) {
   if (bucketErr) {
     console.error('Failed to ensure session-recordings bucket:', bucketErr);
     return NextResponse.json(
-      { success: false, error: { code: 'BUCKET_ERROR', message: 'Recording storage is not configured.' } },
+      {
+        success: false,
+        error: { code: 'BUCKET_ERROR', message: 'Recording storage is not configured.' },
+      },
       { status: 500 }
     );
   }

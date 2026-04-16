@@ -47,9 +47,7 @@ export async function transcribeAudio(
 ): Promise<TranscribeResult> {
   const response = await fetch(url);
   if (!response.ok) {
-    throw new Error(
-      `Failed to download audio (${response.status} ${response.statusText})`
-    );
+    throw new Error(`Failed to download audio (${response.status} ${response.statusText})`);
   }
 
   const contentLength = response.headers.get('content-length');

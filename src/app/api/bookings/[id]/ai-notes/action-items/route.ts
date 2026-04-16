@@ -64,7 +64,10 @@ export async function POST(request: Request, { params }: RouteParams) {
     return Response.json(
       {
         success: false,
-        error: { code: 'INVALID_INPUT', message: parsed.error.issues[0]?.message ?? 'Invalid input' },
+        error: {
+          code: 'INVALID_INPUT',
+          message: parsed.error.issues[0]?.message ?? 'Invalid input',
+        },
       },
       { status: 400 }
     );
@@ -81,7 +84,10 @@ export async function POST(request: Request, { params }: RouteParams) {
   }
   if (booking.coachId !== userId) {
     return Response.json(
-      { success: false, error: { code: 'FORBIDDEN', message: 'Only the coach can create action items.' } },
+      {
+        success: false,
+        error: { code: 'FORBIDDEN', message: 'Only the coach can create action items.' },
+      },
       { status: 403 }
     );
   }

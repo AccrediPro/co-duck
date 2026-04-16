@@ -32,9 +32,7 @@ export function StructuredNotesEditor({ sessionId, data, onRefresh }: Structured
   const [plan, setPlan] = useState(data.soapPlan ?? '');
   const [topics, setTopics] = useState<string[]>(data.keyTopics ?? []);
   const [topicDraft, setTopicDraft] = useState('');
-  const [suggestedItems, setSuggestedItems] = useState<string[]>(
-    data.actionItemsSuggested ?? []
-  );
+  const [suggestedItems, setSuggestedItems] = useState<string[]>(data.actionItemsSuggested ?? []);
   const [selectedSuggestions, setSelectedSuggestions] = useState<Set<string>>(new Set());
   const [nextSuggestions, setNextSuggestions] = useState(data.nextSessionSuggestions ?? '');
   const [emailSubject, setEmailSubject] = useState(data.followUpEmailSubject ?? '');

@@ -104,8 +104,7 @@ export default async function HomePage() {
         <div className="container mx-auto px-4 py-20 md:py-28">
           <div className="mx-auto max-w-4xl text-center">
             <h1 className="text-4xl font-bold tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">
-              Find a Coach Who Gets{' '}
-              <span className="text-gold">the Whole You.</span>
+              Find a Coach Who Gets <span className="text-gold">the Whole You.</span>
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg text-white/80 md:text-xl">
               Certified practitioners in hormones, trauma, ADHD, grief, and menopause — matched to

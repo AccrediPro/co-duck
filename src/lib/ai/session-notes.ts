@@ -65,11 +65,7 @@ async function loadPrompt(): Promise<string> {
 /**
  * Substitute `{{placeholders}}` in the prompt template.
  */
-function renderPrompt(
-  template: string,
-  transcript: string,
-  ctx: SessionContext
-): string {
+function renderPrompt(template: string, transcript: string, ctx: SessionContext): string {
   return template
     .replace(/\{\{coachName\}\}/g, ctx.coachName)
     .replace(/\{\{clientName\}\}/g, ctx.clientName)
@@ -122,9 +118,7 @@ export async function generateSessionNotes(
   try {
     parsed = JSON.parse(raw);
   } catch (err) {
-    throw new Error(
-      `LLM returned invalid JSON: ${(err as Error).message}`
-    );
+    throw new Error(`LLM returned invalid JSON: ${(err as Error).message}`);
   }
 
   const notes = StructuredNotesSchema.parse(parsed);
