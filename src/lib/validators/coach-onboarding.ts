@@ -146,6 +146,72 @@ export const COACH_SPECIALTIES = [
 ] as const;
 
 /* =============================================================================
+   2-LEVEL TAXONOMY: COACH CATEGORIES
+   ============================================================================= */
+
+export interface SubNiche {
+  slug: string;
+  label: string;
+}
+
+export interface CoachCategory {
+  slug: string;
+  label: string;
+  subNiches: SubNiche[];
+}
+
+/**
+ * 2-level specialty taxonomy for coach discovery and SEO landing pages.
+ * Top-level categories each have optional sub-niches.
+ */
+export const COACH_CATEGORIES: CoachCategory[] = [
+  {
+    slug: 'health-wellness',
+    label: 'Health & Wellness',
+    subNiches: [
+      { slug: 'functional-medicine', label: 'Functional Medicine' },
+      { slug: 'perimenopause-hormones', label: 'Perimenopause & Hormones' },
+      { slug: 'trauma-informed', label: 'Trauma-Informed Coaching' },
+      { slug: 'adhd-focus', label: 'ADHD & Focus' },
+      { slug: 'grief-loss', label: 'Grief & Loss' },
+      { slug: 'autoimmune-chronic', label: 'Autoimmune & Chronic Illness' },
+      { slug: 'weight-loss', label: 'Weight Loss & Metabolic Health' },
+      { slug: 'sleep-fatigue', label: 'Sleep & Fatigue Recovery' },
+      { slug: 'gut-health', label: 'Gut Health & Nutrition' },
+      { slug: 'mental-health', label: 'Mental Health & Anxiety' },
+      { slug: 'fertility-preconception', label: 'Fertility & Preconception' },
+      { slug: 'postpartum', label: 'Postpartum & Motherhood' },
+      { slug: 'menopause', label: 'Menopause' },
+      { slug: 'addiction-recovery', label: 'Addiction & Recovery' },
+      { slug: 'chronic-pain', label: 'Chronic Pain' },
+    ],
+  },
+  { slug: 'career', label: 'Career', subNiches: [] },
+  { slug: 'life', label: 'Life', subNiches: [] },
+  { slug: 'business', label: 'Business', subNiches: [] },
+  { slug: 'relationship', label: 'Relationship', subNiches: [] },
+  { slug: 'financial', label: 'Financial', subNiches: [] },
+  { slug: 'leadership', label: 'Leadership', subNiches: [] },
+  { slug: 'performance', label: 'Performance', subNiches: [] },
+  { slug: 'mindset', label: 'Mindset', subNiches: [] },
+  { slug: 'communication', label: 'Communication', subNiches: [] },
+  { slug: 'transition', label: 'Transition', subNiches: [] },
+];
+
+/**
+ * Given a slug, returns the parent category if the slug belongs to a sub-niche,
+ * or null if the slug is itself a top-level category.
+ */
+export function findParentCategory(slug: string): CoachCategory | null {
+  for (const cat of COACH_CATEGORIES) {
+    if (cat.subNiches.some((s) => s.slug === slug)) {
+      return cat;
+    }
+  }
+  return null;
+}
+
+/* =============================================================================
    STEP 2: BIO & SPECIALTIES SCHEMA
    ============================================================================= */
 
@@ -176,10 +242,15 @@ export const COACH_SPECIALTIES = [
  * const result = coachBioSpecialtiesSchema.safeParse(validData);
  * ```
  */
+export const specialtyEntrySchema = z.object({
+  category: z.string().min(1, 'Category cannot be empty'),
+  subNiches: z.array(z.string()),
+});
+
 export const coachBioSpecialtiesSchema = z.object({
   /** Coach's professional biography. Optional but recommended for profile completeness. */
   bio: z.string().max(2000, 'Bio must be less than 2000 characters').optional().or(z.literal('')),
-  /** Coaching specialty tags. Must have at least one. Can be from COACH_SPECIALTIES or custom. */
+  /** Coaching specialty tags. Must have at least one. */
   specialties: z
     .array(z.string().min(1, 'Specialty cannot be empty'))
     .min(1, 'Please select at least one specialty'),

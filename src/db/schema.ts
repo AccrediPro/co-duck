@@ -544,7 +544,9 @@ export const coachProfiles = pgTable(
      * Can include predefined values from COACH_SPECIALTIES constant
      * or custom specialties added by the coach.
      */
-    specialties: jsonb('specialties').$type<string[]>().default([]),
+    specialties: jsonb('specialties')
+      .$type<Array<{ category: string; subNiches: string[] }>>()
+      .default([]),
 
     /**
      * Default hourly rate in CENTS

@@ -13,13 +13,15 @@ import {
 } from '@/lib/validators/coach-onboarding';
 
 // Schema for the full profile update
+// Note: specialties is kept as string[] here for the legacy profile editor UI;
+// it is converted to {category, subNiches}[] before writing to the DB.
 const fullProfileSchema = z.object({
   displayName: coachBasicInfoSchema.shape.displayName,
   headline: coachBasicInfoSchema.shape.headline,
   profilePhotoUrl: coachBasicInfoSchema.shape.profilePhotoUrl,
   timezone: coachBasicInfoSchema.shape.timezone,
   bio: coachBioSpecialtiesSchema.shape.bio,
-  specialties: coachBioSpecialtiesSchema.shape.specialties,
+  specialties: z.array(z.string().min(1)).min(1, 'Please select at least one specialty'),
   hourlyRate: z.number().min(0).optional().nullable(),
   currency: z.string().refine((val) => SUPPORTED_CURRENCIES.some((c) => c.code === val)),
   sessionTypes: z.array(sessionTypeSchema).min(1, 'At least one session type is required'),
@@ -104,7 +106,7 @@ export async function saveProfile(data: FullProfileFormData): Promise<SaveProfil
         slug,
         headline: data.headline,
         bio: data.bio || null,
-        specialties: data.specialties,
+        specialties: data.specialties.map((s) => ({ category: s, subNiches: [] })),
         timezone: data.timezone,
         hourlyRate: data.hourlyRate ? Math.round(data.hourlyRate * 100) : null,
         currency: data.currency,
@@ -212,7 +214,7 @@ export async function getFullProfile() {
         profilePhotoUrl: user?.avatarUrl || '',
         headline: profile.headline || '',
         bio: profile.bio || '',
-        specialties: profile.specialties || [],
+        specialties: (profile.specialties || []).map((entry) => entry.category),
         timezone: profile.timezone || '',
         hourlyRate: profile.hourlyRate ? profile.hourlyRate / 100 : null, // Convert from cents
         currency: profile.currency || 'USD',

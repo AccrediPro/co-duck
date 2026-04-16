@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
-import { SUPPORTED_CURRENCIES } from '@/lib/validators/coach-onboarding';
+import { SUPPORTED_CURRENCIES, COACH_CATEGORIES } from '@/lib/validators/coach-onboarding';
 import type { SessionType } from '@/db/schema';
 import { Calendar, Check, Clock, Copy, Globe, User } from 'lucide-react';
 import { AvailabilitySection } from './availability-section';
@@ -29,7 +29,7 @@ interface CoachProfileDisplayProps {
   avatarUrl: string | null;
   headline: string | null;
   bio: string | null;
-  specialties: string[] | null;
+  specialties: Array<{ category: string; subNiches: string[] }> | null;
   timezone: string | null;
   hourlyRate: number | null;
   currency: string | null;
@@ -228,11 +228,53 @@ export function CoachProfileDisplay({
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-2">
-                  {specialties.map((specialty, index) => (
-                    <Badge key={index} variant="secondary" className="text-sm">
-                      {specialty}
-                    </Badge>
-                  ))}
+                  {specialties.flatMap((entry, entryIndex) => {
+                    const cat = COACH_CATEGORIES.find((c) => c.label === entry.category);
+                    if (entry.subNiches && entry.subNiches.length > 0) {
+                      return entry.subNiches.map((subNiche, subIndex) => {
+                        const subNicheData = cat?.subNiches.find((s) => s.label === subNiche);
+                        const href =
+                          cat && subNicheData
+                            ? `/coaches/specialty/${subNicheData.slug}`
+                            : null;
+                        return href ? (
+                          <Link key={`${entryIndex}-${subIndex}`} href={href}>
+                            <Badge
+                              variant="secondary"
+                              className="cursor-pointer text-sm hover:bg-secondary/80"
+                            >
+                              {subNiche}
+                            </Badge>
+                          </Link>
+                        ) : (
+                          <Badge
+                            key={`${entryIndex}-${subIndex}`}
+                            variant="secondary"
+                            className="text-sm"
+                          >
+                            {subNiche}
+                          </Badge>
+                        );
+                      });
+                    }
+                    const href = cat ? `/coaches/specialty/${cat.slug}` : null;
+                    return [
+                      href ? (
+                        <Link key={entryIndex} href={href}>
+                          <Badge
+                            variant="secondary"
+                            className="cursor-pointer text-sm hover:bg-secondary/80"
+                          >
+                            {entry.category}
+                          </Badge>
+                        </Link>
+                      ) : (
+                        <Badge key={entryIndex} variant="secondary" className="text-sm">
+                          {entry.category}
+                        </Badge>
+                      ),
+                    ];
+                  })}
                 </div>
               </CardContent>
             </Card>
