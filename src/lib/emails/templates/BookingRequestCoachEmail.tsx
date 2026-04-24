@@ -25,7 +25,7 @@ export function BookingRequestCoachEmail({
   bookingId,
   unsubscribeUrl,
 }: BookingRequestCoachEmailProps) {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://co-duck.com';
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://accredipro.com';
   const bookingUrl = `${appUrl}/dashboard/sessions/${bookingId}`;
 
   return (

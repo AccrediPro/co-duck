@@ -6,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { formatDate } from '@/lib/date-utils';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
+import { flattenSpecialties } from '@/lib/validators/coach-onboarding';
 
 interface Coach {
   id: string;
@@ -15,7 +16,7 @@ interface Coach {
   profile: {
     headline: string | null;
     slug: string | null;
-    specialties: string[] | null;
+    specialties: unknown;
   } | null;
   lastBookingDate: string;
   totalSessions: number;
@@ -52,20 +53,23 @@ export function MyCoachesList({ coaches }: { coaches: Coach[] }) {
                 </div>
               </div>
 
-              {coach.profile?.specialties && coach.profile.specialties.length > 0 && (
-                <div className="mt-3 flex flex-wrap gap-1.5">
-                  {coach.profile.specialties.slice(0, 3).map((specialty) => (
-                    <Badge key={specialty} variant="secondary" className="text-xs">
-                      {specialty}
-                    </Badge>
-                  ))}
-                  {coach.profile.specialties.length > 3 && (
-                    <Badge variant="outline" className="text-xs">
-                      +{coach.profile.specialties.length - 3}
-                    </Badge>
-                  )}
-                </div>
-              )}
+              {(() => {
+                const labels = flattenSpecialties(coach.profile?.specialties);
+                return labels.length > 0 ? (
+                  <div className="mt-3 flex flex-wrap gap-1.5">
+                    {labels.slice(0, 3).map((label, i) => (
+                      <Badge key={i} variant="secondary" className="text-xs">
+                        {label}
+                      </Badge>
+                    ))}
+                    {labels.length > 3 && (
+                      <Badge variant="outline" className="text-xs">
+                        +{labels.length - 3}
+                      </Badge>
+                    )}
+                  </div>
+                ) : null;
+              })()}
 
               <div className="mt-4 flex items-center gap-4 text-sm text-muted-foreground">
                 <span className="flex items-center gap-1">

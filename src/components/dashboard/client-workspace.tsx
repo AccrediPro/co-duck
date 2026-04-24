@@ -107,27 +107,27 @@ const statusConfig = {
 const priorityConfig = {
   high: {
     label: 'High',
-    className: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
+    className: 'bg-destructive/10 text-destructive',
   },
   medium: {
     label: 'Medium',
-    className: 'bg-gold/15 text-gold-dark dark:bg-gold/20 dark:text-gold',
+    className: 'bg-gold/10 text-gold-dark',
   },
-  low: { label: 'Low', className: 'bg-sage/10 text-sage dark:bg-sage/20 dark:text-sage' },
+  low: { label: 'Low', className: 'bg-sage/10 text-sage' },
 } as const;
 
 const goalStatusConfig = {
   pending: {
     label: 'Pending',
-    className: 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400',
+    className: 'bg-gold/10 text-gold-dark',
   },
   in_progress: {
     label: 'In Progress',
-    className: 'bg-burgundy/10 text-burgundy dark:bg-burgundy/20 dark:text-burgundy-light',
+    className: 'bg-burgundy/10 text-burgundy',
   },
   completed: {
     label: 'Completed',
-    className: 'bg-sage/10 text-sage dark:bg-sage/20 dark:text-sage',
+    className: 'bg-sage/10 text-sage',
   },
 } as const;
 

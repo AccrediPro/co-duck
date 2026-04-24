@@ -113,13 +113,11 @@ function getInitials(name: string | null): string {
 
 function getStatusBadge(status: string) {
   const styles: Record<string, string> = {
-    active:
-      'bg-[hsl(var(--brand-accent-light))] text-[hsl(var(--brand-accent-dark))] dark:bg-[hsl(var(--brand-accent-darker))]/30 dark:text-[hsl(var(--brand-accent-muted))]',
-    completed: 'bg-sage/15 text-sage dark:bg-sage/20 dark:text-sage',
-    archived: 'bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400',
-    pending: 'bg-gold/15 text-gold-dark dark:bg-gold/20 dark:text-gold',
-    in_progress:
-      'bg-[hsl(var(--brand-accent-light))] text-[hsl(var(--brand-accent-dark))] dark:bg-[hsl(var(--brand-accent-darker))]/30 dark:text-[hsl(var(--brand-accent-muted))]',
+    active: 'bg-burgundy/10 text-burgundy',
+    completed: 'bg-sage/10 text-sage',
+    archived: 'bg-muted text-muted-foreground',
+    pending: 'bg-gold/10 text-gold-dark',
+    in_progress: 'bg-burgundy/10 text-burgundy',
   };
   const labels: Record<string, string> = {
     active: 'Active',

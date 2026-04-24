@@ -8,13 +8,16 @@ interface WelcomeEmailProps {
 }
 
 export function WelcomeEmail({ name, unsubscribeUrl }: WelcomeEmailProps) {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://co-duck.com';
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://accredipro.com';
 
   return (
-    <EmailLayout preview={`Welcome to Co-duck, ${name}!`} unsubscribeUrl={unsubscribeUrl}>
-      <Text style={heading}>Welcome to Co-duck!</Text>
+    <EmailLayout
+      preview={`Welcome to AccrediPro CoachHub, ${name}!`}
+      unsubscribeUrl={unsubscribeUrl}
+    >
+      <Text style={heading}>Welcome to AccrediPro CoachHub!</Text>
       <Text style={paragraph}>
-        Hi {name}, thanks for joining Co-duck. You now have access to a network of
+        Hi {name}, thanks for joining AccrediPro CoachHub. You now have access to a network of
         credential-verified coaches in hormones, trauma, menopause, ADHD, grief, and whole-person
         health.
       </Text>

@@ -1,6 +1,5 @@
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import {
   Pencil,
   ExternalLink,
@@ -11,93 +10,98 @@ import {
   CheckSquare,
   Search,
 } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { LucideIcon } from 'lucide-react';
 
 interface QuickActionsProps {
   role: 'coach' | 'client';
   coachSlug?: string;
 }
 
-export function QuickActions({ role, coachSlug }: QuickActionsProps) {
-  if (role === 'coach') {
+interface ActionItem {
+  href: string;
+  label: string;
+  icon: LucideIcon;
+  variant: 'primary' | 'secondary' | 'accent';
+  external?: boolean;
+}
+
+function ActionButton({ href, label, icon: Icon, variant, external }: ActionItem) {
+  const styles = {
+    primary: 'bg-burgundy text-white hover:bg-burgundy-light',
+    secondary:
+      'border-2 border-burgundy/20 text-burgundy hover:bg-burgundy/5 hover:border-burgundy/40',
+    accent: 'bg-gold text-white hover:bg-gold-dark',
+  };
+
+  const content = (
+    <div
+      className={cn(
+        'flex flex-col items-center justify-center gap-2 rounded-lg p-4 transition-all',
+        styles[variant]
+      )}
+    >
+      <Icon className="h-5 w-5" />
+      <span className="text-sm font-medium">{label}</span>
+    </div>
+  );
+
+  if (external) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">Quick Actions</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-wrap gap-2">
-          <Button size="sm" asChild>
-            <Link href="/dashboard/sessions">
-              <Calendar className="mr-2 h-4 w-4" />
-              Sessions
-            </Link>
-          </Button>
-          <Button size="sm" variant="outline" asChild>
-            <Link href="/dashboard/messages">
-              <MessageSquare className="mr-2 h-4 w-4" />
-              Messages
-            </Link>
-          </Button>
-          <Button size="sm" variant="outline" asChild>
-            <Link href="/dashboard/profile">
-              <Pencil className="mr-2 h-4 w-4" />
-              Edit Profile
-            </Link>
-          </Button>
-          <Button size="sm" variant="outline" asChild>
-            <Link href="/dashboard/availability">
-              <Clock className="mr-2 h-4 w-4" />
-              Availability
-            </Link>
-          </Button>
-          <Button size="sm" variant="outline" asChild>
-            <Link href="/dashboard/payments">
-              <DollarSign className="mr-2 h-4 w-4" />
-              Payments
-            </Link>
-          </Button>
-          {coachSlug && (
-            <Button size="sm" variant="outline" asChild>
-              <a href={`/coaches/${coachSlug}`} target="_blank" rel="noopener noreferrer">
-                <ExternalLink className="mr-2 h-4 w-4" />
-                Public Profile
-              </a>
-            </Button>
-          )}
-        </CardContent>
-      </Card>
+      <a href={href} target="_blank" rel="noopener noreferrer">
+        {content}
+      </a>
     );
   }
+
+  return <Link href={href}>{content}</Link>;
+}
+
+export function QuickActions({ role, coachSlug }: QuickActionsProps) {
+  const coachActions: ActionItem[] = [
+    { href: '/dashboard/sessions', label: 'Sessions', icon: Calendar, variant: 'primary' },
+    { href: '/dashboard/messages', label: 'Messages', icon: MessageSquare, variant: 'primary' },
+    { href: '/dashboard/profile', label: 'Edit Profile', icon: Pencil, variant: 'secondary' },
+    { href: '/dashboard/availability', label: 'Availability', icon: Clock, variant: 'secondary' },
+    { href: '/dashboard/payments', label: 'Payments', icon: DollarSign, variant: 'accent' },
+    ...(coachSlug
+      ? [
+          {
+            href: `/coaches/${coachSlug}`,
+            label: 'Public Profile',
+            icon: ExternalLink,
+            variant: 'secondary' as const,
+            external: true,
+          },
+        ]
+      : []),
+  ];
+
+  const clientActions: ActionItem[] = [
+    { href: '/coaches', label: 'Find a Coach', icon: Search, variant: 'primary' },
+    { href: '/dashboard/my-sessions', label: 'My Sessions', icon: Calendar, variant: 'primary' },
+    { href: '/dashboard/messages', label: 'Messages', icon: MessageSquare, variant: 'secondary' },
+    {
+      href: '/dashboard/action-items',
+      label: 'Action Items',
+      icon: CheckSquare,
+      variant: 'secondary',
+    },
+  ];
+
+  const actions = role === 'coach' ? coachActions : clientActions;
 
   return (
     <Card>
       <CardHeader>
         <CardTitle className="text-base">Quick Actions</CardTitle>
       </CardHeader>
-      <CardContent className="flex flex-wrap gap-2">
-        <Button size="sm" asChild>
-          <Link href="/coaches">
-            <Search className="mr-2 h-4 w-4" />
-            Find a Coach
-          </Link>
-        </Button>
-        <Button size="sm" variant="outline" asChild>
-          <Link href="/dashboard/my-sessions">
-            <Calendar className="mr-2 h-4 w-4" />
-            My Sessions
-          </Link>
-        </Button>
-        <Button size="sm" variant="outline" asChild>
-          <Link href="/dashboard/messages">
-            <MessageSquare className="mr-2 h-4 w-4" />
-            Messages
-          </Link>
-        </Button>
-        <Button size="sm" variant="outline" asChild>
-          <Link href="/dashboard/action-items">
-            <CheckSquare className="mr-2 h-4 w-4" />
-            Action Items
-          </Link>
-        </Button>
+      <CardContent>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          {actions.map((action) => (
+            <ActionButton key={action.href} {...action} />
+          ))}
+        </div>
       </CardContent>
     </Card>
   );

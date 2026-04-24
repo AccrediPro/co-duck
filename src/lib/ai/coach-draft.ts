@@ -2,7 +2,7 @@
  * @fileoverview Coach Profile AI Draft Generator (P0-11)
  *
  * Takes free-form text about a coach (scraped website copy, pasted "About"
- * section, Instagram bio) and returns a strongly-typed draft of a Co-duck
+ * section, Instagram bio) and returns a strongly-typed draft of a AccrediPro CoachHub
  * coach profile for the coach to review and edit.
  *
  * Uses GPT-4o-mini in JSON mode. Output is validated with Zod before it's

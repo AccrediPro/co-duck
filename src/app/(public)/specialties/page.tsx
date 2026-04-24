@@ -25,9 +25,9 @@ import { eq } from 'drizzle-orm';
 import { COACH_SPECIALTIES } from '@/lib/validators/coach-onboarding';
 
 export const metadata: Metadata = {
-  title: 'Coaching Specialties | Co-duck',
+  title: 'Coaching Specialties | AccrediPro CoachHub',
   description:
-    'Find coaches specializing in hormones, menopause, trauma, ADHD, grief, gut health, and whole-person wellness on Co-duck.',
+    'Find coaches specializing in hormones, menopause, trauma, ADHD, grief, gut health, and whole-person wellness on AccrediPro CoachHub.',
 };
 
 // Map specialties to their icons

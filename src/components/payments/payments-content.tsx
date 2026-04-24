@@ -130,10 +130,7 @@ export function PaymentsContent({ initialData, setupStatus, earningsData }: Paym
     switch (onboardingStatus) {
       case 'complete':
         return (
-          <Badge
-            variant="default"
-            className="bg-[hsl(var(--brand-accent))] hover:bg-[hsl(var(--brand-warm))]"
-          >
+          <Badge variant="default" className="border-sage/30 bg-sage/10 text-sage hover:bg-sage/15">
             <CheckCircle className="mr-1 h-3 w-3" />
             Active
           </Badge>
@@ -158,7 +155,7 @@ export function PaymentsContent({ initialData, setupStatus, earningsData }: Paym
   const getStatusIcon = () => {
     switch (onboardingStatus) {
       case 'complete':
-        return <CheckCircle className="h-12 w-12 text-[hsl(var(--brand-accent))]" />;
+        return <CheckCircle className="h-12 w-12 text-sage" />;
       case 'pending':
         return <Clock className="h-12 w-12 text-gold" />;
       default:

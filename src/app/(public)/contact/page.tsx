@@ -27,7 +27,7 @@ const contactInfo = [
   {
     icon: Mail,
     title: 'Email',
-    details: 'support@co-duck.com',
+    details: 'support@accredipro.com',
     description: 'Send us an email anytime',
   },
   {
@@ -58,7 +58,7 @@ const faqs = [
   {
     question: 'How do I become a coach on the platform?',
     answer:
-      'Coach accounts are set up by our team. If you are interested in coaching on Co-duck, please contact us and we will get you started.',
+      'Coach accounts are set up by our team. If you are interested in coaching on AccrediPro CoachHub, please contact us and we will get you started.',
   },
   {
     question: 'Are the sessions confidential?',

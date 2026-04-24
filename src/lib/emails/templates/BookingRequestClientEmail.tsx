@@ -105,11 +105,11 @@ export function BookingRequestClientEmail({
 
       <Text style={paragraph}>
         Have questions?{' '}
-        <Link href="https://co-duck.com/dashboard/messages" style={link}>
+        <Link href="https://accredipro.com/dashboard/messages" style={link}>
           Message your coach
         </Link>{' '}
         or{' '}
-        <Link href="https://co-duck.com/support" style={link}>
+        <Link href="https://accredipro.com/support" style={link}>
           contact support
         </Link>
       </Text>

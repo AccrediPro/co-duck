@@ -24,12 +24,28 @@ function getRelativeTime(date: Date): string {
   return formatDateShort(date);
 }
 
+function getTimeUrgency(date: Date): 'imminent' | 'soon' | 'normal' {
+  const diffMs = date.getTime() - Date.now();
+  const diffHours = diffMs / (1000 * 60 * 60);
+  if (diffHours < 1) return 'imminent';
+  if (diffHours < 24) return 'soon';
+  return 'normal';
+}
+
+const urgencyStyles = {
+  imminent: 'text-burgundy font-semibold',
+  soon: 'text-gold-dark',
+  normal: 'text-muted-foreground',
+};
+
 export function UpcomingSessionsWidget({ sessions }: UpcomingSessionsWidgetProps) {
   return (
-    <Card>
+    <Card className="border-t-4 border-t-burgundy/30">
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="flex items-center gap-2 text-base">
-          <Clock className="h-4 w-4" />
+          <div className="rounded-full bg-burgundy/10 p-1.5">
+            <Clock className="h-4 w-4 text-burgundy" />
+          </div>
           Upcoming Sessions
         </CardTitle>
         <Button variant="ghost" size="sm" asChild>
@@ -43,21 +59,29 @@ export function UpcomingSessionsWidget({ sessions }: UpcomingSessionsWidgetProps
           <p className="text-sm text-muted-foreground">No upcoming sessions.</p>
         ) : (
           <div className="space-y-3">
-            {sessions.map((session) => (
-              <div key={session.id} className="flex items-center gap-3">
-                <Avatar className="h-8 w-8">
-                  <AvatarImage src={session.clientAvatar || undefined} />
-                  <AvatarFallback>{session.clientName?.charAt(0) || 'C'}</AvatarFallback>
-                </Avatar>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium">{session.clientName || 'Client'}</p>
-                  <p className="text-xs text-muted-foreground">{session.sessionType.name}</p>
+            {sessions.map((session) => {
+              const urgency = getTimeUrgency(new Date(session.startTime));
+              return (
+                <div
+                  key={session.id}
+                  className="flex items-center gap-3 rounded-md p-1.5 transition-colors hover:bg-muted/50"
+                >
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={session.clientAvatar || undefined} />
+                    <AvatarFallback className="bg-burgundy/10 text-xs text-burgundy">
+                      {session.clientName?.charAt(0) || 'C'}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium">{session.clientName || 'Client'}</p>
+                    <p className="text-xs text-muted-foreground">{session.sessionType.name}</p>
+                  </div>
+                  <span className={`whitespace-nowrap text-xs ${urgencyStyles[urgency]}`}>
+                    {getRelativeTime(new Date(session.startTime))}
+                  </span>
                 </div>
-                <span className="whitespace-nowrap text-xs text-muted-foreground">
-                  {getRelativeTime(new Date(session.startTime))}
-                </span>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </CardContent>

@@ -26,7 +26,7 @@ export function EmailLayout({ preview, unsubscribeUrl, children }: EmailLayoutPr
         <Container style={container}>
           {/* Header */}
           <Section style={header}>
-            <Text style={logo}>Co-duck</Text>
+            <Text style={logo}>AccrediPro CoachHub</Text>
           </Section>
 
           {/* Body Content */}
@@ -36,7 +36,7 @@ export function EmailLayout({ preview, unsubscribeUrl, children }: EmailLayoutPr
           <Hr style={hr} />
           <Section style={footer}>
             <Text style={footerText}>
-              You&apos;re receiving this email because you have an account with Co-duck.
+              You&apos;re receiving this email because you have an account with AccrediPro CoachHub.
             </Text>
             <Text style={footerText}>
               {unsubscribeUrl && (
@@ -47,12 +47,12 @@ export function EmailLayout({ preview, unsubscribeUrl, children }: EmailLayoutPr
                   {' | '}
                 </>
               )}
-              <Link href="https://co-duck.com/privacy" style={link}>
+              <Link href="https://accredipro.com/privacy" style={link}>
                 Privacy Policy
               </Link>
             </Text>
             <Text style={footerText}>
-              &copy; {new Date().getFullYear()} Co-duck. All rights reserved.
+              &copy; {new Date().getFullYear()} AccrediPro CoachHub. All rights reserved.
             </Text>
           </Section>
         </Container>

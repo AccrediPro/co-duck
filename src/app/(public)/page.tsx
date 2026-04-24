@@ -8,7 +8,7 @@ import { db, coachProfiles, users } from '@/db';
 // This page queries the DB at request time; skip static prerender (CI has no DB).
 export const dynamic = 'force-dynamic';
 import { eq } from 'drizzle-orm';
-import { SUPPORTED_CURRENCIES } from '@/lib/validators/coach-onboarding';
+import { SUPPORTED_CURRENCIES, flattenSpecialties } from '@/lib/validators/coach-onboarding';
 import type { SessionType } from '@/db/schema';
 import { ArrowRight, User, BadgeCheck, Heart, Lock } from 'lucide-react';
 
@@ -60,7 +60,7 @@ const valueProps = [
     icon: BadgeCheck,
     title: 'Real Credentials, Verified',
     description:
-      "Every coach on Co-duck is credential-checked. You'll know exactly what they studied, where, and when.",
+      "Every coach on AccrediPro CoachHub is credential-checked. You'll know exactly what they studied, where, and when.",
   },
   {
     icon: Heart,
@@ -154,7 +154,7 @@ export default async function HomePage() {
         <div className="container mx-auto px-4">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="text-3xl font-bold tracking-tight text-burgundy-dark md:text-4xl">
-              Why Co-duck?
+              Why AccrediPro CoachHub?
             </h2>
             <p className="mt-4 text-muted-foreground">
               A platform built around you — not corporate checkboxes.
@@ -226,8 +226,7 @@ export default async function HomePage() {
             {featuredCoaches.length > 0
               ? featuredCoaches.map((coach) => {
                   const lowestSession = getLowestPrice(coach.sessionTypes as SessionType[] | null);
-                  const displaySpecialties =
-                    (coach.specialties as string[] | null)?.slice(0, 2) || [];
+                  const displaySpecialties = flattenSpecialties(coach.specialties).slice(0, 2);
 
                   return (
                     <Link key={coach.slug} href={`/coaches/${coach.slug}`}>

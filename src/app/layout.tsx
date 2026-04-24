@@ -16,7 +16,7 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: 'Co-duck',
+  title: 'AccrediPro CoachHub',
   description:
     'Find credential-verified coaches for hormones, menopause, trauma, ADHD, grief, and whole-person health.',
 };

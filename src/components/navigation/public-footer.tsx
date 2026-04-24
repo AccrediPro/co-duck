@@ -79,7 +79,7 @@ export function PublicFooter() {
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
             <Link href="/" className="text-xl font-bold">
-              Co-duck
+              AccrediPro CoachHub
             </Link>
             <p className="mt-2 text-sm text-muted-foreground">
               Credential-verified coaches for hormones, menopause, trauma, ADHD, and whole-person
@@ -144,10 +144,10 @@ export function PublicFooter() {
             <ul className="space-y-2">
               <li>
                 <a
-                  href="mailto:support@co-duck.com"
+                  href="mailto:support@accredipro.com"
                   className="text-sm text-muted-foreground transition-colors hover:text-foreground"
                 >
-                  support@co-duck.com
+                  support@accredipro.com
                 </a>
               </li>
               <li>
@@ -165,7 +165,7 @@ export function PublicFooter() {
         {/* Copyright */}
         <div className="mt-8 flex flex-col items-center justify-between gap-4 border-t pt-8 md:flex-row">
           <p className="text-sm text-muted-foreground">
-            &copy; {new Date().getFullYear()} Co-duck. All rights reserved.
+            &copy; {new Date().getFullYear()} AccrediPro CoachHub. All rights reserved.
           </p>
           <div className="flex gap-4 text-sm text-muted-foreground">
             <Link href="/privacy" className="transition-colors hover:text-foreground">

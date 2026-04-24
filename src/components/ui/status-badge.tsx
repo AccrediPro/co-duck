@@ -4,27 +4,25 @@ import { cn } from '@/lib/utils';
 type BookingStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'no_show';
 
 const statusConfig: Record<BookingStatus, { label: string; className: string }> = {
-  confirmed: {
-    label: 'Confirmed',
-    className:
-      'bg-[hsl(var(--brand-accent))] hover:bg-[hsl(var(--brand-warm))] text-white border-transparent',
-  },
   pending: {
     label: 'Pending',
-    className: 'bg-gold/15 text-gold-dark hover:bg-gold/25 border-transparent',
+    className: 'bg-gold/10 text-gold-dark hover:bg-gold/20 border-gold/30',
+  },
+  confirmed: {
+    label: 'Confirmed',
+    className: 'bg-burgundy/10 text-burgundy hover:bg-burgundy/15 border-burgundy/30',
   },
   completed: {
     label: 'Completed',
-    className: 'border-[hsl(var(--brand-accent))] text-[hsl(var(--brand-warm))] bg-transparent',
+    className: 'bg-sage/10 text-sage hover:bg-sage/15 border-sage/30',
   },
   cancelled: {
     label: 'Cancelled',
-    className:
-      'bg-red-100 text-red-600 hover:bg-red-200 border-transparent dark:bg-red-900/30 dark:text-red-400',
+    className: 'bg-muted text-muted-foreground line-through border-transparent',
   },
   no_show: {
     label: 'No Show',
-    className: 'border-gray-400 text-gray-500 bg-transparent',
+    className: 'bg-destructive/10 text-destructive border-transparent',
   },
 };
 

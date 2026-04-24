@@ -27,7 +27,7 @@ export const SPECIALTY_COPY: Record<string, SpecialtyCopy> = {
   'functional-medicine': {
     slug: 'functional-medicine',
     h1: 'Functional Medicine Coaches',
-    metaTitle: 'Find a Functional Medicine Coach | Co-duck',
+    metaTitle: 'Find a Functional Medicine Coach | AccrediPro CoachHub',
     metaDescription:
       'Connect with certified Functional Medicine coaches who work alongside your medical team to uncover root causes — not just manage symptoms.',
     ogDescription:
@@ -52,7 +52,7 @@ Many are women in their 30s and 40s navigating the intersection of career, famil
 
 A good Functional Medicine coach will take a thorough intake — often 60–90 minutes for the first session. They'll ask about your history, your labs, your daily rhythms, your relationship with food and rest. They won't promise a cure, but they will help you build a clear, prioritized plan. Most clients work with a coach weekly or biweekly over 3–6 months, with check-ins on protocols and adjustments as data comes in.
 
-On Co-duck, every Functional Medicine coach has been vetted for relevant training — whether that's IFM certification, NBC-HWC credentials, integrative health practitioner training, or clinical background paired with coaching certification.
+On AccrediPro CoachHub, every Functional Medicine coach has been vetted for relevant training — whether that's IFM certification, NBC-HWC credentials, integrative health practitioner training, or clinical background paired with coaching certification.
 
 If you're ready to stop managing symptoms and start understanding your body, the right coach is here.`,
     faqs: [
@@ -87,7 +87,7 @@ If you're ready to stop managing symptoms and start understanding your body, the
   'perimenopause-hormones': {
     slug: 'perimenopause-hormones',
     h1: 'Perimenopause & Hormones Coaches',
-    metaTitle: 'Find a Perimenopause & Hormones Coach | Co-duck',
+    metaTitle: 'Find a Perimenopause & Hormones Coach | AccrediPro CoachHub',
     metaDescription:
       'Work with a certified Perimenopause & Hormones coach who understands the HPA axis, thyroid interplay, and the emotional layer most medical providers skip.',
     ogDescription:
@@ -110,7 +110,7 @@ Most perimenopause coaches work through a combination of symptom mapping, lifest
 
 Women between roughly 38 and 55 who are in perimenopause or early postmenopause and want a thinking partner who actually understands their physiology. Women who feel dismissed by conventional medicine. Women who want to make informed decisions about HRT, supplements, and lifestyle — not just accept a prescription or a "just eat less and move more" recommendation that no longer applies.
 
-On Co-duck, our Perimenopause & Hormones coaches bring backgrounds in functional medicine, integrative nutrition, health coaching (NBC-HWC, IIN, or equivalent), and many have personal experience navigating this transition themselves.
+On AccrediPro CoachHub, our Perimenopause & Hormones coaches bring backgrounds in functional medicine, integrative nutrition, health coaching (NBC-HWC, IIN, or equivalent), and many have personal experience navigating this transition themselves.
 
 You deserve a guide who gets it. Not just the labs — the whole experience.`,
     faqs: [
@@ -145,7 +145,7 @@ You deserve a guide who gets it. Not just the labs — the whole experience.`,
   'gut-health': {
     slug: 'gut-health',
     h1: 'Gut Health Coaches',
-    metaTitle: 'Find a Gut Health Coach | Co-duck',
+    metaTitle: 'Find a Gut Health Coach | AccrediPro CoachHub',
     metaDescription:
       'Work with a certified Gut Health coach to address IBS, SIBO, bloating, food sensitivities, and the gut-brain connection through sustainable lifestyle change.',
     ogDescription:
@@ -166,7 +166,7 @@ A typical engagement with a Gut Health coach covers diet and eating patterns (wi
 
 Many clients also explore the emotional dimensions of eating — the anxiety around food, the social isolation that can come with severe gut issues, and the relationship between trauma history and gut hypersensitivity (a well-documented connection).
 
-If you're ready to work with someone who sees the full picture, a Gut Health coach on Co-duck might be the next right step.`,
+If you're ready to work with someone who sees the full picture, a Gut Health coach on AccrediPro CoachHub might be the next right step.`,
     faqs: [
       {
         question: 'Do I need a GI diagnosis before working with a gut health coach?',
@@ -199,7 +199,7 @@ If you're ready to work with someone who sees the full picture, a Gut Health coa
   'trauma-informed': {
     slug: 'trauma-informed',
     h1: 'Trauma-Informed Coaches',
-    metaTitle: 'Find a Trauma-Informed Coach | Co-duck',
+    metaTitle: 'Find a Trauma-Informed Coach | AccrediPro CoachHub',
     metaDescription:
       'Connect with trauma-informed coaches trained in polyvagal, somatic, and attachment-based approaches. They know how to pace, pause, and hold space without re-traumatizing.',
     ogDescription:
@@ -220,7 +220,7 @@ Trauma-informed coaching is appropriate for people who have a history of adverse
 
 It's important to note: trauma-informed coaching is not therapy. For active trauma processing, EMDR, somatic experiencing, or other evidence-based trauma therapies are more appropriate. A trauma-informed coach can help you build capacity, resilience, and clarity between those sessions — or as a complement to ongoing therapeutic work.
 
-On Co-duck, our trauma-informed coaches carry relevant training — whether that's certification in trauma-sensitive coaching, somatic practitioner training, polyvagal-informed coaching, or mental health coaching with specific trauma competencies.`,
+On AccrediPro CoachHub, our trauma-informed coaches carry relevant training — whether that's certification in trauma-sensitive coaching, somatic practitioner training, polyvagal-informed coaching, or mental health coaching with specific trauma competencies.`,
     faqs: [
       {
         question: 'Is trauma-informed coaching the same as trauma therapy?',
@@ -253,7 +253,7 @@ On Co-duck, our trauma-informed coaches carry relevant training — whether that
   'somatic-practices': {
     slug: 'somatic-practices',
     h1: 'Somatic Practices Coaches',
-    metaTitle: 'Find a Somatic Practices Coach | Co-duck',
+    metaTitle: 'Find a Somatic Practices Coach | AccrediPro CoachHub',
     metaDescription:
       'Work with a somatic coaching practitioner who uses body-based awareness, movement, and breath to support deep, lasting change.',
     ogDescription:
@@ -274,7 +274,7 @@ The goals vary: releasing chronic tension patterns, building a deeper sense of a
 
 Often people who feel disconnected from their bodies — whether from stress, chronic illness, trauma, or years of living primarily in their heads. People who notice they keep repeating the same patterns despite knowing better. People in recovery or healing who want to reconnect with their physical sense of self. People who are drawn to a more whole-person approach to coaching and growth.
 
-On Co-duck, our somatic coaches hold training in somatic movement, somatic experiencing principles, body-mind coaching, or related modalities.`,
+On AccrediPro CoachHub, our somatic coaches hold training in somatic movement, somatic experiencing principles, body-mind coaching, or related modalities.`,
     faqs: [
       {
         question: 'Do I need to be athletic or physically flexible for somatic coaching?',
@@ -307,7 +307,7 @@ On Co-duck, our somatic coaches hold training in somatic movement, somatic exper
   'grief-support': {
     slug: 'grief-support',
     h1: 'Grief Support Coaches',
-    metaTitle: 'Find a Grief Support Coach | Co-duck',
+    metaTitle: 'Find a Grief Support Coach | AccrediPro CoachHub',
     metaDescription:
       'Work with a certified Grief Support coach who offers compassionate, non-pathologizing support for loss, life transitions, and the complexity of grief.',
     ogDescription:
@@ -332,7 +332,7 @@ They help with the practical and the existential: how to function when grief mak
 
 Anyone navigating significant loss. Often people who feel unsupported by well-meaning friends or family. People whose loss isn't recognized by those around them (a miscarriage, a pet, a friendship, a job). People who have had loss intersect with other challenges — illness, estrangement, the complexity of grieving someone who caused them harm.
 
-Our grief coaches on Co-duck bring training in grief-informed care, many with additional specialization in perinatal loss, anticipatory grief, or traumatic bereavement.`,
+Our grief coaches on AccrediPro CoachHub bring training in grief-informed care, many with additional specialization in perinatal loss, anticipatory grief, or traumatic bereavement.`,
     faqs: [
       {
         question: "Is grief coaching appropriate while I'm in acute grief?",
@@ -366,7 +366,7 @@ Our grief coaches on Co-duck bring training in grief-informed care, many with ad
   'adhd-coaching': {
     slug: 'adhd-coaching',
     h1: 'ADHD Coaches',
-    metaTitle: 'Find an ADHD Coach | Co-duck',
+    metaTitle: 'Find an ADHD Coach | AccrediPro CoachHub',
     metaDescription:
       'Work with a certified ADHD coach who understands time-blindness, executive function, rejection sensitivity, and the specific reality of late diagnosis.',
     ogDescription:
@@ -389,7 +389,7 @@ Many clients also work through the emotional aftermath of late diagnosis — the
 
 Adults with ADHD (diagnosed or self-suspecting), especially those diagnosed later in life. Women in their 30s and 40s who masked their ADHD through academic achievement and people-pleasing, only to find the mask slipping under the weight of multiple adult responsibilities. People who are high-functioning in some domains and genuinely struggling in others.
 
-Our ADHD coaches on Co-duck hold ADHD-specific training (ACO membership, ADHD coaching certification, or relevant clinical background), and many have ADHD themselves.`,
+Our ADHD coaches on AccrediPro CoachHub hold ADHD-specific training (ACO membership, ADHD coaching certification, or relevant clinical background), and many have ADHD themselves.`,
     faqs: [
       {
         question: 'Do I need an ADHD diagnosis to work with an ADHD coach?',
@@ -422,7 +422,7 @@ Our ADHD coaches on Co-duck hold ADHD-specific training (ACO membership, ADHD co
   'chronic-illness': {
     slug: 'chronic-illness',
     h1: 'Chronic Illness Coaches',
-    metaTitle: 'Find a Chronic Illness Coach | Co-duck',
+    metaTitle: 'Find a Chronic Illness Coach | AccrediPro CoachHub',
     metaDescription:
       'Work with a certified Chronic Illness coach who understands the energy management, grief, identity shifts, and systemic challenges of living with a long-term health condition.',
     ogDescription:
@@ -441,7 +441,7 @@ Many clients also work on finding meaning and quality of life within the constra
 
 People newly diagnosed and overwhelmed by what chronic illness means for their life. People who are years into their illness and feeling like they've been doing it alone. People who want to stop just surviving and start building something meaningful within their actual physical reality.
 
-On Co-duck, our chronic illness coaches often have personal experience with chronic conditions in addition to their coaching training, bringing a depth of understanding that is hard to replicate through education alone.`,
+On AccrediPro CoachHub, our chronic illness coaches often have personal experience with chronic conditions in addition to their coaching training, bringing a depth of understanding that is hard to replicate through education alone.`,
     faqs: [
       {
         question: 'Can coaching help me manage my symptoms?',
@@ -474,7 +474,7 @@ On Co-duck, our chronic illness coaches often have personal experience with chro
   'nutrition-body-neutrality': {
     slug: 'nutrition-body-neutrality',
     h1: 'Nutrition & Body Neutrality Coaches',
-    metaTitle: 'Find a Nutrition & Body Neutrality Coach | Co-duck',
+    metaTitle: 'Find a Nutrition & Body Neutrality Coach | AccrediPro CoachHub',
     metaDescription:
       'Work with a coach who combines evidence-based nutrition support with a body-neutral, anti-diet framework — because health is not a weight.',
     ogDescription:
@@ -525,7 +525,7 @@ This is not a weight loss program. Coaches working in this space do not prescrib
   sleep: {
     slug: 'sleep',
     h1: 'Sleep Coaches',
-    metaTitle: 'Find a Sleep Coach | Co-duck',
+    metaTitle: 'Find a Sleep Coach | AccrediPro CoachHub',
     metaDescription:
       'Work with a certified Sleep coach to address insomnia, sleep disruption from perimenopause or stress, and the lifestyle factors that are keeping you awake.',
     ogDescription:
@@ -544,7 +544,7 @@ Stimulus control and sleep restriction (components of CBT-I, the most evidence-b
 
 Anyone who used to sleep well and doesn't anymore. Perimenopausal women whose sleep disruption is hormonal and who need more than a standard sleep hygiene framework. People with anxiety who know the anxiety drives the sleep problem but haven't found a way through. People who've tried sleep supplements, apps, and devices and haven't found lasting resolution.
 
-Sleep coaches on Co-duck often hold certification in sleep health coaching or behavioral sleep medicine principles, and many specialize in the hormonal and stress dimensions of sleep disruption.`,
+Sleep coaches on AccrediPro CoachHub often hold certification in sleep health coaching or behavioral sleep medicine principles, and many specialize in the hormonal and stress dimensions of sleep disruption.`,
     faqs: [
       {
         question: 'Is sleep coaching the same as CBT-I?',
@@ -577,7 +577,7 @@ Sleep coaches on Co-duck often hold certification in sleep health coaching or be
   'mind-body-medicine': {
     slug: 'mind-body-medicine',
     h1: 'Mind-Body Medicine Coaches',
-    metaTitle: 'Find a Mind-Body Medicine Coach | Co-duck',
+    metaTitle: 'Find a Mind-Body Medicine Coach | AccrediPro CoachHub',
     metaDescription:
       'Work with a coach trained in mind-body medicine principles — bridging the science of stress, emotions, and physical health.',
     ogDescription: 'Your body and mind are not separate systems. Find a coach who works with both.',
@@ -626,7 +626,7 @@ People who notice clear connections between stress and their physical wellbeing.
   autoimmune: {
     slug: 'autoimmune',
     h1: 'Autoimmune Coaches',
-    metaTitle: 'Find an Autoimmune Coach | Co-duck',
+    metaTitle: 'Find an Autoimmune Coach | AccrediPro CoachHub',
     metaDescription:
       'Work with a certified coach specializing in autoimmune conditions — building sustainable lifestyle protocols alongside your medical team.',
     ogDescription:
@@ -674,7 +674,7 @@ Newly diagnosed clients navigating the overwhelming information landscape. Peopl
   fertility: {
     slug: 'fertility',
     h1: 'Fertility Coaches',
-    metaTitle: 'Find a Fertility Coach | Co-duck',
+    metaTitle: 'Find a Fertility Coach | AccrediPro CoachHub',
     metaDescription:
       'Work with a certified Fertility coach who supports you through conception challenges, IVF, loss, and the emotional complexity of the fertility journey.',
     ogDescription:
@@ -691,7 +691,7 @@ Emotional support through the fertility journey: processing the grief of a negat
 
 People who are trying to conceive and want comprehensive support beyond the medical. People undergoing IVF, IUI, or other assisted reproduction and want a coach alongside the clinical team. People navigating recurrent pregnancy loss who need both practical and emotional support. People exploring alternatives — donor conception, surrogacy, adoption — who want help with the decision-making process.
 
-Our fertility coaches on Co-duck hold coaching certifications and often have additional training in reproductive psychology, perinatal mental health, or personal experience with fertility challenges.`,
+Our fertility coaches on AccrediPro CoachHub hold coaching certifications and often have additional training in reproductive psychology, perinatal mental health, or personal experience with fertility challenges.`,
     faqs: [
       {
         question: 'Is fertility coaching a substitute for medical fertility treatment?',
@@ -724,7 +724,7 @@ Our fertility coaches on Co-duck hold coaching certifications and often have add
   'addiction-recovery': {
     slug: 'addiction-recovery',
     h1: 'Addiction Recovery Coaches',
-    metaTitle: 'Find an Addiction Recovery Coach | Co-duck',
+    metaTitle: 'Find an Addiction Recovery Coach | AccrediPro CoachHub',
     metaDescription:
       'Work with a certified Recovery coach who supports sustainable sobriety, relapse prevention, and rebuilding a life in recovery.',
     ogDescription:
@@ -776,7 +776,7 @@ People newly in recovery who want structured support and accountability beyond t
   'integrative-wellness': {
     slug: 'integrative-wellness',
     h1: 'Integrative Wellness Coaches',
-    metaTitle: 'Find an Integrative Wellness Coach | Co-duck',
+    metaTitle: 'Find an Integrative Wellness Coach | AccrediPro CoachHub',
     metaDescription:
       'Work with an Integrative Wellness coach who sees you as a whole person — body, mind, spirit, relationships, and environment — and builds a sustainable path to wellbeing.',
     ogDescription:
@@ -829,7 +829,7 @@ People who feel like they're doing many things "right" but still not thriving �
   career: {
     slug: 'career',
     h1: 'Career Coaches',
-    metaTitle: 'Find a Career Coach | Co-duck',
+    metaTitle: 'Find a Career Coach | AccrediPro CoachHub',
     metaDescription:
       'Connect with certified Career coaches who help you navigate pivots, promotions, negotiation, and finding work that actually fits who you are.',
     ogDescription:
@@ -840,7 +840,7 @@ Some clients come with a burning desire to leave what they're doing but no idea 
 
 Career coaches don't tell you what career to have. They help you figure that out — through better self-understanding, honest assessment of the landscape, and practical strategy for moving from where you are to where you want to be. They also hold you accountable for the steps you keep almost taking.
 
-On Co-duck, our career coaches work across industries and career stages, with particular expertise in career pivots, executive development, women's leadership, and the intersection of career and personal values.`,
+On AccrediPro CoachHub, our career coaches work across industries and career stages, with particular expertise in career pivots, executive development, women's leadership, and the intersection of career and personal values.`,
     faqs: [
       {
         question: 'How is career coaching different from career counseling?',
@@ -873,7 +873,7 @@ On Co-duck, our career coaches work across industries and career stages, with pa
   life: {
     slug: 'life',
     h1: 'Life Coaches',
-    metaTitle: 'Find a Life Coach | Co-duck',
+    metaTitle: 'Find a Life Coach | AccrediPro CoachHub',
     metaDescription:
       'Connect with certified Life coaches who help you build clarity, make meaningful change, and live a life that actually reflects your values.',
     ogDescription: 'Life coaching without the clichés. Find a coach who deals in real things.',
@@ -881,7 +881,7 @@ On Co-duck, our career coaches work across industries and career stages, with pa
 
 Good life coaching is different. It's grounded in actual goals, real accountability, and honest self-examination. It helps you figure out what you actually want (which is harder than it sounds), understand what's getting in the way (which is usually not what you think), and build the momentum to make it real.
 
-Life coaches on Co-duck work with clients on a wide range: major life transitions (divorce, loss, relocation, leaving a career), clarity about values and direction, building better habits, improving relationships, increasing confidence, and navigating the space between where you are and where you want to be.
+Life coaches on AccrediPro CoachHub work with clients on a wide range: major life transitions (divorce, loss, relocation, leaving a career), clarity about values and direction, building better habits, improving relationships, increasing confidence, and navigating the space between where you are and where you want to be.
 
 The best life coaches ask uncomfortable questions, tolerate uncomfortable answers, and hold you to a standard that comes from your own stated values — not theirs.`,
     faqs: [
@@ -903,7 +903,7 @@ The best life coaches ask uncomfortable questions, tolerate uncomfortable answer
       {
         question: 'What credentials should I look for in a life coach?',
         answer:
-          "The coaching industry is largely unregulated, which means credentials vary. Look for ICF certification (International Coaching Federation) — particularly ACC, PCC, or MCC levels — which require training hours, mentorship, and competency assessment. On Co-duck, coach verification helps ensure you're working with someone with legitimate training.",
+          "The coaching industry is largely unregulated, which means credentials vary. Look for ICF certification (International Coaching Federation) — particularly ACC, PCC, or MCC levels — which require training hours, mentorship, and competency assessment. On AccrediPro CoachHub, coach verification helps ensure you're working with someone with legitimate training.",
       },
       {
         question: 'How often should I meet with my life coach?',
@@ -916,7 +916,7 @@ The best life coaches ask uncomfortable questions, tolerate uncomfortable answer
   business: {
     slug: 'business',
     h1: 'Business Coaches',
-    metaTitle: 'Find a Business Coach | Co-duck',
+    metaTitle: 'Find a Business Coach | AccrediPro CoachHub',
     metaDescription:
       'Connect with certified Business coaches who help entrepreneurs, founders, and business owners grow with clarity, strategy, and sustainable momentum.',
     ogDescription:
@@ -927,7 +927,7 @@ Business coaches work with founders, entrepreneurs, small business owners, and c
 
 The work covers a wide span: business model clarity, revenue strategy, team building and delegation, leadership development, navigating difficult decisions, accountability for the priorities that keep slipping, and the personal sustainability of the entrepreneur — burnout, boundary-setting, and building a business that actually works for your life, not just against it.
 
-On Co-duck, our business coaches bring backgrounds in entrepreneurship, corporate leadership, startup ecosystems, and consulting — many have built and run businesses themselves.`,
+On AccrediPro CoachHub, our business coaches bring backgrounds in entrepreneurship, corporate leadership, startup ecosystems, and consulting — many have built and run businesses themselves.`,
     faqs: [
       {
         question: 'Is business coaching worth it for small business owners, not just corporations?',
@@ -960,7 +960,7 @@ On Co-duck, our business coaches bring backgrounds in entrepreneurship, corporat
   relationship: {
     slug: 'relationship',
     h1: 'Relationship Coaches',
-    metaTitle: 'Find a Relationship Coach | Co-duck',
+    metaTitle: 'Find a Relationship Coach | AccrediPro CoachHub',
     metaDescription:
       'Work with a certified Relationship coach to improve communication, navigate conflict, rebuild connection, and understand your own patterns in relationship.',
     ogDescription: 'Relationship coaching for the full complexity of human connection.',
@@ -970,7 +970,7 @@ Relationship coaches work with individuals and couples navigating a wide range: 
 
 A key distinction: relationship coaching is not couples therapy. It doesn't treat psychological disorders or process deep trauma in the therapeutic sense. It's forward-focused, skills-based, and action-oriented — with a depth of self-awareness that good coaching always requires.
 
-On Co-duck, our relationship coaches hold training in attachment theory, Gottman-based approaches, non-violent communication, or related frameworks.`,
+On AccrediPro CoachHub, our relationship coaches hold training in attachment theory, Gottman-based approaches, non-violent communication, or related frameworks.`,
     faqs: [
       {
         question: 'Is relationship coaching the same as couples therapy?',
@@ -1004,7 +1004,7 @@ On Co-duck, our relationship coaches hold training in attachment theory, Gottman
   financial: {
     slug: 'financial',
     h1: 'Financial Coaches',
-    metaTitle: 'Find a Financial Coach | Co-duck',
+    metaTitle: 'Find a Financial Coach | AccrediPro CoachHub',
     metaDescription:
       'Work with a certified Financial coach who helps you build a healthier relationship with money — budgeting, saving, debt, and the beliefs that drive all of it.',
     ogDescription:
@@ -1013,7 +1013,7 @@ On Co-duck, our relationship coaches hold training in attachment theory, Gottman
 
 Most of us carry inherited money stories — absorbed from family, culture, and early experiences — that shape our financial decisions without our awareness. Financial coaches help you see those stories clearly, understand how they're driving your current behavior, and build the practical skills and habits that support the financial life you actually want.
 
-Financial coaches on Co-duck work with clients on budgeting and cash flow, debt management, savings and emergency fund building, financial goal-setting, navigating major financial decisions, and the emotional dimensions of money — scarcity mindset, financial anxiety, and the complex feelings that surround spending, saving, and enough-ness.`,
+Financial coaches on AccrediPro CoachHub work with clients on budgeting and cash flow, debt management, savings and emergency fund building, financial goal-setting, navigating major financial decisions, and the emotional dimensions of money — scarcity mindset, financial anxiety, and the complex feelings that surround spending, saving, and enough-ness.`,
     faqs: [
       {
         question: 'Is a financial coach the same as a financial advisor?',
@@ -1047,7 +1047,7 @@ Financial coaches on Co-duck work with clients on budgeting and cash flow, debt 
   leadership: {
     slug: 'leadership',
     h1: 'Leadership Coaches',
-    metaTitle: 'Find a Leadership Coach | Co-duck',
+    metaTitle: 'Find a Leadership Coach | AccrediPro CoachHub',
     metaDescription:
       'Work with a certified Leadership coach to develop your leadership presence, navigate executive challenges, and build the skills that sustain influence.',
     ogDescription:
@@ -1056,7 +1056,7 @@ Financial coaches on Co-duck work with clients on budgeting and cash flow, debt 
 
 Leadership coaches work with executives, directors, managers, and emerging leaders who want to grow in their capacity to lead — not just manage — people, organizations, and change. The work spans communication and influence, executive presence, navigating complexity and ambiguity, building and developing teams, managing up and across, and the personal sustainability of leadership — because leading is exhausting when done without self-awareness.
 
-Leadership coaching on Co-duck draws on a range of frameworks: systems thinking, Dare to Lead (Brené Brown), situational leadership, emotional intelligence, and the practical experience of coaches who have led teams and organizations themselves.`,
+Leadership coaching on AccrediPro CoachHub draws on a range of frameworks: systems thinking, Dare to Lead (Brené Brown), situational leadership, emotional intelligence, and the practical experience of coaches who have led teams and organizations themselves.`,
     faqs: [
       {
         question: 'Is leadership coaching only for senior executives?',
@@ -1089,7 +1089,7 @@ Leadership coaching on Co-duck draws on a range of frameworks: systems thinking,
   performance: {
     slug: 'performance',
     h1: 'Performance Coaches',
-    metaTitle: 'Find a Performance Coach | Co-duck',
+    metaTitle: 'Find a Performance Coach | AccrediPro CoachHub',
     metaDescription:
       'Work with a certified Performance coach who helps athletes, executives, and high achievers operate at their best — sustainably.',
     ogDescription:
@@ -1132,7 +1132,7 @@ Performance coaches work with athletes preparing for competition, executives nav
   mindset: {
     slug: 'mindset',
     h1: 'Mindset Coaches',
-    metaTitle: 'Find a Mindset Coach | Co-duck',
+    metaTitle: 'Find a Mindset Coach | AccrediPro CoachHub',
     metaDescription:
       'Work with a certified Mindset coach who helps you understand and shift the beliefs, patterns, and internal narratives that shape your results.',
     ogDescription: 'Mindset coaching that deals in real beliefs, not just positive thinking.',
@@ -1142,7 +1142,7 @@ Mindset coaches help you see those beliefs clearly — not just the ones you'd c
 
 This is practical, not mystical work. It draws on cognitive behavioral principles, acceptance and commitment therapy (ACT), positive psychology, neuroscience of belief and habit, and the simple discipline of honest self-examination with a skilled observer.
 
-Mindset coaches on Co-duck work on a wide range of specific applications: overcoming self-sabotage, building confidence, shifting scarcity to abundance thinking, developing growth orientation, managing perfectionism, and building the internal foundation that makes everything else in coaching actually work.`,
+Mindset coaches on AccrediPro CoachHub work on a wide range of specific applications: overcoming self-sabotage, building confidence, shifting scarcity to abundance thinking, developing growth orientation, managing perfectionism, and building the internal foundation that makes everything else in coaching actually work.`,
     faqs: [
       {
         question: 'Is mindset coaching just positive thinking?',
@@ -1175,7 +1175,7 @@ Mindset coaches on Co-duck work on a wide range of specific applications: overco
   communication: {
     slug: 'communication',
     h1: 'Communication Coaches',
-    metaTitle: 'Find a Communication Coach | Co-duck',
+    metaTitle: 'Find a Communication Coach | AccrediPro CoachHub',
     metaDescription:
       'Work with a certified Communication coach to improve how you speak, listen, present, and navigate difficult conversations.',
     ogDescription: 'Communication coaching for people who want to be understood and to connect.',
@@ -1219,7 +1219,7 @@ This is a skills domain — communication can be learned, practiced, and improve
   transition: {
     slug: 'transition',
     h1: 'Life Transition Coaches',
-    metaTitle: 'Find a Life Transition Coach | Co-duck',
+    metaTitle: 'Find a Life Transition Coach | AccrediPro CoachHub',
     metaDescription:
       'Work with a certified Transition coach who helps you navigate major life changes — career, relationships, identity, and everything in between — with clarity and intention.',
     ogDescription:

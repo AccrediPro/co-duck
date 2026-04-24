@@ -598,7 +598,7 @@ async function handlePaymentIntentFailed(paymentIntent: Stripe.PaymentIntent) {
 /**
  * Handles the account.application.deauthorized event.
  *
- * When a coach disconnects their Stripe Connect account from the Co-duck platform,
+ * When a coach disconnects their Stripe Connect account from the AccrediPro CoachHub platform,
  * this handler:
  * 1. Finds the coach profile with that Stripe account ID
  * 2. Clears the stripeAccountId

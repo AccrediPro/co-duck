@@ -6,7 +6,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/componen
 import { CheckIcon } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'Pricing | Co-duck — Coaching Platform',
+  title: 'Pricing | AccrediPro CoachHub',
   description:
     'Simple, transparent pricing for coaches. Start free for 14 days, then choose the plan that fits your practice.',
 };
@@ -24,7 +24,7 @@ const PLANS = [
       'Client messaging',
       'Session notes',
       'Email support',
-      'Co-duck branding',
+      'AccrediPro CoachHub branding',
     ],
     cta: 'Start free trial',
     highlight: false,
@@ -41,7 +41,7 @@ const PLANS = [
       'Custom intake forms',
       'Multi-session packages',
       'Priority support',
-      'Remove Co-duck branding',
+      'Remove AccrediPro CoachHub branding',
     ],
     cta: 'Start free trial',
     highlight: true,
@@ -72,7 +72,7 @@ const FAQ = [
   },
   {
     q: 'What does the transaction fee apply to?',
-    a: 'The fee applies to each coaching session payment processed through Co-duck. Packages and memberships are also subject to the fee.',
+    a: 'The fee applies to each coaching session payment processed through AccrediPro CoachHub. Packages and memberships are also subject to the fee.',
   },
   {
     q: 'Can I change my plan later?',
@@ -206,7 +206,8 @@ export default function PricingPage() {
       <section className="bg-primary/5 py-16 text-center">
         <h2 className="mb-4 text-2xl font-bold">Ready to grow your coaching practice?</h2>
         <p className="mb-8 text-muted-foreground">
-          Join coaches who use Co-duck to manage clients, bookings, and payments — all in one place.
+          Join coaches who use AccrediPro CoachHub to manage clients, bookings, and payments — all
+          in one place.
         </p>
         <Button asChild size="lg">
           <Link href="/sign-up">Start your free 14-day trial</Link>

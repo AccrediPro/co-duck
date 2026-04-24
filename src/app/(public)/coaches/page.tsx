@@ -15,7 +15,7 @@ import {
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'Find a Coach | Co-duck',
+  title: 'Find a Coach | AccrediPro CoachHub',
   description:
     'Browse certified coaches in functional medicine, hormones, trauma-informed care, ADHD, grief, and more. Find your perfect match.',
 };
@@ -223,11 +223,11 @@ export default async function CoachesPage({ searchParams }: PageProps) {
         const sub = cat.subNiches.find((s) => s.slug === subSlug);
         if (sub) {
           heading = `${sub.label} Coaches`;
-          subheading = `Browse certified ${sub.label.toLowerCase()} coaches on Co-duck.`;
+          subheading = `Browse certified ${sub.label.toLowerCase()} coaches on AccrediPro CoachHub.`;
         }
       } else {
         heading = `${cat.label} Coaches`;
-        subheading = `Browse certified ${cat.label.toLowerCase()} coaches on Co-duck.`;
+        subheading = `Browse certified ${cat.label.toLowerCase()} coaches on AccrediPro CoachHub.`;
       }
     }
   }

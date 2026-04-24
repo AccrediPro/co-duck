@@ -309,7 +309,7 @@ export function CredentialsEditor({
               {field.verifiedAt && (
                 <Badge variant="outline" className="border-green-200 bg-green-50 text-green-700">
                   <CheckCircle className="mr-1 h-3 w-3" />
-                  Verified by Co-duck admin
+                  Verified by AccrediPro CoachHub admin
                 </Badge>
               )}
             </CardContent>
