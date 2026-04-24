@@ -15,13 +15,15 @@ export function TodaysSchedule({ sessions }: TodaysScheduleProps) {
   const now = new Date();
 
   return (
-    <Card className="col-span-2">
+    <Card className="col-span-2 border-t-4 border-t-burgundy">
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="flex items-center gap-2">
-          <Calendar className="h-5 w-5" />
+          <div className="rounded-full bg-burgundy/10 p-1.5">
+            <Calendar className="h-5 w-5 text-burgundy" />
+          </div>
           Today&apos;s Schedule
         </CardTitle>
-        <Badge variant="secondary">
+        <Badge variant="secondary" className="bg-burgundy/10 text-burgundy">
           {sessions.length} session{sessions.length !== 1 ? 's' : ''}
         </Badge>
       </CardHeader>
@@ -38,20 +40,22 @@ export function TodaysSchedule({ sessions }: TodaysScheduleProps) {
                 <div
                   key={session.id}
                   className={`flex items-center gap-4 rounded-lg border p-3 ${
-                    isNow
-                      ? 'border-[hsl(var(--brand-accent))] bg-[hsl(var(--brand-surface))] dark:bg-[hsl(var(--brand-accent-deep))]'
-                      : ''
+                    isNow ? 'border-burgundy bg-burgundy/5' : ''
                   } ${isPast ? 'opacity-60' : ''}`}
                 >
                   <div className="text-center">
-                    <p className="text-sm font-semibold">{formatTime(session.startTime)}</p>
+                    <p className="text-sm font-semibold text-burgundy-dark">
+                      {formatTime(session.startTime)}
+                    </p>
                     <p className="text-xs text-muted-foreground">
                       {session.sessionType.duration}min
                     </p>
                   </div>
                   <Avatar className="h-8 w-8">
                     <AvatarImage src={session.clientAvatar || undefined} />
-                    <AvatarFallback>{session.clientName?.charAt(0) || 'C'}</AvatarFallback>
+                    <AvatarFallback className="bg-burgundy/10 text-xs text-burgundy">
+                      {session.clientName?.charAt(0) || 'C'}
+                    </AvatarFallback>
                   </Avatar>
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium">{session.clientName || 'Client'}</p>
@@ -59,7 +63,9 @@ export function TodaysSchedule({ sessions }: TodaysScheduleProps) {
                       {session.sessionType.name}
                     </p>
                   </div>
-                  {isNow && <Badge className="bg-[hsl(var(--brand-warm))]">Now</Badge>}
+                  {isNow && (
+                    <Badge className="bg-burgundy text-white hover:bg-burgundy-light">Now</Badge>
+                  )}
                   {session.meetingLink && !isPast && (
                     <Button size="sm" variant="outline" asChild>
                       <a href={session.meetingLink} target="_blank" rel="noopener noreferrer">

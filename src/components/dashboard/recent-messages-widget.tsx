@@ -16,10 +16,12 @@ export function RecentMessagesWidget({ messages, unreadCount }: RecentMessagesWi
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="flex items-center gap-2 text-base">
-          <MessageSquare className="h-4 w-4" />
+          <div className="rounded-full bg-burgundy/10 p-1.5">
+            <MessageSquare className="h-4 w-4 text-burgundy" />
+          </div>
           Messages
           {unreadCount > 0 && (
-            <Badge variant="destructive" className="ml-1 h-5 px-1.5 text-xs">
+            <Badge className="ml-1 h-5 bg-gold px-1.5 text-xs text-white hover:bg-gold-dark">
               {unreadCount}
             </Badge>
           )}
@@ -39,18 +41,18 @@ export function RecentMessagesWidget({ messages, unreadCount }: RecentMessagesWi
               <Link
                 key={msg.conversationId}
                 href={`/dashboard/messages/${msg.conversationId}`}
-                className="flex items-center gap-3 rounded-md p-2 transition-colors hover:bg-muted"
+                className="flex items-center gap-3 rounded-md p-2 transition-colors hover:bg-muted/50"
               >
                 <Avatar className="h-8 w-8">
                   <AvatarImage src={msg.otherUserAvatar || undefined} />
-                  <AvatarFallback>{msg.otherUserName?.charAt(0) || '?'}</AvatarFallback>
+                  <AvatarFallback className="bg-burgundy/10 text-xs text-burgundy">
+                    {msg.otherUserName?.charAt(0) || '?'}
+                  </AvatarFallback>
                 </Avatar>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <p className="truncate text-sm font-medium">{msg.otherUserName || 'User'}</p>
-                    {msg.unreadCount > 0 && (
-                      <span className="h-2 w-2 rounded-full bg-[hsl(var(--brand-accent))]" />
-                    )}
+                    {msg.unreadCount > 0 && <span className="h-2 w-2 rounded-full bg-gold" />}
                   </div>
                   <p className="truncate text-xs text-muted-foreground">
                     {msg.lastMessageContent || 'No messages'}

@@ -95,22 +95,22 @@ export function ActionItemsList({
   const getStatusIcon = (status: ActionItemWithStatus['status']) => {
     switch (status) {
       case 'completed':
-        return <CheckCircle2 className="h-4 w-4 text-[hsl(var(--brand-warm))]" />;
+        return <CheckCircle2 className="h-4 w-4 text-sage" />;
       case 'overdue':
-        return <AlertCircle className="h-4 w-4 text-red-500" />;
+        return <AlertCircle className="h-4 w-4 text-destructive" />;
       case 'pending':
-        return <Circle className="h-4 w-4 text-[hsl(var(--brand-accent))]" />;
+        return <Circle className="h-4 w-4 text-gold-dark" />;
     }
   };
 
   const getStatusColor = (status: ActionItemWithStatus['status']) => {
     switch (status) {
       case 'completed':
-        return 'text-[hsl(var(--brand-warm))]';
+        return 'text-sage';
       case 'overdue':
-        return 'text-red-500';
+        return 'text-destructive';
       case 'pending':
-        return 'text-[hsl(var(--brand-accent))]';
+        return 'text-gold-dark';
     }
   };
 

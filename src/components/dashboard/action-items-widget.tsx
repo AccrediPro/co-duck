@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { CheckSquare, ArrowRight, Circle } from 'lucide-react';
+import { CheckSquare, ArrowRight, Check } from 'lucide-react';
 import { formatDateShort } from '@/lib/date-utils';
 
 interface ActionItemPreview {
@@ -18,6 +18,32 @@ interface ActionItemsWidgetProps {
   recentItems: ActionItemPreview[];
 }
 
+function getItemPriority(item: ActionItemPreview): 'overdue' | 'due-soon' | 'normal' | 'completed' {
+  if (item.isCompleted) return 'completed';
+  if (!item.dueDate) return 'normal';
+  const now = new Date();
+  const due = new Date(item.dueDate);
+  const diffMs = due.getTime() - now.getTime();
+  const diffDays = diffMs / (1000 * 60 * 60 * 24);
+  if (diffDays < 0) return 'overdue';
+  if (diffDays <= 2) return 'due-soon';
+  return 'normal';
+}
+
+const priorityStyles = {
+  overdue: 'border-l-destructive',
+  'due-soon': 'border-l-gold',
+  normal: 'border-l-burgundy/20',
+  completed: 'border-l-sage',
+};
+
+const datePriorityStyles = {
+  overdue: 'text-destructive',
+  'due-soon': 'text-gold-dark',
+  normal: 'text-muted-foreground',
+  completed: 'text-sage',
+};
+
 export function ActionItemsWidget({ count, recentItems }: ActionItemsWidgetProps) {
   return (
     <Card>
@@ -26,7 +52,7 @@ export function ActionItemsWidget({ count, recentItems }: ActionItemsWidgetProps
           <CheckSquare className="h-4 w-4" />
           Action Items
           {count > 0 && (
-            <Badge variant="secondary" className="ml-1">
+            <Badge variant="secondary" className="ml-1 bg-burgundy/10 text-burgundy">
               {count}
             </Badge>
           )}
@@ -42,20 +68,42 @@ export function ActionItemsWidget({ count, recentItems }: ActionItemsWidgetProps
           <p className="text-sm text-muted-foreground">No pending action items.</p>
         ) : (
           <div className="space-y-2">
-            {recentItems.map((item) => (
-              <div key={item.id} className="flex items-start gap-2">
-                <Circle className="mt-0.5 h-3 w-3 text-muted-foreground" />
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm">{item.title}</p>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    {item.coachName && <span>From {item.coachName}</span>}
-                    {item.dueDate && <span>Due {formatDateShort(item.dueDate)}</span>}
+            {recentItems.map((item) => {
+              const priority = getItemPriority(item);
+              return (
+                <div
+                  key={item.id}
+                  className={`flex items-start gap-3 rounded-md border-l-4 px-3 py-2 transition-colors hover:bg-muted/50 ${priorityStyles[priority]}`}
+                >
+                  {priority === 'completed' ? (
+                    <div className="mt-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-sage/20">
+                      <Check className="h-3 w-3 text-sage" />
+                    </div>
+                  ) : (
+                    <div className="mt-1 h-2.5 w-2.5 rounded-full border-2 border-current text-burgundy/40" />
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <p
+                      className={`truncate text-sm ${
+                        priority === 'completed' ? 'text-muted-foreground line-through' : ''
+                      }`}
+                    >
+                      {item.title}
+                    </p>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      {item.coachName && <span>From {item.coachName}</span>}
+                      {item.dueDate && (
+                        <span className={datePriorityStyles[priority]}>
+                          Due {formatDateShort(item.dueDate)}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
             {count > recentItems.length && (
-              <p className="text-xs text-muted-foreground">
+              <p className="pl-3 text-xs text-muted-foreground">
                 +{count - recentItems.length} more items
               </p>
             )}

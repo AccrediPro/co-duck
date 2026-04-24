@@ -17,10 +17,12 @@ export function SessionStats({
   pendingBookingRequests = 0,
 }: SessionStatsProps) {
   return (
-    <Card>
+    <Card className="border-t-4 border-t-burgundy">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-base">
-          <BarChart3 className="h-4 w-4" />
+          <div className="rounded-full bg-burgundy/10 p-1.5">
+            <BarChart3 className="h-4 w-4 text-burgundy" />
+          </div>
           Session Stats
         </CardTitle>
       </CardHeader>
@@ -42,24 +44,30 @@ export function SessionStats({
           )}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Users className="h-4 w-4" />
+              <div className="rounded-full bg-burgundy/10 p-1">
+                <Users className="h-3.5 w-3.5 text-burgundy" />
+              </div>
               Total Clients
             </div>
-            <span className="text-lg font-semibold">{distinctClients}</span>
+            <span className="text-xl font-bold text-burgundy-dark">{distinctClients}</span>
           </div>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Calendar className="h-4 w-4" />
+              <div className="rounded-full bg-sage/10 p-1">
+                <Calendar className="h-3.5 w-3.5 text-sage" />
+              </div>
               This Month
             </div>
-            <span className="text-lg font-semibold">{sessionsThisMonth}</span>
+            <span className="text-xl font-bold text-burgundy-dark">{sessionsThisMonth}</span>
           </div>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <BarChart3 className="h-4 w-4" />
+              <div className="rounded-full bg-gold/10 p-1">
+                <BarChart3 className="h-3.5 w-3.5 text-gold-dark" />
+              </div>
               Total Sessions
             </div>
-            <span className="text-lg font-semibold">{totalSessions}</span>
+            <span className="text-xl font-bold text-burgundy-dark">{totalSessions}</span>
           </div>
         </div>
       </CardContent>

@@ -57,22 +57,22 @@ function getStatusBadge(status: TransactionWithClient['status']) {
       return (
         <Badge
           variant="default"
-          className="bg-[hsl(var(--brand-accent))] hover:bg-[hsl(var(--brand-warm))]"
+          className="bg-sage/10 text-sage border-sage/30 hover:bg-sage/15"
         >
           Completed
         </Badge>
       );
     case 'pending':
       return (
-        <Badge variant="secondary" className="bg-gold/10 text-gold-dark">
+        <Badge variant="secondary" className="bg-gold/10 text-gold-dark border-gold/30">
           Pending
         </Badge>
       );
     case 'failed':
-      return <Badge variant="destructive">Failed</Badge>;
+      return <Badge className="bg-destructive/10 text-destructive border-transparent">Failed</Badge>;
     case 'refunded':
       return (
-        <Badge variant="secondary" className="bg-gray-500/10 text-gray-600">
+        <Badge variant="secondary" className="bg-muted text-muted-foreground">
           Refunded
         </Badge>
       );

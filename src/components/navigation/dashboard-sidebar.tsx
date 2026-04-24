@@ -36,78 +36,124 @@ interface NavLink {
   href: string;
   label: string;
   icon: LucideIcon;
-  roles?: UserRole[]; // If undefined, visible to all roles
-  showBadge?: boolean; // Whether to show unread badge for this link
+  roles?: UserRole[];
+  showBadge?: boolean;
 }
 
-// Common links visible to all roles
-const commonLinks: NavLink[] = [
-  { href: '/dashboard', label: 'Overview', icon: Home },
-  { href: '/dashboard/messages', label: 'Messages', icon: MessageSquare, showBadge: true },
-  { href: '/dashboard/settings', label: 'Settings', icon: Settings },
-];
+interface NavSection {
+  label: string;
+  links: NavLink[];
+}
 
-// Profile link visible to all roles
-const profileLink: NavLink = { href: '/dashboard/profile', label: 'Profile', icon: User };
+// Build grouped navigation sections based on role
+function getNavSectionsForRole(role: UserRole): NavSection[] {
+  const sections: NavSection[] = [];
 
-// Coach-specific links
-const coachLinks: NavLink[] = [
-  { href: '/dashboard/sessions', label: 'Sessions', icon: CalendarDays, roles: ['coach'] },
-  { href: '/dashboard/clients', label: 'My Clients', icon: Users, roles: ['coach'] },
-  { href: '/dashboard/availability', label: 'Availability', icon: Clock, roles: ['coach'] },
-  { href: '/dashboard/memberships', label: 'Memberships', icon: Repeat, roles: ['coach'] },
-  { href: '/dashboard/forms', label: 'Forms', icon: ClipboardList, roles: ['coach'] },
-  { href: '/dashboard/embed', label: 'Embed widget', icon: Code2, roles: ['coach'] },
-  { href: '/dashboard/payments', label: 'Payments', icon: CreditCard, roles: ['coach'] },
-  {
-    href: '/dashboard/iconnect',
-    label: 'iConnect',
-    icon: LayoutList,
-    roles: ['coach'],
-    showBadge: true,
-  },
-];
-
-// Client-specific links
-const clientLinks: NavLink[] = [
-  { href: '/dashboard/my-coaches', label: 'My Coach', icon: UserCheck, roles: ['client'] },
-  { href: '/dashboard/my-sessions', label: 'My Sessions', icon: CalendarDays, roles: ['client'] },
-  {
-    href: '/dashboard/my-memberships',
-    label: 'Memberships',
-    icon: Repeat,
-    roles: ['client'],
-  },
-  {
-    href: '/dashboard/iconnect',
-    label: 'iConnect',
-    icon: LayoutList,
-    roles: ['client'],
-    showBadge: true,
-  },
-];
-
-// Get navigation links based on user role
-function getNavLinksForRole(role: UserRole): NavLink[] {
-  const links: NavLink[] = [commonLinks[0]]; // Overview first
-
-  // Profile link visible to all roles
-  links.push(profileLink);
+  // Overview is always first, ungrouped
+  sections.push({
+    label: '',
+    links: [{ href: '/dashboard', label: 'Overview', icon: Home }],
+  });
 
   if (role === 'coach') {
-    links.push(...coachLinks);
+    sections.push({
+      label: 'Coaching',
+      links: [
+        { href: '/dashboard/sessions', label: 'Sessions', icon: CalendarDays },
+        { href: '/dashboard/clients', label: 'My Clients', icon: Users },
+        { href: '/dashboard/availability', label: 'Availability', icon: Clock },
+        { href: '/dashboard/memberships', label: 'Memberships', icon: Repeat },
+        { href: '/dashboard/forms', label: 'Forms', icon: ClipboardList },
+        {
+          href: '/dashboard/iconnect',
+          label: 'iConnect',
+          icon: LayoutList,
+          showBadge: true,
+        },
+      ],
+    });
+    sections.push({
+      label: 'Account',
+      links: [
+        { href: '/dashboard/profile', label: 'Profile', icon: User },
+        { href: '/dashboard/payments', label: 'Payments', icon: CreditCard },
+        { href: '/dashboard/embed', label: 'Embed Widget', icon: Code2 },
+        {
+          href: '/dashboard/messages',
+          label: 'Messages',
+          icon: MessageSquare,
+          showBadge: true,
+        },
+        { href: '/dashboard/settings', label: 'Settings', icon: Settings },
+      ],
+    });
   } else if (role === 'client') {
-    links.push(...clientLinks);
-  } else if (role === 'admin') {
-    // Admins see both coach and client links
-    links.push(...coachLinks, ...clientLinks);
+    sections.push({
+      label: 'Coaching',
+      links: [
+        { href: '/dashboard/my-coaches', label: 'My Coach', icon: UserCheck },
+        { href: '/dashboard/my-sessions', label: 'My Sessions', icon: CalendarDays },
+        { href: '/dashboard/my-memberships', label: 'Memberships', icon: Repeat },
+        {
+          href: '/dashboard/iconnect',
+          label: 'iConnect',
+          icon: LayoutList,
+          showBadge: true,
+        },
+      ],
+    });
+    sections.push({
+      label: 'Account',
+      links: [
+        { href: '/dashboard/profile', label: 'Profile', icon: User },
+        {
+          href: '/dashboard/messages',
+          label: 'Messages',
+          icon: MessageSquare,
+          showBadge: true,
+        },
+        { href: '/dashboard/settings', label: 'Settings', icon: Settings },
+      ],
+    });
+  } else {
+    // Admin sees both
+    sections.push({
+      label: 'Coaching',
+      links: [
+        { href: '/dashboard/sessions', label: 'Sessions', icon: CalendarDays },
+        { href: '/dashboard/clients', label: 'My Clients', icon: Users },
+        { href: '/dashboard/availability', label: 'Availability', icon: Clock },
+        { href: '/dashboard/memberships', label: 'Memberships', icon: Repeat },
+        { href: '/dashboard/forms', label: 'Forms', icon: ClipboardList },
+        { href: '/dashboard/my-coaches', label: 'My Coach', icon: UserCheck },
+        { href: '/dashboard/my-sessions', label: 'My Sessions', icon: CalendarDays },
+        { href: '/dashboard/my-memberships', label: 'Memberships', icon: Repeat },
+        {
+          href: '/dashboard/iconnect',
+          label: 'iConnect',
+          icon: LayoutList,
+          showBadge: true,
+        },
+      ],
+    });
+    sections.push({
+      label: 'Account',
+      links: [
+        { href: '/dashboard/profile', label: 'Profile', icon: User },
+        { href: '/dashboard/payments', label: 'Payments', icon: CreditCard },
+        { href: '/dashboard/embed', label: 'Embed Widget', icon: Code2 },
+        {
+          href: '/dashboard/messages',
+          label: 'Messages',
+          icon: MessageSquare,
+          showBadge: true,
+        },
+        { href: '/dashboard/settings', label: 'Settings', icon: Settings },
+      ],
+    });
   }
 
-  // Messages link (visible to all)
-  links.push(commonLinks[1]);
-  // Settings last
-  links.push(commonLinks[2]);
-  return links;
+  return sections;
 }
 
 interface DashboardSidebarProps {
@@ -118,6 +164,80 @@ interface DashboardSidebarProps {
   iconnectUnreadCount?: number;
 }
 
+function NavLinkItem({
+  link,
+  isActive,
+  badgeCount,
+  onClick,
+}: {
+  link: NavLink;
+  isActive: boolean;
+  badgeCount: number;
+  onClick?: () => void;
+}) {
+  const Icon = link.icon;
+  const showBadge = link.showBadge && badgeCount > 0;
+
+  return (
+    <Link
+      href={link.href}
+      onClick={onClick}
+      className={cn(
+        'flex min-h-[44px] items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+        isActive
+          ? 'border-l-[3px] border-l-gold bg-burgundy text-white'
+          : 'text-muted-foreground hover:bg-burgundy/5 hover:text-burgundy'
+      )}
+    >
+      <Icon className="h-4 w-4" />
+      <span className="flex-1">{link.label}</span>
+      {showBadge && (
+        <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-gold px-1.5 text-xs font-medium text-white">
+          {badgeCount > 99 ? '99+' : badgeCount}
+        </span>
+      )}
+    </Link>
+  );
+}
+
+function NavSections({
+  sections,
+  isActiveLink,
+  getBadgeCount,
+  onClick,
+}: {
+  sections: NavSection[];
+  isActiveLink: (href: string) => boolean;
+  getBadgeCount: (link: NavLink) => number;
+  onClick?: () => void;
+}) {
+  return (
+    <>
+      {sections.map((section, idx) => (
+        <div key={section.label || idx}>
+          {section.label && (
+            <>
+              {idx > 0 && <div className="mx-3 my-1 border-b border-burgundy/10" />}
+              <p className="mb-2 mt-4 px-3 text-xs font-semibold uppercase tracking-wider text-burgundy/60">
+                {section.label}
+              </p>
+            </>
+          )}
+          {section.links.map((link) => (
+            <NavLinkItem
+              key={link.href}
+              link={link}
+              isActive={isActiveLink(link.href)}
+              badgeCount={getBadgeCount(link)}
+              onClick={onClick}
+            />
+          ))}
+        </div>
+      ))}
+    </>
+  );
+}
+
 export function DashboardSidebar({
   userName,
   userEmail,
@@ -126,7 +246,7 @@ export function DashboardSidebar({
   iconnectUnreadCount: initialIConnectUnread = 0,
 }: DashboardSidebarProps) {
   const pathname = usePathname();
-  const navLinks = getNavLinksForRole(userRole);
+  const sections = getNavSectionsForRole(userRole);
   const unreadMessageCount = useUnreadMessageCount(initialUnreadCount);
   const iconnectUnreadCount = useIConnectUnread(initialIConnectUnread);
 
@@ -137,6 +257,12 @@ export function DashboardSidebar({
     return pathname.startsWith(href);
   };
 
+  const getBadgeCount = (link: NavLink) => {
+    if (link.href === '/dashboard/messages') return unreadMessageCount;
+    if (link.href === '/dashboard/iconnect') return iconnectUnreadCount;
+    return 0;
+  };
+
   return (
     <>
       {/* Desktop Sidebar */}
@@ -145,9 +271,9 @@ export function DashboardSidebar({
         <div className="flex h-16 items-center justify-between px-6">
           <Link
             href="/"
-            className="flex min-h-[44px] min-w-0 flex-1 items-center truncate text-sm font-bold"
+            className="flex min-h-[44px] min-w-0 flex-1 items-center truncate text-sm font-bold text-burgundy-dark"
           >
-            Co-duck
+            AccrediPro CoachHub
           </Link>
           <NotificationBell />
         </div>
@@ -155,37 +281,12 @@ export function DashboardSidebar({
         <Separator />
 
         {/* Navigation Links */}
-        <nav className="flex-1 space-y-1 px-3 py-4">
-          {navLinks.map((link) => {
-            const Icon = link.icon;
-            const badgeCount =
-              link.href === '/dashboard/messages'
-                ? unreadMessageCount
-                : link.href === '/dashboard/iconnect'
-                  ? iconnectUnreadCount
-                  : 0;
-            const showBadge = link.showBadge && badgeCount > 0;
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={cn(
-                  'flex min-h-[44px] items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-                  isActiveLink(link.href)
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-                )}
-              >
-                <Icon className="h-4 w-4" />
-                <span className="flex-1">{link.label}</span>
-                {showBadge && (
-                  <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-xs font-medium text-destructive-foreground">
-                    {badgeCount > 99 ? '99+' : badgeCount}
-                  </span>
-                )}
-              </Link>
-            );
-          })}
+        <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
+          <NavSections
+            sections={sections}
+            isActiveLink={isActiveLink}
+            getBadgeCount={getBadgeCount}
+          />
         </nav>
 
         <Separator />
@@ -214,7 +315,7 @@ export function DashboardMobileHeader({
 }: DashboardSidebarProps) {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const navLinks = getNavLinksForRole(userRole);
+  const sections = getNavSectionsForRole(userRole);
   const unreadMessageCount = useUnreadMessageCount(initialUnreadCount);
   const iconnectUnreadCount = useIConnectUnread(initialIConnectUnread);
 
@@ -225,10 +326,19 @@ export function DashboardMobileHeader({
     return pathname.startsWith(href);
   };
 
+  const getBadgeCount = (link: NavLink) => {
+    if (link.href === '/dashboard/messages') return unreadMessageCount;
+    if (link.href === '/dashboard/iconnect') return iconnectUnreadCount;
+    return 0;
+  };
+
   return (
     <header className="sticky top-0 z-50 flex h-16 items-center justify-between border-b bg-background px-4 md:hidden">
-      <Link href="/" className="flex min-h-[44px] items-center whitespace-nowrap text-xl font-bold">
-        Co-duck
+      <Link
+        href="/"
+        className="flex min-h-[44px] items-center whitespace-nowrap text-xl font-bold text-burgundy-dark"
+      >
+        AccrediPro CoachHub
       </Link>
 
       <div className="flex items-center gap-2">
@@ -240,7 +350,7 @@ export function DashboardMobileHeader({
             className="relative flex min-h-[44px] min-w-[44px] items-center justify-center"
           >
             <MessageSquare className="h-5 w-5 text-muted-foreground" />
-            <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-destructive px-1 text-[10px] font-medium text-destructive-foreground">
+            <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-gold px-1 text-[10px] font-medium text-white">
               {unreadMessageCount > 99 ? '99+' : unreadMessageCount}
             </span>
           </Link>
@@ -251,7 +361,7 @@ export function DashboardMobileHeader({
             className="relative flex min-h-[44px] min-w-[44px] items-center justify-center"
           >
             <LayoutList className="h-5 w-5 text-muted-foreground" />
-            <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-[hsl(var(--brand-accent))] px-1 text-[10px] font-medium text-white">
+            <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-gold px-1 text-[10px] font-medium text-white">
               {iconnectUnreadCount > 99 ? '99+' : iconnectUnreadCount}
             </span>
           </Link>
@@ -273,48 +383,23 @@ export function DashboardMobileHeader({
               <div className="flex h-16 items-center px-6">
                 <Link
                   href="/"
-                  className="flex min-h-[44px] items-center truncate text-sm font-bold"
+                  className="flex min-h-[44px] items-center truncate text-sm font-bold text-burgundy-dark"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  Co-duck
+                  AccrediPro CoachHub
                 </Link>
               </div>
 
               <Separator />
 
               {/* Navigation Links */}
-              <nav className="flex-1 space-y-1 px-3 py-4">
-                {navLinks.map((link) => {
-                  const Icon = link.icon;
-                  const badgeCount =
-                    link.href === '/dashboard/messages'
-                      ? unreadMessageCount
-                      : link.href === '/dashboard/iconnect'
-                        ? iconnectUnreadCount
-                        : 0;
-                  const showBadge = link.showBadge && badgeCount > 0;
-                  return (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className={cn(
-                        'flex min-h-[44px] items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-                        isActiveLink(link.href)
-                          ? 'bg-primary text-primary-foreground'
-                          : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-                      )}
-                    >
-                      <Icon className="h-4 w-4" />
-                      <span className="flex-1">{link.label}</span>
-                      {showBadge && (
-                        <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-xs font-medium text-destructive-foreground">
-                          {badgeCount > 99 ? '99+' : badgeCount}
-                        </span>
-                      )}
-                    </Link>
-                  );
-                })}
+              <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
+                <NavSections
+                  sections={sections}
+                  isActiveLink={isActiveLink}
+                  getBadgeCount={getBadgeCount}
+                  onClick={() => setMobileMenuOpen(false)}
+                />
               </nav>
 
               <Separator />
