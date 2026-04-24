@@ -32,7 +32,7 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
   const copy = SPECIALTY_COPY[slug];
-  if (!copy) return { title: 'Specialty Coaches | Co-duck' };
+  if (!copy) return { title: 'Specialty Coaches | AccrediPro CoachHub' };
 
   return {
     title: copy.metaTitle,
@@ -41,7 +41,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       title: copy.metaTitle,
       description: copy.ogDescription,
       type: 'website',
-      siteName: 'Co-duck',
+      siteName: 'AccrediPro CoachHub',
     },
     twitter: {
       card: 'summary_large_image',
@@ -258,8 +258,8 @@ export default async function SpecialtyLandingPage({ params }: PageProps) {
       <section className="mb-12">
         <h2 className="mb-5 text-2xl font-bold text-foreground">
           {coaches.length > 0
-            ? `${label} Coaches on Co-duck`
-            : `Be the first ${label} coach on Co-duck`}
+            ? `${label} Coaches on AccrediPro CoachHub`
+            : `Be the first ${label} coach on AccrediPro CoachHub`}
         </h2>
         {coaches.length > 0 ? (
           <>
@@ -340,7 +340,8 @@ export default async function SpecialtyLandingPage({ params }: PageProps) {
       <section className="rounded-2xl bg-muted/40 px-8 py-10 text-center">
         <h2 className="text-xl font-bold text-foreground">Are you a {label} coach?</h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          Join Co-duck and connect with clients who are specifically looking for your expertise.
+          Join AccrediPro CoachHub and connect with clients who are specifically looking for your
+          expertise.
         </p>
         <Link
           href="/sign-up?role=coach"

@@ -24,7 +24,7 @@ const MAX_TEXT_CHARS = 12_000; // ~3k tokens.
 /** Per-request fetch timeout. */
 const FETCH_TIMEOUT_MS = 10_000;
 
-const USER_AGENT = 'Mozilla/5.0 (compatible; CoDuckBot/1.0; +https://co-duck.com/bot)';
+const USER_AGENT = 'Mozilla/5.0 (compatible; AccrediProBot/1.0; +https://accredipro.com/bot)';
 
 /**
  * Thrown when LinkedIn blocks the request. Callers should catch this

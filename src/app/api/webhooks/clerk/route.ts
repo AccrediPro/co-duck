@@ -186,7 +186,7 @@ export async function POST(req: Request) {
       // Send welcome email (non-blocking)
       sendEmail({
         to: email,
-        subject: 'Welcome to Co-duck!',
+        subject: 'Welcome to AccrediPro CoachHub!',
         react: WelcomeEmail({
           name: name || 'there',
           unsubscribeUrl: getUnsubscribeUrl(id, 'marketing'),

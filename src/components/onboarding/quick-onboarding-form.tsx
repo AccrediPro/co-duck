@@ -340,7 +340,7 @@ export function QuickOnboardingForm(props: QuickOnboardingFormProps) {
         toast({
           title: isPublished ? 'Profile published' : 'Profile saved',
           description: isPublished
-            ? 'Your profile is now live on Co-duck.'
+            ? 'Your profile is now live on AccrediPro CoachHub.'
             : 'You can publish it anytime from your dashboard.',
         });
         if (isPublished) {

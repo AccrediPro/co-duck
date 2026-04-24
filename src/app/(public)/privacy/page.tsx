@@ -29,11 +29,11 @@ const sections = [
   {
     id: 'not-hipaa',
     icon: AlertTriangle,
-    title: '1. Co-duck Is Not a HIPAA-Covered Entity',
-    content: `Co-duck is a coaching marketplace — not a healthcare provider, health plan, or healthcare clearinghouse. This means Co-duck is **not subject to HIPAA** (the Health Insurance Portability and Accountability Act).
+    title: '1. AccrediPro CoachHub Is Not a HIPAA-Covered Entity',
+    content: `AccrediPro CoachHub is a coaching marketplace — not a healthcare provider, health plan, or healthcare clearinghouse. This means AccrediPro CoachHub is **not subject to HIPAA** (the Health Insurance Portability and Accountability Act).
 
 **What this means for you:**
-• Coaches on Co-duck are wellness and health coaches, not licensed medical providers
+• Coaches on AccrediPro CoachHub are wellness and health coaches, not licensed medical providers
 • Sessions are coaching conversations, not medical appointments
 • Information shared in sessions is not Protected Health Information (PHI) under HIPAA law
 
@@ -43,13 +43,13 @@ const sections = [
 • We never sell your personal information
 • We treat your health-related disclosures with the same care as any sensitive personal data
 
-If you are working with a licensed therapist, psychiatrist, or physician on a HIPAA-regulated platform, that platform operates under different legal obligations than Co-duck. Co-duck is a coaching supplement, not a medical record system.`,
+If you are working with a licensed therapist, psychiatrist, or physician on a HIPAA-regulated platform, that platform operates under different legal obligations than AccrediPro CoachHub. AccrediPro CoachHub is a coaching supplement, not a medical record system.`,
   },
   {
     id: 'not-medical',
     icon: Shield,
     title: '2. Coaches Are Not Medical Providers',
-    content: `Coaches on Co-duck are not licensed physicians, therapists, psychologists, or other licensed medical professionals (unless separately credentialed outside the coaching context).
+    content: `Coaches on AccrediPro CoachHub are not licensed physicians, therapists, psychologists, or other licensed medical professionals (unless separately credentialed outside the coaching context).
 
 **Important:**
 • Nothing discussed in a coaching session constitutes medical advice, diagnosis, or treatment
@@ -61,7 +61,7 @@ If you are working with a licensed therapist, psychiatrist, or physician on a HI
 • Call 911 for emergencies
 • For mental health crises, call or text 988 (Suicide & Crisis Lifeline) or text HOME to 741741 (Crisis Text Line)
 
-This disclaimer is displayed to all users on Co-duck. It is not a limitation of what coaching can do — coaching is profoundly effective for many people — it is simply an accurate description of what it is.`,
+This disclaimer is displayed to all users on AccrediPro CoachHub. It is not a limitation of what coaching can do — coaching is profoundly effective for many people — it is simply an accurate description of what it is.`,
   },
   {
     id: 'encryption',
@@ -77,7 +77,7 @@ This disclaimer is displayed to all users on Co-duck. It is not a limitation of 
 
 **Access controls:**
 • Session notes are accessible ONLY to the coach who wrote them and the client they were written for
-• Co-duck staff cannot access session content in the normal course of operations
+• AccrediPro CoachHub staff cannot access session content in the normal course of operations
 • We do not share session content with third parties, advertisers, or analytics providers
 
 **What encryption does NOT guarantee:**
@@ -89,11 +89,11 @@ This disclaimer is displayed to all users on Co-duck. It is not a limitation of 
     id: 'messaging',
     icon: MessageSquare,
     title: '4. Messaging Is Private and 1:1',
-    content: `All messages exchanged on Co-duck are 1:1 between you and your coach (or your client). There are no group chats and no broadcast messages.
+    content: `All messages exchanged on AccrediPro CoachHub are 1:1 between you and your coach (or your client). There are no group chats and no broadcast messages.
 
 **Messaging privacy:**
 • Messages are visible only to the sender and recipient
-• Co-duck staff do not monitor or read message content in the ordinary course of business
+• AccrediPro CoachHub staff do not monitor or read message content in the ordinary course of business
 • We may review messages in response to a reported safety concern, Terms of Service violation, or valid legal request
 • Messages are stored encrypted and are not used to train AI models or sold to third parties
 
@@ -108,7 +108,7 @@ This disclaimer is displayed to all users on Co-duck. It is not a limitation of 
     id: 'data-ownership',
     icon: Download,
     title: '5. You Can Export or Delete Your Data Anytime',
-    content: `You own your data on Co-duck. We are a custodian, not an owner.
+    content: `You own your data on AccrediPro CoachHub. We are a custodian, not an owner.
 
 **Export your data:**
 • Go to Settings > Data & Privacy > Export My Data to download a copy of all your personal information, session history, notes, and messages in JSON format
@@ -131,7 +131,7 @@ This disclaimer is displayed to all users on Co-duck. It is not a limitation of 
     id: 'overview',
     icon: Eye,
     title: '6. Privacy Overview',
-    content: `Co-duck ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our platform.
+    content: `AccrediPro CoachHub ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our platform.
 
 **Key Points:**
 • We collect information you provide directly and automatically through your use of the Service
@@ -140,7 +140,7 @@ This disclaimer is displayed to all users on Co-duck. It is not a limitation of 
 • You have rights regarding your personal information, including access, correction, and deletion
 • We implement security measures to protect your data
 
-By using Co-duck, you consent to the data practices described in this policy. If you do not agree with these practices, please do not use our Service.`,
+By using AccrediPro CoachHub, you consent to the data practices described in this policy. If you do not agree with these practices, please do not use our Service.`,
   },
   {
     id: 'collection',
@@ -256,7 +256,7 @@ California Residents (CCPA):
 You have additional rights including the right to know what information we collect and the right to opt out of the sale of personal information. Note: we do not sell personal information.
 
 How to exercise your rights:
-Email privacy@co-duck.com or use the Settings page. We respond within 30 days.`,
+Email privacy@accredipro.com or use the Settings page. We respond within 30 days.`,
   },
   {
     id: 'contact',
@@ -265,10 +265,10 @@ Email privacy@co-duck.com or use the Settings page. We respond within 30 days.`,
     content: `If you have questions, concerns, or requests regarding this Privacy Policy or our data practices, please contact us:
 
 Privacy Inquiries:
-Email: privacy@co-duck.com
+Email: privacy@accredipro.com
 
 General Support:
-Email: support@co-duck.com
+Email: support@accredipro.com
 Visit: /contact page
 
 Response Time:
@@ -412,11 +412,11 @@ export default function PrivacyPage() {
               {/* Introduction */}
               <div className="mb-8 rounded-lg border bg-cream p-6">
                 <p className="text-muted-foreground">
-                  At Co-duck, we take your privacy seriously — especially because our coaches often
-                  support clients through vulnerable health transitions. This Privacy Policy
-                  describes how we collect, use, share, and protect your personal information. We
-                  believe in transparency and want you to understand exactly how your data is
-                  handled.
+                  At AccrediPro CoachHub, we take your privacy seriously — especially because our
+                  coaches often support clients through vulnerable health transitions. This Privacy
+                  Policy describes how we collect, use, share, and protect your personal
+                  information. We believe in transparency and want you to understand exactly how
+                  your data is handled.
                 </p>
               </div>
 
@@ -430,7 +430,8 @@ export default function PrivacyPage() {
                   <li className="flex items-start gap-2">
                     <span className="text-burgundy">•</span>
                     <span>
-                      Co-duck is NOT a HIPAA-covered entity — coaches are not medical providers
+                      AccrediPro CoachHub is NOT a HIPAA-covered entity — coaches are not medical
+                      providers
                     </span>
                   </li>
                   <li className="flex items-start gap-2">

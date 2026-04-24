@@ -325,7 +325,7 @@ const TEST_SECTIONS = [
           },
           { id: 'email-4', text: 'Check email includes session details, date, time' },
           { id: 'email-5', text: 'Check email includes meeting link if set' },
-          { id: 'email-6', text: 'Verify emails have proper Co-duck branding' },
+          { id: 'email-6', text: 'Verify emails have proper AccrediPro CoachHub branding' },
         ],
       },
       {

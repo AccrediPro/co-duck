@@ -55,21 +55,20 @@ function getStatusBadge(status: TransactionWithClient['status']) {
   switch (status) {
     case 'succeeded':
       return (
-        <Badge
-          variant="default"
-          className="bg-sage/10 text-sage border-sage/30 hover:bg-sage/15"
-        >
+        <Badge variant="default" className="border-sage/30 bg-sage/10 text-sage hover:bg-sage/15">
           Completed
         </Badge>
       );
     case 'pending':
       return (
-        <Badge variant="secondary" className="bg-gold/10 text-gold-dark border-gold/30">
+        <Badge variant="secondary" className="border-gold/30 bg-gold/10 text-gold-dark">
           Pending
         </Badge>
       );
     case 'failed':
-      return <Badge className="bg-destructive/10 text-destructive border-transparent">Failed</Badge>;
+      return (
+        <Badge className="border-transparent bg-destructive/10 text-destructive">Failed</Badge>
+      );
     case 'refunded':
       return (
         <Badge variant="secondary" className="bg-muted text-muted-foreground">

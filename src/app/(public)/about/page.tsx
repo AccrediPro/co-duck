@@ -5,9 +5,9 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Heart, Sparkles, ArrowRight, CheckCircle, Shield, Users } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'About Us | Co-duck',
+  title: 'About Us | AccrediPro CoachHub',
   description:
-    'Co-duck connects people with credential-verified, trauma-informed coaches in hormones, menopause, ADHD, grief, and whole-person health.',
+    'AccrediPro CoachHub connects people with credential-verified, trauma-informed coaches in hormones, menopause, ADHD, grief, and whole-person health.',
 };
 
 const stats = [
@@ -49,7 +49,7 @@ const milestones = [
     year: '2023',
     title: 'Founded',
     description:
-      'Co-duck launched with one mission: make it easier to find a coach who actually gets your health journey.',
+      'AccrediPro CoachHub launched with one mission: make it easier to find a coach who actually gets your health journey.',
   },
   {
     year: '2024',
@@ -76,8 +76,8 @@ export default function AboutPage() {
               Built for the Whole You — <span className="text-gold">Not Just the Symptoms</span>
             </h1>
             <p className="mx-auto mt-6 max-w-2xl text-lg text-white/80 md:text-xl">
-              At Co-duck, we connect you with credential-verified coaches who understand hormones,
-              trauma, ADHD, grief, menopause, and the ways your body and life intersect.
+              At AccrediPro CoachHub, we connect you with credential-verified coaches who understand
+              hormones, trauma, ADHD, grief, menopause, and the ways your body and life intersect.
             </p>
           </div>
         </div>
@@ -110,8 +110,8 @@ export default function AboutPage() {
               Too many people spend years in doctors&apos; offices being told their labs are
               &quot;normal&quot; while they feel anything but. We believe you deserve support from
               someone who understands how hormones, nervous system dysregulation, life transitions,
-              and whole-body health connect. Co-duck exists to make that kind of coach findable,
-              affordable, and accountable — with credentials you can actually verify.
+              and whole-body health connect. AccrediPro CoachHub exists to make that kind of coach
+              findable, affordable, and accountable — with credentials you can actually verify.
             </p>
           </div>
         </div>
@@ -125,7 +125,7 @@ export default function AboutPage() {
               What We Stand For
             </h2>
             <p className="mt-4 text-muted-foreground">
-              The principles that guide every decision on Co-duck.
+              The principles that guide every decision on AccrediPro CoachHub.
             </p>
           </div>
           <div className="mt-16 grid gap-8 md:grid-cols-2 lg:grid-cols-4">
@@ -151,7 +151,9 @@ export default function AboutPage() {
             <h2 className="text-3xl font-bold tracking-tight text-burgundy-dark md:text-4xl">
               Our Journey
             </h2>
-            <p className="mt-4 text-muted-foreground">Key milestones in the Co-duck story.</p>
+            <p className="mt-4 text-muted-foreground">
+              Key milestones in the AccrediPro CoachHub story.
+            </p>
           </div>
           <div className="mx-auto mt-16 max-w-3xl">
             <div className="space-y-8">
@@ -183,7 +185,7 @@ export default function AboutPage() {
           <div className="grid items-center gap-12 lg:grid-cols-2">
             <div>
               <h2 className="text-3xl font-bold tracking-tight text-burgundy-dark md:text-4xl">
-                What Makes Co-duck Different
+                What Makes AccrediPro CoachHub Different
               </h2>
               <p className="mt-4 text-lg text-muted-foreground">
                 We&apos;re not a generic marketplace. Every feature was built with health and

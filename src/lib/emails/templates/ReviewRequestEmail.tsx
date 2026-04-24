@@ -19,7 +19,7 @@ export function ReviewRequestEmail({
   coachSlug,
   unsubscribeUrl,
 }: ReviewRequestEmailProps) {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://co-duck.com';
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://accredipro.com';
 
   return (
     <EmailLayout

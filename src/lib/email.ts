@@ -35,7 +35,7 @@ export async function sendEmail({
   to,
   subject,
   react,
-  from = 'Co-duck <noreply@co-duck.com>',
+  from = 'AccrediPro CoachHub <noreply@accredipro.com>',
   headers,
 }: SendEmailOptions): Promise<SendEmailResult> {
   if (!resend) {

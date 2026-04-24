@@ -130,10 +130,7 @@ export function PaymentsContent({ initialData, setupStatus, earningsData }: Paym
     switch (onboardingStatus) {
       case 'complete':
         return (
-          <Badge
-            variant="default"
-            className="bg-sage/10 text-sage border-sage/30 hover:bg-sage/15"
-          >
+          <Badge variant="default" className="border-sage/30 bg-sage/10 text-sage hover:bg-sage/15">
             <CheckCircle className="mr-1 h-3 w-3" />
             Active
           </Badge>
