@@ -58,7 +58,7 @@ export default async function DashboardPage() {
   const displayName = clerkUser?.firstName || user?.name || 'User';
 
   return (
-    <div className="mx-auto max-w-7xl">
+    <div className="w-full">
       {/* Page Header Card */}
       <Card className="mb-6">
         <CardHeader>
