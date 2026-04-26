@@ -15,7 +15,7 @@ export function TodaysSchedule({ sessions }: TodaysScheduleProps) {
   const now = new Date();
 
   return (
-    <Card className="col-span-2 border-t-4 border-t-burgundy">
+    <Card className="border-t-4 border-t-burgundy">
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="flex items-center gap-2">
           <div className="rounded-full bg-burgundy/10 p-1.5">
@@ -29,7 +29,16 @@ export function TodaysSchedule({ sessions }: TodaysScheduleProps) {
       </CardHeader>
       <CardContent>
         {sessions.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No sessions scheduled for today.</p>
+          <div className="flex flex-col items-center py-6 text-center">
+            <Calendar className="mb-2 h-10 w-10 text-muted-foreground/20" />
+            <p className="text-sm font-medium text-muted-foreground">No sessions today</p>
+            <p className="mb-3 text-xs text-muted-foreground/70">
+              Your schedule is clear for the day
+            </p>
+            <Button size="sm" variant="outline" asChild>
+              <Link href="/dashboard/availability">View Availability</Link>
+            </Button>
+          </div>
         ) : (
           <div className="space-y-3">
             {sessions.map((session) => {

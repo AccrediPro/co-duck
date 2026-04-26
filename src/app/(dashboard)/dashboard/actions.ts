@@ -62,6 +62,7 @@ export interface CoachDashboardData {
     sessionsThisMonth: number;
     totalSessions: number;
   };
+  averageRating: number;
   profile: {
     isPublished: boolean;
     completionPercentage: number;
@@ -74,6 +75,7 @@ export interface ClientDashboardData {
   unreadMessageCount: number;
   recentMessages: MessagePreview[];
   pendingActionItemsCount: number;
+  distinctCoachCount: number;
   recentActionItems: Array<{
     id: number;
     title: string;
@@ -212,6 +214,7 @@ export async function getCoachDashboardData(): Promise<
           completionPercentage: coachProfiles.profileCompletionPercentage,
           slug: coachProfiles.slug,
           currency: coachProfiles.currency,
+          averageRating: coachProfiles.averageRating,
         })
         .from(coachProfiles)
         .where(eq(coachProfiles.userId, userId))
@@ -308,6 +311,7 @@ export async function getCoachDashboardData(): Promise<
         recentMessages: recentMessagesData,
         pendingActionItemsCount: Number(pendingItemsResult[0]?.count || 0),
         pendingBookingRequests: Number(pendingBookingRequestsResult[0]?.count || 0),
+        averageRating: parseFloat(profile.averageRating || '0'),
         sessionStats: {
           distinctClients: Number(distinctClientsResult[0]?.count || 0),
           sessionsThisMonth: Number(sessionsThisMonthResult[0]?.count || 0),
@@ -347,6 +351,7 @@ export async function getClientDashboardData(): Promise<
       recentItemsRaw,
       completedSessionsResult,
       totalHoursResult,
+      distinctCoachesResult,
     ] = await Promise.all([
       // Upcoming sessions with coach info (next 5)
       db
@@ -415,6 +420,17 @@ export async function getClientDashboardData(): Promise<
         })
         .from(bookings)
         .where(and(eq(bookings.clientId, userId), eq(bookings.status, 'completed'))),
+
+      // Distinct coaches
+      db
+        .select({ count: sql<number>`COUNT(DISTINCT ${bookings.coachId})` })
+        .from(bookings)
+        .where(
+          and(
+            eq(bookings.clientId, userId),
+            or(eq(bookings.status, 'confirmed'), eq(bookings.status, 'completed'))
+          )
+        ),
     ]);
 
     const upcomingSessions = upcomingSessionsRaw.map((s) => ({
@@ -432,6 +448,7 @@ export async function getClientDashboardData(): Promise<
         unreadMessageCount: unreadCount,
         recentMessages: recentMessagesData,
         pendingActionItemsCount: Number(pendingItemsResult[0]?.count || 0),
+        distinctCoachCount: Number(distinctCoachesResult[0]?.count || 0),
         recentActionItems: recentItemsRaw,
         sessionHistory: {
           completedCount: Number(completedSessionsResult[0]?.count || 0),

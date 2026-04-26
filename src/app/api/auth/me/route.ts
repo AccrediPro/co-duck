@@ -9,8 +9,8 @@
 
 import { auth } from '@clerk/nextjs/server';
 import { db } from '@/db';
-import { users, coachProfiles } from '@/db/schema';
-import { eq } from 'drizzle-orm';
+import { users, coachProfiles, coachAvailability } from '@/db/schema';
+import { eq, and, sql } from 'drizzle-orm';
 import { z } from 'zod';
 import { rateLimit, FREQUENT_LIMIT, WRITE_LIMIT, rateLimitResponse } from '@/lib/rate-limit';
 
@@ -81,12 +81,23 @@ export async function GET(request: Request) {
       );
     }
 
-    // If user is a coach, include coach profile
+    // If user is a coach, include coach profile + availability check
     let coachProfile = null;
+    let hasAvailability = false;
     if (user.role === 'coach') {
-      coachProfile = await db.query.coachProfiles.findFirst({
-        where: eq(coachProfiles.userId, userId),
-      });
+      const [profile, availabilityCount] = await Promise.all([
+        db.query.coachProfiles.findFirst({
+          where: eq(coachProfiles.userId, userId),
+        }),
+        db
+          .select({ count: sql<number>`count(*)` })
+          .from(coachAvailability)
+          .where(
+            and(eq(coachAvailability.coachId, userId), eq(coachAvailability.isAvailable, true))
+          ),
+      ]);
+      coachProfile = profile ?? null;
+      hasAvailability = Number(availabilityCount[0]?.count ?? 0) > 0;
     }
 
     return Response.json({
@@ -109,6 +120,8 @@ export async function GET(request: Request) {
               sessionTypes: coachProfile.sessionTypes,
               isPublished: coachProfile.isPublished,
               stripeOnboardingComplete: coachProfile.stripeOnboardingComplete,
+              stripeAccountId: coachProfile.stripeAccountId,
+              hasAvailability,
             }
           : null,
       },

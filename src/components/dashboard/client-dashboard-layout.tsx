@@ -4,6 +4,9 @@ import { ActionItemsWidget } from './action-items-widget';
 import { RecentMessagesWidget } from './recent-messages-widget';
 import { ClientSessionHistory } from './client-session-history';
 import { QuickActions } from './quick-actions';
+import { ClientStatsBar } from './client-stats-bar';
+import { ActivityFeed } from './activity-feed';
+import { DailyTip } from './daily-tip';
 import type { ClientDashboardData } from '@/app/(dashboard)/dashboard/actions';
 
 interface ClientDashboardLayoutProps {
@@ -13,30 +16,41 @@ interface ClientDashboardLayoutProps {
 export function ClientDashboardLayout({ data }: ClientDashboardLayoutProps) {
   return (
     <div className="space-y-6">
-      {/* Row 1: Upcoming Sessions + Find a Coach CTA */}
-      <div className="grid gap-4 lg:grid-cols-3">
-        <ClientUpcomingSessions sessions={data.upcomingSessions} />
-        <FindCoachCta />
-      </div>
+      {/* Stats Bar */}
+      <ClientStatsBar
+        coachCount={data.distinctCoachCount}
+        upcomingSessions={data.upcomingSessions.length}
+        completedSessions={data.sessionHistory.completedCount}
+        pendingActionItems={data.pendingActionItemsCount}
+      />
 
-      {/* Row 2: Action Items + Messages + Session History */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <ActionItemsWidget
-          count={data.pendingActionItemsCount}
-          recentItems={data.recentActionItems}
-        />
-        <RecentMessagesWidget
-          messages={data.recentMessages}
-          unreadCount={data.unreadMessageCount}
-        />
-        <ClientSessionHistory
-          completedCount={data.sessionHistory.completedCount}
-          totalHours={data.sessionHistory.totalHours}
-        />
-      </div>
+      {/* Two-Column Asymmetric Layout */}
+      <div className="grid gap-6 lg:grid-cols-3">
+        {/* Left Column (2/3) */}
+        <div className="space-y-6 lg:col-span-2">
+          <ClientUpcomingSessions sessions={data.upcomingSessions} />
+          <ActionItemsWidget
+            count={data.pendingActionItemsCount}
+            recentItems={data.recentActionItems}
+          />
+          <ClientSessionHistory
+            completedCount={data.sessionHistory.completedCount}
+            totalHours={data.sessionHistory.totalHours}
+          />
+        </div>
 
-      {/* Row 3: Quick Actions */}
-      <QuickActions role="client" />
+        {/* Right Column (1/3) */}
+        <div className="space-y-6">
+          <FindCoachCta />
+          <ActivityFeed />
+          <RecentMessagesWidget
+            messages={data.recentMessages}
+            unreadCount={data.unreadMessageCount}
+          />
+          <QuickActions role="client" />
+          <DailyTip />
+        </div>
+      </div>
     </div>
   );
 }

@@ -75,7 +75,7 @@ export function CalendarView() {
   const selectedSessions = selectedDay ? sessionsByDay.get(selectedDay) || [] : [];
 
   return (
-    <Card className="col-span-2">
+    <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="flex items-center gap-2">
           <Calendar className="h-5 w-5" />

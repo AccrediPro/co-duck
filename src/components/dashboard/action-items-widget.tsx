@@ -65,7 +65,14 @@ export function ActionItemsWidget({ count, recentItems }: ActionItemsWidgetProps
       </CardHeader>
       <CardContent>
         {recentItems.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No pending action items.</p>
+          <div className="flex flex-col items-center py-6 text-center">
+            <CheckSquare className="mb-2 h-10 w-10 text-muted-foreground/20" />
+            <p className="text-sm font-medium text-muted-foreground">No pending action items</p>
+            <p className="mb-3 text-xs text-muted-foreground/70">You&apos;re all caught up!</p>
+            <Button size="sm" variant="outline" asChild>
+              <Link href="/dashboard/action-items">View All Items</Link>
+            </Button>
+          </div>
         ) : (
           <div className="space-y-2">
             {recentItems.map((item) => {
