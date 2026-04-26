@@ -56,7 +56,16 @@ export function UpcomingSessionsWidget({ sessions }: UpcomingSessionsWidgetProps
       </CardHeader>
       <CardContent>
         {sessions.length === 0 ? (
-          <p className="text-sm text-muted-foreground">No upcoming sessions.</p>
+          <div className="flex flex-col items-center py-6 text-center">
+            <Clock className="mb-2 h-10 w-10 text-muted-foreground/20" />
+            <p className="text-sm font-medium text-muted-foreground">No upcoming sessions</p>
+            <p className="mb-3 text-xs text-muted-foreground/70">
+              Sessions will appear here once booked
+            </p>
+            <Button size="sm" variant="outline" asChild>
+              <Link href="/dashboard/sessions">View Sessions</Link>
+            </Button>
+          </div>
         ) : (
           <div className="space-y-3">
             {sessions.map((session) => {

@@ -25,7 +25,7 @@ function getRelativeTime(date: Date): string {
 
 export function ClientUpcomingSessions({ sessions }: ClientUpcomingSessionsProps) {
   return (
-    <Card className="col-span-2">
+    <Card>
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle className="flex items-center gap-2 text-burgundy-dark">
           <Calendar className="h-5 w-5" />

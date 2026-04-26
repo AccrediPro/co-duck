@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ClipboardCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface ClientCheckIn {
@@ -82,7 +83,11 @@ export function CheckInOverview() {
       </CardHeader>
       <CardContent>
         {clients.length === 0 ? (
-          <p className="py-6 text-center text-sm text-muted-foreground">No check-ins this week</p>
+          <div className="flex flex-col items-center py-6 text-center">
+            <ClipboardCheck className="mb-2 h-10 w-10 text-muted-foreground/20" />
+            <p className="text-sm font-medium text-muted-foreground">No check-ins this week</p>
+            <p className="text-xs text-muted-foreground/70">Client check-ins will appear here</p>
+          </div>
         ) : (
           <div className="space-y-1">
             {clients.map((client) => {
