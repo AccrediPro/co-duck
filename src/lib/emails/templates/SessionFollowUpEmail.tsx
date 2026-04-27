@@ -31,7 +31,7 @@ export function SessionFollowUpEmail({
         style={{
           fontSize: '22px',
           fontWeight: '600',
-          color: '#5d262d',
+          color: '#0F766E',
           marginBottom: '16px',
         }}
       >

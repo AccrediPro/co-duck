@@ -16,9 +16,9 @@ interface CheckInEntry {
 }
 
 const MOOD_CONFIG = {
-  good: { y: 20, color: '#8b9a64', emoji: '😊', label: 'Good' },
-  okay: { y: 50, color: '#d4af37', emoji: '😐', label: 'Okay' },
-  struggling: { y: 80, color: '#722f37', emoji: '😔', label: 'Struggling' },
+  good: { y: 20, color: '#22C55E', emoji: '😊', label: 'Good' },
+  okay: { y: 50, color: '#F97316', emoji: '😐', label: 'Okay' },
+  struggling: { y: 80, color: '#0D9488', emoji: '😔', label: 'Struggling' },
 } as const;
 
 export function CheckInHistory() {
@@ -174,7 +174,7 @@ function MoodChart({ entries }: { entries: CheckInEntry[] }) {
 
         {/* Connecting line */}
         {linePath && (
-          <path d={linePath} fill="none" stroke="#722f37" strokeWidth={2} strokeOpacity={0.4} />
+          <path d={linePath} fill="none" stroke="#0D9488" strokeWidth={2} strokeOpacity={0.4} />
         )}
 
         {/* Dots */}

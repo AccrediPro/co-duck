@@ -15,7 +15,7 @@ interface ClientDashboardLayoutProps {
 
 export function ClientDashboardLayout({ data }: ClientDashboardLayoutProps) {
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Stats Bar */}
       <ClientStatsBar
         coachCount={data.distinctCoachCount}
@@ -25,32 +25,34 @@ export function ClientDashboardLayout({ data }: ClientDashboardLayoutProps) {
       />
 
       {/* Two-Column Asymmetric Layout */}
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-4 lg:grid-cols-3">
         {/* Left Column (2/3) */}
-        <div className="space-y-6 lg:col-span-2">
+        <div className="space-y-4 lg:col-span-2">
           <ClientUpcomingSessions sessions={data.upcomingSessions} />
           <ActionItemsWidget
             count={data.pendingActionItemsCount}
             recentItems={data.recentActionItems}
           />
-          <ClientSessionHistory
-            completedCount={data.sessionHistory.completedCount}
-            totalHours={data.sessionHistory.totalHours}
-          />
+          <ActivityFeed />
         </div>
 
         {/* Right Column (1/3) */}
-        <div className="space-y-6">
+        <div className="space-y-4">
           <FindCoachCta />
-          <ActivityFeed />
+          <DailyTip />
           <RecentMessagesWidget
             messages={data.recentMessages}
             unreadCount={data.unreadMessageCount}
           />
           <QuickActions role="client" />
-          <DailyTip />
         </div>
       </div>
+
+      {/* Session History + Messages — full width at bottom */}
+      <ClientSessionHistory
+        completedCount={data.sessionHistory.completedCount}
+        totalHours={data.sessionHistory.totalHours}
+      />
     </div>
   );
 }
