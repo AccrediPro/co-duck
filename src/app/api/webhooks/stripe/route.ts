@@ -1450,7 +1450,8 @@ async function handleCoachInvoiceFinalized(invoice: Stripe.Invoice, accountId: s
   // state if events arrive out of order.
   if (row.status === 'draft') {
     setClause.status = 'open';
-    setClause.finalizedAt = row.finalizedAt ?? transitionDate(invoice.status_transitions?.finalized_at);
+    setClause.finalizedAt =
+      row.finalizedAt ?? transitionDate(invoice.status_transitions?.finalized_at);
   }
 
   await db.update(invoices).set(setClause).where(eq(invoices.id, row.id));
@@ -1488,8 +1489,7 @@ async function handleCoachInvoicePaid(invoice: Stripe.Invoice, accountId: string
       invoiceNumber: invoice.number ?? undefined,
       hostedInvoiceUrl: invoice.hosted_invoice_url ?? undefined,
       invoicePdfUrl: invoice.invoice_pdf ?? undefined,
-      finalizedAt:
-        row.finalizedAt ?? transitionDate(invoice.status_transitions?.finalized_at),
+      finalizedAt: row.finalizedAt ?? transitionDate(invoice.status_transitions?.finalized_at),
       updatedAt: new Date(),
     })
     .where(eq(invoices.id, row.id));
@@ -1551,7 +1551,9 @@ async function handleCoachInvoiceUncollectible(invoice: Stripe.Invoice, accountI
   const stripeInvoiceId = invoice.id;
   if (!stripeInvoiceId) return;
 
-  console.log(`Stripe webhook: invoice.marked_uncollectible ${stripeInvoiceId} (account=${accountId})`);
+  console.log(
+    `Stripe webhook: invoice.marked_uncollectible ${stripeInvoiceId} (account=${accountId})`
+  );
 
   const row = await findCoachInvoiceRow(stripeInvoiceId, accountId);
   if (!row) {
