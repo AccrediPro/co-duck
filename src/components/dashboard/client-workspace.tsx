@@ -326,11 +326,11 @@ export function ClientWorkspace({
         <TabsList>
           <TabsTrigger value="programs" className="gap-1.5">
             <BookOpen className="h-4 w-4" />
-            Programmi
+            Programs
           </TabsTrigger>
           <TabsTrigger value="invoices" className="gap-1.5">
             <Receipt className="h-4 w-4" />
-            Fatture
+            Invoices
           </TabsTrigger>
         </TabsList>
 

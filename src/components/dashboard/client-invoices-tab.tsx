@@ -50,12 +50,12 @@ function formatMoney(cents: number, currency: string): string {
 }
 
 const statusConfig: Record<InvoiceStatus, { label: string; className: string }> = {
-  draft: { label: 'Bozza', className: 'bg-muted text-muted-foreground' },
-  open: { label: 'Da pagare', className: 'bg-primary/10 text-primary' },
-  paid: { label: 'Pagata', className: 'bg-sage/10 text-sage' },
-  void: { label: 'Annullata', className: 'bg-muted text-muted-foreground line-through' },
+  draft: { label: 'Draft', className: 'bg-muted text-muted-foreground' },
+  open: { label: 'Open', className: 'bg-primary/10 text-primary' },
+  paid: { label: 'Paid', className: 'bg-sage/10 text-sage' },
+  void: { label: 'Void', className: 'bg-muted text-muted-foreground line-through' },
   uncollectible: {
-    label: 'Non riscuotibile',
+    label: 'Uncollectible',
     className: 'bg-destructive/10 text-destructive',
   },
 };
@@ -89,10 +89,10 @@ export function ClientInvoicesTab({ clientId }: { clientId: string }) {
       if (json.success) {
         setInvoices(json.data?.invoices ?? []);
       } else {
-        setError(json.error?.message || 'Impossibile caricare le fatture');
+        setError(json.error?.message || 'Unable to load invoices');
       }
     } catch {
-      setError('Errore di rete durante il caricamento delle fatture');
+      setError('Network error while loading invoices');
     } finally {
       setLoading(false);
     }
@@ -106,10 +106,10 @@ export function ClientInvoicesTab({ clientId }: { clientId: string }) {
     setInvoices((prev) => [invoice, ...prev]);
     setShowCreate(false);
     toast({
-      title: 'Fattura creata',
+      title: 'Invoice created',
       description: invoice.invoiceNumber
-        ? `Fattura ${invoice.invoiceNumber}`
-        : 'La fattura è stata creata',
+        ? `Invoice ${invoice.invoiceNumber}`
+        : 'The invoice has been created',
     });
     fetchInvoices();
   };
@@ -117,12 +117,10 @@ export function ClientInvoicesTab({ clientId }: { clientId: string }) {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <p className="text-sm text-muted-foreground">
-          Fatture emesse a questo cliente tramite Stripe.
-        </p>
+        <p className="text-sm text-muted-foreground">Invoices issued to this client via Stripe.</p>
         <Button size="sm" onClick={() => setShowCreate(true)}>
           <Plus className="mr-1 h-4 w-4" />
-          Crea fattura
+          Create invoice
         </Button>
       </div>
 
@@ -136,7 +134,7 @@ export function ClientInvoicesTab({ clientId }: { clientId: string }) {
             <AlertCircle className="mb-4 h-10 w-10 text-destructive" />
             <p className="text-sm font-medium">{error}</p>
             <Button variant="outline" size="sm" className="mt-4" onClick={fetchInvoices}>
-              Riprova
+              Retry
             </Button>
           </CardContent>
         </Card>
@@ -144,13 +142,13 @@ export function ClientInvoicesTab({ clientId }: { clientId: string }) {
         <Card>
           <CardContent className="flex flex-col items-center py-12 text-center">
             <Receipt className="mb-4 h-12 w-12 text-muted-foreground" />
-            <p className="text-lg font-medium">Nessuna fattura</p>
+            <p className="text-lg font-medium">No invoices</p>
             <p className="mb-4 text-sm text-muted-foreground">
-              Crea la prima fattura per questo cliente.
+              Create the first invoice for this client.
             </p>
             <Button size="sm" onClick={() => setShowCreate(true)}>
               <Plus className="mr-1 h-4 w-4" />
-              Crea fattura
+              Create invoice
             </Button>
           </CardContent>
         </Card>
@@ -177,7 +175,7 @@ function InvoiceRow({ invoice }: { invoice: Invoice }) {
     <div className="flex flex-col gap-3 rounded-lg border p-3 sm:flex-row sm:items-center sm:justify-between">
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="font-semibold">{invoice.invoiceNumber || 'Bozza'}</span>
+          <span className="font-semibold">{invoice.invoiceNumber || 'Draft'}</span>
           <InvoiceStatusBadge status={invoice.status} />
         </div>
         {invoice.description && (
@@ -188,7 +186,7 @@ function InvoiceRow({ invoice }: { invoice: Invoice }) {
           {invoice.dueDate && (
             <span className="flex items-center gap-1">
               <Clock className="h-3 w-3" />
-              Scadenza {formatDate(invoice.dueDate)}
+              Due {formatDate(invoice.dueDate)}
             </span>
           )}
         </div>
@@ -205,8 +203,8 @@ function InvoiceRow({ invoice }: { invoice: Invoice }) {
                 href={invoice.hostedInvoiceUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label="Apri pagina di pagamento Stripe"
-                title="Apri pagina di pagamento"
+                aria-label="Open Stripe payment page"
+                title="Open payment page"
               >
                 <ExternalLink className="h-4 w-4" />
               </a>
@@ -218,8 +216,8 @@ function InvoiceRow({ invoice }: { invoice: Invoice }) {
                 href={invoice.invoicePdfUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label="Scarica PDF della fattura"
-                title="Scarica PDF"
+                aria-label="Download invoice PDF"
+                title="Download PDF"
               >
                 <Download className="h-4 w-4" />
               </a>
@@ -279,12 +277,12 @@ function CreateInvoiceDialog({
 
     const trimmedDesc = description.trim();
     if (!trimmedDesc) {
-      setFormError('Inserisci una descrizione.');
+      setFormError('Enter a description.');
       return;
     }
     const amountCents = parseAmountCents(amount);
     if (amountCents === null) {
-      setFormError('Inserisci un importo valido maggiore di zero (es. 150.00).');
+      setFormError('Enter a valid amount greater than zero (e.g. 150.00).');
       return;
     }
 
@@ -305,14 +303,14 @@ function CreateInvoiceDialog({
         onCreated(json.data);
         resetForm();
       } else {
-        const msg = json.error?.message || 'Impossibile creare la fattura';
+        const msg = json.error?.message || 'Unable to create the invoice';
         setFormError(msg);
-        toast({ title: 'Errore', description: msg, variant: 'destructive' });
+        toast({ title: 'Error', description: msg, variant: 'destructive' });
       }
     } catch {
-      const msg = 'Si è verificato un errore imprevisto';
+      const msg = 'An unexpected error occurred';
       setFormError(msg);
-      toast({ title: 'Errore', description: msg, variant: 'destructive' });
+      toast({ title: 'Error', description: msg, variant: 'destructive' });
     } finally {
       setLoading(false);
     }
@@ -328,27 +326,28 @@ function CreateInvoiceDialog({
     >
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Nuova fattura</DialogTitle>
+          <DialogTitle>New invoice</DialogTitle>
           <DialogDescription>
-            Crea e finalizza una fattura Stripe per questo cliente. Riceverà un link di pagamento.
+            Create and finalize a Stripe invoice for this client. They&apos;ll receive a payment
+            link.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label htmlFor="inv-desc">Descrizione *</Label>
+              <Label htmlFor="inv-desc">Description *</Label>
               <Textarea
                 id="inv-desc"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="es. Pacchetto coaching — Giugno"
+                placeholder="e.g. Coaching package — June"
                 rows={2}
                 required
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="inv-amount">Importo (USD) *</Label>
+                <Label htmlFor="inv-amount">Amount (USD) *</Label>
                 <Input
                   id="inv-amount"
                   inputMode="decimal"
@@ -359,8 +358,8 @@ function CreateInvoiceDialog({
                 />
               </div>
               <div className="space-y-2">
-                <Label>Scadenza</Label>
-                <DatePicker value={dueDate} onChange={setDueDate} placeholder="Data scadenza" />
+                <Label>Due date</Label>
+                <DatePicker value={dueDate} onChange={setDueDate} placeholder="Due date" />
               </div>
             </div>
             {formError && (
@@ -372,11 +371,11 @@ function CreateInvoiceDialog({
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Annulla
+              Cancel
             </Button>
             <Button type="submit" disabled={loading}>
               {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Crea fattura
+              Create invoice
             </Button>
           </DialogFooter>
         </form>

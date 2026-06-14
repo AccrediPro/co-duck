@@ -519,7 +519,7 @@ export type InvoicingEligibilityResult =
  * this returns a freshly generated account onboarding link so the UI can offer
  * a one-click re-link without a separate round-trip.
  *
- * The invoice-create route (Wave B2) and the Fatture tab (Wave B3) consume this
+ * The invoice-create route (Wave B2) and the Invoices tab (Wave B3) consume this
  * to decide whether to allow invoice creation.
  */
 export async function getInvoicingEligibility(): Promise<InvoicingEligibilityResult> {
