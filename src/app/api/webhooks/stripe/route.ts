@@ -24,6 +24,7 @@ import { stripe } from '@/lib/stripe';
 import { db, bookings, transactions, users, coachProfiles } from '@/db';
 import { memberships, membershipSubscriptions } from '@/db/schema';
 import { packages, packagePurchases, coachSubscriptions } from '@/db/schema';
+import { invoices } from '@/db/schema';
 import { eq, and, gte } from 'drizzle-orm';
 import type Stripe from 'stripe';
 import { getOrCreateConversationInternal, sendSystemMessage } from '@/lib/conversations';
@@ -148,6 +149,13 @@ export async function POST(req: Request) {
         break;
       }
 
+      case 'account.updated': {
+        // Connect onboarding/capability change — sync charges/payouts/details
+        // flags onto the coach profile (Connect hardening).
+        await handleAccountUpdated(event.data.object as Stripe.Account);
+        break;
+      }
+
       // ---- Package purchase (P0-05) ----
       // checkout.session.completed is already handled above but dispatches
       // to handlePackageCheckoutCompleted when metadata.type === 'package'
@@ -181,6 +189,38 @@ export async function POST(req: Request) {
       case 'invoice.payment_failed': {
         // Flip to past_due; grace window handled via subscription.updated.
         await handleInvoicePaymentFailed(event.data.object as Stripe.Invoice);
+        break;
+      }
+
+      // ---- Coach-issued invoices (direct charge on connected account) ----
+      // Distinct from the membership/subscription invoice.payment_* events
+      // above. These sync the `invoices` table by stripeInvoiceId. Events for
+      // invoices we don't track (e.g. subscription invoices) no-op naturally
+      // because no matching row exists. `event.account` is the coach's
+      // connected account id, used for multi-tenant scoping.
+      case 'invoice.finalized': {
+        await handleCoachInvoiceFinalized(
+          event.data.object as Stripe.Invoice,
+          event.account ?? null
+        );
+        break;
+      }
+
+      case 'invoice.paid': {
+        await handleCoachInvoicePaid(event.data.object as Stripe.Invoice, event.account ?? null);
+        break;
+      }
+
+      case 'invoice.voided': {
+        await handleCoachInvoiceVoided(event.data.object as Stripe.Invoice, event.account ?? null);
+        break;
+      }
+
+      case 'invoice.marked_uncollectible': {
+        await handleCoachInvoiceUncollectible(
+          event.data.object as Stripe.Invoice,
+          event.account ?? null
+        );
         break;
       }
 
@@ -1273,4 +1313,263 @@ async function handleSubscriptionDeleted(sub: Stripe.Subscription) {
     .where(eq(coachSubscriptions.coachId, coachId));
 
   console.log(`Stripe webhook [subscription]: Marked canceled for coach ${coachId}`);
+}
+
+// ============================================================================
+// CONNECT HARDENING: account.updated
+// ============================================================================
+
+/**
+ * Handles the `account.updated` event for a coach's connected account.
+ *
+ * Stripe fires this whenever a connected account's onboarding state or
+ * capabilities change. We mirror the three Connect flags onto the coach
+ * profile so the rest of the app (invoice gating, UI nudges) can read a fresh
+ * local copy without round-tripping to Stripe:
+ * - `charges_enabled`  → `coachProfiles.chargesEnabled`
+ * - `payouts_enabled`  → `coachProfiles.payoutsEnabled`
+ * - `details_submitted`→ `coachProfiles.detailsSubmitted`
+ *
+ * When the account is fully usable (details submitted AND charges enabled) we
+ * also flip `stripeOnboardingComplete` to true. Consistent with the existing
+ * status-check flow, we never flip it back to false here to avoid unpublishing
+ * a coach on a transient capability blip.
+ *
+ * @param account - The updated Stripe Account object from the event.
+ */
+async function handleAccountUpdated(account: Stripe.Account) {
+  const accountId = account.id;
+  console.log(`Stripe webhook: account.updated for ${accountId}`);
+
+  if (!accountId) {
+    console.error('Stripe webhook: account.updated event missing account id');
+    return;
+  }
+
+  const profile = await db.query.coachProfiles.findFirst({
+    where: eq(coachProfiles.stripeAccountId, accountId),
+  });
+
+  if (!profile) {
+    console.log(`Stripe webhook: no coach profile for connected account ${accountId}`);
+    return;
+  }
+
+  const chargesEnabled = !!account.charges_enabled;
+  const payoutsEnabled = !!account.payouts_enabled;
+  const detailsSubmitted = !!account.details_submitted;
+  const onboardingComplete = detailsSubmitted && chargesEnabled;
+
+  await db
+    .update(coachProfiles)
+    .set({
+      chargesEnabled,
+      payoutsEnabled,
+      detailsSubmitted,
+      // Only ever flip to true here (never false) — mirrors checkStripeAccountStatus.
+      ...(onboardingComplete && !profile.stripeOnboardingComplete
+        ? { stripeOnboardingComplete: true }
+        : {}),
+    })
+    .where(eq(coachProfiles.userId, profile.userId));
+
+  console.log(
+    `Stripe webhook: synced Connect flags for coach ${profile.userId} ` +
+      `(charges=${chargesEnabled}, payouts=${payoutsEnabled}, details=${detailsSubmitted})`
+  );
+}
+
+// ============================================================================
+// COACH-ISSUED INVOICES: invoice.* sync (direct charge on connected account)
+// ============================================================================
+
+/**
+ * Looks up the local `invoices` row for a Stripe invoice id, scoping by the
+ * coach that owns the connected account when `accountId` is available.
+ *
+ * Returns `null` when no row matches — this is the natural filter that makes
+ * the coach-invoice handlers no-op for invoices we don't track (e.g. platform
+ * subscription/membership invoices, which live in `membership_subscriptions`).
+ *
+ * @param stripeInvoiceId - The Stripe invoice id (`in_...`).
+ * @param accountId - The connected account id from `event.account`, if present.
+ */
+async function findCoachInvoiceRow(stripeInvoiceId: string, accountId: string | null) {
+  // Resolve the coach from the connected account for multi-tenant scoping.
+  let coachId: string | null = null;
+  if (accountId) {
+    const profile = await db.query.coachProfiles.findFirst({
+      where: eq(coachProfiles.stripeAccountId, accountId),
+    });
+    coachId = profile?.userId ?? null;
+  }
+
+  const where = coachId
+    ? and(eq(invoices.stripeInvoiceId, stripeInvoiceId), eq(invoices.coachId, coachId))
+    : eq(invoices.stripeInvoiceId, stripeInvoiceId);
+
+  return db.query.invoices.findFirst({ where });
+}
+
+/**
+ * Converts a Stripe `status_transitions` unix timestamp (seconds) to a Date,
+ * falling back to "now" when Stripe didn't provide one.
+ */
+function transitionDate(unixSeconds: number | null | undefined): Date {
+  return unixSeconds ? new Date(unixSeconds * 1000) : new Date();
+}
+
+/**
+ * Handles `invoice.finalized` for a coach-issued invoice.
+ *
+ * Persists the Stripe-assigned `number`, `hosted_invoice_url`, `invoice_pdf`
+ * and flips status `draft` → `open`. Idempotent: re-running won't downgrade an
+ * already-paid/void row (status is only moved off `draft`), and the URLs/number
+ * are filled in even if a later event arrived first.
+ */
+async function handleCoachInvoiceFinalized(invoice: Stripe.Invoice, accountId: string | null) {
+  const stripeInvoiceId = invoice.id;
+  if (!stripeInvoiceId) return;
+
+  console.log(`Stripe webhook: invoice.finalized ${stripeInvoiceId} (account=${accountId})`);
+
+  const row = await findCoachInvoiceRow(stripeInvoiceId, accountId);
+  if (!row) {
+    console.log(`Stripe webhook: no coach invoice row for ${stripeInvoiceId}, ignoring finalize`);
+    return;
+  }
+
+  const setClause: Partial<typeof invoices.$inferInsert> = {
+    invoiceNumber: invoice.number ?? undefined,
+    hostedInvoiceUrl: invoice.hosted_invoice_url ?? undefined,
+    invoicePdfUrl: invoice.invoice_pdf ?? undefined,
+    updatedAt: new Date(),
+  };
+
+  // Only advance the lifecycle when still a draft — never clobber a terminal
+  // state if events arrive out of order.
+  if (row.status === 'draft') {
+    setClause.status = 'open';
+    setClause.finalizedAt = row.finalizedAt ?? transitionDate(invoice.status_transitions?.finalized_at);
+  }
+
+  await db.update(invoices).set(setClause).where(eq(invoices.id, row.id));
+
+  console.log(`Stripe webhook: invoice ${row.id} finalized (number=${invoice.number ?? 'n/a'})`);
+}
+
+/**
+ * Handles `invoice.paid` for a coach-issued invoice. Flips status to `paid`,
+ * stamps `paidAt`, and notifies the coach. Idempotent on duplicate events.
+ */
+async function handleCoachInvoicePaid(invoice: Stripe.Invoice, accountId: string | null) {
+  const stripeInvoiceId = invoice.id;
+  if (!stripeInvoiceId) return;
+
+  console.log(`Stripe webhook: invoice.paid ${stripeInvoiceId} (account=${accountId})`);
+
+  const row = await findCoachInvoiceRow(stripeInvoiceId, accountId);
+  if (!row) {
+    console.log(`Stripe webhook: no coach invoice row for ${stripeInvoiceId}, ignoring paid`);
+    return;
+  }
+
+  if (row.status === 'paid') {
+    console.log(`Stripe webhook: invoice ${row.id} already paid, skipping`);
+    return;
+  }
+
+  await db
+    .update(invoices)
+    .set({
+      status: 'paid',
+      paidAt: row.paidAt ?? transitionDate(invoice.status_transitions?.paid_at),
+      // Backfill finalize artifacts in case the finalized event was missed.
+      invoiceNumber: invoice.number ?? undefined,
+      hostedInvoiceUrl: invoice.hosted_invoice_url ?? undefined,
+      invoicePdfUrl: invoice.invoice_pdf ?? undefined,
+      finalizedAt:
+        row.finalizedAt ?? transitionDate(invoice.status_transitions?.finalized_at),
+      updatedAt: new Date(),
+    })
+    .where(eq(invoices.id, row.id));
+
+  console.log(`Stripe webhook: invoice ${row.id} marked paid`);
+
+  const amount = (row.amountTotalCents / 100).toLocaleString('en-US', {
+    style: 'currency',
+    currency: (row.currency || 'usd').toUpperCase(),
+  });
+
+  createNotification({
+    userId: row.coachId,
+    type: 'system',
+    title: 'Invoice paid',
+    body: `Your invoice${invoice.number ? ` ${invoice.number}` : ''} for ${amount} has been paid.`,
+    link: '/dashboard/payments',
+  });
+}
+
+/**
+ * Handles `invoice.voided` for a coach-issued invoice. Flips status to `void`
+ * and stamps `voidedAt`. Idempotent on duplicate events.
+ */
+async function handleCoachInvoiceVoided(invoice: Stripe.Invoice, accountId: string | null) {
+  const stripeInvoiceId = invoice.id;
+  if (!stripeInvoiceId) return;
+
+  console.log(`Stripe webhook: invoice.voided ${stripeInvoiceId} (account=${accountId})`);
+
+  const row = await findCoachInvoiceRow(stripeInvoiceId, accountId);
+  if (!row) {
+    console.log(`Stripe webhook: no coach invoice row for ${stripeInvoiceId}, ignoring void`);
+    return;
+  }
+
+  if (row.status === 'void') {
+    console.log(`Stripe webhook: invoice ${row.id} already void, skipping`);
+    return;
+  }
+
+  await db
+    .update(invoices)
+    .set({
+      status: 'void',
+      voidedAt: row.voidedAt ?? transitionDate(invoice.status_transitions?.voided_at),
+      updatedAt: new Date(),
+    })
+    .where(eq(invoices.id, row.id));
+
+  console.log(`Stripe webhook: invoice ${row.id} marked void`);
+}
+
+/**
+ * Handles `invoice.marked_uncollectible` for a coach-issued invoice. Flips
+ * status to `uncollectible`. Idempotent on duplicate events.
+ */
+async function handleCoachInvoiceUncollectible(invoice: Stripe.Invoice, accountId: string | null) {
+  const stripeInvoiceId = invoice.id;
+  if (!stripeInvoiceId) return;
+
+  console.log(`Stripe webhook: invoice.marked_uncollectible ${stripeInvoiceId} (account=${accountId})`);
+
+  const row = await findCoachInvoiceRow(stripeInvoiceId, accountId);
+  if (!row) {
+    console.log(
+      `Stripe webhook: no coach invoice row for ${stripeInvoiceId}, ignoring uncollectible`
+    );
+    return;
+  }
+
+  if (row.status === 'uncollectible') {
+    console.log(`Stripe webhook: invoice ${row.id} already uncollectible, skipping`);
+    return;
+  }
+
+  await db
+    .update(invoices)
+    .set({ status: 'uncollectible', updatedAt: new Date() })
+    .where(eq(invoices.id, row.id));
+
+  console.log(`Stripe webhook: invoice ${row.id} marked uncollectible`);
 }

@@ -15,6 +15,12 @@ export type GetPaymentsDataResult =
         stripeAccountId: string | null;
         stripeOnboardingComplete: boolean;
         onboardingStatus: StripeOnboardingStatus;
+        // Connect flags (mirror of Stripe, kept fresh by the account.updated webhook).
+        chargesEnabled: boolean;
+        payoutsEnabled: boolean;
+        detailsSubmitted: boolean;
+        // True when the coach may create invoices (requires charges_enabled).
+        canInvoice: boolean;
       };
     }
   | { success: false; error: string };
@@ -53,6 +59,10 @@ export async function getPaymentsData(): Promise<GetPaymentsDataResult> {
         stripeAccountId: profile.stripeAccountId,
         stripeOnboardingComplete: profile.stripeOnboardingComplete,
         onboardingStatus,
+        chargesEnabled: profile.chargesEnabled,
+        payoutsEnabled: profile.payoutsEnabled,
+        detailsSubmitted: profile.detailsSubmitted,
+        canInvoice: !!profile.stripeAccountId && profile.chargesEnabled,
       },
     };
   } catch (error) {
@@ -174,17 +184,28 @@ export async function checkStripeAccountStatus(): Promise<CheckStripeAccountStat
     // Check account status with Stripe
     const account = await stripe.accounts.retrieve(profile.stripeAccountId);
 
-    const isComplete = account.details_submitted && account.charges_enabled;
+    const chargesEnabled = !!account.charges_enabled;
+    const payoutsEnabled = !!account.payouts_enabled;
+    const detailsSubmitted = !!account.details_submitted;
+    const isComplete = detailsSubmitted && chargesEnabled;
     const requiresAction =
       !account.details_submitted || account.requirements?.currently_due?.length;
 
-    // Update database if onboarding is now complete
-    if (isComplete && !profile.stripeOnboardingComplete) {
-      await db
-        .update(coachProfiles)
-        .set({ stripeOnboardingComplete: true })
-        .where(eq(coachProfiles.userId, userId));
-    }
+    // Persist the fresh Connect flags (complements the account.updated webhook —
+    // ensures the local mirror is up to date right after the coach returns from
+    // onboarding, before any webhook may have landed). Only ever flips
+    // stripeOnboardingComplete to true, never back to false.
+    await db
+      .update(coachProfiles)
+      .set({
+        chargesEnabled,
+        payoutsEnabled,
+        detailsSubmitted,
+        ...(isComplete && !profile.stripeOnboardingComplete
+          ? { stripeOnboardingComplete: true }
+          : {}),
+      })
+      .where(eq(coachProfiles.userId, userId));
 
     return {
       success: true,
@@ -464,5 +485,91 @@ export async function generateStripeDashboardLink(): Promise<GenerateStripeDashb
   } catch (error) {
     console.error('Error generating Stripe dashboard link:', error);
     return { success: false, error: 'Failed to generate dashboard link' };
+  }
+}
+
+/**
+ * Why a coach currently cannot issue invoices.
+ * - `no_stripe_account`: never started Connect onboarding.
+ * - `onboarding_incomplete`: account exists but details not submitted.
+ * - `charges_disabled`: details submitted but charges still not enabled
+ *   (e.g. Stripe verification pending).
+ */
+export type InvoicingBlockedReason =
+  | 'no_stripe_account'
+  | 'onboarding_incomplete'
+  | 'charges_disabled';
+
+export type InvoicingEligibilityResult =
+  | {
+      success: true;
+      canInvoice: boolean;
+      reason?: InvoicingBlockedReason;
+      /** A fresh Connect onboarding link to finish/re-link when blocked. */
+      onboardingUrl?: string;
+    }
+  | { success: false; error: string };
+
+/**
+ * Connect gating for the invoicing feature.
+ *
+ * A coach may create invoices only when their connected account has
+ * `charges_enabled = true` (Dave's binding Connect-hardening requirement).
+ * When blocked because onboarding is incomplete or charges aren't enabled yet,
+ * this returns a freshly generated account onboarding link so the UI can offer
+ * a one-click re-link without a separate round-trip.
+ *
+ * The invoice-create route (Wave B2) and the Fatture tab (Wave B3) consume this
+ * to decide whether to allow invoice creation.
+ */
+export async function getInvoicingEligibility(): Promise<InvoicingEligibilityResult> {
+  try {
+    const { userId } = await auth();
+    if (!userId) {
+      return { success: false, error: 'Not authenticated' };
+    }
+
+    const profiles = await db
+      .select()
+      .from(coachProfiles)
+      .where(eq(coachProfiles.userId, userId))
+      .limit(1);
+
+    if (profiles.length === 0) {
+      return { success: false, error: 'Coach profile not found' };
+    }
+
+    const profile = profiles[0];
+
+    if (!profile.stripeAccountId) {
+      return { success: true, canInvoice: false, reason: 'no_stripe_account' };
+    }
+
+    if (profile.chargesEnabled) {
+      return { success: true, canInvoice: true };
+    }
+
+    // Blocked → mint a fresh onboarding link so the coach can finish/re-link.
+    const headersList = await headers();
+    const host = headersList.get('host') || 'localhost:3000';
+    const protocol = host.includes('localhost') ? 'http' : 'https';
+    const baseUrl = `${protocol}://${host}`;
+
+    const accountLink = await stripe.accountLinks.create({
+      account: profile.stripeAccountId,
+      refresh_url: `${baseUrl}/dashboard/payments?setup=refresh`,
+      return_url: `${baseUrl}/dashboard/payments?setup=complete`,
+      type: 'account_onboarding',
+    });
+
+    return {
+      success: true,
+      canInvoice: false,
+      reason: profile.detailsSubmitted ? 'charges_disabled' : 'onboarding_incomplete',
+      onboardingUrl: accountLink.url,
+    };
+  } catch (error) {
+    console.error('Error checking invoicing eligibility:', error);
+    return { success: false, error: 'Failed to check invoicing eligibility' };
   }
 }
