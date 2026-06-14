@@ -17,6 +17,7 @@ import {
   ChevronUp,
   Clock,
   Loader2,
+  Receipt,
 } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -38,6 +39,7 @@ import {
 } from './client-workspace-dialogs';
 import { ClientFilesTab } from './client-files-tab';
 import { ClientGroupBadges } from './client-group-badges';
+import { ClientInvoicesTab } from './client-invoices-tab';
 import { ClientCheckInTimeline } from '@/components/check-ins/client-check-in-timeline';
 
 interface Client {
@@ -319,145 +321,165 @@ export function ClientWorkspace({
         </div>
       </div>
 
-      {/* New Program button */}
-      <div className="flex justify-end">
-        <Button onClick={() => setShowCreateProgram(true)} size="sm">
-          <Plus className="mr-1 h-4 w-4" />
-          New Program
-        </Button>
-      </div>
+      {/* Top-level workspace tabs */}
+      <Tabs defaultValue="programs" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="programs" className="gap-1.5">
+            <BookOpen className="h-4 w-4" />
+            Programs
+          </TabsTrigger>
+          <TabsTrigger value="invoices" className="gap-1.5">
+            <Receipt className="h-4 w-4" />
+            Invoices
+          </TabsTrigger>
+        </TabsList>
 
-      {/* Programs list */}
-      {programs.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center py-12 text-center">
-            <BookOpen className="mb-4 h-12 w-12 text-muted-foreground" />
-            <p className="text-lg font-medium">No programs</p>
-            <p className="text-sm text-muted-foreground">
-              Create the first coaching program for this client.
-            </p>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="space-y-3">
-          {programs.map((program) => {
-            const cfg = statusConfig[program.status];
-            const isExpanded = expandedPrograms.has(program.id);
-            const progress = getProgramProgress(program);
+        <TabsContent value="programs" className="space-y-6">
+          {/* New Program button */}
+          <div className="flex justify-end">
+            <Button onClick={() => setShowCreateProgram(true)} size="sm">
+              <Plus className="mr-1 h-4 w-4" />
+              New Program
+            </Button>
+          </div>
 
-            return (
-              <Card key={program.id}>
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between">
-                    <div
-                      className="flex-1 cursor-pointer"
-                      onClick={() => toggleProgram(program.id)}
-                    >
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-semibold">{program.title}</h3>
-                        <Badge variant={cfg.variant}>{cfg.label}</Badge>
-                      </div>
-                      {program.description && (
-                        <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
-                          {program.description}
-                        </p>
-                      )}
-                      <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
-                        {program.startDate && <span>From {formatDate(program.startDate)}</span>}
-                        {program.endDate && <span>to {formatDate(program.endDate)}</span>}
-                      </div>
-                      {/* Progress bar */}
-                      <div className="mt-2">
-                        <div className="mb-1 flex items-center justify-between text-xs text-muted-foreground">
-                          <span>
-                            {progress.completed}/{progress.total} completed
-                          </span>
-                          <span>{progress.percent}%</span>
+          {/* Programs list */}
+          {programs.length === 0 ? (
+            <Card>
+              <CardContent className="flex flex-col items-center py-12 text-center">
+                <BookOpen className="mb-4 h-12 w-12 text-muted-foreground" />
+                <p className="text-lg font-medium">No programs</p>
+                <p className="text-sm text-muted-foreground">
+                  Create the first coaching program for this client.
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-3">
+              {programs.map((program) => {
+                const cfg = statusConfig[program.status];
+                const isExpanded = expandedPrograms.has(program.id);
+                const progress = getProgramProgress(program);
+
+                return (
+                  <Card key={program.id}>
+                    <CardContent className="p-4">
+                      <div className="flex items-start justify-between">
+                        <div
+                          className="flex-1 cursor-pointer"
+                          onClick={() => toggleProgram(program.id)}
+                        >
+                          <div className="flex items-center gap-2">
+                            <h3 className="font-semibold">{program.title}</h3>
+                            <Badge variant={cfg.variant}>{cfg.label}</Badge>
+                          </div>
+                          {program.description && (
+                            <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
+                              {program.description}
+                            </p>
+                          )}
+                          <div className="mt-2 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+                            {program.startDate && <span>From {formatDate(program.startDate)}</span>}
+                            {program.endDate && <span>to {formatDate(program.endDate)}</span>}
+                          </div>
+                          {/* Progress bar */}
+                          <div className="mt-2">
+                            <div className="mb-1 flex items-center justify-between text-xs text-muted-foreground">
+                              <span>
+                                {progress.completed}/{progress.total} completed
+                              </span>
+                              <span>{progress.percent}%</span>
+                            </div>
+                            <Progress
+                              value={progress.percent}
+                              className={`h-2 ${progress.percent === 100 ? '[&>div]:bg-sage' : ''}`}
+                            />
+                          </div>
                         </div>
-                        <Progress
-                          value={progress.percent}
-                          className={`h-2 ${progress.percent === 100 ? '[&>div]:bg-sage' : ''}`}
-                        />
-                      </div>
-                    </div>
 
-                    <div className="flex items-center gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={() => toggleProgram(program.id)}
-                      >
-                        {isExpanded ? (
-                          <ChevronUp className="h-4 w-4" />
-                        ) : (
-                          <ChevronDown className="h-4 w-4" />
-                        )}
-                      </Button>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8">
-                            <MoreHorizontal className="h-4 w-4" />
+                        <div className="flex items-center gap-1">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => toggleProgram(program.id)}
+                          >
+                            {isExpanded ? (
+                              <ChevronUp className="h-4 w-4" />
+                            ) : (
+                              <ChevronDown className="h-4 w-4" />
+                            )}
                           </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem
-                            onClick={() => {
-                              setSelectedProgramId(program.id);
-                              setShowCreateGoal(true);
-                            }}
-                          >
-                            <Target className="mr-2 h-4 w-4" />
-                            Add Goal
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => {
-                              setSelectedProgramId(program.id);
-                              setShowCreateTask(true);
-                            }}
-                          >
-                            <CheckSquare className="mr-2 h-4 w-4" />
-                            Add Task
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            className="text-destructive"
-                            onClick={() => handleDeleteProgram(program.id)}
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                  </div>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  setSelectedProgramId(program.id);
+                                  setShowCreateGoal(true);
+                                }}
+                              >
+                                <Target className="mr-2 h-4 w-4" />
+                                Add Goal
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  setSelectedProgramId(program.id);
+                                  setShowCreateTask(true);
+                                }}
+                              >
+                                <CheckSquare className="mr-2 h-4 w-4" />
+                                Add Task
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="text-destructive"
+                                onClick={() => handleDeleteProgram(program.id)}
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      </div>
 
-                  {/* Expanded content with sub-tabs */}
-                  {isExpanded && (
-                    <ProgramContent
-                      program={program}
-                      goals={programGoals[program.id] || []}
-                      loadingGoals={!!loadingGoals[program.id]}
-                      tasks={getTasksForProgram(program.id)}
-                      onAddGoal={() => {
-                        setSelectedProgramId(program.id);
-                        setShowCreateGoal(true);
-                      }}
-                      onAddTask={() => {
-                        setSelectedProgramId(program.id);
-                        setShowCreateTask(true);
-                      }}
-                      onDeleteGoal={(goalId) => handleDeleteGoal(goalId, program.id)}
-                    />
-                  )}
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      )}
+                      {/* Expanded content with sub-tabs */}
+                      {isExpanded && (
+                        <ProgramContent
+                          program={program}
+                          goals={programGoals[program.id] || []}
+                          loadingGoals={!!loadingGoals[program.id]}
+                          tasks={getTasksForProgram(program.id)}
+                          onAddGoal={() => {
+                            setSelectedProgramId(program.id);
+                            setShowCreateGoal(true);
+                          }}
+                          onAddTask={() => {
+                            setSelectedProgramId(program.id);
+                            setShowCreateTask(true);
+                          }}
+                          onDeleteGoal={(goalId) => handleDeleteGoal(goalId, program.id)}
+                        />
+                      )}
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
 
-      {/* Check-ins Timeline */}
-      <ClientCheckInTimeline clientId={clientId} />
+          {/* Check-ins Timeline */}
+          <ClientCheckInTimeline clientId={clientId} />
+        </TabsContent>
+
+        <TabsContent value="invoices">
+          <ClientInvoicesTab clientId={clientId} />
+        </TabsContent>
+      </Tabs>
 
       {/* Dialogs */}
       <CreateProgramDialog

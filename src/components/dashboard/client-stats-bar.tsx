@@ -13,25 +13,29 @@ const stats = [
     key: 'coaches',
     label: 'My Coaches',
     icon: Users,
-    colorClass: 'bg-burgundy/10 text-burgundy',
+    borderClass: 'border-l-burgundy',
+    iconClass: 'text-burgundy',
   },
   {
     key: 'upcoming',
     label: 'Upcoming Sessions',
     icon: Calendar,
-    colorClass: 'bg-gold/10 text-gold-dark',
+    borderClass: 'border-l-gold',
+    iconClass: 'text-gold-dark',
   },
   {
     key: 'completed',
     label: 'Completed Sessions',
     icon: CheckCircle,
-    colorClass: 'bg-sage/10 text-sage',
+    borderClass: 'border-l-sage',
+    iconClass: 'text-sage',
   },
   {
     key: 'actions',
     label: 'Pending Actions',
     icon: ClipboardList,
-    colorClass: 'bg-burgundy-light/10 text-burgundy-light',
+    borderClass: 'border-l-gold',
+    iconClass: 'text-gold',
   },
 ] as const;
 
@@ -50,16 +54,12 @@ export function ClientStatsBar({
 
   return (
     <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-      {stats.map(({ key, label, icon: Icon, colorClass }) => (
-        <Card key={key} className="border-none shadow-sm">
+      {stats.map(({ key, label, icon: Icon, borderClass, iconClass }) => (
+        <Card key={key} className={`border-l-4 shadow-sm ${borderClass}`}>
           <CardContent className="flex items-center gap-3 p-4">
-            <div
-              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${colorClass}`}
-            >
-              <Icon className="h-5 w-5" />
-            </div>
+            <Icon className={`h-5 w-5 shrink-0 ${iconClass}`} />
             <div className="min-w-0">
-              <p className="truncate text-2xl font-bold text-burgundy-dark">{values[key]}</p>
+              <p className="truncate text-2xl font-bold text-foreground">{values[key]}</p>
               <p className="truncate text-xs text-muted-foreground">{label}</p>
             </div>
           </CardContent>

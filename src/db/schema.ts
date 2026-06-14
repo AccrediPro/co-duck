@@ -142,6 +142,33 @@ export const transactionStatusEnum = pgEnum('transaction_status', [
 ]);
 
 /**
+ * Invoice Status Enum
+ *
+ * Mirrors the Stripe Invoice lifecycle for coach-issued invoices created via
+ * the Stripe Invoices API on the coach's connected account (direct charge).
+ *
+ * @enum {string}
+ * @property {'draft'} draft - Invoice created but not yet finalized (editable)
+ * @property {'open'} open - Finalized and awaiting payment (has invoiceNumber + PDF)
+ * @property {'paid'} paid - Payment captured in full
+ * @property {'void'} void - Cancelled before/after finalization, no longer payable
+ * @property {'uncollectible'} uncollectible - Marked unlikely to be paid (written off)
+ *
+ * @remarks
+ * - Statuses are synced idempotently from Stripe `invoice.*` webhooks keyed on
+ *   `stripeInvoiceId`.
+ * - A 2% platform `application_fee_amount` is applied at finalize time.
+ * - Maps 1:1 to Stripe's invoice `status` field.
+ */
+export const invoiceStatusEnum = pgEnum('invoice_status', [
+  'draft',
+  'open',
+  'paid',
+  'void',
+  'uncollectible',
+]);
+
+/**
  * Message Type Enum
  *
  * Distinguishes between user messages and system-generated messages.
@@ -766,6 +793,40 @@ export const coachProfiles = pgTable(
      * Must be true for coach to accept paid bookings.
      */
     stripeOnboardingComplete: boolean('stripe_onboarding_complete').notNull().default(false),
+
+    /**
+     * Whether the connected account can currently accept charges.
+     * @type {boolean}
+     * @default false
+     *
+     * @remarks
+     * Mirror of Stripe's `charges_enabled` flag, synced from the
+     * `account.updated` webhook. Gating requirement: a coach may only create
+     * and finalize invoices when this is true (Connect hardening).
+     */
+    chargesEnabled: boolean('charges_enabled').notNull().default(false),
+
+    /**
+     * Whether the connected account can currently receive payouts.
+     * @type {boolean}
+     * @default false
+     *
+     * @remarks
+     * Mirror of Stripe's `payouts_enabled` flag, synced from the
+     * `account.updated` webhook.
+     */
+    payoutsEnabled: boolean('payouts_enabled').notNull().default(false),
+
+    /**
+     * Whether the coach has submitted all required onboarding details.
+     * @type {boolean}
+     * @default false
+     *
+     * @remarks
+     * Mirror of Stripe's `details_submitted` flag, synced from the
+     * `account.updated` webhook. False indicates onboarding/re-link is needed.
+     */
+    detailsSubmitted: boolean('details_submitted').notNull().default(false),
 
     // ----------------------
     // Review Statistics
@@ -4452,3 +4513,286 @@ export const membershipSubscriptionsRelations = relations(
     bookings: many(bookings),
   })
 );
+
+// ============================================================================
+// INVOICES TABLE (Stripe Invoices — direct charge on coach connected account)
+// ============================================================================
+
+/**
+ * Invoices Table
+ *
+ * Real invoices coaches issue to their clients via the Stripe Invoices API,
+ * created as a DIRECT CHARGE on the coach's connected account
+ * (`{ stripeAccount: coach.stripeAccountId }`).
+ *
+ * ## Purpose
+ * Lets coaches bill clients outside the session-checkout flow (retainers,
+ * packages, ad-hoc work) with Stripe-hosted payment pages, sequential invoice
+ * numbers, and downloadable PDFs.
+ *
+ * ## Relationships
+ * - Belongs to users (as coach, many:1)
+ * - Belongs to users (as client, many:1)
+ * - Optionally belongs to a booking (many:1, nullable)
+ *
+ * ## Idempotency
+ * `stripeInvoiceId` is UNIQUE so `invoice.*` webhooks can upsert/sync status
+ * transitions exactly once, regardless of retries.
+ *
+ * @remarks
+ * - All monetary values are stored in integer CENTS (consistent with the
+ *   `transactions` table).
+ * - `applicationFeeCents` is the 2% platform fee applied at finalize.
+ * - Multi-tenant: every row is scoped by `coachId`.
+ * - `invoiceNumber`, `hostedInvoiceUrl`, `invoicePdfUrl` are populated by Stripe
+ *   only after the invoice is finalized (status leaves `draft`).
+ */
+export const invoices = pgTable(
+  'invoices',
+  {
+    id: serial('id').primaryKey(),
+
+    /**
+     * Coach issuing the invoice (owner of the connected account).
+     * @type {string}
+     */
+    coachId: text('coach_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+
+    /**
+     * Client being billed.
+     * @type {string}
+     */
+    clientId: text('client_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+
+    /**
+     * Optional booking this invoice relates to.
+     * @type {number | null}
+     */
+    bookingId: integer('booking_id').references(() => bookings.id, { onDelete: 'set null' }),
+
+    /**
+     * Stripe Invoice ID on the coach's connected account.
+     * UNIQUE — idempotency key for webhook sync.
+     * @type {string | null}
+     * @example "in_1234567890"
+     */
+    stripeInvoiceId: text('stripe_invoice_id').unique(),
+
+    /**
+     * Stripe Customer ID (created on the coach's connected account).
+     * @type {string | null}
+     * @example "cus_1234567890"
+     */
+    stripeCustomerId: text('stripe_customer_id'),
+
+    /**
+     * Current invoice status (mirrors Stripe).
+     * @type {'draft' | 'open' | 'paid' | 'void' | 'uncollectible'}
+     * @default 'draft'
+     */
+    status: invoiceStatusEnum('status').notNull().default('draft'),
+
+    /**
+     * Total invoice amount in CENTS.
+     * @type {number}
+     * @example 50000 // $500.00
+     */
+    amountTotalCents: integer('amount_total_cents').notNull(),
+
+    /**
+     * Platform application fee in CENTS (2% of total).
+     * @type {number}
+     * @example 1000 // $10.00 fee on a $500 invoice
+     */
+    applicationFeeCents: integer('application_fee_cents').notNull().default(0),
+
+    /**
+     * Currency code (lowercase).
+     * @type {string}
+     * @default 'usd'
+     */
+    currency: text('currency').notNull().default('usd'),
+
+    /**
+     * Stripe sequential invoice number (assigned at finalize).
+     * @type {string | null}
+     * @example "ABCD-0001"
+     */
+    invoiceNumber: text('invoice_number'),
+
+    /**
+     * Stripe-hosted invoice payment page URL.
+     * @type {string | null}
+     */
+    hostedInvoiceUrl: text('hosted_invoice_url'),
+
+    /**
+     * Stripe-hosted invoice PDF URL.
+     * @type {string | null}
+     */
+    invoicePdfUrl: text('invoice_pdf_url'),
+
+    /**
+     * Free-text description / memo shown on the invoice.
+     * @type {string | null}
+     */
+    description: text('description'),
+
+    /**
+     * Optional due date for the invoice.
+     * @type {Date | null}
+     */
+    dueDate: timestamp('due_date', { withTimezone: true }),
+
+    /**
+     * When the invoice was finalized (left draft).
+     * @type {Date | null}
+     */
+    finalizedAt: timestamp('finalized_at', { withTimezone: true }),
+
+    /**
+     * When the invoice was paid in full.
+     * @type {Date | null}
+     */
+    paidAt: timestamp('paid_at', { withTimezone: true }),
+
+    /**
+     * When the invoice was voided.
+     * @type {Date | null}
+     */
+    voidedAt: timestamp('voided_at', { withTimezone: true }),
+
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
+  },
+  (table) => [
+    // Index for coach's invoice list (multi-tenant scoping)
+    index('invoices_coach_id_idx').on(table.coachId),
+    // Index for client's invoice list
+    index('invoices_client_id_idx').on(table.clientId),
+    // Index for fast webhook lookups by Stripe invoice ID
+    index('invoices_stripe_invoice_id_idx').on(table.stripeInvoiceId),
+    // Index for filtering by status
+    index('invoices_status_idx').on(table.status),
+  ]
+);
+
+/** Type for selecting an invoice record */
+export type Invoice = typeof invoices.$inferSelect;
+
+/** Type for inserting a new invoice record */
+export type NewInvoice = typeof invoices.$inferInsert;
+
+// ============================================================================
+// COACH-CLIENT BILLING TABLE (Stripe Customer cache per connected account)
+// ============================================================================
+
+/**
+ * Coach-Client Billing Table
+ *
+ * Caches the Stripe Customer created for a client ON A SPECIFIC COACH'S
+ * CONNECTED ACCOUNT. Because invoices use direct charge, each coach has its own
+ * Customer namespace — a client maps to a different Customer per coach.
+ *
+ * ## Purpose
+ * Avoids re-creating a Stripe Customer on the coach's connected account every
+ * time an invoice is issued; the cached `stripeCustomerId` is reused.
+ *
+ * ## Relationships
+ * - Belongs to users (as coach, many:1)
+ * - Belongs to users (as client, many:1)
+ *
+ * ## Uniqueness
+ * One row per (coachId, clientId) pair — enforced by a composite unique
+ * constraint.
+ *
+ * @remarks
+ * Multi-tenant: scoped by `coachId`. The `stripeCustomerId` lives on the coach's
+ * connected account, NOT the platform account.
+ */
+export const coachClientBilling = pgTable(
+  'coach_client_billing',
+  {
+    id: serial('id').primaryKey(),
+
+    /**
+     * Coach (owner of the connected account the Customer belongs to).
+     * @type {string}
+     */
+    coachId: text('coach_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+
+    /**
+     * Client the Stripe Customer represents.
+     * @type {string}
+     */
+    clientId: text('client_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+
+    /**
+     * Stripe Customer ID on the coach's connected account.
+     * @type {string}
+     * @example "cus_1234567890"
+     */
+    stripeCustomerId: text('stripe_customer_id').notNull(),
+
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => new Date()),
+  },
+  (table) => [
+    // Index for coach's cached customers
+    index('coach_client_billing_coach_id_idx').on(table.coachId),
+    // Index for client lookups
+    index('coach_client_billing_client_id_idx').on(table.clientId),
+    // One Stripe Customer per coach-client pair
+    unique('coach_client_billing_coach_client_unique').on(table.coachId, table.clientId),
+  ]
+);
+
+/** Type for selecting a coach-client billing record */
+export type CoachClientBilling = typeof coachClientBilling.$inferSelect;
+
+/** Type for inserting a new coach-client billing record */
+export type NewCoachClientBilling = typeof coachClientBilling.$inferInsert;
+
+export const invoicesRelations = relations(invoices, ({ one }) => ({
+  coach: one(users, {
+    fields: [invoices.coachId],
+    references: [users.id],
+    relationName: 'coachInvoices',
+  }),
+  client: one(users, {
+    fields: [invoices.clientId],
+    references: [users.id],
+    relationName: 'clientInvoices',
+  }),
+  booking: one(bookings, {
+    fields: [invoices.bookingId],
+    references: [bookings.id],
+  }),
+}));
+
+export const coachClientBillingRelations = relations(coachClientBilling, ({ one }) => ({
+  coach: one(users, {
+    fields: [coachClientBilling.coachId],
+    references: [users.id],
+    relationName: 'coachClientBillingCoach',
+  }),
+  client: one(users, {
+    fields: [coachClientBilling.clientId],
+    references: [users.id],
+    relationName: 'coachClientBillingClient',
+  }),
+}));

@@ -10,83 +10,83 @@
 
 @layer base {
   :root {
-    --background: 40 60% 91%;
-    --foreground: 354 41% 26%;
-    --card: 40 50% 97%;
-    --card-foreground: 354 41% 26%;
+    --background: 40 33% 98%;
+    --foreground: 168 36% 26%;
+    --card: 0 0% 100%;
+    --card-foreground: 168 36% 26%;
     --popover: 0 0% 100%;
-    --popover-foreground: 354 41% 26%;
-    --primary: 354 42% 32%;
+    --popover-foreground: 168 36% 26%;
+    --primary: 168 83% 29%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 43 65% 52%;
-    --secondary-foreground: 354 41% 16%;
-    --muted: 38 40% 87%;
-    --muted-foreground: 30 15% 40%;
-    --accent: 43 65% 52%;
-    --accent-foreground: 354 41% 16%;
+    --secondary: 30 6% 46%;
+    --secondary-foreground: 168 36% 16%;
+    --muted: 30 6% 93%;
+    --muted-foreground: 25 5% 45%;
+    --accent: 25 95% 53%;
+    --accent-foreground: 0 0% 100%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
-    --border: 36 30% 82%;
-    --input: 36 30% 82%;
-    --ring: 354 42% 32%;
-    --chart-1: 354 42% 32%;
-    --chart-2: 354 41% 39%;
-    --chart-3: 354 41% 26%;
-    --chart-4: 43 65% 52%;
-    --chart-5: 79 22% 50%;
+    --border: 30 10% 87%;
+    --input: 30 10% 87%;
+    --ring: 168 83% 29%;
+    --chart-1: 168 83% 29%;
+    --chart-2: 168 76% 36%;
+    --chart-3: 168 83% 23%;
+    --chart-4: 25 95% 53%;
+    --chart-5: 142 71% 45%;
     --radius: 0.5rem;
-    --success: 79 22% 50%;
+    --success: 142 71% 45%;
 
     /* Brand accent palette */
-    --brand-warm: 354 42% 32%; /* #722f37 */
-    --brand-accent: 354 41% 39%; /* #8b3a42 */
-    --brand-accent-light: 40 60% 91%; /* #f5eddc */
-    --brand-accent-dark: 354 41% 26%; /* #5d262d */
-    --brand-accent-darker: 354 41% 20%; /* #4d2026 */
-    --brand-accent-muted: 354 30% 45%; /* #956168 */
-    --brand-accent-hover: 354 41% 39%; /* #8b3a42 */
-    --brand-surface: 40 50% 97%; /* #faf7f0 */
-    --brand-border: 36 30% 82%; /* #ddd4c4 */
-    --brand-accent-deep: 354 41% 16%; /* #3b1a1e */
+    --brand-warm: 168 83% 29%; /* #0D9488 teal */
+    --brand-accent: 168 76% 36%; /* #14B8A6 teal-400 */
+    --brand-accent-light: 40 33% 98%; /* #FAFAF9 stone-50 */
+    --brand-accent-dark: 168 83% 23%; /* #0F766E teal-700 */
+    --brand-accent-darker: 168 83% 18%;
+    --brand-accent-muted: 168 30% 45%;
+    --brand-accent-hover: 168 76% 36%; /* #14B8A6 */
+    --brand-surface: 0 0% 100%; /* white */
+    --brand-border: 30 10% 87%;
+    --brand-accent-deep: 168 83% 16%;
   }
   .dark {
-    --background: 354 30% 6%;
-    --foreground: 40 30% 92%;
-    --card: 354 25% 9%;
-    --card-foreground: 40 30% 92%;
-    --popover: 354 25% 9%;
-    --popover-foreground: 40 30% 92%;
-    --primary: 354 42% 40%;
+    --background: 168 15% 6%;
+    --foreground: 30 10% 92%;
+    --card: 168 10% 9%;
+    --card-foreground: 30 10% 92%;
+    --popover: 168 10% 9%;
+    --popover-foreground: 30 10% 92%;
+    --primary: 168 76% 36%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 43 55% 45%;
-    --secondary-foreground: 40 30% 92%;
-    --muted: 354 15% 15%;
-    --muted-foreground: 354 10% 60%;
-    --accent: 43 55% 45%;
-    --accent-foreground: 40 30% 92%;
+    --secondary: 25 80% 48%;
+    --secondary-foreground: 30 10% 92%;
+    --muted: 168 8% 15%;
+    --muted-foreground: 168 5% 60%;
+    --accent: 25 80% 48%;
+    --accent-foreground: 30 10% 92%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 354 15% 18%;
-    --input: 354 15% 18%;
-    --ring: 354 42% 40%;
-    --chart-1: 354 42% 45%;
-    --chart-2: 354 35% 50%;
-    --chart-3: 354 41% 30%;
-    --chart-4: 43 65% 52%;
-    --chart-5: 79 22% 50%;
-    --success: 79 22% 50%;
+    --border: 168 8% 18%;
+    --input: 168 8% 18%;
+    --ring: 168 76% 36%;
+    --chart-1: 168 76% 40%;
+    --chart-2: 168 60% 45%;
+    --chart-3: 168 83% 29%;
+    --chart-4: 25 95% 53%;
+    --chart-5: 142 71% 45%;
+    --success: 142 71% 45%;
 
     /* Brand accent palette (dark mode) */
-    --brand-warm: 354 42% 32%;
-    --brand-accent: 354 41% 39%;
-    --brand-accent-light: 40 30% 20%;
-    --brand-accent-dark: 354 41% 26%;
-    --brand-accent-darker: 354 41% 20%;
-    --brand-accent-muted: 354 30% 45%;
-    --brand-accent-hover: 354 41% 39%;
-    --brand-surface: 354 20% 10%;
-    --brand-border: 354 15% 25%;
-    --brand-accent-deep: 354 41% 16%;
+    --brand-warm: 168 83% 29%;
+    --brand-accent: 168 76% 36%;
+    --brand-accent-light: 168 10% 20%;
+    --brand-accent-dark: 168 83% 23%;
+    --brand-accent-darker: 168 83% 18%;
+    --brand-accent-muted: 168 30% 45%;
+    --brand-accent-hover: 168 76% 36%;
+    --brand-surface: 168 10% 10%;
+    --brand-border: 168 8% 25%;
+    --brand-accent-deep: 168 83% 16%;
   }
 }
 

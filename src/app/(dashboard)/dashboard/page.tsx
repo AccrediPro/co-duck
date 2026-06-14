@@ -57,34 +57,32 @@ export default async function DashboardPage() {
   const isCoach = role === 'coach';
   const displayName = clerkUser?.firstName || user?.name || 'User';
 
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+
   return (
     <div className="w-full">
-      {/* Page Header Card */}
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle className="text-2xl font-bold">Dashboard</CardTitle>
-          <CardDescription>
-            Welcome back, {displayName}!
-            {isCoach && (
-              <Badge variant="secondary" className="ml-2">
-                Coach
-              </Badge>
-            )}
-            {role === 'client' && (
-              <Badge variant="outline" className="ml-2">
-                Client
-              </Badge>
-            )}
-            {role === 'admin' && (
-              <Badge variant="default" className="ml-2">
-                Admin
-              </Badge>
-            )}
-          </CardDescription>
-        </CardHeader>
-      </Card>
+      {/* Greeting Banner */}
+      <div className="via-burgundy/3 mb-4 rounded-xl bg-gradient-to-r from-burgundy/5 to-transparent px-6 py-4">
+        <div className="flex items-center gap-3">
+          <h1 className="text-2xl font-bold text-burgundy-dark">
+            {greeting}, {displayName}!
+          </h1>
+          {isCoach && (
+            <Badge className="bg-burgundy text-white hover:bg-burgundy-light">Coach</Badge>
+          )}
+          {role === 'client' && (
+            <Badge variant="outline" className="border-burgundy/30 text-burgundy">
+              Client
+            </Badge>
+          )}
+          {role === 'admin' && (
+            <Badge className="bg-gold text-white hover:bg-gold-dark">Admin</Badge>
+          )}
+        </div>
+      </div>
 
-      <div className="space-y-6">
+      <div className="space-y-4">
         {/* Coach Dashboard */}
         {isCoach && coachProfile && <CoachDashboardContent />}
 

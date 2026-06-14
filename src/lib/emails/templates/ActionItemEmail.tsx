@@ -69,18 +69,18 @@ const taskSection = {
   padding: '16px 24px',
   backgroundColor: '#f0fdf4',
   borderRadius: '8px',
-  borderLeft: '4px solid #694044',
+  borderLeft: '4px solid #0D9488',
 };
 
 const taskTitle = {
-  color: '#4d2d30',
+  color: '#0F766E',
   fontSize: '16px',
   fontWeight: '600' as const,
   margin: '0 0 8px',
 };
 
 const taskDescription = {
-  color: '#5a363a',
+  color: '#115E59',
   fontSize: '14px',
   lineHeight: '22px',
   margin: '0 0 8px',

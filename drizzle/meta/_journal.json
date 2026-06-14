@@ -246,6 +246,13 @@
       "when": 1776331199675,
       "tag": "0035_memberships_p0_06",
       "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "7",
+      "when": 1781439718372,
+      "tag": "0036_stripe_invoices_connect",
+      "breakpoints": true
     }
   ]
 }

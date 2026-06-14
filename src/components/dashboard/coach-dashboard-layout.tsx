@@ -15,7 +15,7 @@ interface CoachDashboardLayoutProps {
 
 export function CoachDashboardLayout({ data }: CoachDashboardLayoutProps) {
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Stats Bar */}
       <CoachStatsBar
         activeClients={data.sessionStats.distinctClients}
@@ -26,26 +26,28 @@ export function CoachDashboardLayout({ data }: CoachDashboardLayoutProps) {
       />
 
       {/* Two-Column Asymmetric Layout */}
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-4 lg:grid-cols-3">
         {/* Left Column (2/3) */}
-        <div className="space-y-6 lg:col-span-2">
+        <div className="space-y-4 lg:col-span-2">
           <TodaysSchedule sessions={data.todaysSessions} />
           <CalendarView />
-          <UpcomingSessionsWidget sessions={data.upcomingSessions} />
+          <ActivityFeed />
         </div>
 
         {/* Right Column (1/3) */}
-        <div className="space-y-6">
+        <div className="space-y-4">
           <GettingStartedChecklist />
-          <ActivityFeed />
+          <DailyTip />
           <RecentMessagesWidget
             messages={data.recentMessages}
             unreadCount={data.unreadMessageCount}
           />
           <QuickActions role="coach" coachSlug={data.profile.slug} />
-          <DailyTip />
         </div>
       </div>
+
+      {/* Upcoming Sessions — full width at bottom */}
+      <UpcomingSessionsWidget sessions={data.upcomingSessions} />
     </div>
   );
 }
